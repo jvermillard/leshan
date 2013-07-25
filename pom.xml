@@ -30,14 +30,14 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <version.mina>3.0.0-M2-SNAPSHOT</version.mina>
     </properties>
-
 
     <dependencies>
         <dependency>
             <groupId>org.apache.mina</groupId>
             <artifactId>mina-codec</artifactId>
-            <version>3.0.0-M1</version>
+            <version>${version.mina}</version>
             <scope>compile</scope>
             <type>jar</type>
         </dependency>
@@ -45,17 +45,13 @@
         <dependency>
             <groupId>org.apache.mina</groupId>
             <artifactId>mina-coap</artifactId>
-            <version>3.0.0-M1</version>
-            <scope>compile</scope>
-            <type>bundle</type>
+            <version>${version.mina}</version>
         </dependency>
 
         <dependency>
             <groupId>org.apache.mina</groupId>
             <artifactId>mina-core</artifactId>
-            <version>3.0.0-M1</version>
-            <scope>compile</scope>
-            <type>bundle</type>
+            <version>${version.mina}</version>
         </dependency>
 
         <!-- test dependencies -->
@@ -82,11 +78,18 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <version>2.4.0</version>
-            </plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                  <encoding>UTF-8</encoding>
+                  <source>1.7</source>
+                  <target>1.7</target>
+                  <debug>true</debug>
+                  <optimize>true</optimize>
+                  <showDeprecations>true</showDeprecations>
+                </configuration>
+             </plugin>
         </plugins>
     </build>
 </project>
