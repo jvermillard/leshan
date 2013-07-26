@@ -17,9 +17,11 @@
  *  under the License.
  *
  */
-package leshan.server;
+package leshan.server.lwm2m;
 
 import leshan.server.lwm2m.message.LwM2mMessage;
+import leshan.server.lwm2m.message.client.ClientMessage;
+import leshan.server.lwm2m.message.client.MessageProcessor;
 
 import org.apache.mina.api.AbstractIoHandler;
 import org.apache.mina.api.IoSession;
@@ -29,11 +31,17 @@ import org.apache.mina.api.IoSession;
  */
 public class LwM2mHandler extends AbstractIoHandler {
 
+    private final MessageProcessor processor = new LwM2mProcessor();
+
     @Override
     public void messageReceived(IoSession session, Object message) {
 
-        if (message instanceof LwM2mMessage) {
+        if (message instanceof ClientMessage) {
             System.out.println("rcvd LW-M2M msg : " + message + " from " + session);
+
+            LwM2mMessage response = ((ClientMessage) message).process(processor);
+            session.write(response);
+
         } else {
             System.err.println("a LW-M2M message is expected");
         }

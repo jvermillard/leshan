@@ -1,13 +1,15 @@
-package leshan.server.lwm2m.message;
+package leshan.server.lwm2m.message.client;
 
 import java.util.Arrays;
+
+import leshan.server.lwm2m.message.LwM2mMessage;
 
 import org.apache.commons.lang.Validate;
 
 /**
  * The message sent by the the client to the server to perform a <b>Register</b> operation.
  */
-public class RegisterMessage implements LwM2mMessage {
+public class RegisterMessage implements ClientMessage {
 
     /**
      * Transport binding and Queue Mode
@@ -27,6 +29,9 @@ public class RegisterMessage implements LwM2mMessage {
         UQS
     }
 
+    private final int id;
+
+    /** the LWM2M Client identifier on one LWM2M Server */
     private final String endpoint;
 
     /**
@@ -57,18 +62,31 @@ public class RegisterMessage implements LwM2mMessage {
      * @param smsNumber Optional.
      * @param objects
      */
-    public RegisterMessage(String endpoint, Long lifetime, String lwM2mVersion, BindingMode bindingMode,
+    public RegisterMessage(int id, String endpoint, Long lifetime, String lwM2mVersion, BindingMode bindingMode,
             String smsNumber, String[] objects) {
 
         Validate.notEmpty(endpoint);
         Validate.notEmpty(objects);
 
+        this.id = id;
         this.endpoint = endpoint;
         this.lifetime = lifetime == null ? 86400 : lifetime;
         this.lwM2mVersion = lwM2mVersion == null ? "1.0" : lwM2mVersion;
         this.bindingMode = bindingMode == null ? BindingMode.U : bindingMode;
         this.smsNumber = smsNumber;
         this.objects = objects;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public LwM2mMessage process(MessageProcessor visitor) {
+        return visitor.process(this);
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getEndpoint() {
@@ -101,10 +119,10 @@ public class RegisterMessage implements LwM2mMessage {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("RegisterMessage [endpoint=").append(endpoint).append(", lifetime=").append(lifetime)
-                .append(", lwM2mVersion=").append(lwM2mVersion).append(", bindingMode=").append(bindingMode)
-                .append(", smsNumber=").append(smsNumber).append(", objects=").append(Arrays.toString(objects))
-                .append("]");
+        builder.append("RegisterMessage [id=").append(id).append(", endpoint=").append(endpoint).append(", lifetime=")
+                .append(lifetime).append(", lwM2mVersion=").append(lwM2mVersion).append(", bindingMode=")
+                .append(bindingMode).append(", smsNumber=").append(smsNumber).append(", objects=")
+                .append(Arrays.toString(objects)).append("]");
         return builder.toString();
     }
 
