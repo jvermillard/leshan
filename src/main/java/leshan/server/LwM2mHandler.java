@@ -19,8 +19,7 @@
  */
 package leshan.server;
 
-import java.util.HashMap;
-import java.util.Map;
+import leshan.server.lwm2m.message.LwM2mMessage;
 
 import org.apache.mina.api.AbstractIoHandler;
 import org.apache.mina.api.IoSession;
@@ -29,11 +28,14 @@ import org.apache.mina.api.IoSession;
  * Protocol logic for handling LW-M2M protocol.
  */
 public class LwM2mHandler extends AbstractIoHandler {
-    
+
     @Override
     public void messageReceived(IoSession session, Object message) {
-        System.err.println("rcvd : "+message+" from "+session);
-        Map<String,String> m = new HashMap<>();
-        m.put("a", "b");
+
+        if (message instanceof LwM2mMessage) {
+            System.out.println("rcvd LW-M2M msg : " + message + " from " + session);
+        } else {
+            System.err.println("a LW-M2M message is expected");
+        }
     }
 }
