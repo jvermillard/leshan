@@ -22,6 +22,7 @@ package leshan.server.lwm2m;
 import leshan.server.lwm2m.message.LwM2mMessage;
 import leshan.server.lwm2m.message.client.ClientMessage;
 import leshan.server.lwm2m.message.client.MessageProcessor;
+import leshan.server.lwm2m.session.Session;
 
 import org.apache.mina.api.AbstractIoHandler;
 import org.apache.mina.api.IoSession;
@@ -39,7 +40,7 @@ public class LwM2mHandler extends AbstractIoHandler {
         if (message instanceof ClientMessage) {
             System.out.println("rcvd LW-M2M msg : " + message + " from " + session);
 
-            LwM2mMessage response = ((ClientMessage) message).process(processor);
+            LwM2mMessage response = ((ClientMessage) message).process(processor, new Session(session));
             session.write(response);
 
         } else {

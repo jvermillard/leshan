@@ -2,15 +2,18 @@ package leshan.server.lwm2m;
 
 import java.io.UnsupportedEncodingException;
 
+import leshan.server.lwm2m.message.client.DeregisterMessage;
 import leshan.server.lwm2m.message.client.RegisterMessage;
-import leshan.server.lwm2m.message.client.RegisterMessage.BindingMode;
 import leshan.server.lwm2m.message.server.MessageEncoder;
 import leshan.server.lwm2m.message.server.ServerMessage;
+import leshan.server.lwm2m.session.BindingMode;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.apache.mina.api.AbstractIoFilter;
 import org.apache.mina.api.IoSession;
 import org.apache.mina.coap.CoapCode;
 import org.apache.mina.coap.CoapMessage;
+import org.apache.mina.codec.ProtocolDecoderException;
 import org.apache.mina.filterchain.ReadFilterChainController;
 import org.apache.mina.filterchain.WriteFilterChainController;
 import org.apache.mina.session.DefaultWriteRequest;
@@ -73,21 +76,31 @@ public class LwM2mFilter extends AbstractIoFilter {
                         break;
                     case PUT:
                         // update
+
+                        break;
                     case DELETE:
                         // unregister
+
+                        // TODO multi level location ?
+                        String registrationId = uriPath[1];
+                        controller.callReadNextFilter(new DeregisterMessage(coapMessage.getId(), registrationId));
+                        break;
                     default:
-                        System.err.println("register operation non supported : " + coapMessage.getCode());
+                        throw new ProtocolDecoderException("register operation non supported : "
+                                + coapMessage.getCode());
                     }
                     break;
                 case "bs":
                     // bootstrap
                 default:
-                    System.err.println("coap uri path not supported : " + uriPath[0]);
+                    throw new NotImplementedException("coap uri path not supported : " + uriPath[0]);
                 }
             }
 
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
+        } catch (IllegalArgumentException e) {
+            throw new ProtocolDecoderException("invalid LW-M2M client message", e);
         }
 
     }

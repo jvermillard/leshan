@@ -3,6 +3,8 @@ package leshan.server.lwm2m.message.client;
 import java.util.Arrays;
 
 import leshan.server.lwm2m.message.LwM2mMessage;
+import leshan.server.lwm2m.session.BindingMode;
+import leshan.server.lwm2m.session.Session;
 
 import org.apache.commons.lang.Validate;
 
@@ -10,24 +12,6 @@ import org.apache.commons.lang.Validate;
  * The message sent by the the client to the server to perform a <b>Register</b> operation.
  */
 public class RegisterMessage implements ClientMessage {
-
-    /**
-     * Transport binding and Queue Mode
-     */
-    public enum BindingMode {
-        /** UDP */
-        U,
-        /** UDP with Queue Mode */
-        UQ,
-        /** SMS */
-        S,
-        /** SMS with Queue Mode */
-        SQ,
-        /** UDP and SMS */
-        US,
-        /** UDP with Queue Mode and SMS */
-        UQS
-    }
 
     private final int id;
 
@@ -81,8 +65,8 @@ public class RegisterMessage implements ClientMessage {
      * {@inheritDoc}
      */
     @Override
-    public LwM2mMessage process(MessageProcessor visitor) {
-        return visitor.process(this);
+    public LwM2mMessage process(MessageProcessor visitor, Session session) {
+        return visitor.process(this, session);
     }
 
     public int getId() {

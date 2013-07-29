@@ -30,7 +30,7 @@ public class LwM2mServer {
         // LW-M2M handler
         server.setIoHandler(new LwM2mHandler());
 
-        // we kill sessions after 20 minutes of inactivity
+        // we kill sessions after 20 minutes of inactivity (default)
         server.getSessionConfig().setIdleTimeInMillis(IdleStatus.READ_IDLE, 20 * 60 * 1_000);
 
         server.bind(port);

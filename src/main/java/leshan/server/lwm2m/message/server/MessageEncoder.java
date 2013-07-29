@@ -9,4 +9,8 @@ public interface MessageEncoder {
 
     CoapMessage encode(CreatedResponse message);
 
+    CoapMessage encode(DeletedResponse message);
+
+    CoapMessage encode(ErrorResponse message);
+
 }
