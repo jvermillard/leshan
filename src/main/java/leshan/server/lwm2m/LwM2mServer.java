@@ -9,8 +9,12 @@ import org.apache.mina.coap.codec.CoapDecoder;
 import org.apache.mina.coap.codec.CoapEncoder;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.transport.bio.BioUdpServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LwM2mServer {
+
+    private static final Logger LOG = LoggerFactory.getLogger(LwM2mServer.class);
 
     /** IANA assigned UDP port for CoAP (so for LWM2M) */
     private final int port = 5683;
@@ -35,7 +39,7 @@ public class LwM2mServer {
 
         server.bind(port);
 
-        System.out.println("LW-M2M server started on port " + port);
+        LOG.info("LW-M2M server started on port " + port);
     }
 
     public static void main(String[] args) {

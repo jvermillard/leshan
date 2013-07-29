@@ -26,11 +26,15 @@ import leshan.server.lwm2m.session.Session;
 
 import org.apache.mina.api.AbstractIoHandler;
 import org.apache.mina.api.IoSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Protocol logic for handling LW-M2M protocol.
  */
 public class LwM2mHandler extends AbstractIoHandler {
+
+    private static final Logger LOG = LoggerFactory.getLogger(LwM2mHandler.class);
 
     private final MessageProcessor processor = new LwM2mProcessor();
 
@@ -38,13 +42,13 @@ public class LwM2mHandler extends AbstractIoHandler {
     public void messageReceived(IoSession session, Object message) {
 
         if (message instanceof ClientMessage) {
-            System.out.println("rcvd LW-M2M msg : " + message + " from " + session);
+            LOG.debug("received a LW-M2M msg : " + message + " from " + session);
 
             LwM2mMessage response = ((ClientMessage) message).process(processor, new Session(session));
             session.write(response);
 
         } else {
-            System.err.println("a LW-M2M message is expected");
+            throw new IllegalStateException("a LW-M2M message is expected");
         }
     }
 }

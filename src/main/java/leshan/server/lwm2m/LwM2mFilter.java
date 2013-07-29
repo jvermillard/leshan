@@ -18,11 +18,15 @@ import org.apache.mina.filterchain.ReadFilterChainController;
 import org.apache.mina.filterchain.WriteFilterChainController;
 import org.apache.mina.session.DefaultWriteRequest;
 import org.apache.mina.session.WriteRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A filter in charge of encoding/decoding LW-M2M messages
  */
 public class LwM2mFilter extends AbstractIoFilter {
+
+    private static final Logger LOG = LoggerFactory.getLogger(LwM2mFilter.class);
 
     private MessageEncoder encoder = new LwM2mEncoder();
 
@@ -35,7 +39,7 @@ public class LwM2mFilter extends AbstractIoFilter {
 
         CoapMessage coapMessage = (CoapMessage) message;
 
-        System.out.println("decoding coap message : " + coapMessage);
+        LOG.debug("decoding coap message : " + coapMessage);
 
         try {
             // build LW-M2M message
@@ -111,12 +115,11 @@ public class LwM2mFilter extends AbstractIoFilter {
     @Override
     public void messageWriting(IoSession session, WriteRequest message, WriteFilterChainController controller) {
 
-        if (message.getMessage() != null && message.getMessage() instanceof ServerMessage) {
-            System.out.println("encoding LW-M2M message : " + message.getMessage());
+        LOG.debug("encoding message : " + message.getMessage());
 
+        if (message.getMessage() != null && message.getMessage() instanceof ServerMessage) {
             CoapMessage response = ((ServerMessage) message.getMessage()).encode(encoder);
 
-            System.out.println("coap response : " + response);
             controller.callWriteNextFilter(new DefaultWriteRequest(response));
         }
 
