@@ -39,10 +39,15 @@ public class LwM2mHandler extends AbstractIoHandler {
     private final MessageProcessor processor = new LwM2mProcessor();
 
     @Override
+    public void sessionOpened(IoSession session) {
+        LOG.debug("session open : {}",session);
+    }
+    
+    @Override
     public void messageReceived(IoSession session, Object message) {
 
         if (message instanceof ClientMessage) {
-            LOG.debug("received a LW-M2M msg : " + message + " from " + session);
+            LOG.debug("received a LW-M2M msg : {} from {}", message, session);
 
             LwM2mMessage response = ((ClientMessage) message).process(processor, new Session(session));
             session.write(response);

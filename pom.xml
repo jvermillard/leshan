@@ -30,7 +30,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <version.mina>3.0.0-M2</version.mina>
+        <version.mina>3.0.0-M2-SNAPSHOT</version.mina>
     </properties>
 
     <dependencies>
@@ -66,6 +66,12 @@
             <version>1.0.9</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-webapp</artifactId>
+            <version>9.0.4.v20130625</version>
+        </dependency>
+
         <!-- test dependencies -->
         <dependency>
             <groupId>junit</groupId>
@@ -94,14 +100,14 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.4</version>
                 <configuration>
-                  <encoding>UTF-8</encoding>
-                  <source>1.7</source>
-                  <target>1.7</target>
-                  <debug>true</debug>
-                  <optimize>true</optimize>
-                  <showDeprecations>true</showDeprecations>
+                    <encoding>UTF-8</encoding>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                    <debug>true</debug>
+                    <optimize>true</optimize>
+                    <showDeprecations>true</showDeprecations>
                 </configuration>
-             </plugin>
+            </plugin>
         </plugins>
     </build>
 </project>
