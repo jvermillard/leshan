@@ -17,7 +17,7 @@
  *  under the License.
  *
  */
-package leshan.server.lwm2m.servlet;
+package leshan.server.servlet;
 
 import java.io.IOException;
 
@@ -30,12 +30,25 @@ import javax.servlet.http.HttpServletResponse;
  * Service HTTP REST API calls.
  */
 public class ApiServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
 
     /**
      * {@inheritDoc}
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-       super.doGet(req, resp);
+       String path = req.getPathInfo();
+
+       switch (path) {
+        case "/clients":
+            resp.getOutputStream().write("pouet".getBytes());
+            resp.setStatus(HttpServletResponse.SC_OK);
+            return;
+        default:
+            resp.getOutputStream().write(("not found: '"+path+"'").getBytes());
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
+       
     }
 }

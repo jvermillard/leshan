@@ -2,7 +2,7 @@ package leshan.server.lwm2m;
 
 import java.nio.ByteBuffer;
 
-import leshan.server.lwm2m.servlet.ApiServlet;
+import leshan.server.servlet.ApiServlet;
 
 import org.apache.mina.api.IdleStatus;
 import org.apache.mina.api.IoFilter;

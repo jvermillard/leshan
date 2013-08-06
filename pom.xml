@@ -30,7 +30,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <version.mina>3.0.0-M2-SNAPSHOT</version.mina>
+        <version.mina>3.0.0-M3-SNAPSHOT</version.mina>
     </properties>
 
     <dependencies>
