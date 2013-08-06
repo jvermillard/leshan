@@ -19,26 +19,26 @@
  */
 package leshan.server.lwm2m.session;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- * Transport binding and Queue Mode
+ * Registry for all the connected LW M2M clients.
  */
-public enum BindingMode {
-
-    /** UDP */
-    U,
-
-    /** UDP with Queue Mode */
-    UQ,
-
-    /** SMS */
-    S,
-
-    /** SMS with Queue Mode */
-    SQ,
-
-    /** UDP and SMS */
-    US,
-
-    /** UDP with Queue Mode and SMS */
-    UQS
+public class SessionRegistry {
+    
+    private Map<String,Session> sessions = new HashMap<>();
+    
+    public void add(Session session) {
+        sessions.put(session.getRegistrationId(),session);
+    }
+    
+    public void remove(Session session) {
+        sessions.remove(session.getRegistrationId());
+    }
+    
+    public Collection<Session> allSessions() {
+        return sessions.values();
+    }
 }

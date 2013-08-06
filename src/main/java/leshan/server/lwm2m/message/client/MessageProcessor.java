@@ -12,4 +12,5 @@ public interface MessageProcessor {
 
     LwM2mMessage process(DeregisterMessage message, Session session);
 
+    void sessionClosed(Session session);
 }

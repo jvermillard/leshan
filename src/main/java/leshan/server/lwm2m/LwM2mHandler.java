@@ -23,6 +23,7 @@ import leshan.server.lwm2m.message.LwM2mMessage;
 import leshan.server.lwm2m.message.client.ClientMessage;
 import leshan.server.lwm2m.message.client.MessageProcessor;
 import leshan.server.lwm2m.session.Session;
+import leshan.server.lwm2m.session.SessionRegistry;
 
 import org.apache.mina.api.AbstractIoHandler;
 import org.apache.mina.api.IoSession;
@@ -36,8 +37,11 @@ public class LwM2mHandler extends AbstractIoHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(LwM2mHandler.class);
 
-    private final MessageProcessor processor = new LwM2mProcessor();
+    private final MessageProcessor processor;
 
+    public LwM2mHandler(SessionRegistry registry ) {
+        processor = new LwM2mProcessor(registry);
+    }
     @Override
     public void sessionOpened(IoSession session) {
         LOG.debug("session open : {}",session);
@@ -55,5 +59,10 @@ public class LwM2mHandler extends AbstractIoHandler {
         } else {
             throw new IllegalStateException("a LW-M2M message is expected");
         }
+    }
+    
+    @Override
+    public void sessionClosed(IoSession session) {
+        processor.sessionClosed(new Session(session));
     }
 }

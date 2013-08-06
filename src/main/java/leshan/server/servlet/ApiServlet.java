@@ -26,12 +26,21 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import leshan.server.lwm2m.session.Session;
+import leshan.server.lwm2m.session.SessionRegistry;
+
 /**
  * Service HTTP REST API calls.
  */
 public class ApiServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
+    private final SessionRegistry registry;
+    
+    public ApiServlet(SessionRegistry registry) {
+        this.registry = registry;
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -41,7 +50,9 @@ public class ApiServlet extends HttpServlet {
 
        switch (path) {
         case "/clients":
-            resp.getOutputStream().write("pouet".getBytes());
+            for(Session session  : registry.allSessions()) {
+                resp.getOutputStream().write(("client : "+session.getRegistrationId()+"\n").getBytes());
+            }
             resp.setStatus(HttpServletResponse.SC_OK);
             return;
         default:

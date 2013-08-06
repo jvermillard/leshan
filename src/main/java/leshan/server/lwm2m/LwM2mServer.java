@@ -1,7 +1,9 @@
+
 package leshan.server.lwm2m;
 
 import java.nio.ByteBuffer;
 
+import leshan.server.lwm2m.session.SessionRegistry;
 import leshan.server.servlet.ApiServlet;
 
 import org.apache.mina.api.IdleStatus;
@@ -26,6 +28,8 @@ public class LwM2mServer {
 
     private BioUdpServer server;
 
+    private SessionRegistry registry = new SessionRegistry();
+    
     public void start() {
         server = new BioUdpServer();
 
@@ -37,7 +41,7 @@ public class LwM2mServer {
         server.setFilters(coapFilter, lwM2mFilter);
 
         // LW-M2M handler
-        server.setIoHandler(new LwM2mHandler());
+        server.setIoHandler(new LwM2mHandler(registry));
 
         // we kill sessions after 20 minutes of inactivity (default)
         server.getSessionConfig().setIdleTimeInMillis(IdleStatus.READ_IDLE, 20 * 60 * 1_000);
@@ -63,7 +67,7 @@ public class LwM2mServer {
         root.setResourceBase(webappDirLocation);
         root.setParentLoaderPriority(true);
 
-        ServletHolder apiServletHolder = new ServletHolder(new ApiServlet());
+        ServletHolder apiServletHolder = new ServletHolder(new ApiServlet(registry));
         root.addServlet(apiServletHolder, "/api/*");
 
         server.setHandler(root);
@@ -73,9 +77,6 @@ public class LwM2mServer {
         } catch (Exception e) {
             LOG.error("jetty error",e);
         }
-
-
- 
     }
 
     public static void main(String[] args) {

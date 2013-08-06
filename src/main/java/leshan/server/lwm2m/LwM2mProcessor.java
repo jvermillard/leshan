@@ -29,6 +29,7 @@ import leshan.server.lwm2m.message.server.ErrorResponse;
 import leshan.server.lwm2m.message.server.RegisterResponse;
 import leshan.server.lwm2m.session.Session;
 import leshan.server.lwm2m.session.Session.RegistrationState;
+import leshan.server.lwm2m.session.SessionRegistry;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
@@ -41,6 +42,12 @@ public class LwM2mProcessor implements MessageProcessor {
 
     private static final Logger LOG = LoggerFactory.getLogger(LwM2mProcessor.class);
 
+    private final SessionRegistry registry;
+    
+    public LwM2mProcessor(SessionRegistry registry) {
+        this.registry = registry;
+    }
+    
     /**
      * {@inheritDoc}
      */
@@ -62,6 +69,7 @@ public class LwM2mProcessor implements MessageProcessor {
 
         session.updateLifeTime(message.getLifetime());
 
+        registry.add(session);
         return new RegisterResponse(message.getId(), registrationId);
     }
 
@@ -90,5 +98,10 @@ public class LwM2mProcessor implements MessageProcessor {
         session.close();
 
         return new DeletedResponse(message.getId());
+    }
+
+    @Override
+    public void sessionClosed(Session session) {
+        registry.remove(session);
     }
 }
