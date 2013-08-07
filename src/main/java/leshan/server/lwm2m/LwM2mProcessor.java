@@ -56,6 +56,7 @@ public class LwM2mProcessor implements RequestProcessor {
         LOG.debug("processing a register message : " + message);
 
         if (session.getRegistrationState() != null) {
+            LOG.debug("already registered");
             // the client should not be already registered
             return new ErrorResponse(message.getId(), ResponseCode.CONFLICT);
         }

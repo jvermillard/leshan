@@ -20,6 +20,7 @@
 package leshan.server.servlet;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Set;
 
 import javax.servlet.ServletException;
@@ -48,6 +49,12 @@ public class EventServlet extends HttpServlet {
 
     private final Gson gson = new Gson();
 
+    private final byte[] EVENT = "event: ".getBytes();
+
+    private final byte[] DATA = "data: ".getBytes();
+
+    private static final byte[] TERMINATION = new byte[] { '\r', '\n' };
+
     public EventServlet(SessionRegistry registry) {
         registry.addListener(listener);
 
@@ -60,14 +67,22 @@ public class EventServlet extends HttpServlet {
         @Override
         public void registered(LwSession session) {
             for (Continuation c : continuations) {
+                Client client = new Client(session.getEndpoint(), session.getRegistrationId(), session.getIoSession()
+                        .getRemoteAddress().toString(), session.getObjects(), session.getSmsNumber(),
+                        session.getLwM2mVersion(), session.getLifeTimeInSec());
                 try {
-                    Client client = new Client(session.getEndpoint(), session.getRegistrationId(), session
-                            .getIoSession().getRemoteAddress().toString(), session.getObjects(),
-                            session.getSmsNumber(), session.getLwM2mVersion(), session.getLifeTimeInSec());
-                    c.getServletResponse().getWriter().write(gson.toJson(client));
-                    c.getServletResponse().getWriter().flush();
+                    OutputStream output = c.getServletResponse().getOutputStream();
+                    output.write(EVENT);
+                    output.write("REGISTRATION".getBytes());
+                    output.write(TERMINATION);
+                    output.write(DATA);
+                    output.write(gson.toJson(client).getBytes());
+                    output.write(TERMINATION);
+                    output.write(TERMINATION);
+                    output.flush();
+                    c.getServletResponse().flushBuffer();
                 } catch (IOException e) {
-                    LOG.error("Exception", e);
+                    LOG.error("IOException", e);
                 }
             }
         }
@@ -92,8 +107,10 @@ public class EventServlet extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        final Continuation c = ContinuationSupport.getContinuation(req);
-        c.suspend(resp);
+        resp.setContentType("text/event-stream");
+        Continuation c = ContinuationSupport.getContinuation(req);
+        c.setTimeout(0);
         continuations.add(c);
+        c.suspend(resp);
     }
 }
