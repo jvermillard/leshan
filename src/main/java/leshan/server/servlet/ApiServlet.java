@@ -20,6 +20,8 @@
 package leshan.server.servlet;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -28,6 +30,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import leshan.server.lwm2m.session.LwSession;
 import leshan.server.lwm2m.session.SessionRegistry;
+import leshan.server.servlet.json.Client;
+
+import com.google.gson.Gson;
 
 /**
  * Service HTTP REST API calls.
@@ -36,6 +41,8 @@ public class ApiServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private final SessionRegistry registry;
+    
+    private final Gson gson = new Gson();
     
     public ApiServlet(SessionRegistry registry) {
         this.registry = registry;
@@ -50,9 +57,15 @@ public class ApiServlet extends HttpServlet {
 
        switch (path) {
         case "/clients":
+            List<Client> clients = new ArrayList<>();
             for(LwSession session  : registry.allSessions()) {
-                resp.getOutputStream().write(("client : "+session.getRegistrationId()+"\n").getBytes());
+                clients.add(new Client(session.getEndpoint(), session.getRegistrationId(),session.getIoSession().getRemoteAddress().toString(),session.getObjects(),session.getSmsNumber(),session.getLwM2mVersion(),session.getLifeTimeInSec()));
             }
+            
+            String json =  gson.toJson(clients.toArray(new Client[]{}));
+            resp.setContentType("application/json");
+            resp.getOutputStream().write(json.getBytes());
+            
             resp.setStatus(HttpServletResponse.SC_OK);
             return;
         default:

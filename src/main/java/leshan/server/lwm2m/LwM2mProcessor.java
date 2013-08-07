@@ -64,10 +64,11 @@ public class LwM2mProcessor implements MessageProcessor {
 
         String registrationId = createRegistrationId();
         session.setRegistrationId(registrationId);
-
-        // TODO store registration parameters in the session
-
+        session.setEndpoint(message.getEndpoint());
+        session.setLwM2mVersion(message.getLwM2mVersion());
         session.setLifeTimeInSec(message.getLifetime());
+        session.setObjects(message.getObjects());
+        session.setSmsNumber(message.getSmsNumber());
 
         registry.add(session);
         return new RegisterResponse(message.getId(), registrationId);

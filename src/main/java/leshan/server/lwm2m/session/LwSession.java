@@ -31,6 +31,10 @@ public class LwSession {
     private String registrationId;
     private String endpoint;
     private long lifeTimeInSec;
+    private String[] objects;
+    private String smsNumber;
+    private String lwM2mVersion;
+
     
     public LwSession(IoSession ioSession) {
         this.ioSession = ioSession;
@@ -67,4 +71,23 @@ public class LwSession {
     public void setLifeTimeInSec(long lifeTimeInSec) {
         this.lifeTimeInSec = lifeTimeInSec;
     }
+    public String[] getObjects() {
+        return objects;
+    }
+    public void setObjects(String[] objects) {
+        this.objects = objects;
+    }
+    public String getSmsNumber() {
+        return smsNumber;
+    }
+    public void setSmsNumber(String smsNumber) {
+        this.smsNumber = smsNumber;
+    }
+    public String getLwM2mVersion() {
+        return lwM2mVersion;
+    }
+    public void setLwM2mVersion(String lwM2mVersion) {
+        this.lwM2mVersion = lwM2mVersion;
+    }
+    
 }
