@@ -36,7 +36,7 @@ public class ReadRequest implements ServerRequest {
     public ReadRequest(Integer objectId, Integer objectInstanceId, Integer resourceId) {
         Validate.notNull(objectId);
 
-        this.id = RandomUtils.nextInt();
+        this.id = RandomUtils.nextInt() & 0xFFFF;
 
         // TODO check unsigned short
 
@@ -79,6 +79,15 @@ public class ReadRequest implements ServerRequest {
 
     public Integer getResourceId() {
         return resourceId;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("ReadRequest [id=").append(id).append(", objectId=").append(objectId)
+                .append(", objectInstanceId=").append(objectInstanceId).append(", resourceId=").append(resourceId)
+                .append("]");
+        return builder.toString();
     }
 
 }

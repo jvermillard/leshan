@@ -1,5 +1,7 @@
 package leshan.server.lwm2m.message.client;
 
+import java.util.Arrays;
+
 import leshan.server.lwm2m.message.ResponseCode;
 
 import org.apache.commons.lang.Validate;
@@ -45,6 +47,14 @@ public class ClientResponse implements Response {
 
     public String getContentFormat() {
         return contentFormat;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("ClientResponse [id=").append(id).append(", code=").append(code).append(", content=")
+                .append(Arrays.toString(content)).append(", contentFormat=").append(contentFormat).append("]");
+        return builder.toString();
     }
 
 }
