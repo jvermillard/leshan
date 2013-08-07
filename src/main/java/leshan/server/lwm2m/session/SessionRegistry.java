@@ -19,26 +19,40 @@
  */
 package leshan.server.lwm2m.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Registry for all the connected LW M2M clients.
  */
 public class SessionRegistry {
-    
-    private Map<String,LwSession> sessions = new HashMap<>();
-    
+
+    private Map<String, LwSession> sessions = new HashMap<>();
+
+    private List<RegistryListener> listeners = new ArrayList<>();
+
     public void add(LwSession session) {
-        sessions.put(session.getRegistrationId(),session);
+        sessions.put(session.getRegistrationId(), session);
+        for (RegistryListener l : listeners) {
+            l.registered(session);
+        }
     }
-    
+
     public void remove(LwSession session) {
         sessions.remove(session.getRegistrationId());
+        for (RegistryListener l : listeners) {
+            l.unregistered(session);
+        }
     }
-    
+
     public Collection<LwSession> allSessions() {
         return sessions.values();
+    }
+
+    public void addListener(RegistryListener listener) {
+        listeners.add(listener);
     }
 }
