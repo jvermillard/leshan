@@ -13,4 +13,6 @@ public interface MessageEncoder {
 
     CoapMessage encode(ErrorResponse message);
 
+    CoapMessage encode(ReadRequest message);
+
 }

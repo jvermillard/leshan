@@ -78,10 +78,6 @@ public class LwM2mFilter extends AbstractIoFilter {
                         controller.callReadNextFilter(new RegisterMessage(coapMessage.getId(), endpoint, lifetime,
                                 lwVersion, binding, sms, links.split(",")));
                         break;
-                    case PUT:
-                        // update
-
-                        break;
                     case DELETE:
                         // unregister
 
@@ -89,6 +85,9 @@ public class LwM2mFilter extends AbstractIoFilter {
                         String registrationId = uriPath[1];
                         controller.callReadNextFilter(new DeregisterMessage(coapMessage.getId(), registrationId));
                         break;
+                    case PUT:
+                        // update
+
                     default:
                         throw new ProtocolDecoderException("register operation non supported : "
                                 + coapMessage.getCode());
