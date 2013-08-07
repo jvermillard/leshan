@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import leshan.server.lwm2m.message.LwM2mMessage;
 import leshan.server.lwm2m.session.BindingMode;
-import leshan.server.lwm2m.session.Session;
+import leshan.server.lwm2m.session.LwSession;
 
 import org.apache.commons.lang.Validate;
 
@@ -65,7 +65,7 @@ public class RegisterMessage implements ClientMessage {
      * {@inheritDoc}
      */
     @Override
-    public LwM2mMessage process(MessageProcessor visitor, Session session) {
+    public LwM2mMessage process(MessageProcessor visitor, LwSession session) {
         return visitor.process(this, session);
     }
 

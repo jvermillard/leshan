@@ -22,11 +22,12 @@ package leshan.server.lwm2m;
 import leshan.server.lwm2m.message.LwM2mMessage;
 import leshan.server.lwm2m.message.client.ClientMessage;
 import leshan.server.lwm2m.message.client.MessageProcessor;
-import leshan.server.lwm2m.session.Session;
+import leshan.server.lwm2m.session.LwSession;
 import leshan.server.lwm2m.session.SessionRegistry;
 
 import org.apache.mina.api.AbstractIoHandler;
 import org.apache.mina.api.IoSession;
+import org.apache.mina.session.AttributeKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +39,8 @@ public class LwM2mHandler extends AbstractIoHandler {
     private static final Logger LOG = LoggerFactory.getLogger(LwM2mHandler.class);
 
     private final MessageProcessor processor;
+    
+    private final AttributeKey<LwSession> LW_SESSION = new AttributeKey<>(LwSession.class, "LW_SESSION"); 
 
     public LwM2mHandler(SessionRegistry registry ) {
         processor = new LwM2mProcessor(registry);
@@ -49,11 +52,15 @@ public class LwM2mHandler extends AbstractIoHandler {
     
     @Override
     public void messageReceived(IoSession session, Object message) {
-
         if (message instanceof ClientMessage) {
             LOG.debug("received a LW-M2M msg : {} from {}", message, session);
-
-            LwM2mMessage response = ((ClientMessage) message).process(processor, new Session(session));
+            
+            LwSession lwSession = session.getAttribute(LW_SESSION);
+            if (lwSession == null) {
+                lwSession = new LwSession(session);
+                session.setAttribute(LW_SESSION, lwSession);
+            }
+            LwM2mMessage response = ((ClientMessage) message).process(processor, lwSession);
             session.write(response);
 
         } else {
@@ -63,6 +70,6 @@ public class LwM2mHandler extends AbstractIoHandler {
     
     @Override
     public void sessionClosed(IoSession session) {
-        processor.sessionClosed(new Session(session));
+        processor.sessionClosed(new LwSession(session));
     }
 }

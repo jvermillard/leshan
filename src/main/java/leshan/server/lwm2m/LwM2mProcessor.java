@@ -27,8 +27,8 @@ import leshan.server.lwm2m.message.client.RegisterMessage;
 import leshan.server.lwm2m.message.server.DeletedResponse;
 import leshan.server.lwm2m.message.server.ErrorResponse;
 import leshan.server.lwm2m.message.server.RegisterResponse;
-import leshan.server.lwm2m.session.Session;
-import leshan.server.lwm2m.session.Session.RegistrationState;
+import leshan.server.lwm2m.session.LwSession;
+import leshan.server.lwm2m.session.LwSession.RegistrationState;
 import leshan.server.lwm2m.session.SessionRegistry;
 
 import org.apache.commons.lang.RandomStringUtils;
@@ -52,22 +52,22 @@ public class LwM2mProcessor implements MessageProcessor {
      * {@inheritDoc}
      */
     @Override
-    public LwM2mMessage process(RegisterMessage message, Session session) {
+    public LwM2mMessage process(RegisterMessage message, LwSession session) {
         LOG.debug("processing a register message : " + message);
 
-        if (session.getState() != null) {
+        if (session.getRegistrationState() != null) {
             // the client should not be already registered
             return new ErrorResponse(message.getId(), ResponseCode.CONFLICT);
         }
 
-        session.setState(RegistrationState.REGISTERED);
+        session.setRegistrationState(RegistrationState.REGISTERED);
 
-        String registrationId = this.createRegistrationId();
+        String registrationId = createRegistrationId();
         session.setRegistrationId(registrationId);
 
         // TODO store registration parameters in the session
 
-        session.updateLifeTime(message.getLifetime());
+        session.setLifeTimeInSec(message.getLifetime());
 
         registry.add(session);
         return new RegisterResponse(message.getId(), registrationId);
@@ -78,7 +78,7 @@ public class LwM2mProcessor implements MessageProcessor {
     }
 
     @Override
-    public LwM2mMessage process(DeregisterMessage message, Session session) {
+    public LwM2mMessage process(DeregisterMessage message, LwSession session) {
         LOG.debug("processing a deregister message : " + message);
 
         // check registration location
@@ -89,19 +89,19 @@ public class LwM2mProcessor implements MessageProcessor {
         }
 
         // check state
-        if (!RegistrationState.REGISTERED.equals(session.getState())) {
-            LOG.error("invalid session state, expected 'REGISTERED', was '{}'", session.getState());
+        if (!RegistrationState.REGISTERED.equals(session.getRegistrationState())) {
+            LOG.error("invalid session state, expected 'REGISTERED', was '{}'", session.getRegistrationState());
             return new ErrorResponse(message.getId(), ResponseCode.BAD_REQUEST);
         }
 
-        session.setState(RegistrationState.UNREGISTERED);
-        session.close();
+        session.setRegistrationState(RegistrationState.UNREGISTERED);
+        session.getIoSession().close(false);
 
         return new DeletedResponse(message.getId());
     }
 
     @Override
-    public void sessionClosed(Session session) {
+    public void sessionClosed(LwSession session) {
         registry.remove(session);
     }
 }

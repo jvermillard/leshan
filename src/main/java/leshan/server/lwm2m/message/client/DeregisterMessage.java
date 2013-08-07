@@ -1,7 +1,7 @@
 package leshan.server.lwm2m.message.client;
 
 import leshan.server.lwm2m.message.LwM2mMessage;
-import leshan.server.lwm2m.session.Session;
+import leshan.server.lwm2m.session.LwSession;
 
 import org.apache.commons.lang.Validate;
 
@@ -23,7 +23,7 @@ public class DeregisterMessage implements ClientMessage {
     }
 
     @Override
-    public LwM2mMessage process(MessageProcessor visitor, Session session) {
+    public LwM2mMessage process(MessageProcessor visitor, LwSession session) {
         return visitor.process(this, session);
     }
 

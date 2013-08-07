@@ -28,17 +28,17 @@ import java.util.Map;
  */
 public class SessionRegistry {
     
-    private Map<String,Session> sessions = new HashMap<>();
+    private Map<String,LwSession> sessions = new HashMap<>();
     
-    public void add(Session session) {
+    public void add(LwSession session) {
         sessions.put(session.getRegistrationId(),session);
     }
     
-    public void remove(Session session) {
+    public void remove(LwSession session) {
         sessions.remove(session.getRegistrationId());
     }
     
-    public Collection<Session> allSessions() {
+    public Collection<LwSession> allSessions() {
         return sessions.values();
     }
 }

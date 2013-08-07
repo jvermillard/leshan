@@ -26,7 +26,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import leshan.server.lwm2m.session.Session;
+import leshan.server.lwm2m.session.LwSession;
 import leshan.server.lwm2m.session.SessionRegistry;
 
 /**
@@ -50,7 +50,7 @@ public class ApiServlet extends HttpServlet {
 
        switch (path) {
         case "/clients":
-            for(Session session  : registry.allSessions()) {
+            for(LwSession session  : registry.allSessions()) {
                 resp.getOutputStream().write(("client : "+session.getRegistrationId()+"\n").getBytes());
             }
             resp.setStatus(HttpServletResponse.SC_OK);
