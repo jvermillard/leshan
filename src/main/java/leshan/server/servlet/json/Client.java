@@ -25,17 +25,17 @@ package leshan.server.servlet.json;
 public class Client {
 
     private String endpoint;
-    
+
     private String registrationId;
-    
+
     private String address;
-    
+
     private String[] objects;
-    
+
     private String smsNumber;
-    
+
     private String lwM2mVersion;
-    
+
     private long lifetime;
 
     public Client(String endpoint, String registrationId, String address, String[] objects, String smsNumber,

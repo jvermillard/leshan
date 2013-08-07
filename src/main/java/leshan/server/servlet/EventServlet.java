@@ -45,53 +45,55 @@ public class EventServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private static final Logger LOG = LoggerFactory.getLogger(EventServlet.class);
-    
+
     private final Gson gson = new Gson();
 
     public EventServlet(SessionRegistry registry) {
         registry.addListener(listener);
-        
+
     }
-    
-    private Set<Continuation> continuations = new  ConcurrentHashSet<>();
-    
+
+    private Set<Continuation> continuations = new ConcurrentHashSet<>();
+
     private RegistryListener listener = new RegistryListener() {
-        
+
         @Override
         public void registered(LwSession session) {
-            for(Continuation c:continuations) {
+            for (Continuation c : continuations) {
                 try {
-                Client client = new Client(session.getEndpoint(), session.getRegistrationId(),session.getIoSession().getRemoteAddress().toString(),session.getObjects(),session.getSmsNumber(),session.getLwM2mVersion(),session.getLifeTimeInSec());
+                    Client client = new Client(session.getEndpoint(), session.getRegistrationId(), session
+                            .getIoSession().getRemoteAddress().toString(), session.getObjects(),
+                            session.getSmsNumber(), session.getLwM2mVersion(), session.getLifeTimeInSec());
                     c.getServletResponse().getWriter().write(gson.toJson(client));
                     c.getServletResponse().getWriter().flush();
                 } catch (IOException e) {
-                    LOG.error("Exception",e);
+                    LOG.error("Exception", e);
                 }
             }
         }
-        
+
         @Override
         public void unregistered(LwSession session) {
-            
+
         }
     };
-    
+
     /**
      * {@inheritDoc}
      */
     @Override
     public void init() throws ServletException {
         super.init();
-        
-        
+
     }
+
     /**
      * {@inheritDoc}
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        final Continuation c= ContinuationSupport.getContinuation(req);
+        final Continuation c = ContinuationSupport.getContinuation(req);
         c.suspend(resp);
-        
+        continuations.add(c);
     }
 }

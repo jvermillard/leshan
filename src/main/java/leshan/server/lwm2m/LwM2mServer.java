@@ -1,10 +1,10 @@
-
 package leshan.server.lwm2m;
 
 import java.nio.ByteBuffer;
 
 import leshan.server.lwm2m.session.SessionRegistry;
 import leshan.server.servlet.ApiServlet;
+import leshan.server.servlet.EventServlet;
 
 import org.apache.mina.api.IdleStatus;
 import org.apache.mina.api.IoFilter;
@@ -29,7 +29,7 @@ public class LwM2mServer {
     private BioUdpServer server;
 
     private SessionRegistry registry = new SessionRegistry();
-    
+
     public void start() {
         server = new BioUdpServer();
 
@@ -50,7 +50,7 @@ public class LwM2mServer {
         server.bind(port);
 
         LOG.info("LW-M2M server started on port " + port);
-        
+
         // now prepare and start jetty
         String webappDirLocation = "src/main/webapp/";
 
@@ -72,10 +72,15 @@ public class LwM2mServer {
 
         server.setHandler(root);
 
+        ServletHolder eventServletHolder = new ServletHolder(new EventServlet(registry));
+        root.addServlet(eventServletHolder, "/event/*");
+
+        server.setHandler(root);
+
         try {
             server.start();
         } catch (Exception e) {
-            LOG.error("jetty error",e);
+            LOG.error("jetty error", e);
         }
     }
 

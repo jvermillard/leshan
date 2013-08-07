@@ -41,38 +41,40 @@ public class ApiServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private final SessionRegistry registry;
-    
+
     private final Gson gson = new Gson();
-    
+
     public ApiServlet(SessionRegistry registry) {
         this.registry = registry;
     }
-    
+
     /**
      * {@inheritDoc}
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-       String path = req.getPathInfo();
+        String path = req.getPathInfo();
 
-       switch (path) {
+        switch (path) {
         case "/clients":
             List<Client> clients = new ArrayList<>();
-            for(LwSession session  : registry.allSessions()) {
-                clients.add(new Client(session.getEndpoint(), session.getRegistrationId(),session.getIoSession().getRemoteAddress().toString(),session.getObjects(),session.getSmsNumber(),session.getLwM2mVersion(),session.getLifeTimeInSec()));
+            for (LwSession session : registry.allSessions()) {
+                clients.add(new Client(session.getEndpoint(), session.getRegistrationId(), session.getIoSession()
+                        .getRemoteAddress().toString(), session.getObjects(), session.getSmsNumber(), session
+                        .getLwM2mVersion(), session.getLifeTimeInSec()));
             }
-            
-            String json =  gson.toJson(clients.toArray(new Client[]{}));
+
+            String json = gson.toJson(clients.toArray(new Client[] {}));
             resp.setContentType("application/json");
             resp.getOutputStream().write(json.getBytes());
-            
+
             resp.setStatus(HttpServletResponse.SC_OK);
             return;
         default:
-            resp.getOutputStream().write(("not found: '"+path+"'").getBytes());
+            resp.getOutputStream().write(("not found: '" + path + "'").getBytes());
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-       
+
     }
 }

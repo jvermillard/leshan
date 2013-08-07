@@ -42,8 +42,8 @@ public class TlvDecoder implements StatelessProtocolDecoder<ByteBuffer, Tlv[]> {
     @Override
     public Tlv[] decode(ByteBuffer input, Void context) {
         List<Tlv> tlvs = new ArrayList<>();
-        
-        while(input.remaining()>0) {
+
+        while (input.remaining() > 0) {
             input.order(ByteOrder.BIG_ENDIAN);
             int typeByte = input.get() & 0xFF;
             TlvType type;
@@ -63,7 +63,7 @@ public class TlvDecoder implements StatelessProtocolDecoder<ByteBuffer, Tlv[]> {
             default:
                 throw new IllegalStateException("unknown type : " + (typeByte & 0b1100_0000));
             }
-    
+
             int identifier;
             // decode identifier
             if ((typeByte & 0b0010_0000) == 0) {
@@ -71,10 +71,10 @@ public class TlvDecoder implements StatelessProtocolDecoder<ByteBuffer, Tlv[]> {
             } else {
                 identifier = input.getShort() & 0xFFFF;
             }
-    
+
             int length;
             int lengthType = typeByte & 0b0001_1000;
-    
+
             // decode length
             switch (lengthType) {
             case 0b0000_0000:
@@ -96,29 +96,29 @@ public class TlvDecoder implements StatelessProtocolDecoder<ByteBuffer, Tlv[]> {
             default:
                 throw new IllegalStateException("unknown length type : " + (typeByte & 0b0001_1000));
             }
-    
-            if (type == TlvType.RESOURCE_VALUE || type ==  TlvType.RESOURCE_INSTANCE) {
+
+            if (type == TlvType.RESOURCE_VALUE || type == TlvType.RESOURCE_INSTANCE) {
                 byte[] payload = new byte[length];
                 input.get(payload);
-                tlvs.add( new Tlv(type, null, payload, identifier));
+                tlvs.add(new Tlv(type, null, payload, identifier));
             } else {
                 // create a view of the contained TLVs
                 ByteBuffer slice = input.slice();
                 slice.limit(length);
-                
+
                 Tlv[] children = decode(slice, null);
 
                 // skip the children, it will be decoded by the view
-                input.position(input.position()+length);
-   
+                input.position(input.position() + length);
+
                 Tlv tlv = new Tlv(type, children, null, identifier);
                 tlvs.add(tlv);
             }
         }
-        
-        return tlvs.toArray(new Tlv[]{});
+
+        return tlvs.toArray(new Tlv[] {});
     }
-    
+
     /**
      * {@inheritDoc}
      */

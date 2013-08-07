@@ -25,6 +25,6 @@ package leshan.server.lwm2m.session;
 public interface RegistryListener {
 
     void registered(LwSession session);
-    
+
     void unregistered(LwSession session);
 }

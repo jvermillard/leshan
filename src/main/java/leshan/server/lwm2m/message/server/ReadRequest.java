@@ -28,7 +28,9 @@ public class ReadRequest implements ServerMessage {
     private final int id;
 
     private final Integer objectId;
+
     private final Integer objectInstanceId;
+
     private final Integer resourceId;
 
     public ReadRequest(Integer objectId, Integer objectInstanceId, Integer resourceId) {

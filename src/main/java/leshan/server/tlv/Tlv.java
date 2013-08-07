@@ -25,7 +25,7 @@ import java.util.Arrays;
  * a Type-Length-Value container, can contain more TLV.
  */
 public class Tlv {
-   
+
     /**
      * build a TLV container
      * @param type the type of TLV
@@ -39,33 +39,33 @@ public class Tlv {
         this.children = children;
         this.value = value;
         this.identifier = identifier;
-        
+
         if (type == TlvType.RESOURCE_VALUE || type == TlvType.RESOURCE_INSTANCE) {
-            if (value  == null) {
-                throw new IllegalArgumentException("a "+type.name()+" must have a value");
+            if (value == null) {
+                throw new IllegalArgumentException("a " + type.name() + " must have a value");
             } else if (children != null) {
-                throw new IllegalArgumentException("a "+type.name()+" can't have children");
+                throw new IllegalArgumentException("a " + type.name() + " can't have children");
             }
         } else {
-            if (value  != null) {
-                throw new IllegalArgumentException("a "+type.name()+" can't have a value");
+            if (value != null) {
+                throw new IllegalArgumentException("a " + type.name() + " can't have a value");
             } else if (children == null) {
-                throw new IllegalArgumentException("a "+type.name()+" must have children");
+                throw new IllegalArgumentException("a " + type.name() + " must have children");
             }
         }
     }
 
     // type of TLV, indicate if it's containing a value or TLV containing more TLV or values
     private TlvType type;
-    
+
     // if of type OBJECT_INSTANCE,MULTIPLE_RESOURCE or null
     private Tlv[] children;
-    
+
     // if type RESOURCE_VALUE or RESOURCE_INSTANCE => null
     private byte[] value;
 
     private int identifier;
-    
+
     public TlvType getType() {
         return type;
     }

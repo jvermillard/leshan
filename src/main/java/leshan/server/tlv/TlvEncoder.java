@@ -34,7 +34,7 @@ public class TlvEncoder implements StatelessProtocolEncoder<Tlv[], ByteBuffer> {
     public Void createEncoderState() {
         return null;
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -42,18 +42,18 @@ public class TlvEncoder implements StatelessProtocolEncoder<Tlv[], ByteBuffer> {
     public ByteBuffer encode(Tlv[] tlvs, Void state) {
         int size = 0;
         System.err.println("start");
-        for(Tlv tlv : tlvs) {
-            
+        for (Tlv tlv : tlvs) {
+
             int length = tlvEncodedLength(tlv);
-            size += tlvEncodedSize(tlv,length);
-            System.err.println("tlv size : "+size);
+            size += tlvEncodedSize(tlv, length);
+            System.err.println("tlv size : " + size);
         }
         System.err.println("done");
-        System.err.println("size : "+size);
+        System.err.println("size : " + size);
         ByteBuffer b = ByteBuffer.allocate(size);
         b.order(ByteOrder.BIG_ENDIAN);
-        for(Tlv tlv : tlvs) {
-            encode(tlv,b);
+        for (Tlv tlv : tlvs) {
+            encode(tlv, b);
         }
         b.flip();
         return b;
@@ -62,7 +62,7 @@ public class TlvEncoder implements StatelessProtocolEncoder<Tlv[], ByteBuffer> {
     private int tlvEncodedSize(Tlv tlv, int length) {
         int size = 1 /* HEADER */;
         size += (tlv.getIdentifier() < 65_536) ? 1 : 2; /* 8 bits or 16 bits identifiers*/
-        
+
         if (length < 8) {
             size += 0;
         } else if (length < 256) {
@@ -74,7 +74,7 @@ public class TlvEncoder implements StatelessProtocolEncoder<Tlv[], ByteBuffer> {
         } else {
             throw new ProtocolEncoderException("length should fit in max 24bits");
         }
- 
+
         size += length;
         return size;
     }
@@ -90,13 +90,14 @@ public class TlvEncoder implements StatelessProtocolEncoder<Tlv[], ByteBuffer> {
             length = 0;
             for (Tlv child : tlv.getChildren()) {
                 int subLength = tlvEncodedLength(child);
-                length += tlvEncodedSize(child,subLength); 
+                length += tlvEncodedSize(child, subLength);
             }
         }
-        
+
         return length;
     }
-    private void encode(Tlv tlv,ByteBuffer b) {
+
+    private void encode(Tlv tlv, ByteBuffer b) {
         int length;
         length = tlvEncodedLength(tlv);
         int typeByte;
@@ -121,7 +122,7 @@ public class TlvEncoder implements StatelessProtocolEncoder<Tlv[], ByteBuffer> {
 
         // encode identifier length
         typeByte |= (tlv.getIdentifier() < 65_536) ? 0b00_0000 : 0b10_0000;
-        
+
         // type of length
         if (length < 8) {
             typeByte |= length;
@@ -132,38 +133,38 @@ public class TlvEncoder implements StatelessProtocolEncoder<Tlv[], ByteBuffer> {
         } else {
             typeByte |= 0b0001_1000;
         }
-        
+
         // fill the buffer
-        b.put((byte)typeByte);
+        b.put((byte) typeByte);
         if (tlv.getIdentifier() < 65_536) {
-            b.put((byte)tlv.getIdentifier());
+            b.put((byte) tlv.getIdentifier());
         } else {
-            b.putShort((short)tlv.getIdentifier());
+            b.putShort((short) tlv.getIdentifier());
         }
-        
+
         // write length
-        
-        if (length >=8) {
+
+        if (length >= 8) {
             if (length < 256) {
-                b.put((byte)length);
-            } else if ( length < 65_536) {
-                b.putShort((short)length);
+                b.put((byte) length);
+            } else if (length < 65_536) {
+                b.putShort((short) length);
             } else {
                 int msb = (length & 0xFF_00_00) >> 16;
-                b.put((byte)msb);
+                b.put((byte) msb);
                 b.putShort((short) (length & 0xFF_FF));
                 typeByte |= 0b0001_1000;
             }
         }
-        
+
         switch (tlv.getType()) {
         case RESOURCE_VALUE:
         case RESOURCE_INSTANCE:
             b.put(tlv.getValue());
             break;
         default:
-            for(Tlv child:tlv.getChildren()) {
-               encode(child, b); 
+            for (Tlv child : tlv.getChildren()) {
+                encode(child, b);
             }
             break;
         }

@@ -39,22 +39,23 @@ public class LwM2mHandler extends AbstractIoHandler {
     private static final Logger LOG = LoggerFactory.getLogger(LwM2mHandler.class);
 
     private final MessageProcessor processor;
-    
-    private final AttributeKey<LwSession> LW_SESSION = new AttributeKey<>(LwSession.class, "LW_SESSION"); 
 
-    public LwM2mHandler(SessionRegistry registry ) {
+    private final AttributeKey<LwSession> LW_SESSION = new AttributeKey<>(LwSession.class, "LW_SESSION");
+
+    public LwM2mHandler(SessionRegistry registry) {
         processor = new LwM2mProcessor(registry);
     }
+
     @Override
     public void sessionOpened(IoSession session) {
-        LOG.debug("session open : {}",session);
+        LOG.debug("session open : {}", session);
     }
-    
+
     @Override
     public void messageReceived(IoSession session, Object message) {
         if (message instanceof ClientMessage) {
             LOG.debug("received a LW-M2M msg : {} from {}", message, session);
-            
+
             LwSession lwSession = session.getAttribute(LW_SESSION);
             if (lwSession == null) {
                 lwSession = new LwSession(session);
@@ -67,7 +68,7 @@ public class LwM2mHandler extends AbstractIoHandler {
             throw new IllegalStateException("a LW-M2M message is expected");
         }
     }
-    
+
     @Override
     public void sessionClosed(IoSession session) {
         processor.sessionClosed(new LwSession(session));

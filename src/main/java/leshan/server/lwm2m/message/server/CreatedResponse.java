@@ -8,6 +8,7 @@ import org.apache.mina.coap.CoapMessage;
 public class CreatedResponse implements ServerMessage {
 
     private final int id;
+
     private final String[] newLocation;
 
     public CreatedResponse(int id, String... newLocation) {

@@ -43,11 +43,11 @@ public class LwM2mProcessor implements MessageProcessor {
     private static final Logger LOG = LoggerFactory.getLogger(LwM2mProcessor.class);
 
     private final SessionRegistry registry;
-    
+
     public LwM2mProcessor(SessionRegistry registry) {
         this.registry = registry;
     }
-    
+
     /**
      * {@inheritDoc}
      */

@@ -23,8 +23,5 @@ package leshan.server.tlv;
  * The type of a TLV
  */
 public enum TlvType {
-    OBJECT_INSTANCE,
-    RESOURCE_INSTANCE,
-    MULTIPLE_RESOURCE,
-    RESOURCE_VALUE;
+    OBJECT_INSTANCE, RESOURCE_INSTANCE, MULTIPLE_RESOURCE, RESOURCE_VALUE;
 }

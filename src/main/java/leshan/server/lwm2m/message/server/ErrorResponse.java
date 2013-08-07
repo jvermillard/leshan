@@ -7,6 +7,7 @@ import org.apache.mina.coap.CoapMessage;
 public class ErrorResponse implements ServerMessage {
 
     private final int id;
+
     private final ResponseCode errorCode;
 
     public ErrorResponse(int id, ResponseCode errorCode) {

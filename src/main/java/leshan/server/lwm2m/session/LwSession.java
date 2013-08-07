@@ -27,67 +27,88 @@ import org.apache.mina.api.IoSession;
 public class LwSession {
 
     private final IoSession ioSession;
+
     private RegistrationState registrationState;
+
     private String registrationId;
+
     private String endpoint;
+
     private long lifeTimeInSec;
+
     private String[] objects;
+
     private String smsNumber;
+
     private String lwM2mVersion;
 
-    
     public LwSession(IoSession ioSession) {
         this.ioSession = ioSession;
-    
+
     }
+
     public enum RegistrationState {
         UNREGISTERED, REGISTERED
     }
+
     public RegistrationState getRegistrationState() {
         return registrationState;
     }
+
     public void setRegistrationState(RegistrationState registrationState) {
         this.registrationState = registrationState;
     }
+
     public String getRegistrationId() {
         return registrationId;
     }
+
     public void setRegistrationId(String registrationId) {
         this.registrationId = registrationId;
     }
+
     public String getEndpoint() {
         return endpoint;
     }
+
     public void setEndpoint(String endpoint) {
         this.endpoint = endpoint;
     }
+
     public IoSession getIoSession() {
         return ioSession;
     }
-    
+
     public long getLifeTimeInSec() {
         return lifeTimeInSec;
     }
+
     public void setLifeTimeInSec(long lifeTimeInSec) {
         this.lifeTimeInSec = lifeTimeInSec;
     }
+
     public String[] getObjects() {
         return objects;
     }
+
     public void setObjects(String[] objects) {
         this.objects = objects;
     }
+
     public String getSmsNumber() {
         return smsNumber;
     }
+
     public void setSmsNumber(String smsNumber) {
         this.smsNumber = smsNumber;
     }
+
     public String getLwM2mVersion() {
         return lwM2mVersion;
     }
+
     public void setLwM2mVersion(String lwM2mVersion) {
         this.lwM2mVersion = lwM2mVersion;
     }
-    
+
 }
