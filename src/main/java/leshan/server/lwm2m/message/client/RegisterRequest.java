@@ -11,7 +11,7 @@ import org.apache.commons.lang.Validate;
 /**
  * The message sent by the the client to the server to perform a <b>Register</b> operation.
  */
-public class RegisterMessage implements ClientMessage {
+public class RegisterRequest implements ClientRequest {
 
     private final int id;
 
@@ -46,7 +46,7 @@ public class RegisterMessage implements ClientMessage {
      * @param smsNumber Optional.
      * @param objects
      */
-    public RegisterMessage(int id, String endpoint, Long lifetime, String lwM2mVersion, BindingMode bindingMode,
+    public RegisterRequest(int id, String endpoint, Long lifetime, String lwM2mVersion, BindingMode bindingMode,
             String smsNumber, String[] objects) {
 
         Validate.notEmpty(endpoint);
@@ -65,7 +65,7 @@ public class RegisterMessage implements ClientMessage {
      * {@inheritDoc}
      */
     @Override
-    public LwM2mMessage process(MessageProcessor visitor, LwSession session) {
+    public LwM2mMessage process(RequestProcessor visitor, LwSession session) {
         return visitor.process(this, session);
     }
 

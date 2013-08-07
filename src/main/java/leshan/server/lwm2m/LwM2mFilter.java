@@ -2,8 +2,10 @@ package leshan.server.lwm2m;
 
 import java.io.UnsupportedEncodingException;
 
-import leshan.server.lwm2m.message.client.DeregisterMessage;
-import leshan.server.lwm2m.message.client.RegisterMessage;
+import leshan.server.lwm2m.message.ResponseCode;
+import leshan.server.lwm2m.message.client.ClientResponse;
+import leshan.server.lwm2m.message.client.DeregisterRequest;
+import leshan.server.lwm2m.message.client.RegisterRequest;
 import leshan.server.lwm2m.message.server.MessageEncoder;
 import leshan.server.lwm2m.message.server.ServerMessage;
 import leshan.server.lwm2m.session.BindingMode;
@@ -42,62 +44,89 @@ public class LwM2mFilter extends AbstractIoFilter {
         LOG.debug("decoding coap message : " + coapMessage);
 
         try {
-            // build LW-M2M message
-            String[] uriPath = coapMessage.getUriPath();
-            if (uriPath.length > 0) {
+            switch (coapMessage.getType()) {
 
-                switch (uriPath[0]) {
-                case "rd":
-                    switch (CoapCode.fromCode(coapMessage.getCode())) {
-                    case POST:
-                        // register
+            case ACK:
+                ResponseCode code = ResponseCode.fromCoapCode(coapMessage.getCode());
 
-                        String endpoint = null;
-                        Long lifetime = null;
-                        String sms = null;
-                        String lwVersion = null;
-                        BindingMode binding = null;
+                byte[] content = null;
+                String format = null;
+                if (ResponseCode.CONTENT.equals(code)) {
+                    content = coapMessage.getPayload();
 
-                        for (String param : coapMessage.getUriQuery()) {
-                            if (param.startsWith("ep=")) {
-                                endpoint = param.substring(3);
-                            } else if (param.startsWith("lt=")) {
-                                lifetime = Long.valueOf(param.substring(3));
-                            } else if (param.startsWith("sms=")) {
-                                sms = param.substring(4);
-                            } else if (param.startsWith("lwm2m=")) {
-                                lwVersion = param.substring(6);
-                            } else if (param.startsWith("b=")) {
-                                binding = BindingMode.valueOf(param.substring(2));
-                            }
-                        }
-
-                        // TODO CoRE Link Format (RFC6690)
-                        String links = new String(coapMessage.getPayload(), "UTF-8");
-
-                        controller.callReadNextFilter(new RegisterMessage(coapMessage.getId(), endpoint, lifetime,
-                                lwVersion, binding, sms, links.split(",")));
-                        break;
-                    case DELETE:
-                        // unregister
-
-                        // TODO multi level location ?
-                        String registrationId = uriPath[1];
-                        controller.callReadNextFilter(new DeregisterMessage(coapMessage.getId(), registrationId));
-                        break;
-                    case PUT:
-                        // update
-
-                    default:
-                        throw new ProtocolDecoderException("register operation non supported : "
-                                + coapMessage.getCode());
-                    }
-                    break;
-                case "bs":
-                    // bootstrap
-                default:
-                    throw new NotImplementedException("coap uri path not supported : " + uriPath[0]);
+                    // coapMessage.getContentFormat()?
+                    // supposing this is a plain text payload
+                    format = "application/vnd.oma.lwm2m+text";
                 }
+
+                controller.callReadNextFilter(new ClientResponse(coapMessage.getId(), code, content, format));
+                break;
+
+            case CONFIRMABLE:
+
+                String[] uriPath = coapMessage.getUriPath();
+
+                if (uriPath.length > 0) {
+
+                    switch (uriPath[0]) {
+                    case "rd":
+                        switch (CoapCode.fromCode(coapMessage.getCode())) {
+                        case POST:
+                            // register
+
+                            String endpoint = null;
+                            Long lifetime = null;
+                            String sms = null;
+                            String lwVersion = null;
+                            BindingMode binding = null;
+
+                            for (String param : coapMessage.getUriQuery()) {
+                                if (param.startsWith("ep=")) {
+                                    endpoint = param.substring(3);
+                                } else if (param.startsWith("lt=")) {
+                                    lifetime = Long.valueOf(param.substring(3));
+                                } else if (param.startsWith("sms=")) {
+                                    sms = param.substring(4);
+                                } else if (param.startsWith("lwm2m=")) {
+                                    lwVersion = param.substring(6);
+                                } else if (param.startsWith("b=")) {
+                                    binding = BindingMode.valueOf(param.substring(2));
+                                }
+                            }
+
+                            // TODO CoRE Link Format (RFC6690)
+                            String links = new String(coapMessage.getPayload(), "UTF-8");
+
+                            controller.callReadNextFilter(new RegisterRequest(coapMessage.getId(), endpoint, lifetime,
+                                    lwVersion, binding, sms, links.split(",")));
+                            break;
+                        case DELETE:
+                            // unregister
+
+                            // TODO multi level location ?
+                            String registrationId = uriPath[1];
+                            controller.callReadNextFilter(new DeregisterRequest(coapMessage.getId(), registrationId));
+                            break;
+                        case PUT:
+                            // update
+
+                        default:
+                            throw new ProtocolDecoderException("register operation non supported : "
+                                    + coapMessage.getCode());
+                        }
+                        break;
+                    case "bs":
+                        // bootstrap
+                    default:
+                        throw new NotImplementedException("coap uri path not supported : " + uriPath[0]);
+                    }
+                }
+
+                break;
+
+            case NON_CONFIRMABLE:
+            case RESET:
+                throw new NotImplementedException("coap message type not supported : " + coapMessage.getType());
             }
 
         } catch (UnsupportedEncodingException e) {

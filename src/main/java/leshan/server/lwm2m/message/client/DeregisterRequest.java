@@ -8,14 +8,14 @@ import org.apache.commons.lang.Validate;
 /**
  * The message sent by the the client to the server to perform a <b>De-registration</b> operation.
  */
-public class DeregisterMessage implements ClientMessage {
+public class DeregisterRequest implements ClientRequest {
 
     private final int id;
 
     /** the identifier used to unregister the client */
     private final String registrationId;
 
-    public DeregisterMessage(int id, String registrationId) {
+    public DeregisterRequest(int id, String registrationId) {
         Validate.notEmpty(registrationId);
 
         this.id = id;
@@ -23,7 +23,7 @@ public class DeregisterMessage implements ClientMessage {
     }
 
     @Override
-    public LwM2mMessage process(MessageProcessor visitor, LwSession session) {
+    public LwM2mMessage process(RequestProcessor visitor, LwSession session) {
         return visitor.process(this, session);
     }
 

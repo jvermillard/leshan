@@ -20,8 +20,8 @@
 package leshan.server.lwm2m;
 
 import leshan.server.lwm2m.message.LwM2mMessage;
-import leshan.server.lwm2m.message.client.ClientMessage;
-import leshan.server.lwm2m.message.client.MessageProcessor;
+import leshan.server.lwm2m.message.client.ClientRequest;
+import leshan.server.lwm2m.message.client.RequestProcessor;
 import leshan.server.lwm2m.session.LwSession;
 import leshan.server.lwm2m.session.SessionRegistry;
 
@@ -38,7 +38,7 @@ public class LwM2mHandler extends AbstractIoHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(LwM2mHandler.class);
 
-    private final MessageProcessor processor;
+    private final RequestProcessor processor;
 
     private final AttributeKey<LwSession> LW_SESSION = new AttributeKey<>(LwSession.class, "LW_SESSION");
 
@@ -53,7 +53,7 @@ public class LwM2mHandler extends AbstractIoHandler {
 
     @Override
     public void messageReceived(IoSession session, Object message) {
-        if (message instanceof ClientMessage) {
+        if (message instanceof ClientRequest) {
             LOG.debug("received a LW-M2M msg : {} from {}", message, session);
 
             LwSession lwSession = session.getAttribute(LW_SESSION);
@@ -61,11 +61,11 @@ public class LwM2mHandler extends AbstractIoHandler {
                 lwSession = new LwSession(session);
                 session.setAttribute(LW_SESSION, lwSession);
             }
-            LwM2mMessage response = ((ClientMessage) message).process(processor, lwSession);
+            LwM2mMessage response = ((ClientRequest) message).process(processor, lwSession);
             session.write(response);
 
         } else {
-            throw new IllegalStateException("a LW-M2M message is expected");
+            LOG.debug("no processing for messages of type {}", message.getClass());
         }
     }
 

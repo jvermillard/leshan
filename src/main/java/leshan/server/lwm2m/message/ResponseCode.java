@@ -11,8 +11,20 @@ public enum ResponseCode {
     /** 2.02 */
     DELETED(66),
 
+    /** 2.05 */
+    CONTENT(69),
+
     /** 4.00 */
     BAD_REQUEST(128),
+
+    /** 4.01 */
+    UNAUTHORIZED(129),
+
+    /** 4.04 */
+    NOT_FOUND(132),
+
+    /** 4.05 */
+    METHOD_NOT_ALLOWRD(133),
 
     /** 4.09 */
     CONFLICT(137);
@@ -31,6 +43,18 @@ public enum ResponseCode {
 
     public int getCoapCode() {
         return coapCode;
+    }
+
+    /**
+     * Find the {@link ResponseCode} for the given CoAP code (<code>null</code> if not found)
+     */
+    public static ResponseCode fromCoapCode(int coapCode) {
+        for (ResponseCode t : ResponseCode.values()) {
+            if (t.getCoapCode() == coapCode) {
+                return t;
+            }
+        }
+        return null;
     }
 
 }

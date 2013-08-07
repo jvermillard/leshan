@@ -35,14 +35,14 @@ public class SessionRegistry {
     private List<RegistryListener> listeners = new ArrayList<>();
 
     public void add(LwSession session) {
-        sessions.put(session.getRegistrationId(), session);
+        sessions.put(session.getEndpoint(), session);
         for (RegistryListener l : listeners) {
             l.registered(session);
         }
     }
 
     public void remove(LwSession session) {
-        sessions.remove(session.getRegistrationId());
+        sessions.remove(session.getEndpoint());
         for (RegistryListener l : listeners) {
             l.unregistered(session);
         }
@@ -54,5 +54,9 @@ public class SessionRegistry {
 
     public void addListener(RegistryListener listener) {
         listeners.add(listener);
+    }
+
+    public LwSession getSession(String endpoint) {
+        return sessions.get(endpoint);
     }
 }

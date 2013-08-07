@@ -38,7 +38,9 @@ public class LwM2mServer {
                 new CoapDecoder());
         IoFilter lwM2mFilter = new LwM2mFilter();
 
-        server.setFilters(coapFilter, lwM2mFilter);
+        LwM2mRequestFilter requestFilter = new LwM2mRequestFilter();
+
+        server.setFilters(coapFilter, lwM2mFilter, requestFilter);
 
         // LW-M2M handler
         server.setIoHandler(new LwM2mHandler(registry));
@@ -67,7 +69,7 @@ public class LwM2mServer {
         root.setResourceBase(webappDirLocation);
         root.setParentLoaderPriority(true);
 
-        ServletHolder apiServletHolder = new ServletHolder(new ApiServlet(registry));
+        ServletHolder apiServletHolder = new ServletHolder(new ApiServlet(registry, requestFilter));
         root.addServlet(apiServletHolder, "/api/*");
 
         server.setHandler(root);

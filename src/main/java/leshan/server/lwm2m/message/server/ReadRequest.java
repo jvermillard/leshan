@@ -23,7 +23,7 @@ import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.mina.coap.CoapMessage;
 
-public class ReadRequest implements ServerMessage {
+public class ReadRequest implements ServerRequest {
 
     private final int id;
 
@@ -50,6 +50,14 @@ public class ReadRequest implements ServerMessage {
      */
     @Override
     public int getId() {
+        return id;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object requestId() {
         return id;
     }
 

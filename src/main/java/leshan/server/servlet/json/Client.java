@@ -20,7 +20,7 @@
 package leshan.server.servlet.json;
 
 /**
- * JSON bean for a client. 
+ * JSON bean for a client.
  */
 public class Client {
 
@@ -40,7 +40,6 @@ public class Client {
 
     public Client(String endpoint, String registrationId, String address, String[] objects, String smsNumber,
             String lwM2mVersion, long lifetime) {
-        super();
         this.endpoint = endpoint;
         this.registrationId = registrationId;
         this.address = address;

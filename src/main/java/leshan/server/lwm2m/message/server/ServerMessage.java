@@ -4,6 +4,9 @@ import leshan.server.lwm2m.message.LwM2mMessage;
 
 import org.apache.mina.coap.CoapMessage;
 
+/**
+ * A LW-M2M message that needs to be encoded to be sent to the client.
+ */
 public interface ServerMessage extends LwM2mMessage {
 
     /**

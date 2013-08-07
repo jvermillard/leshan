@@ -21,9 +21,9 @@ package leshan.server.lwm2m;
 
 import leshan.server.lwm2m.message.LwM2mMessage;
 import leshan.server.lwm2m.message.ResponseCode;
-import leshan.server.lwm2m.message.client.DeregisterMessage;
-import leshan.server.lwm2m.message.client.MessageProcessor;
-import leshan.server.lwm2m.message.client.RegisterMessage;
+import leshan.server.lwm2m.message.client.DeregisterRequest;
+import leshan.server.lwm2m.message.client.RequestProcessor;
+import leshan.server.lwm2m.message.client.RegisterRequest;
 import leshan.server.lwm2m.message.server.DeletedResponse;
 import leshan.server.lwm2m.message.server.ErrorResponse;
 import leshan.server.lwm2m.message.server.RegisterResponse;
@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 /**
  * React to received LWM2M message following the LWM2M protocol.
  */
-public class LwM2mProcessor implements MessageProcessor {
+public class LwM2mProcessor implements RequestProcessor {
 
     private static final Logger LOG = LoggerFactory.getLogger(LwM2mProcessor.class);
 
@@ -52,7 +52,7 @@ public class LwM2mProcessor implements MessageProcessor {
      * {@inheritDoc}
      */
     @Override
-    public LwM2mMessage process(RegisterMessage message, LwSession session) {
+    public LwM2mMessage process(RegisterRequest message, LwSession session) {
         LOG.debug("processing a register message : " + message);
 
         if (session.getRegistrationState() != null) {
@@ -79,7 +79,7 @@ public class LwM2mProcessor implements MessageProcessor {
     }
 
     @Override
-    public LwM2mMessage process(DeregisterMessage message, LwSession session) {
+    public LwM2mMessage process(DeregisterRequest message, LwSession session) {
         LOG.debug("processing a deregister message : " + message);
 
         // check registration location

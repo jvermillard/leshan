@@ -4,9 +4,9 @@ import leshan.server.lwm2m.message.LwM2mMessage;
 import leshan.server.lwm2m.session.LwSession;
 
 /**
- * A LW-M2M message from a device.
+ * A request from a LW-M2M device.
  */
-public interface ClientMessage extends LwM2mMessage {
+public interface ClientRequest extends LwM2mMessage {
 
     /**
      * Processes the message using the visitor pattern.
@@ -15,6 +15,6 @@ public interface ClientMessage extends LwM2mMessage {
      * @param session the current session
      * @return the message to send to the client if a response is expected
      */
-    LwM2mMessage process(MessageProcessor visitor, LwSession session);
+    LwM2mMessage process(RequestProcessor visitor, LwSession session);
 
 }
