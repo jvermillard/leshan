@@ -34,6 +34,7 @@ import leshan.server.lwm2m.session.SessionRegistry;
 import leshan.server.servlet.json.Client;
 
 import org.eclipse.jetty.continuation.Continuation;
+import org.eclipse.jetty.continuation.ContinuationListener;
 import org.eclipse.jetty.continuation.ContinuationSupport;
 import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.slf4j.Logger;
@@ -52,6 +53,8 @@ public class EventServlet extends HttpServlet {
     private final byte[] EVENT = "event: ".getBytes();
 
     private final byte[] DATA = "data: ".getBytes();
+
+    private final byte[] VOID = ": ".getBytes();
 
     private static final byte[] TERMINATION = new byte[] { '\r', '\n' };
 
@@ -108,8 +111,29 @@ public class EventServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("text/event-stream");
+        OutputStream output = resp.getOutputStream();
+        output.write(VOID);
+        output.write("waiting for events".getBytes());
+        output.write(TERMINATION);
+        output.flush();
+        resp.flushBuffer();
+
         Continuation c = ContinuationSupport.getContinuation(req);
         c.setTimeout(0);
+        c.addContinuationListener(new ContinuationListener() {
+
+            @Override
+            public void onTimeout(Continuation continuation) {
+                LOG.debug("continuation closed");
+                continuation.complete();
+            }
+
+            @Override
+            public void onComplete(Continuation continuation) {
+                LOG.debug("continuation completed");
+                continuations.remove(continuation);
+            }
+        });
         continuations.add(c);
         c.suspend(resp);
     }
