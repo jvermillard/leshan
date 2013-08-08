@@ -20,6 +20,7 @@
 package leshan.server.servlet;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -37,6 +38,9 @@ import leshan.server.lwm2m.session.LwSession;
 import leshan.server.lwm2m.session.SessionRegistry;
 import leshan.server.servlet.json.Client;
 import leshan.server.servlet.json.ReadResponse;
+import leshan.server.servlet.json.TlvSerializer;
+import leshan.server.tlv.Tlv;
+import leshan.server.tlv.TlvDecoder;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.ArrayUtils;
@@ -46,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 /**
  * Service HTTP REST API calls.
@@ -60,11 +65,18 @@ public class ApiServlet extends HttpServlet {
 
     private final LwM2mRequestFilter requestFilter;
 
-    private final Gson gson = new Gson();
+    private final Gson gson;
+
+    private final TlvDecoder tlvDecoder = new TlvDecoder();
 
     public ApiServlet(SessionRegistry registry, LwM2mRequestFilter requestFilter) {
         this.registry = registry;
         this.requestFilter = requestFilter;
+
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeAdapter(Tlv.class, new TlvSerializer());
+
+        gson = gsonBuilder.create();
     }
 
     /**
@@ -147,12 +159,12 @@ public class ApiServlet extends HttpServlet {
         ClientResponse lwResponse = future.get();
 
         // build JSON read response
-        String value = null;
+        Object value = null;
         if (lwResponse instanceof ContentResponse) {
             ContentResponse cResponse = (ContentResponse) lwResponse;
             switch (cResponse.getFormat()) {
             case TLV:
-                value = "TLV : " + Hex.encodeHexString(cResponse.getContent());
+                value = tlvDecoder.decode(ByteBuffer.wrap(cResponse.getContent()), null);
                 break;
             case TEXT:
             case JSON:
