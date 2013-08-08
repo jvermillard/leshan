@@ -2,8 +2,10 @@ package leshan.server.lwm2m;
 
 import java.io.UnsupportedEncodingException;
 
+import leshan.server.lwm2m.message.ContentFormat;
 import leshan.server.lwm2m.message.ResponseCode;
 import leshan.server.lwm2m.message.client.ClientResponse;
+import leshan.server.lwm2m.message.client.ContentResponse;
 import leshan.server.lwm2m.message.client.DeregisterRequest;
 import leshan.server.lwm2m.message.client.RegisterRequest;
 import leshan.server.lwm2m.message.server.MessageEncoder;
@@ -11,6 +13,7 @@ import leshan.server.lwm2m.message.server.ServerMessage;
 import leshan.server.lwm2m.session.BindingMode;
 
 import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.mina.api.AbstractIoFilter;
 import org.apache.mina.api.IoSession;
 import org.apache.mina.coap.CoapCode;
@@ -50,16 +53,23 @@ public class LwM2mFilter extends AbstractIoFilter {
                 ResponseCode code = ResponseCode.fromCoapCode(coapMessage.getCode());
 
                 byte[] content = null;
-                String format = null;
+                ContentFormat format = null;
                 if (ResponseCode.CONTENT.equals(code)) {
                     content = coapMessage.getPayload();
 
                     // coapMessage.getContentFormat()?
-                    // supposing this is a plain text payload
-                    format = "application/vnd.oma.lwm2m+text";
+
+                    // HACK to guess the content format
+                    if (StringUtils.isAsciiPrintable(new String(content, "UTF-8"))) {
+                        format = ContentFormat.TEXT;
+                    } else {
+                        format = ContentFormat.TLV;
+                    }
+                    controller.callReadNextFilter(new ContentResponse(coapMessage.getId(), content, format));
+                } else {
+                    controller.callReadNextFilter(new ClientResponse(coapMessage.getId(), code));
                 }
 
-                controller.callReadNextFilter(new ClientResponse(coapMessage.getId(), code, content, format));
                 break;
 
             case CONFIRMABLE:

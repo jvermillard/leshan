@@ -22,6 +22,7 @@ package leshan.server.servlet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -30,12 +31,14 @@ import javax.servlet.http.HttpServletResponse;
 
 import leshan.server.lwm2m.LwM2mRequestFilter;
 import leshan.server.lwm2m.message.client.ClientResponse;
+import leshan.server.lwm2m.message.client.ContentResponse;
 import leshan.server.lwm2m.message.server.ReadRequest;
 import leshan.server.lwm2m.session.LwSession;
 import leshan.server.lwm2m.session.SessionRegistry;
 import leshan.server.servlet.json.Client;
 import leshan.server.servlet.json.ReadResponse;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.mina.api.IoFuture;
@@ -104,39 +107,17 @@ public class ApiServlet extends HttpServlet {
                         String endpoint = path[1];
                         LwSession session = registry.getSession(endpoint);
                         if (session == null) {
-                            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "no registered client with id '"
+                                    + endpoint + "'");
                             return;
                         } else {
-                            Integer objectId = Integer.valueOf(path[2]);
-                            Integer objectInstanceId = null;
-                            Integer resourceId = null;
-                            if (path.length > 3) {
-                                objectInstanceId = Integer.valueOf(path[3]);
-                            }
-                            if (path.length > 4) {
-                                resourceId = Integer.valueOf(path[4]);
-                            }
-                            ReadRequest request = new ReadRequest(objectId, objectInstanceId, resourceId);
-                            IoFuture<ClientResponse> future = requestFilter.request(session.getIoSession(), request,
-                                    5000);
-                            // wait for client response
-                            ClientResponse lwResponse = future.get();
-
-                            ReadResponse response = new ReadResponse(lwResponse.getCode().toString(), new String(
-                                    lwResponse.getContent(), "UTF-8"));
-
-                            String json = gson.toJson(response);
-                            resp.setContentType("application/json");
-                            resp.getOutputStream().write(json.getBytes());
-
-                            resp.setStatus(HttpServletResponse.SC_OK);
+                            this.readRequest(session, path, resp);
                             return;
                         }
                     }
                 }
             default:
-                resp.getOutputStream().write(("not found: '" + req.getPathInfo() + "'").getBytes());
-                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "not found: '" + req.getPathInfo() + "'");
                 return;
             }
         } catch (Exception e) {
@@ -144,5 +125,52 @@ public class ApiServlet extends HttpServlet {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
 
+    }
+
+    private void readRequest(LwSession session, String[] path, HttpServletResponse resp) throws InterruptedException,
+            ExecutionException, IOException {
+
+        Integer objectId = Integer.valueOf(path[2]);
+        Integer objectInstanceId = null;
+        Integer resourceId = null;
+
+        if (path.length > 3) {
+            objectInstanceId = Integer.valueOf(path[3]);
+        }
+        if (path.length > 4) {
+            resourceId = Integer.valueOf(path[4]);
+        }
+
+        ReadRequest request = new ReadRequest(objectId, objectInstanceId, resourceId);
+        IoFuture<ClientResponse> future = requestFilter.request(session.getIoSession(), request, 5000);
+        // wait for client response
+        ClientResponse lwResponse = future.get();
+
+        // build JSON read response
+        String value = null;
+        if (lwResponse instanceof ContentResponse) {
+            ContentResponse cResponse = (ContentResponse) lwResponse;
+            switch (cResponse.getFormat()) {
+            case TLV:
+                value = "TLV : " + Hex.encodeHexString(cResponse.getContent());
+                break;
+            case TEXT:
+            case JSON:
+            case LINK:
+                value = new String(cResponse.getContent(), "UTF-8");
+                break;
+            case OPAQUE:
+                value = Hex.encodeHexString(cResponse.getContent());
+                break;
+            }
+        }
+
+        ReadResponse response = new ReadResponse(lwResponse.getCode().toString(), value);
+
+        String json = gson.toJson(response);
+        resp.setContentType("application/json");
+        resp.getOutputStream().write(json.getBytes());
+
+        resp.setStatus(HttpServletResponse.SC_OK);
     }
 }

@@ -7,11 +7,11 @@ public class ReadResponse {
 
     private String status;
 
-    private String content;
+    private String value;
 
     public ReadResponse(String status, String content) {
         this.status = status;
-        this.content = content;
+        this.value = content;
     }
 
     public String getStatus() {
@@ -23,11 +23,11 @@ public class ReadResponse {
     }
 
     public String getContent() {
-        return content;
+        return value;
     }
 
     public void setContent(String content) {
-        this.content = content;
+        this.value = content;
     }
 
 }
