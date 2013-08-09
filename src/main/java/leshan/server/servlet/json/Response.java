@@ -3,13 +3,13 @@ package leshan.server.servlet.json;
 /**
  * JSON bean for a client read response
  */
-public class ReadResponse {
+public class Response {
 
     private String status;
 
     private Object value;
 
-    public ReadResponse(String status, Object value) {
+    public Response(String status, Object value) {
         this.status = status;
         this.value = value;
     }

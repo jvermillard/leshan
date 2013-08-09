@@ -11,6 +11,9 @@ public enum ResponseCode {
     /** 2.02 */
     DELETED(66),
 
+    /** 2.04 */
+    CHANGED(68),
+
     /** 2.05 */
     CONTENT(69),
 

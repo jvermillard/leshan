@@ -23,6 +23,10 @@ import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.mina.coap.CoapMessage;
 
+/**
+ * The request to access the value of a Resource, an array of Resource Instances, an Object Instance or all the Object
+ * Instances of an Object.
+ */
 public class ReadRequest implements ServerRequest {
 
     private final int id;
