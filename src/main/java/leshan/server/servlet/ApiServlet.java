@@ -114,7 +114,7 @@ public class ApiServlet extends HttpServlet {
                 return;
             }
 
-            if (path.length == 1 && equals("GET".equals(req.getMethod()))) {
+            if (path.length == 1 && "GET".equals(req.getMethod())) {
                 // list registered clients
                 List<Client> clients = new ArrayList<>();
                 for (LwSession session : registry.allSessions()) {
