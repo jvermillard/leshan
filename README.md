@@ -1,7 +1,16 @@
-leshan
+Leshan
 ======
 
-Leshan is a LWM2M Server implementation using Apache Mina.
+Leshan is a OMA Lightweight M2M server implementation.
+
+What is OMA LWM2M: 
+http://technical.openmobilealliance.org/Technical/release_program/lightweightM2M_v1_0.aspx
+
+The specification: 
+http://member.openmobilealliance.org/ftp/Public_documents/DM/LightweightM2M/
+
+Introduction to LWM2M:
+http://fr.slideshare.net/zdshelby/oma-lightweightm2-mtutorial
 
 
 Compile & Run
