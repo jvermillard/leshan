@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en" ng-app="lwClientApp">
+<head>
+  <meta charset="utf-8">
+  <title>Lightweight M2M clients</title>
+  <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+  
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.8/angular.min.js"></script>
+  <script src="js/controllers.js"></script>
+  
+</head>
+<body ng-controller="LwClientCtrl">
+  <div class="container">
+  
+  	<div class="page-header">
+  		<h1>OMA Lightweight M2M server</h1>
+  	</div>
+  	
+  	<p class="lead">{{clients.length}} connected clients</p>
+  	
+  	<li ng-repeat="client in clients">
+        <span>Endpoint : {{client.endpoint}} - Registration ID : {{client.registrationId}}</span>
+    </li>
+  
+  </div>
+
+</body>
+</html>
