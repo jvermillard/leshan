@@ -12,6 +12,10 @@ http://member.openmobilealliance.org/ftp/Public_documents/DM/LightweightM2M/
 Introduction to LWM2M:
 http://fr.slideshare.net/zdshelby/oma-lightweightm2-mtutorial
 
+Contact
+-------
+
+Join the project mailling list : leshan-lwm2m@googlegroups.com
 
 Compile & Run
 -------------
