@@ -19,11 +19,13 @@
  */
 package leshan.server.lwm2m;
 
+import java.util.Date;
+
 import leshan.server.lwm2m.message.LwM2mMessage;
 import leshan.server.lwm2m.message.ResponseCode;
 import leshan.server.lwm2m.message.client.DeregisterRequest;
-import leshan.server.lwm2m.message.client.RequestProcessor;
 import leshan.server.lwm2m.message.client.RegisterRequest;
+import leshan.server.lwm2m.message.client.RequestProcessor;
 import leshan.server.lwm2m.message.server.DeletedResponse;
 import leshan.server.lwm2m.message.server.ErrorResponse;
 import leshan.server.lwm2m.message.server.RegisterResponse;
@@ -65,6 +67,7 @@ public class LwM2mProcessor implements RequestProcessor {
 
         String registrationId = createRegistrationId();
         session.setRegistrationId(registrationId);
+        session.setRegistrationDate(new Date());
         session.setEndpoint(message.getEndpoint());
         session.setLwM2mVersion(message.getLwM2mVersion());
         session.setLifeTimeInSec(message.getLifetime());

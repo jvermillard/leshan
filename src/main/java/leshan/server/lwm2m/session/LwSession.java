@@ -19,6 +19,8 @@
  */
 package leshan.server.lwm2m.session;
 
+import java.util.Date;
+
 import org.apache.mina.api.IoSession;
 
 /**
@@ -29,6 +31,8 @@ public class LwSession {
     private final IoSession ioSession;
 
     private RegistrationState registrationState;
+
+    private Date registrationDate;
 
     private String registrationId;
 
@@ -109,6 +113,14 @@ public class LwSession {
 
     public void setLwM2mVersion(String lwM2mVersion) {
         this.lwM2mVersion = lwM2mVersion;
+    }
+
+    public Date getRegistrationDate() {
+        return registrationDate;
+    }
+
+    public void setRegistrationDate(Date registrationDate) {
+        this.registrationDate = registrationDate;
     }
 
 }

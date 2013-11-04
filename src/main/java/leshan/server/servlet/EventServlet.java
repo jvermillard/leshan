@@ -70,9 +70,10 @@ public class EventServlet extends HttpServlet {
         @Override
         public void registered(LwSession session) {
             for (Continuation c : continuations) {
-                Client client = new Client(session.getEndpoint(), session.getRegistrationId(), session.getIoSession()
-                        .getRemoteAddress().toString(), session.getObjects(), session.getSmsNumber(),
-                        session.getLwM2mVersion(), session.getLifeTimeInSec());
+                Client client = new Client(session.getEndpoint(), session.getRegistrationId(),
+                        session.getRegistrationDate(), session.getIoSession().getRemoteAddress().toString(),
+                        session.getObjects(), session.getSmsNumber(), session.getLwM2mVersion(),
+                        session.getLifeTimeInSec());
                 try {
                     OutputStream output = c.getServletResponse().getOutputStream();
                     output.write(EVENT);

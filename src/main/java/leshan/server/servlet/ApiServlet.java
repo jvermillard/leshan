@@ -118,9 +118,10 @@ public class ApiServlet extends HttpServlet {
                 // list registered clients
                 List<Client> clients = new ArrayList<>();
                 for (LwSession session : registry.allSessions()) {
-                    clients.add(new Client(session.getEndpoint(), session.getRegistrationId(), session.getIoSession()
-                            .getRemoteAddress().toString(), session.getObjects(), session.getSmsNumber(), session
-                            .getLwM2mVersion(), session.getLifeTimeInSec()));
+                    clients.add(new Client(session.getEndpoint(), session.getRegistrationId(), session
+                            .getRegistrationDate(), session.getIoSession().getRemoteAddress().toString(), session
+                            .getObjects(), session.getSmsNumber(), session.getLwM2mVersion(), session
+                            .getLifeTimeInSec()));
                 }
 
                 String json = gson.toJson(clients.toArray(new Client[] {}));

@@ -19,6 +19,8 @@
  */
 package leshan.server.servlet.json;
 
+import java.util.Date;
+
 /**
  * JSON bean for a client.
  */
@@ -27,6 +29,8 @@ public class Client {
     private String endpoint;
 
     private String registrationId;
+
+    private Date registrationDate;
 
     private String address;
 
@@ -38,10 +42,11 @@ public class Client {
 
     private long lifetime;
 
-    public Client(String endpoint, String registrationId, String address, String[] objects, String smsNumber,
-            String lwM2mVersion, long lifetime) {
+    public Client(String endpoint, String registrationId, Date registrationDate, String address, String[] objects,
+            String smsNumber, String lwM2mVersion, long lifetime) {
         this.endpoint = endpoint;
         this.registrationId = registrationId;
+        this.registrationDate = registrationDate;
         this.address = address;
         this.objects = objects;
         this.smsNumber = smsNumber;
@@ -104,4 +109,13 @@ public class Client {
     public void setLifetime(long lifetime) {
         this.lifetime = lifetime;
     }
+
+    public Date getRegistrationDate() {
+        return registrationDate;
+    }
+
+    public void setRegistrationDate(Date registrationDate) {
+        this.registrationDate = registrationDate;
+    }
+
 }
