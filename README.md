@@ -42,4 +42,6 @@ Get the instace 0 of the object 3 of a registered client: http://localhost:8080/
 
 Leshan also provides a simple UI (http://localhost:8080) to get the list of connected clients and read some values of clients resources.
 
+![Leshan](https://raw.github.com/msangoi/leshan/master/lw-clients.png)
+
 
