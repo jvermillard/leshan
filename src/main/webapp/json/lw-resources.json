@@ -1,0 +1,147 @@
+[
+	{
+		"name":"LWM2M Security",
+		"path":"/0",
+		"type":"object"
+	},
+	
+	
+	{
+		"name":"LWM2M Server",
+		"path":"/1",
+		"type":"object"
+	},
+		
+	
+	{
+		"name":"Access Control",
+		"path":"/2",
+		"type":"object"
+	},
+		
+	
+	
+	{
+		"name":"Device",
+		"path":"/3",
+		"type":"object"
+	},
+	{
+		"name":"Manufacturer",
+		"path":"/3/0/0",
+		"type":"resource"
+	},
+	{
+		"name":"Model Number",
+		"path":"/3/0/1",
+		"type":"resource"
+	},
+	{
+		"name":"Serial Number",
+		"path":"/3/0/2",
+		"type":"resource"
+	},
+	{
+		"name":"Firmware Version",
+		"path":"/3/0/3",
+		"type":"resource"
+	},
+	{
+		"name":"Reboot",
+		"path":"/3/0/4",
+		"type":"resource"
+	},
+	{
+		"name":"Factory Reset",
+		"path":"/3/0/5",
+		"type":"resource"
+	},
+	{
+		"name":"Available Power Sources",
+		"path":"/3/0/6",
+		"type":"resource"
+	},
+	{
+		"name":"Power Source Voltage",
+		"path":"/3/0/7",
+		"type":"resource"
+	},
+	{
+		"name":"Power Source Current",
+		"path":"/3/0/8",
+		"type":"resource"
+	},
+	{
+		"name":"Battery Level",
+		"path":"/3/0/9",
+		"type":"resource"
+	},
+	{
+		"name":"Memory Free",
+		"path":"/3/0/10",
+		"type":"resource"
+	},
+	{
+		"name":"Error Code",
+		"path":"/3/0/11",
+		"type":"resource"
+	},
+	{
+		"name":"Reset Error Code",
+		"path":"/3/0/12",
+		"type":"resource"
+	},
+	{
+		"name":"Current Time",
+		"path":"/3/0/13",
+		"type":"resource"
+	},
+	{
+		"name":"UTC Offset",
+		"path":"/3/0/14",
+		"type":"resource"
+	},
+	{
+		"name":"Timezone",
+		"path":"/3/0/15",
+		"type":"resource"
+	},
+	{
+		"name":"Supported Binding and Modes",
+		"path":"/3/0/16",
+		"type":"resource"
+	},
+
+	
+	
+	
+	{
+		"name":"Connectivity Monitoring",
+		"path":"/4",
+		"type":"object"
+	},
+	
+	
+	
+	{
+		"name":"Firmware",
+		"path":"/5",
+		"type":"object"
+	},
+	
+	
+	
+	{
+		"name":"Location",
+		"path":"/6",
+		"type":"object"
+	},
+	
+	
+	
+	{
+		"name":"Connectivity Statistics",
+		"path":"/7",
+		"type":"object"
+	}
+]

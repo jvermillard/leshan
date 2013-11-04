@@ -1,0 +1,32 @@
+<div class="col-md-4">
+
+	<div class="panel panel-default lw-tree-menu">
+		
+		<div class="panel-heading">
+			<h3 class="panel-title">Resources for client {{clientId}}</h3>
+		</div>
+		<ul class="nav nav-pills nav-stacked panel-body" role="navigation" id="menu">
+			<li ng-repeat="resource in lwresources | filter:{type: 'object'}">
+				<a href="#/clients/{{clientId}}#{{resource.name}}" ng-click="scrollTo('{{resource.name}}')">{{resource.name}}</a>
+			</li>
+		</ul>
+		
+	</div>
+
+
+</div>
+
+<div class="col-md-8">
+
+	<div id="lw-resources">
+	
+		<div ng-repeat="resource in lwresources" class="lw-rsc-div-{{resource.type}}">
+			<h3 class="lw-rsc-title lw-rsc-title-{{resource.type}}" id="{{resource.name}}">{{resource.name}}</h3>
+			<span class="text-muted lw-rsc-path">{{resource.path}}</span>
+			<button ng-if="resource.type == 'resource'" class="btn btn-default btn-xs" ng-click="read('{{resource.path}}', $index)">GET</button>
+			<span class="lw-rsc-value">{{resource.value}}</span>
+		</div>
+		
+	</div>
+
+</div>

@@ -1,0 +1,254 @@
+[
+	{
+		"name":"LWM2M Security",
+		"path":"/0",
+		"type":"object"
+	},
+	{
+		"name":"LWM2M Server URI",
+		"path":"/0/0/0",
+		"type":"resource"
+	},
+	{
+		"name" : "Bootstrap Server",
+		"path" : "/0/0/1",
+		"type":"resource"
+	},
+	{
+		"name" : "Security Mode",
+		"path" : "/0/0/2",
+		"type":"resource"
+	},
+	{
+		"name" : "Public Key or Identity",
+		"path" : "/0/0/3",
+		"type":"resource"
+	},
+	{
+		"name" : "Server Public Key or Identity",
+		"path" : "/0/0/4",
+		"type":"resource"
+	},
+	{
+		"name" : "Secret Key",
+		"path" : "/0/0/5",
+		"type":"resource"
+	},
+	{
+		"name" : "Short Server ID",
+		"path" : "/0/0/6",
+		"type":"resource"
+	},
+	{
+		"name" : "Client Hold Off Time",
+		"path" : "/0/0/7",
+		"type":"resource"
+	},
+	
+	
+	
+	{
+		"name":"LWM2M Server",
+		"path":"/1",
+		"type":"object"
+	},
+	{
+		"name":"Short Server ID",
+		"path":"/1/0/0",
+		"type":"resource"
+	},
+	{
+		"name":"Lifetime",
+		"path":"/1/0/1",
+		"type":"resource"
+	},
+	{
+		"name":"Default Minimum Period",
+		"path":"/1/0/2",
+		"type":"resource"
+	},
+	{
+		"name":"Default Maximum Period",
+		"path":"/1/0/3",
+		"type":"resource"
+	},
+	{
+		"name":"Disable",
+		"path":"/1/0/4",
+		"type":"resource"
+	},
+	{
+		"name":"Disable Timeout",
+		"path":"/1/0/5",
+		"type":"resource"
+	},
+	{
+		"name":"Notification Storing When Disabled or Offline",
+		"path":"/1/0/6",
+		"type":"resource"
+	},
+	{
+		"name":"Binding",
+		"path":"/1/0/7",
+		"type":"resource"
+	},
+	{
+		"name":"Registration of Update Trigger",
+		"path":"/1/0/8",
+		"type":"resource"
+	},
+	
+	
+	
+	{
+		"name":"Access Control",
+		"path":"/2",
+		"type":"object"
+	},
+	{
+		"name":"Object ID",
+		"path":"/2/0/0",
+		"type":"resource"
+	},
+	{
+		"name":"Object Instance ID",
+		"path":"/2/0/1",
+		"type":"resource"
+	},
+	{
+		"name":"ACL",
+		"path":"/2/0/2",
+		"type":"resource"
+	},
+	{
+		"name":"Access Control Owner",
+		"path":"/2/0/3",
+		"type":"resource"
+	},
+	
+	
+	
+	{
+		"name":"Device",
+		"path":"/3",
+		"type":"object"
+	},
+	{
+		"name":"Manufacturer",
+		"path":"/3/0/0",
+		"type":"resource"
+	},
+	{
+		"name":"Model Number",
+		"path":"/3/0/1",
+		"type":"resource"
+	},
+	{
+		"name":"Serial Number",
+		"path":"/3/0/2",
+		"type":"resource"
+	},
+	{
+		"name":"Firmware Version",
+		"path":"/3/0/3",
+		"type":"resource"
+	},
+	{
+		"name":"Reboot",
+		"path":"/3/0/4",
+		"type":"resource"
+	},
+	{
+		"name":"Factory Reset",
+		"path":"/3/0/5",
+		"type":"resource"
+	},
+	{
+		"name":"Available Power Sources",
+		"path":"/3/0/6",
+		"type":"resource"
+	},
+	{
+		"name":"Power Source Voltage",
+		"path":"/3/0/7",
+		"type":"resource"
+	},
+	{
+		"name":"Power Source Current",
+		"path":"/3/0/8",
+		"type":"resource"
+	},
+	{
+		"name":"Battery Level",
+		"path":"/3/0/9",
+		"type":"resource"
+	},
+	{
+		"name":"Memory Free",
+		"path":"/3/0/10",
+		"type":"resource"
+	},
+	{
+		"name":"Error Code",
+		"path":"/3/0/11",
+		"type":"resource"
+	},
+	{
+		"name":"Reset Error Code",
+		"path":"/3/0/12",
+		"type":"resource"
+	},
+	{
+		"name":"Current Time",
+		"path":"/3/0/13",
+		"type":"resource"
+	},
+	{
+		"name":"UTC Offset",
+		"path":"/3/0/14",
+		"type":"resource"
+	},
+	{
+		"name":"Timezone",
+		"path":"/3/0/15",
+		"type":"resource"
+	},
+	{
+		"name":"Supported Binding and Modes",
+		"path":"/3/0/16",
+		"type":"resource"
+	},
+
+	
+	
+	
+	{
+		"name":"Connectivity Monitoring",
+		"path":"/4",
+		"type":"object"
+	},
+	
+	
+	
+	{
+		"name":"Firmware",
+		"path":"/5",
+		"type":"object"
+	},
+	
+	
+	
+	{
+		"name":"Location",
+		"path":"/6",
+		"type":"object"
+	},
+	
+	
+	
+	{
+		"name":"Connectivity Statistics",
+		"path":"/7",
+		"type":"object"
+	}
+]
