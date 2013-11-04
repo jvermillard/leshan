@@ -39,3 +39,7 @@ Now you can register your LWM2M client.
 The list of the registered clients: http://localhost:8080/api/clients
 
 Get the instace 0 of the object 3 of a registered client: http://localhost:8080/api/clients/{endpoint}/3/0
+
+Leshan also provides a simple UI (http://localhost:8080) to get the list of connected clients and read some values of clients resources.
+
+
