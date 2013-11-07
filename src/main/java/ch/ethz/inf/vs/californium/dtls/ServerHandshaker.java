@@ -321,8 +321,7 @@ public class ServerHandshaker extends Handshaker {
 			mdWithClientFinished = (MessageDigest) md.clone();
 			mdWithClientFinished.update(clientFinished.toByteArray());
 		} catch (CloneNotSupportedException e) {
-			LOG.severe("Clone not supported.");
-			e.printStackTrace();
+            LOG.error("Clone not supported.", e);
 		}
 
 		// Verify client's data
@@ -567,7 +566,8 @@ public class ServerHandshaker extends Handshaker {
 		String identity = message.getIdentity();
 
 		byte[] psk = sharedKeys.get(identity);
-		LOG.fine("Received client's (" + endpointAddress.toString() + ") key exchange message for PSK:\nIdentity: " + identity + "\nPreshared Key: " + ByteArrayUtils.toHexString(psk));
+        LOG.debug("Received client's (" + endpointAddress.toString() + ") key exchange message for PSK:\nIdentity: "
+                + identity + "\nPreshared Key: " + ByteArrayUtils.toHexString(psk));
 		
 		if (psk == null) {
 			AlertMessage alert = new AlertMessage(AlertLevel.FATAL, AlertDescription.HANDSHAKE_FAILURE);

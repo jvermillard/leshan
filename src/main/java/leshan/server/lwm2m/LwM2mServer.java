@@ -2,6 +2,7 @@ package leshan.server.lwm2m;
 
 import java.nio.ByteBuffer;
 
+import leshan.server.dtls.DtlsFilter;
 import leshan.server.lwm2m.session.SessionRegistry;
 import leshan.server.servlet.ApiServlet;
 import leshan.server.servlet.EventServlet;

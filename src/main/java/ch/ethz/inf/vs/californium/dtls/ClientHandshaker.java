@@ -509,8 +509,7 @@ public class ClientHandshaker extends Handshaker {
 			try {
 				mdWithClientFinished = (MessageDigest) md.clone();
 			} catch (CloneNotSupportedException e) {
-				LOG.severe("Clone not supported.");
-				e.printStackTrace();
+                LOG.error("Clone not supported.", e);
 			}
 
 			handshakeHash = md.digest();
@@ -523,8 +522,7 @@ public class ClientHandshaker extends Handshaker {
 			handshakeHash = mdWithClientFinished.digest();
 
 		} catch (NoSuchAlgorithmException e) {
-			LOG.severe("No such Message Digest Algorithm available.");
-			e.printStackTrace();
+            LOG.error("No such Message Digest Algorithm available.", e);
 		}
 
 		return flight;

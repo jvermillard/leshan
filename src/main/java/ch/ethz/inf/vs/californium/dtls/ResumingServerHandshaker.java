@@ -167,8 +167,7 @@ public class ResumingServerHandshaker extends ServerHandshaker {
 		try {
 			mdWithServerFinished = (MessageDigest) md.clone();
 		} catch (Exception e) {
-			LOG.severe("Clone not supported.");
-			e.printStackTrace();
+            LOG.error("Clone not supported.", e);
 		}
 
 		handshakeHash = md.digest();

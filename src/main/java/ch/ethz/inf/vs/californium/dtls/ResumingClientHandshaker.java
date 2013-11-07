@@ -153,8 +153,7 @@ public class ResumingClientHandshaker extends ClientHandshaker {
 			// finished message
 			mdWithServerFinish = (MessageDigest) md.clone();
 		} catch (Exception e) {
-			LOG.severe("Clone not supported.");
-			e.printStackTrace();
+            LOG.error("Clone not supported.", e);
 		}
 		mdWithServerFinish.update(message.toByteArray());
 

@@ -48,11 +48,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ch.ethz.inf.vs.californium.coap.EndpointAddress;
 import ch.ethz.inf.vs.californium.dtls.AlertMessage.AlertDescription;
@@ -72,7 +74,7 @@ public abstract class Handshaker {
 
 	// Logging ////////////////////////////////////////////////////////
 
-	protected static final Logger LOG = Logger.getLogger(Handshaker.class.getName());
+    protected static final Logger LOG = LoggerFactory.getLogger(Handshaker.class);
 
 	// Static members /////////////////////////////////////////////////
 
@@ -90,9 +92,9 @@ public abstract class Handshaker {
 
 	public final static int TEST_LABEL_3 = 7;
 	
-	public final static String KEY_STORE_PASSWORD = "endPass";
+    public final static String KEY_STORE_PASSWORD = "leshan";//"endPass";
 	
-	private static final String TRUST_STORE_PASSWORD = "rootPass";
+    private static final String TRUST_STORE_PASSWORD = "leshan";//"rootPass";
 
 	/**
 	 * A map storing shared keys. The shared key is associated with an PSK
@@ -204,8 +206,7 @@ public abstract class Handshaker {
 		try {
 			this.md = MessageDigest.getInstance("SHA-256");
 		} catch (NoSuchAlgorithmException e) {
-			LOG.severe("Could not initialize the message digest algorithm.");
-			e.printStackTrace();
+            LOG.error("Could not initialize the message digest algorithm.", e);
 		}
 	}
 
@@ -400,12 +401,11 @@ public abstract class Handshaker {
 				return doExpansion(md, secret, ByteArrayUtils.concatenate(label.getBytes(), seed), 148);
 
 			default:
-				LOG.severe("Unknwon label: " + labelId);
+                LOG.error("Unknwon label: " + labelId);
 				return null;
 			}
 		} catch (NoSuchAlgorithmException e) {
-			LOG.severe("Message digest algorithm not available.");
-			e.printStackTrace();
+            LOG.error("Message digest algorithm not available.", e);
 			return null;
 		}
 	}
@@ -707,11 +707,10 @@ public abstract class Handshaker {
 			InputStream in = new FileInputStream(Properties.std.getProperty("KEY_STORE_LOCATION".replace("/", File.pathSeparator)));
 			keyStore.load(in, KEY_STORE_PASSWORD.toCharArray());
 
-			certificates = keyStore.getCertificateChain("client");
-			privateKey = (PrivateKey) keyStore.getKey("client", KEY_STORE_PASSWORD.toCharArray());
+            certificates = keyStore.getCertificateChain("end"); // client 
+            privateKey = (PrivateKey) keyStore.getKey("end", KEY_STORE_PASSWORD.toCharArray());
 		} catch (Exception e) {
-			LOG.severe("Could not load the keystore.");
-			e.printStackTrace();
+            LOG.error("Could not load the keystore.", e);
 		}
 	}
 	
@@ -730,8 +729,7 @@ public abstract class Handshaker {
 			
 			trustedCertificates[0] = trustStore.getCertificate("root");
 		} catch (Exception e) {
-			LOG.severe("Could not load the trusted certificates.");
-			e.printStackTrace();
+            LOG.error("Could not load the trusted certificates.", e);
 		}
 
 		return trustedCertificates;
