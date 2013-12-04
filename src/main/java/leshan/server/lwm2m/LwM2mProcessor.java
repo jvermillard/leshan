@@ -107,6 +107,7 @@ public class LwM2mProcessor implements RequestProcessor {
 
     @Override
     public void sessionClosed(LwSession session) {
+        LOG.debug("session closed : {}", session);
         registry.remove(session);
     }
 }

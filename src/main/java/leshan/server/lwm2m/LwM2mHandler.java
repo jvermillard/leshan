@@ -71,6 +71,10 @@ public class LwM2mHandler extends AbstractIoHandler {
 
     @Override
     public void sessionClosed(IoSession session) {
-        processor.sessionClosed(new LwSession(session));
+        LwSession lwSession = session.getAttribute(LW_SESSION);
+        if (lwSession != null) {
+            processor.sessionClosed(lwSession);
+            session.removeAttribute(LW_SESSION);
+        }
     }
 }

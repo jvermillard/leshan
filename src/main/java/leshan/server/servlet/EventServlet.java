@@ -21,6 +21,8 @@ package leshan.server.servlet;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Set;
 
 import javax.servlet.ServletException;
@@ -60,7 +62,6 @@ public class EventServlet extends HttpServlet {
 
     public EventServlet(SessionRegistry registry) {
         registry.addListener(listener);
-
     }
 
     private Set<Continuation> continuations = new ConcurrentHashSet<>();
@@ -69,33 +70,42 @@ public class EventServlet extends HttpServlet {
 
         @Override
         public void registered(LwSession session) {
-            for (Continuation c : continuations) {
-                Client client = new Client(session.getEndpoint(), session.getRegistrationId(),
-                        session.getRegistrationDate(), session.getIoSession().getRemoteAddress().toString(),
-                        session.getObjects(), session.getSmsNumber(), session.getLwM2mVersion(),
-                        session.getLifeTimeInSec());
-                try {
-                    OutputStream output = c.getServletResponse().getOutputStream();
-                    output.write(EVENT);
-                    output.write("REGISTRATION".getBytes());
-                    output.write(TERMINATION);
-                    output.write(DATA);
-                    output.write(gson.toJson(client).getBytes());
-                    output.write(TERMINATION);
-                    output.write(TERMINATION);
-                    output.flush();
-                    c.getServletResponse().flushBuffer();
-                } catch (IOException e) {
-                    LOG.error("IOException", e);
-                }
-            }
+            sendEvent("REGISTRATION", session);
         }
 
         @Override
         public void unregistered(LwSession session) {
-
+            sendEvent("DEREGISTRATION", session);
         }
     };
+
+    private void sendEvent(String event, LwSession session) {
+        Collection<Continuation> disconnected = new ArrayList<>();
+
+        for (Continuation c : continuations) {
+            Client client = new Client(session.getEndpoint(), session.getRegistrationId(),
+                    session.getRegistrationDate(), session.getIoSession().getRemoteAddress().toString(),
+                    session.getObjects(), session.getSmsNumber(), session.getLwM2mVersion(), session.getLifeTimeInSec());
+
+            try {
+                OutputStream output = c.getServletResponse().getOutputStream();
+                output.write(EVENT);
+                output.write(event.getBytes("UTF-8"));
+                output.write(TERMINATION);
+                output.write(DATA);
+                output.write(gson.toJson(client).getBytes("UTF-8"));
+                output.write(TERMINATION);
+                output.write(TERMINATION);
+                output.flush();
+                c.getServletResponse().flushBuffer();
+            } catch (IOException e) {
+                LOG.debug("Disconnected SSE client");
+                disconnected.add(c);
+            }
+        }
+
+        continuations.removeAll(disconnected);
+    }
 
     /**
      * {@inheritDoc}
