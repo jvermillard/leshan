@@ -11,6 +11,7 @@ import org.apache.mina.api.IoFilter;
 import org.apache.mina.coap.CoapMessage;
 import org.apache.mina.coap.codec.CoapDecoder;
 import org.apache.mina.coap.codec.CoapEncoder;
+import org.apache.mina.coap.retry.CoapRetryFilter;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.transport.bio.BioUdpServer;
 import org.eclipse.jetty.server.Server;
@@ -33,14 +34,16 @@ public class LwM2mServer {
     public void start() {
         server = new BioUdpServer();
 
-        // protocol filters
         IoFilter coapFilter = new ProtocolCodecFilter<CoapMessage, ByteBuffer, Void, Void>(new CoapEncoder(),
                 new CoapDecoder());
+
+        CoapRetryFilter retryFilter = new CoapRetryFilter();
+
         IoFilter lwM2mFilter = new LwM2mFilter();
 
         LwM2mRequestFilter requestFilter = new LwM2mRequestFilter();
 
-        server.setFilters(coapFilter, lwM2mFilter, requestFilter);
+        server.setFilters(coapFilter, retryFilter, lwM2mFilter, requestFilter);
 
         // LW-M2M handler
         server.setIoHandler(new LwM2mHandler(registry));
