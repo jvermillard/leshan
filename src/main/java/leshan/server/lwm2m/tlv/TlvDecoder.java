@@ -17,30 +17,17 @@
  *  under the License.
  *
  */
-package leshan.server.tlv;
+package leshan.server.lwm2m.tlv;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.mina.codec.StatelessProtocolDecoder;
+public class TlvDecoder {
 
-public class TlvDecoder implements StatelessProtocolDecoder<ByteBuffer, Tlv[]> {
+    public Tlv[] decode(ByteBuffer input) {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Void createDecoderState() {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Tlv[] decode(ByteBuffer input, Void context) {
         List<Tlv> tlvs = new ArrayList<>();
 
         while (input.remaining() > 0) {
@@ -86,7 +73,7 @@ public class TlvDecoder implements StatelessProtocolDecoder<ByteBuffer, Tlv[]> {
                 length = input.get() & 0xFF;
                 break;
             case 0b0001_0000:
-                // 16 bit length 
+                // 16 bit length
                 length = input.getShort() & 0xFFFF;
                 break;
             case 0b0001_1000:
@@ -106,7 +93,7 @@ public class TlvDecoder implements StatelessProtocolDecoder<ByteBuffer, Tlv[]> {
                 ByteBuffer slice = input.slice();
                 slice.limit(length);
 
-                Tlv[] children = decode(slice, null);
+                Tlv[] children = decode(slice);
 
                 // skip the children, it will be decoded by the view
                 input.position(input.position() + length);
@@ -119,10 +106,4 @@ public class TlvDecoder implements StatelessProtocolDecoder<ByteBuffer, Tlv[]> {
         return tlvs.toArray(new Tlv[] {});
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void finishDecode(Void context) {
-    }
 }

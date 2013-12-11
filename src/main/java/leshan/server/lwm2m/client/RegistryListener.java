@@ -17,11 +17,24 @@
  *  under the License.
  *
  */
-package leshan.server.tlv;
+package leshan.server.lwm2m.client;
 
 /**
- * The type of a TLV
+ * Listen for client registration events.
  */
-public enum TlvType {
-    OBJECT_INSTANCE, RESOURCE_INSTANCE, MULTIPLE_RESOURCE, RESOURCE_VALUE;
+public interface RegistryListener {
+
+    /**
+     * Invoked when a new client has been registered on the server.
+     * 
+     * @param client
+     */
+    void registered(Client client);
+
+    /**
+     * Invoked when a new client has been unregistered from the server.
+     * 
+     * @param client
+     */
+    void unregistered(Client client);
 }

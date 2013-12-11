@@ -1,11 +1,10 @@
-package leshan.server.lwm2m.message.client;
+package leshan.server.lwm2m.message;
 
 import java.util.Arrays;
 
-import leshan.server.lwm2m.message.ContentFormat;
-import leshan.server.lwm2m.message.ResponseCode;
-
 import org.apache.commons.lang.Validate;
+
+import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 
 /**
  * A response with content from the LW-M2M client.
@@ -16,8 +15,8 @@ public class ContentResponse extends ClientResponse {
 
     private final ContentFormat format;
 
-    public ContentResponse(int id, byte[] content, ContentFormat format) {
-        super(id, ResponseCode.CONTENT);
+    public ContentResponse(byte[] content, ContentFormat format) {
+        super(ResponseCode.CONTENT);
 
         Validate.notNull(format);
 
@@ -37,7 +36,7 @@ public class ContentResponse extends ClientResponse {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("ContentResponse [content=").append(Arrays.toString(content)).append(", format=").append(format)
-                .append(", id=").append(id).append(", code=").append(code).append("]");
+                .append("]");
         return builder.toString();
     }
 

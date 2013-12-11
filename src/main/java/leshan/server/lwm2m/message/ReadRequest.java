@@ -17,19 +17,15 @@
  *  under the License.
  *
  */
-package leshan.server.lwm2m.message.server;
+package leshan.server.lwm2m.message;
 
 import org.apache.commons.lang.Validate;
-import org.apache.commons.lang.math.RandomUtils;
-import org.apache.mina.coap.CoapMessage;
 
 /**
  * The request to access the value of a Resource, an array of Resource Instances, an Object Instance or all the Object
  * Instances of an Object.
  */
-public class ReadRequest implements ServerRequest {
-
-    private final int id;
+public class ReadRequest {
 
     private final Integer objectId;
 
@@ -40,37 +36,9 @@ public class ReadRequest implements ServerRequest {
     public ReadRequest(Integer objectId, Integer objectInstanceId, Integer resourceId) {
         Validate.notNull(objectId);
 
-        this.id = RandomUtils.nextInt() & 0xFFFF;
-
-        // TODO check unsigned short
-
         this.objectId = objectId;
         this.objectInstanceId = objectInstanceId;
         this.resourceId = resourceId;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int getId() {
-        return id;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Object requestId() {
-        return id;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public CoapMessage encode(MessageEncoder visitor) {
-        return visitor.encode(this);
     }
 
     public Integer getObjectId() {
@@ -88,9 +56,8 @@ public class ReadRequest implements ServerRequest {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("ReadRequest [id=").append(id).append(", objectId=").append(objectId)
-                .append(", objectInstanceId=").append(objectInstanceId).append(", resourceId=").append(resourceId)
-                .append("]");
+        builder.append("ReadRequest [objectId=").append(objectId).append(", objectInstanceId=")
+                .append(objectInstanceId).append(", resourceId=").append(resourceId).append("]");
         return builder.toString();
     }
 

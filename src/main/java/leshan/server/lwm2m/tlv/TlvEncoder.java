@@ -17,29 +17,14 @@
  *  under the License.
  *
  */
-package leshan.server.tlv;
+package leshan.server.lwm2m.tlv;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import org.apache.mina.codec.ProtocolEncoderException;
-import org.apache.mina.codec.StatelessProtocolEncoder;
+public class TlvEncoder {
 
-public class TlvEncoder implements StatelessProtocolEncoder<Tlv[], ByteBuffer> {
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Void createEncoderState() {
-        return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public ByteBuffer encode(Tlv[] tlvs, Void state) {
+    public ByteBuffer encode(Tlv[] tlvs) {
         int size = 0;
         System.err.println("start");
         for (Tlv tlv : tlvs) {
@@ -61,7 +46,7 @@ public class TlvEncoder implements StatelessProtocolEncoder<Tlv[], ByteBuffer> {
 
     private int tlvEncodedSize(Tlv tlv, int length) {
         int size = 1 /* HEADER */;
-        size += (tlv.getIdentifier() < 65_536) ? 1 : 2; /* 8 bits or 16 bits identifiers*/
+        size += (tlv.getIdentifier() < 65_536) ? 1 : 2; /* 8 bits or 16 bits identifiers */
 
         if (length < 8) {
             size += 0;
@@ -72,7 +57,7 @@ public class TlvEncoder implements StatelessProtocolEncoder<Tlv[], ByteBuffer> {
         } else if (length < 16_777_216) {
             size += 3;
         } else {
-            throw new ProtocolEncoderException("length should fit in max 24bits");
+            throw new IllegalArgumentException("length should fit in max 24bits");
         }
 
         size += length;

@@ -17,14 +17,28 @@
  *  under the License.
  *
  */
-package leshan.server.lwm2m.session;
+package leshan.server.lwm2m.client;
 
 /**
- * Listen for session registry new registration events.
+ * Transport binding and Queue Mode
  */
-public interface RegistryListener {
+public enum BindingMode {
 
-    void registered(LwSession session);
+    /** UDP */
+    U,
 
-    void unregistered(LwSession session);
+    /** UDP with Queue Mode */
+    UQ,
+
+    /** SMS */
+    S,
+
+    /** SMS with Queue Mode */
+    SQ,
+
+    /** UDP and SMS */
+    US,
+
+    /** UDP with Queue Mode and SMS */
+    UQS
 }

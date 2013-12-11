@@ -1,21 +1,16 @@
-package leshan.server.lwm2m.message.server;
+package leshan.server.lwm2m.message;
 
 import java.util.Arrays;
 
-import leshan.server.lwm2m.message.ContentFormat;
-import leshan.server.tlv.Tlv;
+import leshan.server.lwm2m.tlv.Tlv;
 
 import org.apache.commons.lang.Validate;
-import org.apache.commons.lang.math.RandomUtils;
-import org.apache.mina.coap.CoapMessage;
 
 /**
  * The request to change the value of a Resource, an array of Resources Instances or multiple Resources from an Object
  * Instance.
  */
-public class WriteRequest implements ServerRequest {
-
-    private final int id;
+public class WriteRequest {
 
     private final Integer objectId;
 
@@ -55,8 +50,6 @@ public class WriteRequest implements ServerRequest {
             throw new IllegalArgumentException("unsupported content format for write request : " + format);
         }
 
-        this.id = RandomUtils.nextInt() & 0xFFFF;
-
         this.objectId = objectId;
         this.objectInstanceId = objectInstanceId;
         this.resourceId = resourceId;
@@ -64,30 +57,6 @@ public class WriteRequest implements ServerRequest {
         this.stringValue = stringValue;
         this.tlvValues = tlvValues;
 
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public CoapMessage encode(MessageEncoder visitor) {
-        return visitor.encode(this);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int getId() {
-        return id;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Object requestId() {
-        return id;
     }
 
     public Integer getObjectId() {
@@ -117,10 +86,10 @@ public class WriteRequest implements ServerRequest {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("WriteRequest [id=").append(id).append(", objectId=").append(objectId)
-                .append(", objectInstanceId=").append(objectInstanceId).append(", resourceId=").append(resourceId)
-                .append(", format=").append(format).append(", stringValue=").append(stringValue).append(", tlvValues=")
-                .append(Arrays.toString(tlvValues)).append("]");
+        builder.append("WriteRequest [objectId=").append(objectId).append(", objectInstanceId=")
+                .append(objectInstanceId).append(", resourceId=").append(resourceId).append(", format=").append(format)
+                .append(", stringValue=").append(stringValue).append(", tlvValues=").append(Arrays.toString(tlvValues))
+                .append("]");
         return builder.toString();
     }
 

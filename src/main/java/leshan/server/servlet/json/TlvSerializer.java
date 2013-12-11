@@ -3,7 +3,7 @@ package leshan.server.servlet.json;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 
-import leshan.server.tlv.Tlv;
+import leshan.server.lwm2m.tlv.Tlv;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang.StringUtils;

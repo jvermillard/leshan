@@ -20,9 +20,7 @@
 package leshan.server.servlet;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 
 import javax.servlet.ServletException;
@@ -30,26 +28,22 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import leshan.server.lwm2m.LwM2mRequestFilter;
+import leshan.server.lwm2m.RequestHandler;
+import leshan.server.lwm2m.client.Client;
+import leshan.server.lwm2m.client.ClientRegistry;
+import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ContentFormat;
-import leshan.server.lwm2m.message.client.ClientResponse;
-import leshan.server.lwm2m.message.client.ContentResponse;
-import leshan.server.lwm2m.message.server.ReadRequest;
-import leshan.server.lwm2m.message.server.WriteRequest;
-import leshan.server.lwm2m.session.LwSession;
-import leshan.server.lwm2m.session.SessionRegistry;
-import leshan.server.servlet.json.Client;
-import leshan.server.servlet.json.Response;
+import leshan.server.lwm2m.message.ReadRequest;
+import leshan.server.lwm2m.message.WriteRequest;
+import leshan.server.lwm2m.tlv.Tlv;
+import leshan.server.servlet.json.ClientSerializer;
+import leshan.server.servlet.json.ResponseSerializer;
 import leshan.server.servlet.json.TlvSerializer;
-import leshan.server.tlv.Tlv;
-import leshan.server.tlv.TlvDecoder;
 
-import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.StringUtils;
-import org.apache.mina.api.IoFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,21 +59,20 @@ public class ApiServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    private final SessionRegistry registry;
+    private final RequestHandler requestHandler;
 
-    private final LwM2mRequestFilter requestFilter;
+    private final ClientRegistry clientRegistry;
 
     private final Gson gson;
 
-    private final TlvDecoder tlvDecoder = new TlvDecoder();
-
-    public ApiServlet(SessionRegistry registry, LwM2mRequestFilter requestFilter) {
-        this.registry = registry;
-        this.requestFilter = requestFilter;
+    public ApiServlet(RequestHandler requestHandler, ClientRegistry clientRegistry) {
+        this.requestHandler = requestHandler;
+        this.clientRegistry = clientRegistry;
 
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(Tlv.class, new TlvSerializer());
-
+        gsonBuilder.registerTypeHierarchyAdapter(Client.class, new ClientSerializer());
+        gsonBuilder.registerTypeHierarchyAdapter(ClientResponse.class, new ResponseSerializer());
         gson = gsonBuilder.create();
     }
 
@@ -116,13 +109,7 @@ public class ApiServlet extends HttpServlet {
 
             if (path.length == 1 && "GET".equals(req.getMethod())) {
                 // list registered clients
-                List<Client> clients = new ArrayList<>();
-                for (LwSession session : registry.allSessions()) {
-                    clients.add(new Client(session.getEndpoint(), session.getRegistrationId(), session
-                            .getRegistrationDate(), session.getIoSession().getRemoteAddress().toString(), session
-                            .getObjects(), session.getSmsNumber(), session.getLwM2mVersion(), session
-                            .getLifeTimeInSec()));
-                }
+                Collection<Client> clients = clientRegistry.allClients();
 
                 String json = gson.toJson(clients.toArray(new Client[] {}));
                 resp.setContentType("application/json");
@@ -140,20 +127,33 @@ public class ApiServlet extends HttpServlet {
                 return;
             }
 
-            LwSession session = registry.getSession(requestInfo.endpoint);
-            if (session == null) {
+            Client client = clientRegistry.get(requestInfo.endpoint);
+            if (client == null) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "no registered client with id '"
                         + requestInfo.endpoint + "'");
                 return;
             }
 
+            ClientResponse cResponse = null;
             if ("GET".equals(req.getMethod())) {
                 // read
-                this.readRequest(session, requestInfo, resp);
+                cResponse = this.readRequest(client, requestInfo, resp);
             } else if ("PUT".equals(req.getMethod())) {
                 // write
-                this.writeRequest(session, requestInfo, req, resp);
+                cResponse = this.writeRequest(client, requestInfo, req, resp);
             }
+
+            String response = null;
+            if (cResponse == null) {
+                response = "Request timeout";
+            } else {
+                response = gson.toJson(cResponse);
+            }
+            resp.setContentType("application/json");
+            resp.getOutputStream().write(response.getBytes());
+
+            resp.setStatus(HttpServletResponse.SC_OK);
+
             return;
 
         } catch (NotImplementedException e) {
@@ -165,68 +165,24 @@ public class ApiServlet extends HttpServlet {
 
     }
 
-    private void readRequest(LwSession session, RequestInfo requestInfo, HttpServletResponse resp)
+    private ClientResponse readRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp)
             throws InterruptedException, ExecutionException, IOException {
 
-        ReadRequest request = new ReadRequest(requestInfo.objectId, requestInfo.objectInstanceId,
-                requestInfo.resourceId);
-        IoFuture<ClientResponse> future = requestFilter.request(session.getIoSession(), request, 5000);
-        // wait for client response
-        ClientResponse lwResponse = future.get();
-
-        // build JSON read response
-        Object value = null;
-        if (lwResponse instanceof ContentResponse) {
-            ContentResponse cResponse = (ContentResponse) lwResponse;
-            switch (cResponse.getFormat()) {
-            case TLV:
-                value = tlvDecoder.decode(ByteBuffer.wrap(cResponse.getContent()), null);
-                break;
-            case TEXT:
-            case JSON:
-            case LINK:
-                value = new String(cResponse.getContent(), "UTF-8");
-                break;
-            case OPAQUE:
-                value = Hex.encodeHexString(cResponse.getContent());
-                break;
-            }
-        }
-
-        Response response = new Response(lwResponse.getCode().toString(), value);
-
-        String json = gson.toJson(response);
-        resp.setContentType("application/json");
-        resp.getOutputStream().write(json.getBytes());
-
-        resp.setStatus(HttpServletResponse.SC_OK);
+        return requestHandler.read(client, new ReadRequest(requestInfo.objectId, requestInfo.objectInstanceId,
+                requestInfo.resourceId));
     }
 
-    private void writeRequest(LwSession session, RequestInfo requestInfo, HttpServletRequest req,
+    private ClientResponse writeRequest(Client client, RequestInfo requestInfo, HttpServletRequest req,
             HttpServletResponse resp) throws InterruptedException, ExecutionException, IOException {
 
-        WriteRequest request = null;
         if ("text/plain".equals(req.getContentType())) {
             String content = IOUtils.toString(req.getInputStream(), "UTF-8");
-            request = new WriteRequest(requestInfo.objectId, requestInfo.objectInstanceId, requestInfo.resourceId,
-                    ContentFormat.TEXT, content, null);
+            return requestHandler.write(client, new WriteRequest(requestInfo.objectId, requestInfo.objectInstanceId,
+                    requestInfo.resourceId, ContentFormat.TEXT, content, null));
         } else {
             throw new NotImplementedException("content type " + req.getContentType()
                     + " not supported for write requests");
         }
-
-        IoFuture<ClientResponse> future = requestFilter.request(session.getIoSession(), request, 5000);
-        // wait for client response
-        ClientResponse lwResponse = future.get();
-
-        // build JSON response
-        Response response = new Response(lwResponse.getCode().toString(), null);
-
-        String json = gson.toJson(response);
-        resp.setContentType("application/json");
-        resp.getOutputStream().write(json.getBytes());
-
-        resp.setStatus(HttpServletResponse.SC_OK);
     }
 
     class RequestInfo {

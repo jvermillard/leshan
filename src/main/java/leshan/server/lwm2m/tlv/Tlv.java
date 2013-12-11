@@ -17,7 +17,7 @@
  *  under the License.
  *
  */
-package leshan.server.tlv;
+package leshan.server.lwm2m.tlv;
 
 import java.util.Arrays;
 

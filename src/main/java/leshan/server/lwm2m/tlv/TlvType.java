@@ -17,28 +17,13 @@
  *  under the License.
  *
  */
-package leshan.server.lwm2m.session;
+package leshan.server.lwm2m.tlv;
 
 /**
- * Transport binding and Queue Mode
+ * The type of a TLV
  */
-public enum BindingMode {
+public enum TlvType {
 
-    /** UDP */
-    U,
+    OBJECT_INSTANCE, RESOURCE_INSTANCE, MULTIPLE_RESOURCE, RESOURCE_VALUE;
 
-    /** UDP with Queue Mode */
-    UQ,
-
-    /** SMS */
-    S,
-
-    /** SMS with Queue Mode */
-    SQ,
-
-    /** UDP and SMS */
-    US,
-
-    /** UDP with Queue Mode and SMS */
-    UQS
 }
