@@ -1,6 +1,7 @@
 package leshan.server.lwm2m.client;
 
 import java.net.InetAddress;
+import java.util.Collection;
 import java.util.Date;
 
 /**
@@ -25,6 +26,11 @@ public interface Client {
     String getLwM2mVersion();
 
     BindingMode getBindingMode();
+
+    /**
+     * @return the list of supported objects in the CoRE Link Format.
+     */
+    Collection<String> getObjectLinks();
 
     /**
      * Returns <code>true</code> if the given object (or object instance) is supported/available on the LWM2M client.

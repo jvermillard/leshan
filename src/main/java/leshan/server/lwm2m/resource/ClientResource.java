@@ -1,6 +1,8 @@
 package leshan.server.lwm2m.resource;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 
 import leshan.server.lwm2m.client.BindingMode;
@@ -152,6 +154,15 @@ public class ClientResource extends ResourceBase implements Client {
         return bindingMode;
     }
 
+    @Override
+    public Collection<String> getObjectLinks() {
+        Collection<String> links = new ArrayList<>();
+        for (Resource child : this.getChildren()) {
+            ((ObjectResource) child).appendLinks(links, null);
+        }
+        return links;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -164,11 +175,11 @@ public class ClientResource extends ResourceBase implements Client {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("ClientResource [registrationDate=").append(registrationDate).append(", address=")
+        builder.append("ClientResource [getRegistrationId()=").append(getRegistrationId()).append(", getEndpoint()=")
+                .append(getEndpoint()).append(", registrationDate=").append(registrationDate).append(", address=")
                 .append(address).append(", port=").append(port).append(", lifeTimeInSec=").append(lifeTimeInSec)
                 .append(", smsNumber=").append(smsNumber).append(", lwM2mVersion=").append(lwM2mVersion)
-                .append(", bindingMode=").append(bindingMode).append(", getEndpoint()=").append(getEndpoint())
-                .append(", getRegistrationId()=").append(getRegistrationId()).append("]");
+                .append(", bindingMode=").append(bindingMode).append("]");
         return builder.toString();
     }
 

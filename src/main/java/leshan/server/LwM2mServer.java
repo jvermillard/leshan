@@ -24,7 +24,7 @@ public class LwM2mServer {
 
         String webPort = System.getenv("PORT");
         if (webPort == null || webPort.isEmpty()) {
-            webPort = "8880";
+            webPort = "8080";
         }
 
         org.eclipse.jetty.server.Server server = new org.eclipse.jetty.server.Server(Integer.valueOf(webPort));

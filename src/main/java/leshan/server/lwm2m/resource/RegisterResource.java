@@ -1,5 +1,6 @@
 package leshan.server.lwm2m.resource;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -50,45 +51,79 @@ public class RegisterResource extends ResourceBase implements ClientRegistry {
 
         if (Type.CON.equals(request.getType())) {
 
-            // register
-            String registrationId = RegisterResource.createRegistrationId();
+            try {
+                // register
+                String registrationId = RegisterResource.createRegistrationId();
 
-            String endpoint = null;
-            Long lifetime = null;
-            String smsNumber = null;
-            String lwVersion = null;
-            BindingMode binding = null;
+                String endpoint = null;
+                Long lifetime = null;
+                String smsNumber = null;
+                String lwVersion = null;
+                BindingMode binding = null;
 
-            for (String param : request.getOptions().getURIQueries()) {
-                if (param.startsWith("ep=")) {
-                    endpoint = param.substring(3);
-                } else if (param.startsWith("lt=")) {
-                    lifetime = Long.valueOf(param.substring(3));
-                } else if (param.startsWith("sms=")) {
-                    smsNumber = param.substring(4);
-                } else if (param.startsWith("lwm2m=")) {
-                    lwVersion = param.substring(6);
-                } else if (param.startsWith("b=")) {
-                    binding = BindingMode.valueOf(param.substring(2));
+                for (String param : request.getOptions().getURIQueries()) {
+                    if (param.startsWith("ep=")) {
+                        endpoint = param.substring(3);
+                    } else if (param.startsWith("lt=")) {
+                        lifetime = Long.valueOf(param.substring(3));
+                    } else if (param.startsWith("sms=")) {
+                        smsNumber = param.substring(4);
+                    } else if (param.startsWith("lwm2m=")) {
+                        lwVersion = param.substring(6);
+                    } else if (param.startsWith("b=")) {
+                        binding = BindingMode.valueOf(param.substring(2));
+                    }
                 }
+
+                // TODO endpoint uniqueness ?
+
+                ClientResource client = new ClientResource(registrationId, endpoint, request.getSource(),
+                        request.getSourcePort(), lwVersion, lifetime, smsNumber, binding);
+
+                // object links
+                String[] objectLinks = new String(request.getPayload(), "UTF-8").split(",");
+                addObjectResources(client, objectLinks);
+
+                this.add(client);
+                LOG.info("New registered client: {}", client);
+
+                Response response = new Response(ResponseCode.CREATED);
+                response.getOptions().addLocationPath(client.getURI());
+                exchange.respond(response);
+
+            } catch (UnsupportedEncodingException e) {
+                LOG.error("Invalid registration request", e);
+                exchange.respond(ResponseCode.BAD_REQUEST);
             }
-
-            // TODO endpoint uniqueness ?
-
-            ClientResource client = new ClientResource(registrationId, endpoint, request.getSource(),
-                    request.getSourcePort(), lwVersion, lifetime, smsNumber, binding);
-            this.add(client);
-
-            // TODO add object resources
-
-            LOG.debug("New registered client: {}", client);
-
-            Response response = new Response(ResponseCode.CREATED);
-            response.getOptions().addLocationPath(client.getURI());
-            exchange.respond(response);
 
         } else {
             exchange.respond(ResponseCode.BAD_REQUEST);
+        }
+    }
+
+    private void addObjectResources(Resource client, String[] objectLinks) {
+        LOG.debug("Available objects for client {}: {}", client.getName(), objectLinks);
+
+        for (String link : objectLinks) {
+
+            // String valid = StringUtils.substringBetween(link.trim(), "<", ">");
+            // HACK for liblwm2m client
+            String valid = link.trim();
+
+            // TODO rt and ct parameters
+
+            if (valid != null) {
+                Resource current = client;
+                for (String objectName : valid.split("/")) {
+                    Resource child = current.getChild(objectName);
+                    if (child == null) {
+                        child = new ObjectResource(objectName);
+                        current.add(child);
+                        LOG.debug("New object resource created: {}", child.getName());
+                    }
+                    current = child;
+                }
+            }
         }
     }
 
