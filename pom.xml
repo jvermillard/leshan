@@ -30,28 +30,14 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <version.mina>3.0.0-M3-SNAPSHOT</version.mina>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.apache.mina</groupId>
-            <artifactId>mina-codec</artifactId>
-            <version>${version.mina}</version>
-            <scope>compile</scope>
-            <type>jar</type>
-        </dependency>
 
         <dependency>
-            <groupId>org.apache.mina</groupId>
-            <artifactId>mina-coap</artifactId>
-            <version>${version.mina}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.mina</groupId>
-            <artifactId>mina-core</artifactId>
-            <version>${version.mina}</version>
+            <groupId>ch.ethz.inf.vs</groupId>
+            <artifactId>californium</artifactId>
+            <version>0.18.2-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -104,6 +90,28 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>mkovatsc-github-releases</id>
+            <name>mkovatsc-github</name>
+            <url>https://github.com/mkovatsc/maven/raw/master/releases/</url>
+        </repository>
+        <repository>
+            <id>mkovatsc-github-snapshots</id>
+            <name>mkovatsc-github</name>
+            <url>https://github.com/mkovatsc/maven/raw/master/snapshots/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>mkovatsc-github-thirdparty</id>
+            <name>mkovatsc-github</name>
+            <url>https://github.com/mkovatsc/maven/raw/master/thirdparty/</url>
+        </repository>
+    </repositories>
+
     <build>
         <plugins>
             <plugin>
@@ -144,5 +152,18 @@
                 </configuration>
             </plugin>
         </plugins>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-eclipse-plugin</artifactId>
+                    <configuration>
+                        <downloadSources>true</downloadSources>
+                        <downloadJavadocs>false</downloadJavadocs>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 </project>

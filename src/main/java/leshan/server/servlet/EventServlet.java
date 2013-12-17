@@ -30,10 +30,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import leshan.server.lwm2m.session.LwSession;
-import leshan.server.lwm2m.session.RegistryListener;
-import leshan.server.lwm2m.session.SessionRegistry;
-import leshan.server.servlet.json.Client;
+import leshan.server.lwm2m.client.Client;
+import leshan.server.lwm2m.client.ClientRegistry;
+import leshan.server.lwm2m.client.RegistryListener;
+import leshan.server.servlet.json.ClientSerializer;
 
 import org.eclipse.jetty.continuation.Continuation;
 import org.eclipse.jetty.continuation.ContinuationListener;
@@ -43,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class EventServlet extends HttpServlet {
 
@@ -50,7 +51,7 @@ public class EventServlet extends HttpServlet {
 
     private static final Logger LOG = LoggerFactory.getLogger(EventServlet.class);
 
-    private final Gson gson = new Gson();
+    private final Gson gson;
 
     private final byte[] EVENT = "event: ".getBytes();
 
@@ -60,8 +61,12 @@ public class EventServlet extends HttpServlet {
 
     private static final byte[] TERMINATION = new byte[] { '\r', '\n' };
 
-    public EventServlet(SessionRegistry registry) {
+    public EventServlet(ClientRegistry registry) {
         registry.addListener(listener);
+
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeHierarchyAdapter(Client.class, new ClientSerializer());
+        gson = gsonBuilder.create();
     }
 
     private Set<Continuation> continuations = new ConcurrentHashSet<>();
@@ -69,31 +74,30 @@ public class EventServlet extends HttpServlet {
     private RegistryListener listener = new RegistryListener() {
 
         @Override
-        public void registered(LwSession session) {
-            sendEvent("REGISTRATION", session);
+        public void registered(Client client) {
+            sendEvent("REGISTRATION", client);
         }
 
         @Override
-        public void unregistered(LwSession session) {
-            sendEvent("DEREGISTRATION", session);
+        public void unregistered(Client client) {
+            sendEvent("DEREGISTRATION", client);
         }
     };
 
-    private void sendEvent(String event, LwSession session) {
+    private void sendEvent(String event, Client client) {
+        LOG.debug("Registration event {} for client {}", event, client);
+
         Collection<Continuation> disconnected = new ArrayList<>();
+        String jClient = gson.toJson(client);
 
         for (Continuation c : continuations) {
-            Client client = new Client(session.getEndpoint(), session.getRegistrationId(),
-                    session.getRegistrationDate(), session.getIoSession().getRemoteAddress().toString(),
-                    session.getObjects(), session.getSmsNumber(), session.getLwM2mVersion(), session.getLifeTimeInSec());
-
             try {
                 OutputStream output = c.getServletResponse().getOutputStream();
                 output.write(EVENT);
                 output.write(event.getBytes("UTF-8"));
                 output.write(TERMINATION);
                 output.write(DATA);
-                output.write(gson.toJson(client).getBytes("UTF-8"));
+                output.write(jClient.getBytes("UTF-8"));
                 output.write(TERMINATION);
                 output.write(TERMINATION);
                 output.flush();
@@ -105,15 +109,6 @@ public class EventServlet extends HttpServlet {
         }
 
         continuations.removeAll(disconnected);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void init() throws ServletException {
-        super.init();
-
     }
 
     /**
