@@ -1,5 +1,6 @@
 package leshan.server.lwm2m;
 
+import leshan.server.LwM2mServer;
 import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.resource.RegisterResource;
@@ -20,9 +21,11 @@ import ch.ethz.inf.vs.californium.server.resources.Resource;
  * A {@link RequestHandler} is provided to perform server-initiated requests to LW-M2M clients.
  * </p>
  */
-public class Server extends ch.ethz.inf.vs.californium.server.Server {
+public class CoapServer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Server.class);
+    private ch.ethz.inf.vs.californium.server.Server coapServer;
+
+    private static final Logger LOG = LoggerFactory.getLogger(LwM2mServer.class);
 
     /** IANA assigned UDP port for CoAP (so for LWM2M) */
     private static final int port = 5684;
@@ -31,19 +34,18 @@ public class Server extends ch.ethz.inf.vs.californium.server.Server {
 
     private final RequestHandler requestHandler;
 
-    public Server() {
-        super(port);
+    public CoapServer() {
+        coapServer = new ch.ethz.inf.vs.californium.server.Server(port);
 
         RegisterResource rdResource = new RegisterResource();
-        this.add(rdResource);
+        coapServer.add(rdResource);
 
         this.clientRegistry = rdResource;
-        this.requestHandler = new RequestHandler(this.getEndpoints().get(0));
+        this.requestHandler = new RequestHandler(coapServer.getEndpoints().get(0));
     }
 
-    @Override
     public void start() {
-        super.start();
+        coapServer.start();
         LOG.info("LW-M2M server started on port " + port);
     }
 
@@ -54,5 +56,4 @@ public class Server extends ch.ethz.inf.vs.californium.server.Server {
     public RequestHandler getRequestHandler() {
         return this.requestHandler;
     }
-
 }

@@ -1,6 +1,6 @@
 package leshan.server;
 
-import leshan.server.lwm2m.Server;
+import leshan.server.lwm2m.CoapServer;
 import leshan.server.servlet.ApiServlet;
 import leshan.server.servlet.EventServlet;
 
@@ -16,7 +16,7 @@ public class LwM2mServer {
     public void start() {
 
         // LWM2M server
-        Server lwServer = new Server();
+        CoapServer lwServer = new CoapServer();
         lwServer.start();
 
         // now prepare and start jetty
