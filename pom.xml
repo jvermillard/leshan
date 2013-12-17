@@ -151,6 +151,27 @@
                     </archive>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.rat</groupId>
+                <artifactId>apache-rat-plugin</artifactId>
+                <version>0.9</version>
+                <configuration>
+                    <excludeSubProjects>false</excludeSubProjects>
+                    <excludes>
+                        <!-- project excludes -->
+                        <exclude>.git/**</exclude>
+                        <exclude>README*</exclude>
+                        <exclude>**/.*</exclude>
+                        <exclude>**/.classpath</exclude>
+                        <exclude>**/.project</exclude>
+                        <exclude>**/.settings/**</exclude>
+                        <exclude>**/target/**</exclude>
+                        <exclude>**/LICENSE.*</exclude>
+                        <exclude>**/NOTICE*.txt</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
         </plugins>
 
         <pluginManagement>
