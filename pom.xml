@@ -31,15 +31,15 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    
+
     <dependencies>
-    
-    	<dependency>
+
+        <dependency>
             <groupId>ch.ethz.inf.vs</groupId>
             <artifactId>californium</artifactId>
-            <version>0.18.1-SNAPSHOT</version>
-   		</dependency>
-    
+            <version>0.18.2-SNAPSHOT</version>
+        </dependency>
+
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
@@ -111,7 +111,7 @@
             <url>https://github.com/mkovatsc/maven/raw/master/thirdparty/</url>
         </repository>
     </repositories>
-    
+
     <build>
         <plugins>
             <plugin>
@@ -152,5 +152,18 @@
                 </configuration>
             </plugin>
         </plugins>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-eclipse-plugin</artifactId>
+                    <configuration>
+                        <downloadSources>true</downloadSources>
+                        <downloadJavadocs>false</downloadJavadocs>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 </project>
