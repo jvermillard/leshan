@@ -48,4 +48,23 @@ public interface ClientRegistry {
      */
     void addListener(RegistryListener listener);
 
+    /**
+     * remove a client registration listener.
+     * @param listener the listener to be removed 
+     */
+    void removeListener(RegistryListener listener);
+
+    /**
+     * register a new client 
+     * @param client the client to register, identified by its end-point.
+     * @return the previously registered client with this end-point of <code>null</code>
+     */
+    Client registerClient(Client client);
+
+    /**
+     * de-register a client.
+     * @param endpoint the client end-point to remove 
+     * @return the previously registered client or <code>null</code>
+     */
+    Client deregisterClient(String endpoint);
 }

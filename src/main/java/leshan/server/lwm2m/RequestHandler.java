@@ -69,8 +69,7 @@ public class RequestHandler {
         LOG.debug("READ request for client {}: {}", client.getEndpoint(), readRequest);
 
         // validate resource path
-        client.supportObject(Integer.toString(readRequest.getObjectId()));
-        // client.supportObject(Integer.toString(request.getObjectInstanceId()));
+        // TODO? client.supportObject(Integer.toString(readRequest.getObjectId()));
 
         Request request = buildReadRequest(readRequest);
         prepareDestination(request, client);
@@ -115,8 +114,7 @@ public class RequestHandler {
         LOG.debug("WRITE request for client {}: {}", client.getEndpoint(), writeRequest);
 
         // validate resource path
-        client.supportObject(Integer.toString(writeRequest.getObjectId()));
-        // client.supportObject(Integer.toString(request.getObjectInstanceId()));
+        // TODO? client.supportObject(Integer.toString(writeRequest.getObjectId()));
 
         Request request = buildWriteRequest(writeRequest);
         prepareDestination(request, client);

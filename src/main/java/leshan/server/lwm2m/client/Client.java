@@ -20,46 +20,111 @@
 package leshan.server.lwm2m.client;
 
 import java.net.InetAddress;
-import java.util.Collection;
 import java.util.Date;
+
+import org.apache.commons.lang.Validate;
 
 /**
  * A LW-M2M client registered on the server
  */
-public interface Client {
+public class Client {
+    private static final long DEFAULT_LIFETIME_IN_SEC = 86400L;
 
-    String getEndpoint();
+    private static final String DEFAULT_LWM2M_VERSION = "1.0";
 
-    String getRegistrationId();
+    private final Date registrationDate;
 
-    Date getRegistrationDate();
+    private final InetAddress address;
 
-    InetAddress getAddress();
+    private final int port;
 
-    int getPort();
+    private final long lifeTimeInSec;
 
-    long getLifeTimeInSec();
+    private final String smsNumber;
 
-    String getSmsNumber();
+    private final String lwM2mVersion;
 
-    String getLwM2mVersion();
+    private final BindingMode bindingMode;
 
-    BindingMode getBindingMode();
+    private final String endpoint;
 
-    /**
-     * @return the list of supported objects in the CoRE Link Format.
-     */
-    Collection<String> getObjectLinks();
+    private final String registrationId;
 
-    /**
-     * Returns <code>true</code> if the given object (or object instance) is supported/available on the LWM2M client.
-     * <p>
-     * The list of supported objects and object instances is provided by the client during the registration phase.
-     * </p>
-     * 
-     * @param objectId the identifier of the object/object instance
-     * @return <code>true</code> if the object is available for this client and <code>false</code> otherwise.
-     */
-    boolean supportObject(String objectId);
+    private final String[] objectLinks;
+
+    public Client(String registrationId, String endpoint, InetAddress address, Integer port) {
+        this(registrationId, endpoint, address, port, null, null, null, null, null);
+    }
+
+    public Client(String registrationId, String endpoint, InetAddress address, Integer port, String lwM2mVersion,
+            Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks) {
+
+        Validate.notEmpty(endpoint);
+        Validate.notNull(address);
+        Validate.notNull(port);
+
+        this.registrationId = registrationId;
+        this.endpoint = endpoint;
+        this.address = address;
+        this.port = port;
+        this.objectLinks = objectLinks;
+        this.registrationDate = new Date();
+        this.lifeTimeInSec = lifetime == null ? DEFAULT_LIFETIME_IN_SEC : lifetime;
+        this.lwM2mVersion = lwM2mVersion == null ? DEFAULT_LWM2M_VERSION : lwM2mVersion;
+        this.bindingMode = binding == null ? BindingMode.U : binding;
+        this.smsNumber = smsNumber;
+    }
+
+
+    public String getRegistrationId() {
+        return registrationId;
+    }
+
+    public Date getRegistrationDate() {
+        return registrationDate;
+    }
+
+    public InetAddress getAddress() {
+        return address;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public String[] getObjectLinks() {
+        return objectLinks;
+    }
+
+    public long getLifeTimeInSec() {
+        return lifeTimeInSec;
+    }
+
+    public String getSmsNumber() {
+        return smsNumber;
+    }
+
+    public String getLwM2mVersion() {
+        return lwM2mVersion;
+    }
+
+    public BindingMode getBindingMode() {
+        return bindingMode;
+    }
+
+    public String getEndpoint() {
+        return endpoint;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("ClientResource [getRegistrationId()=").append(registrationId).append(", getEndpoint()=")
+                .append(endpoint).append(", registrationDate=").append(registrationDate).append(", address=")
+                .append(address).append(", port=").append(port).append(", lifeTimeInSec=").append(lifeTimeInSec)
+                .append(", smsNumber=").append(smsNumber).append(", lwM2mVersion=").append(lwM2mVersion)
+                .append(", bindingMode=").append(bindingMode).append("]");
+        return builder.toString();
+    }
 
 }

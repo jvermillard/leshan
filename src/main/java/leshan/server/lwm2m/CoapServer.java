@@ -22,6 +22,7 @@ package leshan.server.lwm2m;
 import leshan.server.LwM2mServer;
 import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.ClientRegistry;
+import leshan.server.lwm2m.client.ClientRegistryImpl;
 import leshan.server.lwm2m.resource.RegisterResource;
 
 import org.slf4j.Logger;
@@ -49,17 +50,16 @@ public class CoapServer {
     /** IANA assigned UDP port for CoAP (so for LWM2M) */
     private static final int port = 5684;
 
-    private final ClientRegistry clientRegistry;
+    private final ClientRegistry clientRegistry = new ClientRegistryImpl();
 
     private final RequestHandler requestHandler;
 
     public CoapServer() {
         coapServer = new ch.ethz.inf.vs.californium.server.Server(port);
 
-        RegisterResource rdResource = new RegisterResource();
+        RegisterResource rdResource = new RegisterResource(clientRegistry);
         coapServer.add(rdResource);
 
-        this.clientRegistry = rdResource;
         this.requestHandler = new RequestHandler(coapServer.getEndpoints().get(0));
     }
 
