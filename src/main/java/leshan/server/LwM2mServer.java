@@ -23,6 +23,7 @@ import leshan.server.lwm2m.CoapServer;
 import leshan.server.servlet.ApiServlet;
 import leshan.server.servlet.EventServlet;
 
+import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
@@ -31,6 +32,8 @@ import org.slf4j.LoggerFactory;
 public class LwM2mServer {
 
     private static final Logger LOG = LoggerFactory.getLogger(LwM2mServer.class);
+
+    private Server server;
 
     public void start() {
 
@@ -46,7 +49,7 @@ public class LwM2mServer {
             webPort = "8080";
         }
 
-        org.eclipse.jetty.server.Server server = new org.eclipse.jetty.server.Server(Integer.valueOf(webPort));
+        server = new Server(Integer.valueOf(webPort));
         WebAppContext root = new WebAppContext();
 
         root.setContextPath("/");
@@ -67,6 +70,14 @@ public class LwM2mServer {
             server.start();
         } catch (Exception e) {
             LOG.error("jetty error", e);
+        }
+    }
+
+    public void stop() {
+        try {
+            server.stop();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
