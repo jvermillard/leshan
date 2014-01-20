@@ -161,7 +161,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>leshan.server.lwm2m.LwM2mServer</mainClass>
+                            <mainClass>leshan.server.LwM2mServer</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
