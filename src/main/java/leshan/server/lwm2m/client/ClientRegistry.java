@@ -35,7 +35,7 @@ public interface ClientRegistry {
     Client get(String endpoint);
 
     /**
-     * Returns the list of all registered clients
+     * Return the list of all registered clients
      * 
      * @return the registered clients
      */
@@ -49,22 +49,25 @@ public interface ClientRegistry {
     void addListener(RegistryListener listener);
 
     /**
-     * remove a client registration listener.
-     * @param listener the listener to be removed 
+     * Remove a client registration listener.
+     * 
+     * @param listener the listener to be removed
      */
     void removeListener(RegistryListener listener);
 
     /**
-     * register a new client 
+     * Register a new client
+     * 
      * @param client the client to register, identified by its end-point.
      * @return the previously registered client with this end-point of <code>null</code>
      */
     Client registerClient(Client client);
 
     /**
-     * de-register a client.
-     * @param endpoint the client end-point to remove 
+     * De-register a client.
+     * 
+     * @param registrationId the client registrationId
      * @return the previously registered client or <code>null</code>
      */
-    Client deregisterClient(String endpoint);
+    Client deregisterClient(String registrationId);
 }

@@ -20,6 +20,7 @@
 package leshan.server.lwm2m.resource;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 import leshan.server.lwm2m.client.BindingMode;
 import leshan.server.lwm2m.client.Client;
@@ -32,37 +33,35 @@ import org.slf4j.LoggerFactory;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.coap.CoAP.Type;
 import ch.ethz.inf.vs.californium.coap.Request;
-import ch.ethz.inf.vs.californium.coap.Response;
-import ch.ethz.inf.vs.californium.network.Exchange;
+import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
 import ch.ethz.inf.vs.californium.server.resources.Resource;
 import ch.ethz.inf.vs.californium.server.resources.ResourceBase;
 
 /**
  * A CoAP {@link Resource} in charge of handling clients registration requests.
  * <p>
- * This resource is the entry point of the Resource Directory ("/rd"). Each new client is added to the resource tree as
- * a {@link ClientResource} (as a child of this node).
- * </p>
- * <p>
- * This class implements the {@link ClientRegistry} interface and provides simple methods to access the list of
- * registered LW-M2M clients.
+ * This resource is the entry point of the Resource Directory ("/rd"). Each new client is added to the
+ * {@link ClientRegistry}.
  * </p>
  */
 public class RegisterResource extends ResourceBase {
 
     private static final Logger LOG = LoggerFactory.getLogger(RegisterResource.class);
 
+    public static final String RESOURCE_NAME = "rd";
+
     private final ClientRegistry registry;
 
     public RegisterResource(ClientRegistry registry) {
-        super("rd");
+        super(RESOURCE_NAME);
+
         this.registry = registry;
         getAttributes().addResourceType("core.rd");
     }
 
     @Override
-    public void handlePOST(Exchange exchange) {
-        Request request = exchange.getRequest();
+    public void handlePOST(CoapExchange exchange) {
+        Request request = exchange.advanced().getRequest();
 
         LOG.debug("POST received : {}", request);
 
@@ -93,28 +92,14 @@ public class RegisterResource extends ResourceBase {
                 }
                 String[] objectLinks = new String(request.getPayload(), "UTF-8").split(",");
 
-                Client client = new Client(registrationId, endpoint, request.getSource(),
- request.getSourcePort(),
+                Client client = new Client(registrationId, endpoint, request.getSource(), request.getSourcePort(),
                         lwVersion, lifetime, smsNumber, binding, objectLinks);
 
-                // object links
-
-                //addObjectResources(client, objectLinks);
-
-                //this.add(client);
+                registry.registerClient(client);
                 LOG.info("New registered client: {}", client);
 
-                registry.registerClient(client);
-
-                Response response = new Response(ResponseCode.CREATED);
-
-
-                // register a handler for the newly created client
-                RegisteredClientRessource clientResource = new RegisteredClientRessource(client, registry);
-                add(clientResource);
-
-                response.getOptions().addLocationPath(clientResource.getURI());
-                exchange.respond(response);
+                exchange.setLocationPath(RESOURCE_NAME + "/" + client.getRegistrationId());
+                exchange.respond(ResponseCode.CREATED);
 
             } catch (UnsupportedEncodingException e) {
                 LOG.error("Invalid registration request", e);
@@ -126,36 +111,51 @@ public class RegisterResource extends ResourceBase {
         }
     }
 
-    /*
-    private void addObjectResources(Resource client, String[] objectLinks) {
-        LOG.debug("Available objects for client {}: {}", client.getName(), objectLinks);
+    @Override
+    public void handleDELETE(CoapExchange exchange) {
 
-        for (String link : objectLinks) {
+        LOG.debug("DELETE received : {}", exchange.advanced().getRequest());
 
-            // String valid = StringUtils.substringBetween(link.trim(), "<", ">");
-            // HACK for liblwm2m client
-            String valid = link.trim();
-
-            // TODO rt and ct parameters
-
-            if (valid != null) {
-                Resource current = client;
-                for (String objectName : valid.split("/")) {
-                    Resource child = current.getChild(objectName);
-                    if (child == null) {
-                        child = new ObjectResource(objectName);
-                        current.add(child);
-                        LOG.debug("New object resource created: {}", child.getName());
-                    }
-                    current = child;
-                }
-            }
+        Client unregistered = null;
+        List<String> uri = exchange.getRequestOptions().getURIPaths();
+        if (uri != null && uri.size() == 2 && RESOURCE_NAME.equals(uri.get(0))) {
+            unregistered = registry.deregisterClient(uri.get(1));
         }
-    }*/
+
+        if (unregistered != null) {
+            exchange.respond(ResponseCode.DELETED);
+        } else {
+            exchange.respond(ResponseCode.NOT_FOUND);
+        }
+    }
+
+    /*
+     * Override the default behavior so that requests to sub resources (typically /rd/{client-reg-id}) are handled by
+     * /rd resource.
+     */
+    @Override
+    public Resource getChild(String name) {
+        return this;
+    }
+
+    /*
+     * private void addObjectResources(Resource client, String[] objectLinks) {
+     * LOG.debug("Available objects for client {}: {}", client.getName(), objectLinks);
+     * 
+     * for (String link : objectLinks) {
+     * 
+     * // String valid = StringUtils.substringBetween(link.trim(), "<", ">"); // HACK for liblwm2m client String valid =
+     * link.trim();
+     * 
+     * // TODO rt and ct parameters
+     * 
+     * if (valid != null) { Resource current = client; for (String objectName : valid.split("/")) { Resource child =
+     * current.getChild(objectName); if (child == null) { child = new ObjectResource(objectName); current.add(child);
+     * LOG.debug("New object resource created: {}", child.getName()); } current = child; } } } }
+     */
 
     private static String createRegistrationId() {
         return RandomStringUtils.random(10, true, true);
     }
-
 
 }

@@ -24,12 +24,18 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.apache.commons.lang.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * In memory client registry
  */
 public class ClientRegistryImpl implements ClientRegistry {
 
-    private ConcurrentHashMap<String /*end-point*/, Client> clientsByEp = new ConcurrentHashMap<>();
+    private static final Logger LOG = LoggerFactory.getLogger(ClientRegistryImpl.class);
+
+    private ConcurrentHashMap<String /* end-point */, Client> clientsByEp = new ConcurrentHashMap<>();
 
     private List<RegistryListener> listeners = new CopyOnWriteArrayList<>();
 
@@ -55,6 +61,8 @@ public class ClientRegistryImpl implements ClientRegistry {
 
     @Override
     public Client registerClient(Client client) {
+        LOG.debug("Registering new client: {}", client);
+
         Client previous = clientsByEp.put(client.getEndpoint(), client);
         if (previous != null) {
             for (RegistryListener l : listeners) {
@@ -69,11 +77,29 @@ public class ClientRegistryImpl implements ClientRegistry {
     }
 
     @Override
-    public Client deregisterClient(String endpoint) {
-        Client c = clientsByEp.remove(endpoint);
-        for (RegistryListener l : listeners) {
-            l.unregistered(c);
+    public Client deregisterClient(String registrationId) {
+        LOG.debug("Deregistering client with registrationId: {}", registrationId);
+        Validate.notNull(registrationId);
+
+        String endpoint = null;
+
+        for (Client client : clientsByEp.values()) {
+            if (registrationId.equals(client.getRegistrationId())) {
+                endpoint = client.getEndpoint();
+                break;
+            }
         }
-        return c;
+
+        Client unregistered = null;
+
+        if (endpoint != null) {
+            unregistered = clientsByEp.remove(endpoint);
+            for (RegistryListener l : listeners) {
+                l.unregistered(unregistered);
+            }
+            LOG.debug("Unregistered client: {}", unregistered);
+        }
+
+        return unregistered;
     }
 }

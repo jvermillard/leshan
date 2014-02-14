@@ -20,6 +20,7 @@
 package leshan.server.lwm2m.client;
 
 import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.Date;
 
 import org.apache.commons.lang.Validate;
@@ -28,6 +29,7 @@ import org.apache.commons.lang.Validate;
  * A LW-M2M client registered on the server
  */
 public class Client {
+
     private static final long DEFAULT_LIFETIME_IN_SEC = 86400L;
 
     private static final String DEFAULT_LWM2M_VERSION = "1.0";
@@ -75,7 +77,6 @@ public class Client {
         this.smsNumber = smsNumber;
     }
 
-
     public String getRegistrationId() {
         return registrationId;
     }
@@ -118,13 +119,10 @@ public class Client {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("ClientResource [getRegistrationId()=").append(registrationId).append(", getEndpoint()=")
-                .append(endpoint).append(", registrationDate=").append(registrationDate).append(", address=")
-                .append(address).append(", port=").append(port).append(", lifeTimeInSec=").append(lifeTimeInSec)
-                .append(", smsNumber=").append(smsNumber).append(", lwM2mVersion=").append(lwM2mVersion)
-                .append(", bindingMode=").append(bindingMode).append("]");
-        return builder.toString();
+        return "Client [registrationDate=" + registrationDate + ", address=" + address + ", port=" + port
+                + ", lifeTimeInSec=" + lifeTimeInSec + ", smsNumber=" + smsNumber + ", lwM2mVersion=" + lwM2mVersion
+                + ", bindingMode=" + bindingMode + ", endpoint=" + endpoint + ", registrationId=" + registrationId
+                + ", objectLinks=" + Arrays.toString(objectLinks) + "]";
     }
 
 }

@@ -22,7 +22,6 @@ package leshan.server.lwm2m;
 import leshan.server.LwM2mServer;
 import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.ClientRegistry;
-import leshan.server.lwm2m.client.ClientRegistryImpl;
 import leshan.server.lwm2m.resource.RegisterResource;
 
 import org.slf4j.Logger;
@@ -33,7 +32,7 @@ import ch.ethz.inf.vs.californium.server.resources.Resource;
 /**
  * A Lightweight M2M server.
  * <p>
- * It is a simplified version of a Resource Directory as described in the CoRE RD specification The CoAP
+ * It is a simplified version of a Resource Directory as described in the CoRE RD specification. The CoAP
  * {@link Resource} tree is used to host the description of all the registered LW-M2M clients. {@link Client} lookups
  * can be performed through the {@link ClientRegistry}.
  * </p>
@@ -50,13 +49,13 @@ public class CoapServer {
     /** IANA assigned UDP port for CoAP (so for LWM2M) */
     private static final int port = 5684;
 
-    private final ClientRegistry clientRegistry = new ClientRegistryImpl();
-
     private final RequestHandler requestHandler;
 
-    public CoapServer() {
+    public CoapServer(ClientRegistry clientRegistry) {
+        // init CoAP server
         coapServer = new ch.ethz.inf.vs.californium.server.Server(port);
 
+        // define /rd resource
         RegisterResource rdResource = new RegisterResource(clientRegistry);
         coapServer.add(rdResource);
 
@@ -66,10 +65,6 @@ public class CoapServer {
     public void start() {
         coapServer.start();
         LOG.info("LW-M2M server started on port " + port);
-    }
-
-    public ClientRegistry getClientRegistry() {
-        return this.clientRegistry;
     }
 
     public RequestHandler getRequestHandler() {

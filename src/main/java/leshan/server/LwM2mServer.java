@@ -20,6 +20,8 @@
 package leshan.server;
 
 import leshan.server.lwm2m.CoapServer;
+import leshan.server.lwm2m.client.ClientRegistry;
+import leshan.server.lwm2m.client.ClientRegistryImpl;
 import leshan.server.servlet.ApiServlet;
 import leshan.server.servlet.EventServlet;
 
@@ -37,8 +39,10 @@ public class LwM2mServer {
 
     public void start() {
 
+        ClientRegistry clientRegistry = new ClientRegistryImpl();
+
         // LWM2M server
-        CoapServer lwServer = new CoapServer();
+        CoapServer lwServer = new CoapServer(clientRegistry);
         lwServer.start();
 
         // now prepare and start jetty
@@ -57,11 +61,10 @@ public class LwM2mServer {
         root.setResourceBase(webappDirLocation);
         root.setParentLoaderPriority(true);
 
-        ServletHolder apiServletHolder = new ServletHolder(new ApiServlet(lwServer.getRequestHandler(),
-                lwServer.getClientRegistry()));
+        ServletHolder apiServletHolder = new ServletHolder(new ApiServlet(lwServer.getRequestHandler(), clientRegistry));
         root.addServlet(apiServletHolder, "/api/*");
 
-        ServletHolder eventServletHolder = new ServletHolder(new EventServlet(lwServer.getClientRegistry()));
+        ServletHolder eventServletHolder = new ServletHolder(new EventServlet(clientRegistry));
         root.addServlet(eventServletHolder, "/event/*");
 
         server.setHandler(root);
