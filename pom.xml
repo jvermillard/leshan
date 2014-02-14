@@ -31,7 +31,16 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <exclude.integration.tests>**/*Integration*</exclude.integration.tests>
+        <internal.repo.path>file://${project.build.directory}/../../leshan-repo</internal.repo.path>
     </properties>
+
+    <distributionManagement>
+      <repository>
+        <id>internal.repo</id>
+        <name>Internal Repository</name>
+        <url>${internal.repo.path}</url>
+      </repository>
+    </distributionManagement>
 
     <dependencies>
 
