@@ -253,7 +253,43 @@
 			{
 				"name":"Instance 0",
 				"id":"0",
-				"values" : []
+				"values" : [
+					{
+						"name":"Package",
+						"id":"0",
+						"operations":"W",
+						"type":"opaque"
+					},
+					{
+						"name":"Package URI",
+						"id":"1",
+						"operations":"W",
+						"type":"string"
+					},
+					{
+						"name":"Update",
+						"id":"2",
+						"operations":"E"
+					},
+					{
+						"name":"State",
+						"id":"3",
+						"operations":"R",
+						"type":"integer"
+					},
+					{
+						"name":"Update Supported Objects",
+						"id":"4",
+						"operations":"RW",
+						"type":"boolean"
+					},
+					{
+						"name":"Update Result",
+						"id":"5",
+						"operations":"R",
+						"type":"integer"
+					}
+				]
 			}
 		]
 	},
