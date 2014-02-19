@@ -107,16 +107,28 @@ public class ApiServlet extends HttpServlet {
                 return;
             }
 
-            if (path.length == 1 && "GET".equals(req.getMethod())) {
-                // list registered clients
-                Collection<Client> clients = clientRegistry.allClients();
+            // clients details
+            if ("GET".equals(req.getMethod())) {
+                if (path.length == 1) { // all registered clients
+                    Collection<Client> clients = clientRegistry.allClients();
 
-                String json = gson.toJson(clients.toArray(new Client[] {}));
-                resp.setContentType("application/json");
-                resp.getOutputStream().write(json.getBytes());
-
-                resp.setStatus(HttpServletResponse.SC_OK);
-                return;
+                    String json = gson.toJson(clients.toArray(new Client[] {}));
+                    resp.setContentType("application/json");
+                    resp.getOutputStream().write(json.getBytes("UTF-8"));
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                    return;
+                } else if (path.length == 2) { // get client
+                    String clientEndpoint = path[1];
+                    Client client = clientRegistry.get(clientEndpoint);
+                    if (client != null) {
+                        resp.setContentType("application/json");
+                        resp.getOutputStream().write(gson.toJson(client).getBytes("UTF-8"));
+                        resp.setStatus(HttpServletResponse.SC_OK);
+                    } else {
+                        resp.sendError(HttpServletResponse.SC_NOT_FOUND, "unknown client " + clientEndpoint);
+                    }
+                    return;
+                }
             }
 
             RequestInfo requestInfo;

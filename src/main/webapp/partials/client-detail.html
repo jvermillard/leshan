@@ -1,7 +1,10 @@
-<div class="resource-tree">
+<div ng-if='client' class="resource-tree">
 	<resourceslist list='lwresources'></resourceslist>
 </div>
 
+<div ng-if='!client'>
+	<h4>Client <b>{{clientId}}</b> not registered</h4>
+</div>
 
 <!-- Write modal -->
 <div class="modal fade bs-example-modal-sm" id="writeModal" tabindex="-1" role="dialog"
