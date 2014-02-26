@@ -102,4 +102,13 @@ public class ClientRegistryImpl implements ClientRegistry {
 
         return unregistered;
     }
+
+	@Override
+	public void notifyListeners(Client updatedClient) {
+		for (RegistryListener l : listeners ) {
+			l.updated(updatedClient);
+		}
+	}
+    
+    
 }

@@ -27,14 +27,21 @@ public interface RegistryListener {
     /**
      * Invoked when a new client has been registered on the server.
      * 
-     * @param client
+     * @param client the newly registered client
      */
     void registered(Client client);
 
     /**
      * Invoked when a new client has been unregistered from the server.
      * 
-     * @param client
+     * @param client the client
      */
     void unregistered(Client client);
+    
+    /**
+     * Invoked when an existing client's registration has been updated.
+     * 
+     * @param client the updated client
+     */
+    void updated(Client client);
 }

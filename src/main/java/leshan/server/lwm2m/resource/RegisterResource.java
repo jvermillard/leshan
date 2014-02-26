@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.coap.CoAP.Type;
+import ch.ethz.inf.vs.californium.coap.MediaTypeRegistry;
 import ch.ethz.inf.vs.californium.coap.Request;
 import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
 import ch.ethz.inf.vs.californium.server.resources.Resource;
@@ -66,7 +67,8 @@ public class RegisterResource extends ResourceBase {
 
         LOG.debug("POST received : {}", request);
 
-        if (Type.CON.equals(request.getType())) {
+        if (Type.CON.equals(request.getType())
+        		&& MediaTypeRegistry.APPLICATION_LINK_FORMAT == request.getOptions().getContentFormat() ) {
 
             // register
             String registrationId = RegisterResource.createRegistrationId();
@@ -92,20 +94,27 @@ public class RegisterResource extends ResourceBase {
                         binding = BindingMode.valueOf(param.substring(2));
                     }
                 }
-                String[] objectLinks = new String(request.getPayload(), "UTF-8").split(",");
+                
+                if( endpoint == null || endpoint.isEmpty() ) {
+                   exchange.respond( ResponseCode.BAD_REQUEST, "Client must specify an endpoint identifier" );
+                } else {
 
-                Client client = new Client(registrationId, endpoint, request.getSource(), request.getSourcePort(),
-                        lwVersion, lifetime, smsNumber, binding, objectLinks);
+	                String[] objectLinks = new String(request.getPayload(), "UTF-8").split(",");
 
-                registry.registerClient(client);
-                LOG.info("New registered client: {}", client);
+                	Client client = new Client(registrationId, endpoint, request.getSource(), request.getSourcePort(),
+                        	lwVersion, lifetime, smsNumber, binding, objectLinks);
 
-                exchange.setLocationPath(RESOURCE_NAME + "/" + client.getRegistrationId());
-                exchange.respond(ResponseCode.CREATED);
+                	registry.registerClient(client);
+                	LOG.debug("New registered client: {}", client);
 
+                	exchange.setLocationPath(RESOURCE_NAME + "/" + client.getRegistrationId());
+                	exchange.respond(ResponseCode.CREATED);
+				}
             } catch (UnsupportedEncodingException | ClientRegistrationException e) {
-                LOG.error("Registration failed for client " + endpoint, e);
-                exchange.respond(ResponseCode.BAD_REQUEST);
+                LOG.debug("Registration failed for client " + endpoint, e);
+                exchange.respond(ResponseCode.INTERNAL_SERVER_ERROR);
+            } catch (NumberFormatException e) {
+            	exchange.respond(ResponseCode.BAD_REQUEST, "Lifetime param is not a valid number");
             }
 
         } else {

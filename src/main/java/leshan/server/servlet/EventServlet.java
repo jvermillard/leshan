@@ -82,6 +82,11 @@ public class EventServlet extends HttpServlet {
         public void unregistered(Client client) {
             sendEvent("DEREGISTRATION", client);
         }
+
+		@Override
+		public void updated(Client client) {
+            sendEvent("UPDATE", client);
+		}
     };
 
     private void sendEvent(String event, Client client) {

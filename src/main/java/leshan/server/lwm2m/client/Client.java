@@ -36,23 +36,23 @@ public class Client {
 
     private final Date registrationDate;
 
-    private final InetAddress address;
+    private InetAddress address;
 
-    private final int port;
+    private int port;
 
-    private final long lifeTimeInSec;
+    private long lifeTimeInSec;
 
-    private final String smsNumber;
+    private String smsNumber;
 
     private final String lwM2mVersion;
 
-    private final BindingMode bindingMode;
+    private BindingMode bindingMode;
 
     private final String endpoint;
 
     private final String registrationId;
 
-    private final String[] objectLinks;
+    private String[] objectLinks;
 
     public Client(String registrationId, String endpoint, InetAddress address, Integer port) {
         this(registrationId, endpoint, address, port, null, null, null, null, null);
@@ -122,6 +122,42 @@ public class Client {
         return endpoint;
     }
 
+    /**
+     * Updates a client's registration.
+     * 
+     * @param address the client's IP address
+     * @param port the port the client's CoAP endpoint is listening on
+     * @param lifetime the client's lifetime in seconds or <code>null</code> if the lifetime has not changed
+     * since the client's last update of the registration
+     * @param smsNumber the client's SMS number or <code>null</code> if the number has not changed since the
+     * client's last update of the registration
+     * @param binding the binding mode currently supported by the client as defined in section 5.2.1.1 of the LWM2M spec
+     * or <code>null</code> if the supported mode has not changed since the client's last update of the registration
+     * @param objectLinks the object types and instances supported by the client or <code>null</code> if the types and
+     * instances have not changed since the client's last update of the registration
+     * @throws IllegalArgumentException if the given binding mode is invalid
+     */
+    public void update(InetAddress address, Integer port, Long lifetime, String smsNumber, BindingMode bindingMode, String[] objectLinks) {
+    	if (address != null) {
+    		this.address = address;
+    	}
+    	if (port != null) {
+    		this.port = port;
+    	}
+    	if (lifetime != null) {
+        	this.lifeTimeInSec = lifetime;
+    	}
+    	if (smsNumber != null) {
+    		this.smsNumber = smsNumber;
+    	}
+    	if (bindingMode != null) {
+    		this.bindingMode = bindingMode;
+    	}
+    	if (objectLinks != null) {
+    		this.objectLinks = objectLinks;
+    	}
+    }
+    
     @Override
     public String toString() {
         return "Client [registrationDate=" + registrationDate + ", address=" + address + ", port=" + port
