@@ -33,6 +33,7 @@ import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ContentFormat;
+import leshan.server.lwm2m.message.ExecRequest;
 import leshan.server.lwm2m.message.ReadRequest;
 import leshan.server.lwm2m.message.WriteRequest;
 import leshan.server.lwm2m.tlv.Tlv;
@@ -89,6 +90,14 @@ public class ApiServlet extends HttpServlet {
      */
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        this.handleRequest(req, resp);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         this.handleRequest(req, resp);
     }
 
@@ -153,6 +162,9 @@ public class ApiServlet extends HttpServlet {
             } else if ("PUT".equals(req.getMethod())) {
                 // write
                 cResponse = this.writeRequest(client, requestInfo, req, resp);
+            } else if ("POST".equals(req.getMethod())) {
+                // exec
+                cResponse = this.execRequest(client, requestInfo, resp);
             }
 
             String response = null;
@@ -181,6 +193,13 @@ public class ApiServlet extends HttpServlet {
             throws InterruptedException, ExecutionException, IOException {
 
         return requestHandler.read(client, new ReadRequest(requestInfo.objectId, requestInfo.objectInstanceId,
+                requestInfo.resourceId));
+    }
+
+    private ClientResponse execRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp)
+            throws InterruptedException, ExecutionException, IOException {
+
+        return requestHandler.exec(client, new ExecRequest(requestInfo.objectId, requestInfo.objectInstanceId,
                 requestInfo.resourceId));
     }
 

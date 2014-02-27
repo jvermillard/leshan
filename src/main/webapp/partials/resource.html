@@ -13,6 +13,9 @@
 				<div class="col-md-4">
 					<button ng-if="writable()" class="btn btn-default btn-xs" ng-click="write()">Write</button>
 				</div>
+				<div class="col-md-4">
+					<button ng-if="executable()" class="btn btn-default btn-xs" ng-click="exec()">Exec</button>
+				</div>
 			</div>
 		</div>
 		<div class="col-md-4 resource-value">{{resource.value}}</div>

@@ -25,6 +25,7 @@ import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ContentFormat;
 import leshan.server.lwm2m.message.ContentResponse;
+import leshan.server.lwm2m.message.ExecRequest;
 import leshan.server.lwm2m.message.ReadRequest;
 import leshan.server.lwm2m.message.WriteRequest;
 import leshan.server.lwm2m.tlv.TlvEncoder;
@@ -98,6 +99,23 @@ public class RequestHandler {
         } else {
             return new ClientResponse(coapResponse.getCode());
         }
+    }
+
+    public ClientResponse exec(Client client, ExecRequest execRequest) throws InterruptedException {
+        LOG.debug("EXEC request for client {}: {}", client.getEndpoint(), execRequest);
+        Request request = buildExecRequest(execRequest);
+
+        prepareDestination(request, client);
+
+        // send
+        endpoint.sendRequest(request);
+        Response coapResponse = request.waitForResponse(5000);
+
+        if (coapResponse == null) {
+            return null;
+        }
+
+        return new ClientResponse(coapResponse.getCode());
     }
 
     /**
@@ -184,6 +202,16 @@ public class RequestHandler {
         }
 
         request.setPayload(payload);
+
+        return request;
+    }
+
+    private Request buildExecRequest(ExecRequest execRequest) {
+        Request request = Request.newPost();
+
+        request.getOptions().addURIPath(Integer.toString(execRequest.getObjectId()));
+        request.getOptions().addURIPath(Integer.toString(execRequest.getObjectInstanceId()));
+        request.getOptions().addURIPath(Integer.toString(execRequest.getResourceId()));
 
         return request;
     }
