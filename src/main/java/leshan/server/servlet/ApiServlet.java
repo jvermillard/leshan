@@ -77,12 +77,73 @@ public class ApiServlet extends HttpServlet {
         gson = gsonBuilder.create();
     }
 
+    private boolean checkPath(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String[] path = StringUtils.split(req.getPathInfo(), '/');
+
+        if (ArrayUtils.isEmpty(path)) {
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            return false;
+        }
+
+        if (!("clients".equals(path[0]))) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "not found: '" + req.getPathInfo() + "'");
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        this.handleRequest(req, resp);
+        if (!checkPath(req, resp)) {
+            return;
+        }
+
+        String[] path = StringUtils.split(req.getPathInfo(), '/');
+
+        if (path.length == 1) { // all registered clients
+            Collection<Client> clients = clientRegistry.allClients();
+
+            String json = gson.toJson(clients.toArray(new Client[] {}));
+            resp.setContentType("application/json");
+            resp.getOutputStream().write(json.getBytes("UTF-8"));
+            resp.setStatus(HttpServletResponse.SC_OK);
+
+        } else if (path.length == 2) { // get client
+            String clientEndpoint = path[1];
+            Client client = clientRegistry.get(clientEndpoint);
+            if (client != null) {
+                resp.setContentType("application/json");
+                resp.getOutputStream().write(gson.toJson(client).getBytes("UTF-8"));
+                resp.setStatus(HttpServletResponse.SC_OK);
+            } else {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "unknown client " + clientEndpoint);
+            }
+        } else {
+            try {
+                RequestInfo requestInfo = new RequestInfo(path);
+
+                Client client = clientRegistry.get(requestInfo.endpoint);
+                if (client == null) {
+                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "no registered client with id '"
+                            + requestInfo.endpoint + "'");
+                } else {
+                    ClientResponse cResponse = this.readRequest(client, requestInfo, resp);
+                    processDeviceResponse(resp, cResponse);
+                }
+            } catch (IllegalArgumentException e) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+
+            } catch (NotImplementedException e) {
+                resp.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED, e.getMessage());
+            } catch (Exception e) {
+                LOG.error("unexpected error", e);
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            }
+        }
     }
 
     /**
@@ -90,95 +151,25 @@ public class ApiServlet extends HttpServlet {
      */
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        this.handleRequest(req, resp);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        this.handleRequest(req, resp);
-    }
-
-    private void handleRequest(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
-        String[] path = StringUtils.split(req.getPathInfo(), '/');
-
-        if (ArrayUtils.isEmpty(path)) {
-            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        if (!checkPath(req, resp)) {
             return;
         }
 
+        String[] path = StringUtils.split(req.getPathInfo(), '/');
+
         try {
-            if (!("clients".equals(path[0]))) {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "not found: '" + req.getPathInfo() + "'");
-                return;
-            }
-
-            // clients details
-            if ("GET".equals(req.getMethod())) {
-                if (path.length == 1) { // all registered clients
-                    Collection<Client> clients = clientRegistry.allClients();
-
-                    String json = gson.toJson(clients.toArray(new Client[] {}));
-                    resp.setContentType("application/json");
-                    resp.getOutputStream().write(json.getBytes("UTF-8"));
-                    resp.setStatus(HttpServletResponse.SC_OK);
-                    return;
-                } else if (path.length == 2) { // get client
-                    String clientEndpoint = path[1];
-                    Client client = clientRegistry.get(clientEndpoint);
-                    if (client != null) {
-                        resp.setContentType("application/json");
-                        resp.getOutputStream().write(gson.toJson(client).getBytes("UTF-8"));
-                        resp.setStatus(HttpServletResponse.SC_OK);
-                    } else {
-                        resp.sendError(HttpServletResponse.SC_NOT_FOUND, "unknown client " + clientEndpoint);
-                    }
-                    return;
-                }
-            }
-
-            RequestInfo requestInfo;
-            try {
-                requestInfo = new RequestInfo(path);
-            } catch (IllegalArgumentException e) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-                return;
-            }
+            RequestInfo requestInfo = new RequestInfo(path);
 
             Client client = clientRegistry.get(requestInfo.endpoint);
             if (client == null) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "no registered client with id '"
                         + requestInfo.endpoint + "'");
-                return;
-            }
-
-            ClientResponse cResponse = null;
-            if ("GET".equals(req.getMethod())) {
-                // read
-                cResponse = this.readRequest(client, requestInfo, resp);
-            } else if ("PUT".equals(req.getMethod())) {
-                // write
-                cResponse = this.writeRequest(client, requestInfo, req, resp);
-            } else if ("POST".equals(req.getMethod())) {
-                // exec
-                cResponse = this.execRequest(client, requestInfo, resp);
-            }
-
-            String response = null;
-            if (cResponse == null) {
-                response = "Request timeout";
             } else {
-                response = gson.toJson(cResponse);
+                ClientResponse cResponse = this.writeRequest(client, requestInfo, req, resp);
+                processDeviceResponse(resp, cResponse);
             }
-            resp.setContentType("application/json");
-            resp.getOutputStream().write(response.getBytes());
-
-            resp.setStatus(HttpServletResponse.SC_OK);
-
-            return;
+        } catch (IllegalArgumentException e) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
 
         } catch (NotImplementedException e) {
             resp.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED, e.getMessage());
@@ -186,7 +177,53 @@ public class ApiServlet extends HttpServlet {
             LOG.error("unexpected error", e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
+    }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        if (!checkPath(req, resp)) {
+            return;
+        }
+
+        String[] path = StringUtils.split(req.getPathInfo(), '/');
+
+        try {
+            RequestInfo requestInfo = new RequestInfo(path);
+
+            Client client = clientRegistry.get(requestInfo.endpoint);
+            if (client == null) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "no registered client with id '"
+                        + requestInfo.endpoint + "'");
+
+            } else {
+                ClientResponse cResponse = this.execRequest(client, requestInfo, resp);
+                processDeviceResponse(resp, cResponse);
+            }
+        } catch (IllegalArgumentException e) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+
+        } catch (NotImplementedException e) {
+            resp.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED, e.getMessage());
+        } catch (Exception e) {
+            LOG.error("unexpected error", e);
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private void processDeviceResponse(HttpServletResponse resp, ClientResponse cResponse) throws IOException {
+        String response = null;
+        if (cResponse == null) {
+            response = "Request timeout";
+        } else {
+            response = gson.toJson(cResponse);
+        }
+        resp.setContentType("application/json");
+        resp.getOutputStream().write(response.getBytes());
+
+        resp.setStatus(HttpServletResponse.SC_OK);
     }
 
     private ClientResponse readRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp)
