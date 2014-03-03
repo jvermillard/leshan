@@ -20,21 +20,17 @@
 package leshan.server.lwm2m;
 
 import leshan.server.LwM2mServer;
-import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.resource.RegisterResource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.ethz.inf.vs.californium.server.resources.Resource;
-
 /**
  * A Lightweight M2M server.
  * <p>
- * It is a simplified version of a Resource Directory as described in the CoRE RD specification. The CoAP
- * {@link Resource} tree is used to host the description of all the registered LW-M2M clients. {@link Client} lookups
- * can be performed through the {@link ClientRegistry}.
+ * This CoAP server defines a /rd resources as described in the CoRE RD specification. A {@link ClientRegistry} must be
+ * provided to host the description of all the registered LW-M2M clients.
  * </p>
  * <p>
  * A {@link RequestHandler} is provided to perform server-initiated requests to LW-M2M clients.
@@ -47,13 +43,13 @@ public class CoapServer {
     private static final Logger LOG = LoggerFactory.getLogger(LwM2mServer.class);
 
     /** IANA assigned UDP port for CoAP (so for LWM2M) */
-    private static final int port = 5684;
+    public static final int PORT = 5684;
 
     private final RequestHandler requestHandler;
 
     public CoapServer(ClientRegistry clientRegistry) {
         // init CoAP server
-        coapServer = new ch.ethz.inf.vs.californium.server.Server(port);
+        coapServer = new ch.ethz.inf.vs.californium.server.Server(PORT);
 
         // define /rd resource
         RegisterResource rdResource = new RegisterResource(clientRegistry);
@@ -62,9 +58,19 @@ public class CoapServer {
         this.requestHandler = new RequestHandler(coapServer.getEndpoints().get(0));
     }
 
+    /**
+     * Starts the server and binds it to assigned UDP port for LW-M2M (5684).
+     */
     public void start() {
         coapServer.start();
-        LOG.info("LW-M2M server started on port " + port);
+        LOG.info("LW-M2M server started on port " + PORT);
+    }
+
+    /**
+     * Stops the server and unbinds it from assigned port.
+     */
+    public void stop() {
+        coapServer.stop();
     }
 
     public RequestHandler getRequestHandler() {
