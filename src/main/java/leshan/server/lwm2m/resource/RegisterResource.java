@@ -24,6 +24,7 @@ import java.util.List;
 
 import leshan.server.lwm2m.client.BindingMode;
 import leshan.server.lwm2m.client.Client;
+import leshan.server.lwm2m.client.ClientRegistrationException;
 import leshan.server.lwm2m.client.ClientRegistry;
 
 import org.apache.commons.lang.RandomStringUtils;
@@ -67,15 +68,16 @@ public class RegisterResource extends ResourceBase {
 
         if (Type.CON.equals(request.getType())) {
 
-            try {
-                // register
-                String registrationId = RegisterResource.createRegistrationId();
+            // register
+            String registrationId = RegisterResource.createRegistrationId();
 
-                String endpoint = null;
-                Long lifetime = null;
-                String smsNumber = null;
-                String lwVersion = null;
-                BindingMode binding = null;
+            String endpoint = null;
+            Long lifetime = null;
+            String smsNumber = null;
+            String lwVersion = null;
+            BindingMode binding = null;
+
+            try {
 
                 for (String param : request.getOptions().getURIQueries()) {
                     if (param.startsWith("ep=")) {
@@ -101,8 +103,8 @@ public class RegisterResource extends ResourceBase {
                 exchange.setLocationPath(RESOURCE_NAME + "/" + client.getRegistrationId());
                 exchange.respond(ResponseCode.CREATED);
 
-            } catch (UnsupportedEncodingException e) {
-                LOG.error("Invalid registration request", e);
+            } catch (UnsupportedEncodingException | ClientRegistrationException e) {
+                LOG.error("Registration failed for client " + endpoint, e);
                 exchange.respond(ResponseCode.BAD_REQUEST);
             }
 
@@ -113,20 +115,25 @@ public class RegisterResource extends ResourceBase {
 
     @Override
     public void handleDELETE(CoapExchange exchange) {
-
         LOG.debug("DELETE received : {}", exchange.advanced().getRequest());
 
         Client unregistered = null;
         List<String> uri = exchange.getRequestOptions().getURIPaths();
         if (uri != null && uri.size() == 2 && RESOURCE_NAME.equals(uri.get(0))) {
-            unregistered = registry.deregisterClient(uri.get(1));
+            try {
+                unregistered = registry.deregisterClient(uri.get(1));
+            } catch (ClientRegistrationException e) {
+                LOG.error("Deregistration failed for client with registrationId " + uri.get(1), e);
+            }
         }
 
         if (unregistered != null) {
             exchange.respond(ResponseCode.DELETED);
         } else {
-            exchange.respond(ResponseCode.NOT_FOUND);
+            LOG.debug("Invalid deregistration");
+            exchange.respond(ResponseCode.BAD_REQUEST);
         }
+
     }
 
     /*

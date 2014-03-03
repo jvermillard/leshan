@@ -20,6 +20,7 @@
 package leshan.server.lwm2m.resource;
 
 import leshan.server.lwm2m.client.Client;
+import leshan.server.lwm2m.client.ClientRegistrationException;
 import leshan.server.lwm2m.client.ClientRegistry;
 
 import org.slf4j.Logger;
@@ -52,13 +53,19 @@ public class RegisteredClientRessource extends ResourceBase {
 
     @Override
     public void handleDELETE(CoapExchange exchange) {
-        LOG.debug("Client {} de-registered (registartion id: {})",client.getEndpoint(), client.getRegistrationId());
-        registry.deregisterClient(client.getEndpoint());
-        
-        // remove the resource from the tree
-        delete();
+        LOG.debug("Client {} de-registered (registartion id: {})", client.getEndpoint(), client.getRegistrationId());
+        try {
+            registry.deregisterClient(client.getRegistrationId());
 
-        exchange.respond(ResponseCode.DELETED);
+            // remove the resource from the tree
+            delete();
+
+            exchange.respond(ResponseCode.DELETED);
+
+        } catch (ClientRegistrationException e) {
+            LOG.error("Deregistration failed for client with registrationId " + client.getRegistrationId(), e);
+            exchange.respond(ResponseCode.BAD_REQUEST);
+        }
 
     }
 }

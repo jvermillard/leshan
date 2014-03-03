@@ -60,7 +60,7 @@ public class ClientRegistryImpl implements ClientRegistry {
     }
 
     @Override
-    public Client registerClient(Client client) {
+    public Client registerClient(Client client) throws ClientRegistrationException {
         LOG.debug("Registering new client: {}", client);
 
         Client previous = clientsByEp.put(client.getEndpoint(), client);
@@ -77,7 +77,7 @@ public class ClientRegistryImpl implements ClientRegistry {
     }
 
     @Override
-    public Client deregisterClient(String registrationId) {
+    public Client deregisterClient(String registrationId) throws ClientRegistrationException {
         LOG.debug("Deregistering client with registrationId: {}", registrationId);
         Validate.notNull(registrationId);
 
