@@ -38,9 +38,14 @@
       <repository>
         <id>internal.repo</id>
         <name>Internal Repository</name>
-        <url>${internal.repo.path}</url>
+        <url>${internal.repo.path}/releases</url>
       </repository>
-    </distributionManagement>
+      <snapshotRepository>
+        <id>Internal.repo.snapshots</id>
+        <name>Internal Repository</name>
+        <url>${internal.repo.path}/snapshots</url>
+      </snapshotRepository>
+     </distributionManagement>
 
     <dependencies>
 
