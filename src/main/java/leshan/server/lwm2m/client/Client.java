@@ -60,6 +60,11 @@ public class Client {
 
     public Client(String registrationId, String endpoint, InetAddress address, Integer port, String lwM2mVersion,
             Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks) {
+        this(registrationId, endpoint, address, port, lwM2mVersion, lifetime, smsNumber, binding, objectLinks, null);
+    }
+
+    public Client(String registrationId, String endpoint, InetAddress address, Integer port, String lwM2mVersion,
+            Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks, Date registrationDate) {
 
         Validate.notEmpty(endpoint);
         Validate.notNull(address);
@@ -70,7 +75,7 @@ public class Client {
         this.address = address;
         this.port = port;
         this.objectLinks = objectLinks;
-        this.registrationDate = new Date();
+        this.registrationDate = registrationDate == null ? new Date() : registrationDate;
         this.lifeTimeInSec = lifetime == null ? DEFAULT_LIFETIME_IN_SEC : lifetime;
         this.lwM2mVersion = lwM2mVersion == null ? DEFAULT_LWM2M_VERSION : lwM2mVersion;
         this.bindingMode = binding == null ? BindingMode.U : binding;
