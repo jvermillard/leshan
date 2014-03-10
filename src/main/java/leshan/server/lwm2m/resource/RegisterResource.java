@@ -19,14 +19,14 @@
  */
 package leshan.server.lwm2m.resource;
 
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import leshan.server.lwm2m.client.BindingMode;
 import leshan.server.lwm2m.client.Client;
-import leshan.server.lwm2m.client.ClientRegistrationException;
 import leshan.server.lwm2m.client.ClientRegistry;
+import leshan.server.lwm2m.client.ClientUpdate;
 
+import org.apache.commons.io.Charsets;
 import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,51 +66,88 @@ public class RegisterResource extends ResourceBase {
 
         LOG.debug("POST received : {}", request);
 
-        if (Type.CON.equals(request.getType())) {
-
-            // register
-            String registrationId = RegisterResource.createRegistrationId();
-
-            String endpoint = null;
-            Long lifetime = null;
-            String smsNumber = null;
-            String lwVersion = null;
-            BindingMode binding = null;
-
-            try {
-
-                for (String param : request.getOptions().getURIQueries()) {
-                    if (param.startsWith("ep=")) {
-                        endpoint = param.substring(3);
-                    } else if (param.startsWith("lt=")) {
-                        lifetime = Long.valueOf(param.substring(3));
-                    } else if (param.startsWith("sms=")) {
-                        smsNumber = param.substring(4);
-                    } else if (param.startsWith("lwm2m=")) {
-                        lwVersion = param.substring(6);
-                    } else if (param.startsWith("b=")) {
-                        binding = BindingMode.valueOf(param.substring(2));
-                    }
-                }
-                String[] objectLinks = new String(request.getPayload(), "UTF-8").split(",");
-
-                Client client = new Client(registrationId, endpoint, request.getSource(), request.getSourcePort(),
-                        lwVersion, lifetime, smsNumber, binding, objectLinks);
-
-                registry.registerClient(client);
-                LOG.info("New registered client: {}", client);
-
-                exchange.setLocationPath(RESOURCE_NAME + "/" + client.getRegistrationId());
-                exchange.respond(ResponseCode.CREATED);
-
-            } catch (UnsupportedEncodingException | ClientRegistrationException e) {
-                LOG.error("Registration failed for client " + endpoint, e);
-                exchange.respond(ResponseCode.BAD_REQUEST);
-            }
-
-        } else {
+        if (!Type.CON.equals(request.getType())) {
             exchange.respond(ResponseCode.BAD_REQUEST);
+            return;
         }
+
+        // register
+        String registrationId = RegisterResource.createRegistrationId();
+
+        String endpoint = null;
+        Long lifetime = null;
+        String smsNumber = null;
+        String lwVersion = null;
+        BindingMode binding = null;
+
+        for (String param : request.getOptions().getURIQueries()) {
+            if (param.startsWith("ep=")) {
+                endpoint = param.substring(3);
+            } else if (param.startsWith("lt=")) {
+                lifetime = Long.valueOf(param.substring(3));
+            } else if (param.startsWith("sms=")) {
+                smsNumber = param.substring(4);
+            } else if (param.startsWith("lwm2m=")) {
+                lwVersion = param.substring(6);
+            } else if (param.startsWith("b=")) {
+                binding = BindingMode.valueOf(param.substring(2));
+            }
+        }
+        String[] objectLinks = new String(request.getPayload(), Charsets.UTF_8).split(",");
+
+        Client client = new Client(registrationId, endpoint, request.getSource(), request.getSourcePort(), lwVersion,
+                lifetime, smsNumber, binding, objectLinks);
+
+        registry.registerClient(client);
+        LOG.info("New registered client: {}", client);
+
+        exchange.setLocationPath(RESOURCE_NAME + "/" + client.getRegistrationId());
+        exchange.respond(ResponseCode.CREATED);
+    }
+
+    @Override
+    public void handlePUT(CoapExchange exchange) {
+        Request request = exchange.advanced().getRequest();
+
+        LOG.debug("UPDATE received : {}", request);
+        if (!Type.CON.equals(request.getType())) {
+            exchange.respond(ResponseCode.BAD_REQUEST);
+            return;
+        }
+
+        List<String> uri = exchange.getRequestOptions().getURIPaths();
+        if (uri == null || uri.size() != 2 || !RESOURCE_NAME.equals(uri.get(0))) {
+            exchange.respond(ResponseCode.NOT_FOUND);
+            return;
+        }
+
+        String registrationId = uri.get(1);
+
+        Long lifetime = null;
+        String smsNumber = null;
+        String lwVersion = null;
+        BindingMode binding = null;
+        for (String param : request.getOptions().getURIQueries()) {
+            if (param.startsWith("lt=")) {
+                lifetime = Long.valueOf(param.substring(3));
+            } else if (param.startsWith("sms=")) {
+                smsNumber = param.substring(4);
+            } else if (param.startsWith("lwm2m=")) {
+                lwVersion = param.substring(6);
+            } else if (param.startsWith("b=")) {
+                binding = BindingMode.valueOf(param.substring(2));
+            }
+        }
+        ClientUpdate client = new ClientUpdate(registrationId, request.getSource(), request.getSourcePort(), lwVersion,
+                lifetime, smsNumber, binding, null);
+
+        Client c = registry.updateClient(client);
+        if (c == null) {
+            exchange.respond(ResponseCode.NOT_FOUND);
+        } else {
+            exchange.respond(ResponseCode.CHANGED);
+        }
+
     }
 
     @Override
@@ -120,11 +157,7 @@ public class RegisterResource extends ResourceBase {
         Client unregistered = null;
         List<String> uri = exchange.getRequestOptions().getURIPaths();
         if (uri != null && uri.size() == 2 && RESOURCE_NAME.equals(uri.get(0))) {
-            try {
-                unregistered = registry.deregisterClient(uri.get(1));
-            } catch (ClientRegistrationException e) {
-                LOG.error("Deregistration failed for client with registrationId " + uri.get(1), e);
-            }
+            unregistered = registry.deregisterClient(uri.get(1));
         }
 
         if (unregistered != null) {

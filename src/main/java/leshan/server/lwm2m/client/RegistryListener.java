@@ -32,6 +32,13 @@ public interface RegistryListener {
     void registered(Client client);
 
     /**
+     * Invoked when a client has been updated.
+     * 
+     * @param clientUpdated the client after the update
+     */
+    void updated(Client clientUpdated);
+
+    /**
      * Invoked when a new client has been unregistered from the server.
      * 
      * @param client

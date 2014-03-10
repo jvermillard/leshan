@@ -28,13 +28,11 @@ import org.apache.commons.lang.Validate;
 /**
  * A LW-M2M client registered on the server
  */
-public class Client {
+public class ClientUpdate {
 
     private static final long DEFAULT_LIFETIME_IN_SEC = 86400L;
 
     private static final String DEFAULT_LWM2M_VERSION = "1.0";
-
-    private final Date registrationDate;
 
     private InetAddress address;
 
@@ -48,34 +46,27 @@ public class Client {
 
     private BindingMode bindingMode;
 
-    private final String endpoint;
-
     private final String registrationId;
 
     private final String[] objectLinks;
 
-    public Client(String registrationId, String endpoint, InetAddress address, int port) {
-        this(registrationId, endpoint, address, port, null, null, null, null, null);
+    public ClientUpdate(String registrationId, InetAddress address, int port) {
+        this(registrationId, address, port, null, null, null, null, null);
     }
 
-    public Client(String registrationId, String endpoint, InetAddress address, int port, String lwM2mVersion,
-            Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks) {
-        this(registrationId, endpoint, address, port, lwM2mVersion, lifetime, smsNumber, binding, objectLinks, null);
+    public ClientUpdate(String registrationId, InetAddress address, int port, String lwM2mVersion, Long lifetime,
+            String smsNumber, BindingMode binding, String[] objectLinks) {
+        this(registrationId, address, port, lwM2mVersion, lifetime, smsNumber, binding, objectLinks, null);
     }
 
-    public Client(String registrationId, String endpoint, InetAddress address, int port, String lwM2mVersion,
-            Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks, Date registrationDate) {
+    public ClientUpdate(String registrationId, InetAddress address, int port, String lwM2mVersion, Long lifetime,
+            String smsNumber, BindingMode binding, String[] objectLinks, Date registrationDate) {
 
-        Validate.notEmpty(endpoint);
-        Validate.notNull(address);
-        Validate.notNull(port);
-
+        Validate.notEmpty(registrationId);
         this.registrationId = registrationId;
-        this.endpoint = endpoint;
         this.address = address;
         this.port = port;
         this.objectLinks = objectLinks;
-        this.registrationDate = registrationDate == null ? new Date() : registrationDate;
         this.lifeTimeInSec = lifetime == null ? DEFAULT_LIFETIME_IN_SEC : lifetime;
         this.lwM2mVersion = lwM2mVersion == null ? DEFAULT_LWM2M_VERSION : lwM2mVersion;
         this.bindingMode = binding == null ? BindingMode.U : binding;
@@ -84,10 +75,6 @@ public class Client {
 
     public String getRegistrationId() {
         return registrationId;
-    }
-
-    public Date getRegistrationDate() {
-        return registrationDate;
     }
 
     public InetAddress getAddress() {
@@ -118,10 +105,6 @@ public class Client {
         return bindingMode;
     }
 
-    public String getEndpoint() {
-        return endpoint;
-    }
-
     public void setAddress(InetAddress address) {
         this.address = address;
     }
@@ -148,10 +131,8 @@ public class Client {
 
     @Override
     public String toString() {
-        return "Client [registrationDate=" + registrationDate + ", address=" + address + ", port=" + port
-                + ", lifeTimeInSec=" + lifeTimeInSec + ", smsNumber=" + smsNumber + ", lwM2mVersion=" + lwM2mVersion
-                + ", bindingMode=" + bindingMode + ", endpoint=" + endpoint + ", registrationId=" + registrationId
-                + ", objectLinks=" + Arrays.toString(objectLinks) + "]";
+        return "ClientUpdate [address=" + address + ", port=" + port + ", lifeTimeInSec=" + lifeTimeInSec
+                + ", smsNumber=" + smsNumber + ", lwM2mVersion=" + lwM2mVersion + ", bindingMode=" + bindingMode
+                + ", registrationId=" + registrationId + ", objectLinks=" + Arrays.toString(objectLinks) + "]";
     }
-
 }

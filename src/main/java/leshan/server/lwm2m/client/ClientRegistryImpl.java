@@ -60,7 +60,7 @@ public class ClientRegistryImpl implements ClientRegistry {
     }
 
     @Override
-    public Client registerClient(Client client) throws ClientRegistrationException {
+    public Client registerClient(Client client) {
         LOG.debug("Registering new client: {}", client);
 
         Client previous = clientsByEp.put(client.getEndpoint(), client);
@@ -77,7 +77,39 @@ public class ClientRegistryImpl implements ClientRegistry {
     }
 
     @Override
-    public Client deregisterClient(String registrationId) throws ClientRegistrationException {
+    public Client updateClient(ClientUpdate clientUpdated) {
+        LOG.debug("Updating registration for client: {}", clientUpdated);
+        Validate.notNull(clientUpdated.getRegistrationId());
+        for (Client client : clientsByEp.values()) {
+            if (clientUpdated.getRegistrationId().equals(client.getRegistrationId())) {
+                // update client
+                if (clientUpdated.getAddress() != null) {
+                    client.setAddress(clientUpdated.getAddress());
+                }
+
+                if (clientUpdated.getPort() > 0) {
+                    client.setPort(clientUpdated.getPort());
+                }
+
+                if (clientUpdated.getLwM2mVersion() != null) {
+                    client.setLwM2mVersion(clientUpdated.getLwM2mVersion());
+                }
+
+                if (clientUpdated.getBindingMode() != null) {
+                    client.setBindingMode(clientUpdated.getBindingMode());
+                }
+
+                if (clientUpdated.getSmsNumber() != null) {
+                    client.setSmsNumber(clientUpdated.getSmsNumber());
+                }
+                return client;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Client deregisterClient(String registrationId) {
         LOG.debug("Deregistering client with registrationId: {}", registrationId);
         Validate.notNull(registrationId);
 

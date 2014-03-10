@@ -60,16 +60,22 @@ public interface ClientRegistry {
      * 
      * @param client the client to register, identified by its end-point.
      * @return the previously registered client with this end-point or <code>null</code> if this is a new client.
-     * @throws ClientRegistrationException if the registration has failed
      */
-    Client registerClient(Client client) throws ClientRegistrationException;
+    Client registerClient(Client client);
+
+    /**
+     * Update a client registration
+     * 
+     * @param client the client containing the values to update
+     * @return the registered client or <code>null</code>
+     */
+    Client updateClient(ClientUpdate update);
 
     /**
      * De-register a client.
      * 
      * @param registrationId the client registrationId
      * @return the previously registered client or <code>null</code>
-     * @throws ClientRegistrationException if the de-registration has failed
      */
-    Client deregisterClient(String registrationId) throws ClientRegistrationException;
+    Client deregisterClient(String registrationId);
 }
