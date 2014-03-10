@@ -17,11 +17,10 @@
  *  under the License.
  *
  */
-package leshan.server.lwm2m;
+package leshan.server.lwm2m.client;
 
 import java.io.UnsupportedEncodingException;
 
-import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ContentFormat;
 import leshan.server.lwm2m.message.ContentResponse;

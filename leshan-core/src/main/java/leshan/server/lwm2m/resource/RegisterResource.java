@@ -145,6 +145,69 @@ public class RegisterResource extends ResourceBase {
 
     }
 
+    /**
+     * Updates the LWM2MClient's registration with the server.
+     * 
+     * @param exchange the CoAP exchange containing the request params
+     */
+    @Override
+    public void handlePUT(CoapExchange exchange)
+    {
+        Client client = null;
+        List<String> uri = exchange.getRequestOptions().getURIPaths();
+        if (uri != null && uri.size() == 2 && RESOURCE_NAME.equals(uri.get(0))) {
+             client = registry.getById(uri.get(1));
+        }
+
+        if (client != null) {
+            exchange.respond(ResponseCode.DELETED);
+        } else {
+            LOG.debug("Invalid deregistration");
+            exchange.respond(ResponseCode.BAD_REQUEST);
+        }
+        
+    	Long lifetime = null;
+    	String smsNumber = null;
+    	BindingMode bindingMode = null;
+    	String[] objectLinks = null;
+
+    	try {
+        	for( String param : exchange.getRequestOptions().getURIQueries() )
+            {
+              if( param.startsWith( "lt=" ) )
+              {
+                 lifetime = Long.valueOf( param.substring( 3 ) );
+              }
+              else if( param.startsWith( "sms=" ) )
+              {
+                 smsNumber = param.substring( 4 );
+              }
+              else if( param.startsWith( "b=" ) )
+              {
+                 bindingMode = BindingMode.valueOf( param.substring( 2 ) );
+              }
+            }
+
+        	if (exchange.getRequestPayload() != null) {
+            	objectLinks = new String(exchange.getRequestPayload(), "UTF-8").split(",");
+        	}
+
+        	client.update(exchange.getSourceAddress(), exchange.getSourcePort(), lifetime, smsNumber, bindingMode, objectLinks);
+        	exchange.respond( ResponseCode.CHANGED );
+        	registry.notifyListeners(client);
+
+        	LOG.debug(
+        			"Client with registration ID {} and endpoint {} updated its registration with server for another {} secs",
+        			this.getName(), client.getEndpoint(), client.getLifeTimeInSec() );
+
+    	} catch (UnsupportedEncodingException e) {
+            LOG.error("Cannot decode request payload", e);
+            exchange.respond(ResponseCode.INTERNAL_SERVER_ERROR);
+    	} catch (NumberFormatException e) {
+    		exchange.respond(ResponseCode.BAD_REQUEST);
+    	}
+    }
+
     /*
      * Override the default behavior so that requests to sub resources (typically /rd/{client-reg-id}) are handled by
      * /rd resource.

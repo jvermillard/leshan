@@ -21,6 +21,7 @@ package leshan.server.lwm2m.client;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -35,7 +36,8 @@ public class ClientRegistryImpl implements ClientRegistry {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientRegistryImpl.class);
 
-    private ConcurrentHashMap<String /* end-point */, Client> clientsByEp = new ConcurrentHashMap<>();
+    private Map<String /* end-point */, Client> clientsByEp = new ConcurrentHashMap<>();
+    private Map<String /* id */, Client> clientsById = new ConcurrentHashMap<>();
 
     private List<RegistryListener> listeners = new CopyOnWriteArrayList<>();
 
@@ -58,11 +60,17 @@ public class ClientRegistryImpl implements ClientRegistry {
     public Client get(String endpoint) {
         return clientsByEp.get(endpoint);
     }
+    
+    @Override
+    public Client getById(String id) {
+    	return clientsById.get(id);
+    }
 
     @Override
     public Client registerClient(Client client) throws ClientRegistrationException {
         LOG.debug("Registering new client: {}", client);
 
+        clientsById.put(client.getRegistrationId(), client);
         Client previous = clientsByEp.put(client.getEndpoint(), client);
         if (previous != null) {
             for (RegistryListener l : listeners) {

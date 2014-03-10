@@ -35,6 +35,14 @@ public interface ClientRegistry {
     Client get(String endpoint);
 
     /**
+     * Gets a registered client by its ID.
+     * 
+     * @param id the id
+     * @return the client or <code>null</code> if no client is registered under the given id
+     */
+    Client getById(String id);
+    
+    /**
      * Return the list of all registered clients
      * 
      * @return the registered clients
