@@ -145,22 +145,6 @@ public class RegisterResource extends ResourceBase {
         return this;
     }
 
-    /*
-     * private void addObjectResources(Resource client, String[] objectLinks) {
-     * LOG.debug("Available objects for client {}: {}", client.getName(), objectLinks);
-     * 
-     * for (String link : objectLinks) {
-     * 
-     * // String valid = StringUtils.substringBetween(link.trim(), "<", ">"); // HACK for liblwm2m client String valid =
-     * link.trim();
-     * 
-     * // TODO rt and ct parameters
-     * 
-     * if (valid != null) { Resource current = client; for (String objectName : valid.split("/")) { Resource child =
-     * current.getChild(objectName); if (child == null) { child = new ObjectResource(objectName); current.add(child);
-     * LOG.debug("New object resource created: {}", child.getName()); } current = child; } } } }
-     */
-
     private static String createRegistrationId() {
         return RandomStringUtils.random(10, true, true);
     }
