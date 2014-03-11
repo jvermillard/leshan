@@ -66,43 +66,55 @@ public class RegisterResource extends ResourceBase {
 
         LOG.debug("POST received : {}", request);
 
+        // TODO: is this required? the spec does not say anything about the necessity to use a CON or NON message
         if (!Type.CON.equals(request.getType())) {
             exchange.respond(ResponseCode.BAD_REQUEST);
             return;
         }
 
-        // register
-        String registrationId = RegisterResource.createRegistrationId();
+        // TODO: assert content media type is APPLICATION LINK FORMAT?
 
-        String endpoint = null;
-        Long lifetime = null;
-        String smsNumber = null;
-        String lwVersion = null;
-        BindingMode binding = null;
+        try {
+            String endpoint = null;
+            Long lifetime = null;
+            String smsNumber = null;
+            String lwVersion = null;
+            BindingMode binding = null;
 
-        for (String param : request.getOptions().getURIQueries()) {
-            if (param.startsWith("ep=")) {
-                endpoint = param.substring(3);
-            } else if (param.startsWith("lt=")) {
-                lifetime = Long.valueOf(param.substring(3));
-            } else if (param.startsWith("sms=")) {
-                smsNumber = param.substring(4);
-            } else if (param.startsWith("lwm2m=")) {
-                lwVersion = param.substring(6);
-            } else if (param.startsWith("b=")) {
-                binding = BindingMode.valueOf(param.substring(2));
+            for (String param : request.getOptions().getURIQueries()) {
+                if (param.startsWith("ep=")) {
+                    endpoint = param.substring(3);
+                } else if (param.startsWith("lt=")) {
+                    lifetime = Long.valueOf(param.substring(3));
+                } else if (param.startsWith("sms=")) {
+                    smsNumber = param.substring(4);
+                } else if (param.startsWith("lwm2m=")) {
+                    lwVersion = param.substring(6);
+                } else if (param.startsWith("b=")) {
+                    binding = BindingMode.valueOf(param.substring(2));
+                }
             }
+
+            if (endpoint == null || endpoint.isEmpty()) {
+                exchange.respond( ResponseCode.BAD_REQUEST, "Client must specify an endpoint identifier" );
+            } else {
+                // register
+                String registrationId = RegisterResource.createRegistrationId();
+
+                String[] objectLinks = new String(request.getPayload(), Charsets.UTF_8).split(",");
+
+                Client client = new Client(registrationId, endpoint, request.getSource(), request.getSourcePort(), lwVersion,
+                        lifetime, smsNumber, binding, objectLinks);
+
+                registry.registerClient(client);
+                LOG.debug("New registered client: {}", client);
+
+                exchange.setLocationPath(RESOURCE_NAME + "/" + client.getRegistrationId());
+                exchange.respond(ResponseCode.CREATED);
+            }
+        } catch (NumberFormatException e) {
+            exchange.respond(ResponseCode.BAD_REQUEST, "Lifetime parameter must be a valid number");
         }
-        String[] objectLinks = new String(request.getPayload(), Charsets.UTF_8).split(",");
-
-        Client client = new Client(registrationId, endpoint, request.getSource(), request.getSourcePort(), lwVersion,
-                lifetime, smsNumber, binding, objectLinks);
-
-        registry.registerClient(client);
-        LOG.info("New registered client: {}", client);
-
-        exchange.setLocationPath(RESOURCE_NAME + "/" + client.getRegistrationId());
-        exchange.respond(ResponseCode.CREATED);
     }
 
     @Override

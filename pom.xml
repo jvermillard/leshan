@@ -23,10 +23,16 @@
     <groupId>leshan</groupId>
     <artifactId>leshan-server</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
-    <name>leshan-server</name>
-    <url>http://qithub.org/jvermillard</url>
+    <name>leshan</name>
+    <url>http://github.com/jvermillard/leshan</url>
+    <description>A  Lightweight M2M Server implementation based on Californium</description>
+
+    <modules>
+        <module>leshan-core</module>
+        <module>leshan-standalone</module>
+    </modules>
 
     <scm>
         <developerConnection>scm:git:ssh://git@github.com:jvermillard/leshan.git</developerConnection>
@@ -52,63 +58,8 @@
      </distributionManagement>
 
     <dependencies>
-
-        <dependency>
-            <groupId>ch.ethz.inf.vs</groupId>
-            <artifactId>californium</artifactId>
-            <version>0.18.2-SNAPSHOT</version>
-        </dependency>
-
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>2.6</version>
-        </dependency>
-
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.8</version>
-        </dependency>
-
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.4</version>
-        </dependency>
-
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.0.9</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-webapp</artifactId>
-            <version>9.0.4.v20130625</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-continuation</artifactId>
-            <version>9.0.4.v20130625</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.2.4</version>
-        </dependency>
-
-        <!-- test dependencies -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
+
     <profiles>
         <profile>
             <!-- This profile includes all the tests, even the integration ones -->
@@ -121,8 +72,6 @@
             </properties>
         </profile>
     </profiles>
-
-
 
     <repositories>
         <repository>
@@ -207,6 +156,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.16</version>
                 <configuration>
                     <excludes>
                         <exclude>**/*$*</exclude>
@@ -229,4 +179,34 @@
             </plugins>
         </pluginManagement>
     </build>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>ch.ethz.inf.vs</groupId>
+                <artifactId>californium</artifactId>
+                <version>0.18.2-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>1.7.0</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>2.6</version>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.11</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>2.4</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>
