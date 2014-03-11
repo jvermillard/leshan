@@ -3,8 +3,8 @@ package leshan.server.lwm2m.osgi;
 import java.util.Collection;
 
 import leshan.server.lwm2m.client.Client;
-import leshan.server.lwm2m.client.ClientRegistrationException;
 import leshan.server.lwm2m.client.ClientRegistry;
+import leshan.server.lwm2m.client.ClientUpdate;
 import leshan.server.lwm2m.client.RegistryListener;
 
 /**
@@ -19,12 +19,6 @@ public class OsgiBasedClientRegistry implements ClientRegistry {
 
 	@Override
 	public Client get(String endpoint) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Client getById(String id) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -48,24 +42,22 @@ public class OsgiBasedClientRegistry implements ClientRegistry {
 	}
 
 	@Override
-	public Client registerClient(Client client)
-			throws ClientRegistrationException {
+	public Client registerClient(Client client) {
 		// TODO instantiate LWM2MDevice as wrapper around Client object and register as
 		// DEVICE in OSGi registry
 		return null;
 	}
 
 	@Override
-	public Client deregisterClient(String registrationId)
-			throws ClientRegistrationException {
+	public Client deregisterClient(String registrationId) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void notifyListeners(Client updatedClient) {
+	public Client updateClient(ClientUpdate update) {
 		// TODO Auto-generated method stub
-
+		return null;
 	}
 
 }

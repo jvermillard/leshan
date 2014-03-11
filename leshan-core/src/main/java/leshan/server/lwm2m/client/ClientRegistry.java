@@ -35,14 +35,6 @@ public interface ClientRegistry {
     Client get(String endpoint);
 
     /**
-     * Gets a registered client by its ID.
-     * 
-     * @param id the id
-     * @return the client or <code>null</code> if no client is registered under the given id
-     */
-    Client getById(String id);
-    
-    /**
      * Return the list of all registered clients
      * 
      * @return the registered clients
@@ -64,32 +56,26 @@ public interface ClientRegistry {
     void removeListener(RegistryListener listener);
 
     /**
-     * Registers a new client.
+     * Register a new client
      * 
-     * If the registry already contains a client with the same end-point identifier,
-     * the original client object is replaced with the new one and listeners are
-     * notified of both the de-registration of the original client and the registration
-     * of the new one.
-     *  
      * @param client the client to register, identified by its end-point.
      * @return the previously registered client with this end-point or <code>null</code> if this is a new client.
-     * @throws ClientRegistrationException if the registration has failed
      */
-    Client registerClient(Client client) throws ClientRegistrationException;
+    Client registerClient(Client client);
 
     /**
-     * De-registers a client.
+     * Update a client registration
+     * 
+     * @param client the client containing the values to update
+     * @return the registered client or <code>null</code>
+     */
+    Client updateClient(ClientUpdate update);
+
+    /**
+     * De-register a client.
      * 
      * @param registrationId the client registrationId
      * @return the previously registered client or <code>null</code>
-     * @throws ClientRegistrationException if the de-registration has failed
      */
-    Client deregisterClient(String registrationId) throws ClientRegistrationException;
-    
-    /**
-     * Notifies all registered listeners about an updated client.
-     * 
-     * @param updatedClient the client
-     */
-    void notifyListeners(Client updatedClient);
+    Client deregisterClient(String registrationId);
 }

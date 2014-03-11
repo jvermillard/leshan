@@ -19,21 +19,20 @@
  */
 package leshan.server.lwm2m.resource;
 
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import leshan.server.lwm2m.client.BindingMode;
 import leshan.server.lwm2m.client.Client;
-import leshan.server.lwm2m.client.ClientRegistrationException;
 import leshan.server.lwm2m.client.ClientRegistry;
+import leshan.server.lwm2m.client.ClientUpdate;
 
+import org.apache.commons.io.Charsets;
 import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.coap.CoAP.Type;
-import ch.ethz.inf.vs.californium.coap.MediaTypeRegistry;
 import ch.ethz.inf.vs.californium.coap.Request;
 import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
 import ch.ethz.inf.vs.californium.server.resources.Resource;
@@ -67,59 +66,100 @@ public class RegisterResource extends ResourceBase {
 
         LOG.debug("POST received : {}", request);
 
-        if (Type.CON.equals(request.getType())
-        		&& MediaTypeRegistry.APPLICATION_LINK_FORMAT == request.getOptions().getContentFormat() ) {
-
-            // register
-            String registrationId = RegisterResource.createRegistrationId();
-
-            String endpoint = null;
-            Long lifetime = null;
-            String smsNumber = null;
-            String lwVersion = null;
-            BindingMode binding = null;
-
-            try {
-
-                for (String param : request.getOptions().getURIQueries()) {
-                    if (param.startsWith("ep=")) {
-                        endpoint = param.substring(3);
-                    } else if (param.startsWith("lt=")) {
-                        lifetime = Long.valueOf(param.substring(3));
-                    } else if (param.startsWith("sms=")) {
-                        smsNumber = param.substring(4);
-                    } else if (param.startsWith("lwm2m=")) {
-                        lwVersion = param.substring(6);
-                    } else if (param.startsWith("b=")) {
-                        binding = BindingMode.valueOf(param.substring(2));
-                    }
-                }
-                
-                if( endpoint == null || endpoint.isEmpty() ) {
-                   exchange.respond( ResponseCode.BAD_REQUEST, "Client must specify an endpoint identifier" );
-                } else {
-
-	                String[] objectLinks = new String(request.getPayload(), "UTF-8").split(",");
-
-                	Client client = new Client(registrationId, endpoint, request.getSource(), request.getSourcePort(),
-                        	lwVersion, lifetime, smsNumber, binding, objectLinks);
-
-                	registry.registerClient(client);
-                	LOG.debug("New registered client: {}", client);
-
-                	exchange.setLocationPath(RESOURCE_NAME + "/" + client.getRegistrationId());
-                	exchange.respond(ResponseCode.CREATED);
-				}
-            } catch (UnsupportedEncodingException | ClientRegistrationException e) {
-                LOG.debug("Registration failed for client " + endpoint, e);
-                exchange.respond(ResponseCode.INTERNAL_SERVER_ERROR);
-            } catch (NumberFormatException e) {
-            	exchange.respond(ResponseCode.BAD_REQUEST, "Lifetime param is not a valid number");
-            }
-
-        } else {
+        // TODO: is this required? the spec does not say anything about the necessity to use a CON or NON message
+        if (!Type.CON.equals(request.getType())) {
             exchange.respond(ResponseCode.BAD_REQUEST);
+            return;
         }
+        
+        // TODO: assert content media type is APPLICATION LINK FORMAT?
+
+        try {
+	        String endpoint = null;
+	        Long lifetime = null;
+	        String smsNumber = null;
+	        String lwVersion = null;
+	        BindingMode binding = null;
+	
+	        for (String param : request.getOptions().getURIQueries()) {
+	            if (param.startsWith("ep=")) {
+	                endpoint = param.substring(3);
+	            } else if (param.startsWith("lt=")) {
+	                lifetime = Long.valueOf(param.substring(3));
+	            } else if (param.startsWith("sms=")) {
+	                smsNumber = param.substring(4);
+	            } else if (param.startsWith("lwm2m=")) {
+	                lwVersion = param.substring(6);
+	            } else if (param.startsWith("b=")) {
+	                binding = BindingMode.valueOf(param.substring(2));
+	            }
+	        }
+	        
+	        if (endpoint == null || endpoint.isEmpty()) {
+	            exchange.respond( ResponseCode.BAD_REQUEST, "Client must specify an endpoint identifier" );
+	        } else {
+	            // register
+	            String registrationId = RegisterResource.createRegistrationId();
+	
+		        String[] objectLinks = new String(request.getPayload(), Charsets.UTF_8).split(",");
+		
+		        Client client = new Client(registrationId, endpoint, request.getSource(), request.getSourcePort(), lwVersion,
+		                lifetime, smsNumber, binding, objectLinks);
+		
+		        registry.registerClient(client);
+		        LOG.debug("New registered client: {}", client);
+		
+		        exchange.setLocationPath(RESOURCE_NAME + "/" + client.getRegistrationId());
+		        exchange.respond(ResponseCode.CREATED);
+	        }
+        } catch (NumberFormatException e) {
+        	exchange.respond(ResponseCode.BAD_REQUEST, "Lifetime parameter must be a valid number");
+        }
+    }
+
+    @Override
+    public void handlePUT(CoapExchange exchange) {
+        Request request = exchange.advanced().getRequest();
+
+        LOG.debug("UPDATE received : {}", request);
+        if (!Type.CON.equals(request.getType())) {
+            exchange.respond(ResponseCode.BAD_REQUEST);
+            return;
+        }
+
+        List<String> uri = exchange.getRequestOptions().getURIPaths();
+        if (uri == null || uri.size() != 2 || !RESOURCE_NAME.equals(uri.get(0))) {
+            exchange.respond(ResponseCode.NOT_FOUND);
+            return;
+        }
+
+        String registrationId = uri.get(1);
+
+        Long lifetime = null;
+        String smsNumber = null;
+        String lwVersion = null;
+        BindingMode binding = null;
+        for (String param : request.getOptions().getURIQueries()) {
+            if (param.startsWith("lt=")) {
+                lifetime = Long.valueOf(param.substring(3));
+            } else if (param.startsWith("sms=")) {
+                smsNumber = param.substring(4);
+            } else if (param.startsWith("lwm2m=")) {
+                lwVersion = param.substring(6);
+            } else if (param.startsWith("b=")) {
+                binding = BindingMode.valueOf(param.substring(2));
+            }
+        }
+        ClientUpdate client = new ClientUpdate(registrationId, request.getSource(), request.getSourcePort(), lwVersion,
+                lifetime, smsNumber, binding, null);
+
+        Client c = registry.updateClient(client);
+        if (c == null) {
+            exchange.respond(ResponseCode.NOT_FOUND);
+        } else {
+            exchange.respond(ResponseCode.CHANGED);
+        }
+
     }
 
     @Override
@@ -129,11 +169,7 @@ public class RegisterResource extends ResourceBase {
         Client unregistered = null;
         List<String> uri = exchange.getRequestOptions().getURIPaths();
         if (uri != null && uri.size() == 2 && RESOURCE_NAME.equals(uri.get(0))) {
-            try {
-                unregistered = registry.deregisterClient(uri.get(1));
-            } catch (ClientRegistrationException e) {
-                LOG.error("Deregistration failed for client with registrationId " + uri.get(1), e);
-            }
+            unregistered = registry.deregisterClient(uri.get(1));
         }
 
         if (unregistered != null) {
@@ -143,69 +179,6 @@ public class RegisterResource extends ResourceBase {
             exchange.respond(ResponseCode.BAD_REQUEST);
         }
 
-    }
-
-    /**
-     * Updates the LWM2MClient's registration with the server.
-     * 
-     * @param exchange the CoAP exchange containing the request params
-     */
-    @Override
-    public void handlePUT(CoapExchange exchange)
-    {
-        Client client = null;
-        List<String> uri = exchange.getRequestOptions().getURIPaths();
-        if (uri != null && uri.size() == 2 && RESOURCE_NAME.equals(uri.get(0))) {
-             client = registry.getById(uri.get(1));
-        }
-
-        if (client != null) {
-            exchange.respond(ResponseCode.DELETED);
-        } else {
-            LOG.debug("Invalid deregistration");
-            exchange.respond(ResponseCode.BAD_REQUEST);
-        }
-        
-    	Long lifetime = null;
-    	String smsNumber = null;
-    	BindingMode bindingMode = null;
-    	String[] objectLinks = null;
-
-    	try {
-        	for( String param : exchange.getRequestOptions().getURIQueries() )
-            {
-              if( param.startsWith( "lt=" ) )
-              {
-                 lifetime = Long.valueOf( param.substring( 3 ) );
-              }
-              else if( param.startsWith( "sms=" ) )
-              {
-                 smsNumber = param.substring( 4 );
-              }
-              else if( param.startsWith( "b=" ) )
-              {
-                 bindingMode = BindingMode.valueOf( param.substring( 2 ) );
-              }
-            }
-
-        	if (exchange.getRequestPayload() != null) {
-            	objectLinks = new String(exchange.getRequestPayload(), "UTF-8").split(",");
-        	}
-
-        	client.update(exchange.getSourceAddress(), exchange.getSourcePort(), lifetime, smsNumber, bindingMode, objectLinks);
-        	exchange.respond( ResponseCode.CHANGED );
-        	registry.notifyListeners(client);
-
-        	LOG.debug(
-        			"Client with registration ID {} and endpoint {} updated its registration with server for another {} secs",
-        			this.getName(), client.getEndpoint(), client.getLifeTimeInSec() );
-
-    	} catch (UnsupportedEncodingException e) {
-            LOG.error("Cannot decode request payload", e);
-            exchange.respond(ResponseCode.INTERNAL_SERVER_ERROR);
-    	} catch (NumberFormatException e) {
-    		exchange.respond(ResponseCode.BAD_REQUEST);
-    	}
     }
 
     /*

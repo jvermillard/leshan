@@ -44,7 +44,7 @@ public class Client {
 
     private String smsNumber;
 
-    private final String lwM2mVersion;
+    private String lwM2mVersion;
 
     private BindingMode bindingMode;
 
@@ -52,18 +52,18 @@ public class Client {
 
     private final String registrationId;
 
-    private String[] objectLinks;
+    private final String[] objectLinks;
 
-    public Client(String registrationId, String endpoint, InetAddress address, Integer port) {
+    public Client(String registrationId, String endpoint, InetAddress address, int port) {
         this(registrationId, endpoint, address, port, null, null, null, null, null);
     }
 
-    public Client(String registrationId, String endpoint, InetAddress address, Integer port, String lwM2mVersion,
+    public Client(String registrationId, String endpoint, InetAddress address, int port, String lwM2mVersion,
             Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks) {
         this(registrationId, endpoint, address, port, lwM2mVersion, lifetime, smsNumber, binding, objectLinks, null);
     }
 
-    public Client(String registrationId, String endpoint, InetAddress address, Integer port, String lwM2mVersion,
+    public Client(String registrationId, String endpoint, InetAddress address, int port, String lwM2mVersion,
             Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks, Date registrationDate) {
 
         Validate.notEmpty(endpoint);
@@ -122,42 +122,30 @@ public class Client {
         return endpoint;
     }
 
-    /**
-     * Updates a client's registration.
-     * 
-     * @param address the client's IP address
-     * @param port the port the client's CoAP endpoint is listening on
-     * @param lifetime the client's lifetime in seconds or <code>null</code> if the lifetime has not changed
-     * since the client's last update of the registration
-     * @param smsNumber the client's SMS number or <code>null</code> if the number has not changed since the
-     * client's last update of the registration
-     * @param binding the binding mode currently supported by the client as defined in section 5.2.1.1 of the LWM2M spec
-     * or <code>null</code> if the supported mode has not changed since the client's last update of the registration
-     * @param objectLinks the object types and instances supported by the client or <code>null</code> if the types and
-     * instances have not changed since the client's last update of the registration
-     * @throws IllegalArgumentException if the given binding mode is invalid
-     */
-    public void update(InetAddress address, Integer port, Long lifetime, String smsNumber, BindingMode bindingMode, String[] objectLinks) {
-    	if (address != null) {
-    		this.address = address;
-    	}
-    	if (port != null) {
-    		this.port = port;
-    	}
-    	if (lifetime != null) {
-        	this.lifeTimeInSec = lifetime;
-    	}
-    	if (smsNumber != null) {
-    		this.smsNumber = smsNumber;
-    	}
-    	if (bindingMode != null) {
-    		this.bindingMode = bindingMode;
-    	}
-    	if (objectLinks != null) {
-    		this.objectLinks = objectLinks;
-    	}
+    public void setAddress(InetAddress address) {
+        this.address = address;
     }
-    
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public void setLifeTimeInSec(long lifeTimeInSec) {
+        this.lifeTimeInSec = lifeTimeInSec;
+    }
+
+    public void setSmsNumber(String smsNumber) {
+        this.smsNumber = smsNumber;
+    }
+
+    public void setLwM2mVersion(String lwM2mVersion) {
+        this.lwM2mVersion = lwM2mVersion;
+    }
+
+    public void setBindingMode(BindingMode bindingMode) {
+        this.bindingMode = bindingMode;
+    }
+
     @Override
     public String toString() {
         return "Client [registrationDate=" + registrationDate + ", address=" + address + ", port=" + port
