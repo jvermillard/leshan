@@ -31,6 +31,7 @@
     <modules>
     	<module>leshan-core</module>
     	<module>leshan-standalone</module>
+    	<module>leshan-osgi</module>
     </modules>
     
     <scm>
