@@ -32,19 +32,24 @@ package leshan.server.lwm2m.tlv;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class TlvEncoder {
 
+	private static final Logger LOG = LoggerFactory.getLogger(TlvEncoder.class);
+	
     public ByteBuffer encode(Tlv[] tlvs) {
         int size = 0;
-        System.err.println("start");
+        
+        LOG.trace("start");
         for (Tlv tlv : tlvs) {
 
             int length = tlvEncodedLength(tlv);
             size += tlvEncodedSize(tlv, length);
-            System.err.println("tlv size : " + size);
+            LOG.trace("tlv size : {}", size);
         }
-        System.err.println("done");
-        System.err.println("size : " + size);
+        LOG.trace("done\nsize : {}", size);
         ByteBuffer b = ByteBuffer.allocate(size);
         b.order(ByteOrder.BIG_ENDIAN);
         for (Tlv tlv : tlvs) {
@@ -112,7 +117,7 @@ public class TlvEncoder {
             typeByte = 0b11_000000;
             break;
         default:
-            throw new IllegalStateException("unknown TLV type : '" + tlv.getType() + "'");
+            throw new IllegalArgumentException("unknown TLV type : '" + tlv.getType() + "'");
         }
 
         // encode identifier length

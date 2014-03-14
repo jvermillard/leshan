@@ -58,7 +58,7 @@ public class TlvDecoder {
                 type = TlvType.RESOURCE_VALUE;
                 break;
             default:
-                throw new IllegalStateException("unknown type : " + (typeByte & 0b1100_0000));
+                throw new IllegalArgumentException("unknown type : " + (typeByte & 0b1100_0000));
             }
 
             int identifier;
@@ -91,7 +91,7 @@ public class TlvDecoder {
                 length = ((input.get() & 0xFF) << 16) + input.getShort() & 0xFFFF;
                 break;
             default:
-                throw new IllegalStateException("unknown length type : " + (typeByte & 0b0001_1000));
+                throw new IllegalArgumentException("unknown length type : " + (typeByte & 0b0001_1000));
             }
 
             if (type == TlvType.RESOURCE_VALUE || type == TlvType.RESOURCE_INSTANCE) {
