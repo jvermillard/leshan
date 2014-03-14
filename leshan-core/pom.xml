@@ -30,70 +30,75 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>leshan</groupId>
-    <artifactId>leshan-server</artifactId>
-    <version>1.0-SNAPSHOT</version>
-  </parent>
-  <artifactId>leshan-core</artifactId>
-  <packaging>bundle</packaging>
-  <name>leshan - core</name>
-  <description>Core classes for implementing Lightweight M2M</description>
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>leshan</groupId>
+        <artifactId>leshan-server</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>leshan-core</artifactId>
+    <packaging>bundle</packaging>
+    <name>leshan - core</name>
+    <description>Core classes for implementing Lightweight M2M</description>
 
-  <dependencies>
-    <dependency>
-        <groupId>ch.ethz.inf.vs</groupId>
-        <artifactId>californium</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>commons-lang</groupId>
-        <artifactId>commons-lang</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <scope>test</scope>
-    </dependency>
-    <dependency>
-        <groupId>commons-io</groupId>
-        <artifactId>commons-io</artifactId>
-    </dependency>
-    <dependency>
-    	<groupId>ch.qos.logback</groupId>
-    	<artifactId>logback-classic</artifactId>
-    	<scope>test</scope>
-    </dependency>
-  </dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>ch.ethz.inf.vs</groupId>
+            <artifactId>californium</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
-  <build>
-    <plugins>
-         <plugin>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>maven-bundle-plugin</artifactId>
-            <version>2.3.7</version>
-            <extensions>true</extensions>
-            <configuration>
-               <instructions>
-                  <Export-Package>
-                     leshan.server.lwm2m.client,
-                     leshan.server.lwm2m.message,
-                     leshan.server.lwm2m.resource,
-                     leshan.server.lwm2m.tlv
-                  </Export-Package>
-                  <Import-Package>
-                     ch.ethz.inf.vs.californium.*;version="[0.18.2.SNAPSHOT, 0.19)",
-                     org.apache.commons.lang.*;version="[2.6, 3)",
-                     *
-                  </Import-Package>
-                  <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-               </instructions>
-            </configuration>
-         </plugin>
-    </plugins>
-  </build>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.3.7</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Export-Package>
+                            leshan.server.lwm2m.client,
+                            leshan.server.lwm2m.message,
+                            leshan.server.lwm2m.resource,
+                            leshan.server.lwm2m.tlv
+                        </Export-Package>
+                        <Import-Package>
+                            ch.ethz.inf.vs.californium.*;version="[0.18.2.SNAPSHOT, 0.19)",
+                            org.apache.commons.lang.*;version="[2.6, 3)",
+                            *
+                        </Import-Package>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
