@@ -32,12 +32,13 @@ package leshan.server.lwm2m.tlv;
 import java.util.Arrays;
 
 /**
- * a Type-Length-Value container, can contain more TLV.
+ * A Type-Length-Value container, can contain multiple TLV entries.
  */
 public class Tlv {
 
     /**
-     * build a TLV container
+     * Creates a TLV container.
+     * 
      * @param type the type of TLV
      * @param children the list of children TLV (must be <code>null</code> for type {@link TlvType#RESOURCE_VALUE}
      * @param value the raw contained value, only for type {@link TlvType#RESOURCE_VALUE} <code>null</code> for the other types
@@ -110,8 +111,8 @@ public class Tlv {
 
     @Override
     public String toString() {
-        return "Tlv [type=" + type + ", children=" + Arrays.toString(children) + ", value=" + Arrays.toString(value)
-                + ", identifier=" + identifier + "]";
+    	return String.format("Tlv [type=%s, children=%s, value=%s, identifier=%s]",
+    			new Object[]{type.name(), Arrays.toString(children), Arrays.toString(value), Integer.toString(identifier)});
     }
 
     @Override
