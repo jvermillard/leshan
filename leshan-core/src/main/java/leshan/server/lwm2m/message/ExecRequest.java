@@ -29,41 +29,100 @@
  */
 package leshan.server.lwm2m.message;
 
+import leshan.server.lwm2m.client.Client;
+import leshan.server.lwm2m.tlv.Tlv;
+
 /**
- * The request to send an Execute to a client object resource instance.
+ * A request for executing resources on a client.
  */
-public class ExecRequest {
+public class ExecRequest extends WriteRequest {
 
-    private final int objectId;
-
-    private final int objectInstanceId;
-
-    private final int resourceId;
-
-    public ExecRequest(int objectId, int objectInstanceId, int resourceId) {
-        this.objectId = objectId;
-        this.objectInstanceId = objectInstanceId;
-        this.resourceId = resourceId;
+    private ExecRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId, Tlv[] payload) {
+        super(client, objectId, objectInstanceId, resourceId, payload, false);
     }
 
-    public int getObjectId() {
-        return objectId;
+    private ExecRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId, byte[] payload) {
+        super(client, objectId, objectInstanceId, resourceId, payload, false);
     }
 
-    public int getObjectInstanceId() {
-        return objectInstanceId;
-    }
-
-    public int getResourceId() {
-        return resourceId;
+    private ExecRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId, String payload,
+                        ContentFormat format) {
+        super(client, objectId, objectInstanceId, resourceId, payload, format, false);
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("ExecRequest [objectId=").append(objectId).append(", objectInstanceId=")
-                .append(objectInstanceId).append(", resourceId=").append(resourceId).append("]");
+        builder.append("ExecRequest [client=").append(getClient().getEndpoint()).append(", objectId=")
+        .append(getObjectId()).append(", objectInstanceId=").append(getObjectInstanceId())
+                .append(", resourceId=").append(getResourceId()).append("]");
         return builder.toString();
     }
 
+    /**
+     * Creates a new <em>execute</em> request for a resource that does not
+     * require any parameters.
+     * 
+     * @param client the LWM2M Client to execute the resource on
+     * @param objectId the resource's object ID
+     * @param objectInstanceId the resource's object instance ID
+     * @param resourceId the resource's ID
+     * @return the request object
+     */
+    public static ExecRequest newRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId) {
+        return new ExecRequest(client, objectId, objectInstanceId, resourceId, null, null);
+    }
+
+    /**
+     * Creates a new <em>execute</em> request for a resource accepting TLV
+     * encoded parameters.
+     * 
+     * @param client the LWM2M Client to execute the resource on
+     * @param objectId the resource's object ID
+     * @param objectInstanceId the resource's object instance ID
+     * @param resourceId the resource's ID
+     * @param parameters the parameters
+     * @return the request object
+     */
+    public static ExecRequest newRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId,
+                                         Tlv[] parameters) {
+        return new ExecRequest(client, objectId, objectInstanceId, resourceId, parameters);
+    }
+
+    /**
+     * Creates a new <em>execute</em> request for a resource accepting
+     * parameters encoded as plain text of JSON.
+     * 
+     * @param client the LWM2M Client to execute the resource on
+     * @param objectId the resource's object ID
+     * @param objectInstanceId the resource's object instance ID
+     * @param resourceId the resource's ID
+     * @param parameters the parameters
+     * @return the request object
+     */
+    public static ExecRequest newRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId,
+                                         String parameters, ContentFormat format) {
+        return new ExecRequest(client, objectId, objectInstanceId, resourceId, parameters, format);
+    }
+
+    /**
+     * Creates a new <em>execute</em> request for a resource accepting
+     * parameters encoded as an opaque byte array.
+     * 
+     * @param client the LWM2M Client to execute the resource on
+     * @param objectId the resource's object ID
+     * @param objectInstanceId the resource's object instance ID
+     * @param resourceId the resource's ID
+     * @param parameters the parameters
+     * @return the request object
+     */
+    public static ExecRequest newRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId,
+                                         byte[] parameters) {
+        return new ExecRequest(client, objectId, objectInstanceId, resourceId, parameters);
+    }
+
+    @Override
+    public ClientResponse send(LwM2mClientOperations operations) {
+        return operations.send(this);
+    }
 }

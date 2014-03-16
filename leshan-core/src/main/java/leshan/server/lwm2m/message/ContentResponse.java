@@ -31,8 +31,6 @@ package leshan.server.lwm2m.message;
 
 import java.util.Arrays;
 
-import org.apache.commons.lang.Validate;
-
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 
 /**
@@ -40,33 +38,14 @@ import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
  */
 public class ContentResponse extends ClientResponse {
 
-    private final byte[] content;
-
-    private final ContentFormat format;
-
-    public ContentResponse(byte[] content, ContentFormat format) {
-        super(ResponseCode.CONTENT);
-
-        Validate.notNull(format);
-
-        this.content = content;
-        this.format = format;
-    }
-
-    public byte[] getContent() {
-        return content;
-    }
-
-    public ContentFormat getFormat() {
-        return format;
+    public ContentResponse(byte[] content, Integer contentFormat) {
+        super(ResponseCode.CONTENT.toString(), content, contentFormat);
     }
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("ContentResponse [content=").append(Arrays.toString(content)).append(", format=").append(format)
-                .append("]");
-        return builder.toString();
+        return String.format("ContentResponse [code=%s, content=%s, format=%s]", getCode(),
+                Arrays.toString(getContent()), getFormat());
     }
 
 }

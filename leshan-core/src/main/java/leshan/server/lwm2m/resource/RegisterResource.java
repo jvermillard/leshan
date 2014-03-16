@@ -77,7 +77,8 @@ public class RegisterResource extends ResourceBase {
 
         LOG.debug("POST received : {}", request);
 
-        // TODO: is this required? the spec does not say anything about the necessity to use a CON or NON message
+        // The LW M2M spec (section 8.2) mandates the usage of Confirmable
+        // messages
         if (!Type.CON.equals(request.getType())) {
             exchange.respond(ResponseCode.BAD_REQUEST);
             return;
@@ -117,7 +118,7 @@ public class RegisterResource extends ResourceBase {
                 Client client = new Client(registrationId, endpoint, request.getSource(), request.getSourcePort(), lwVersion,
                         lifetime, smsNumber, binding, objectLinks);
 
-                registry.registerClient(client);
+                this.registry.registerClient(client);
                 LOG.debug("New registered client: {}", client);
 
                 exchange.setLocationPath(RESOURCE_NAME + "/" + client.getRegistrationId());
@@ -164,7 +165,7 @@ public class RegisterResource extends ResourceBase {
         ClientUpdate client = new ClientUpdate(registrationId, request.getSource(), request.getSourcePort(), lwVersion,
                 lifetime, smsNumber, binding, null);
 
-        Client c = registry.updateClient(client);
+        Client c = this.registry.updateClient(client);
         if (c == null) {
             exchange.respond(ResponseCode.NOT_FOUND);
         } else {
@@ -180,7 +181,7 @@ public class RegisterResource extends ResourceBase {
         Client unregistered = null;
         List<String> uri = exchange.getRequestOptions().getURIPaths();
         if (uri != null && uri.size() == 2 && RESOURCE_NAME.equals(uri.get(0))) {
-            unregistered = registry.deregisterClient(uri.get(1));
+            unregistered = this.registry.deregisterClient(uri.get(1));
         }
 
         if (unregistered != null) {

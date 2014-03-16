@@ -29,32 +29,82 @@
  */
 package leshan.server.lwm2m.message;
 
-import org.apache.commons.lang.Validate;
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 
-import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * A response to a server request.
  */
 public class ClientResponse {
 
-    protected final ResponseCode code;
+    private final byte[] content;
+    private final ContentFormat contentFormat;
+    protected final String code;
 
-    public ClientResponse(ResponseCode code) {
-        Validate.notNull(code);
+    public ClientResponse(String code, byte[] payload, Integer contentFormatCode) {
+        if (code == null) {
+            throw new NullPointerException("Response code must not be null");
+        }
 
+        ContentFormat format = null;
+
+        if (contentFormatCode != null) {
+            format = ContentFormat.fromCode(contentFormatCode);
+        } else if (payload != null) {
+            // HACK to guess the content format from the payload
+            try {
+                String stringPayload = new String(payload, "UTF-8");
+                if (StringUtils.isAsciiPrintable(stringPayload)) {
+                    format = stringPayload.trim().startsWith("{") ? ContentFormat.JSON : ContentFormat.TEXT;
+                } else {
+                    format = ContentFormat.TLV;
+                }
+            } catch (UnsupportedEncodingException e) {
+                // can safely be ignored since UTF-8 is supported by definition
+                // in a JVM
+            }
+        }
+
+        this.contentFormat = format;
         this.code = code;
+        this.content = payload;
     }
 
-    public ResponseCode getCode() {
-        return code;
+    /**
+     * Gets the CoAP repsonse code.
+     * 
+     * @return the code
+     */
+    public final String getCode() {
+        return this.code;
+    }
+
+    /**
+     * Gets the payload contained in the repsonse.
+     * 
+     * @return the payload or <code>null</code> if the client did not return any
+     *         payload
+     */
+    public final byte[] getContent() {
+        return this.content;
+    }
+
+    /**
+     * Gets the content format of the response's payload.
+     * 
+     * @return the content format or <code>null</code> if the response did not
+     *         specify a content format
+     */
+    public final ContentFormat getFormat() {
+        return this.contentFormat;
     }
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("ClientResponse [code=").append(code).append("]");
-        return builder.toString();
+        return String.format("ClientResponse [code=%s, content=%s, format=%s]", this.code,
+                Arrays.toString(this.content), this.contentFormat);
     }
 
 }

@@ -34,17 +34,25 @@ package leshan.server.lwm2m.message;
  */
 public enum ContentFormat {
 
-    LINK("application/link-format"), TEXT("application/vnd.oma.lwm2m+text"), TLV("application/vnd.oma.lwm2m+tlv"),
-    JSON("application/vnd.oma.lwm2m+json"), OPAQUE("application/vnd.oma.lwm2m+opaque");
+    // TODO: update media type codes once they have been assigned by IANA
+    LINK("application/link-format", 1540), TEXT("application/vnd.oma.lwm2m+text", 1541), TLV(
+            "application/vnd.oma.lwm2m+tlv", 1542), JSON("application/vnd.oma.lwm2m+json", 1543), OPAQUE(
+                    "application/vnd.oma.lwm2m+opaque", 1544);
 
     private final String mediaType;
+    private final int code;
 
-    private ContentFormat(String mediaType) {
+    private ContentFormat(String mediaType, int code) {
         this.mediaType = mediaType;
+        this.code = code;
     }
 
     public String getMediaType() {
-        return mediaType;
+        return this.mediaType;
+    }
+
+    public int getCode() {
+        return this.code;
     }
 
     /**
@@ -52,11 +60,24 @@ public enum ContentFormat {
      */
     public static ContentFormat fromMediaType(String mediaType) {
         for (ContentFormat t : ContentFormat.values()) {
-            if (t.getMediaType() == mediaType) {
+            if (t.getMediaType().equals(mediaType)) {
                 return t;
             }
         }
         return null;
     }
 
+    /**
+     * Finds the {@link ContentFormat} for a given media type code.
+     * 
+     * @return the media type or <code>null</code> if the given code is unknown
+     */
+    public static ContentFormat fromCode(int code) {
+        for (ContentFormat t : ContentFormat.values()) {
+            if (t.getCode() == code) {
+                return t;
+            }
+        }
+        return null;
+    }
 }

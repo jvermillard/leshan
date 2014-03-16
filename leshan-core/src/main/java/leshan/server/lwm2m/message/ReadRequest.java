@@ -29,46 +29,68 @@
  */
 package leshan.server.lwm2m.message;
 
-import org.apache.commons.lang.Validate;
+import leshan.server.lwm2m.client.Client;
 
 /**
  * The request to access the value of a Resource, an array of Resource Instances, an Object Instance or all the Object
  * Instances of an Object.
  */
-public class ReadRequest {
+public class ReadRequest extends AbstractLwM2mRequest {
 
-    private final Integer objectId;
-
-    private final Integer objectInstanceId;
-
-    private final Integer resourceId;
-
-    public ReadRequest(Integer objectId, Integer objectInstanceId, Integer resourceId) {
-        Validate.notNull(objectId);
-
-        this.objectId = objectId;
-        this.objectInstanceId = objectInstanceId;
-        this.resourceId = resourceId;
-    }
-
-    public Integer getObjectId() {
-        return objectId;
-    }
-
-    public Integer getObjectInstanceId() {
-        return objectInstanceId;
-    }
-
-    public Integer getResourceId() {
-        return resourceId;
+    private ReadRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId) {
+        super(client, objectId, objectInstanceId, resourceId);
     }
 
     @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("ReadRequest [objectId=").append(objectId).append(", objectInstanceId=")
-                .append(objectInstanceId).append(", resourceId=").append(resourceId).append("]");
-        return builder.toString();
+    public final String toString() {
+        return String.format("ReadRequest [client=%s, objectId=%d, objectInstanceId=%d, resourceId=%d]", getClient()
+                .getEndpoint(), getObjectId(), getObjectInstanceId(), getResourceId());
     }
 
+    /**
+     * Creates a request for reading all instances of a particular object from a
+     * client.
+     * 
+     * @param client the LWM2M Client to read the resource from
+     * @param objectId the object ID of the resource
+     * @return the request object
+     * @throws NullPointerException if the object ID is <code>null</code>
+     */
+    public static final ReadRequest newRequest(Client client, Integer objectId) {
+        return new ReadRequest(client, objectId, null, null);
+    }
+
+    /**
+     * Creates a request for reading a particular object instance from a client.
+     * 
+     * @param client the LWM2M Client to read the resource from
+     * @param objectId the object ID of the resource
+     * @param objectInstanceId the object instance ID
+     * @return the request object
+     * @throws NullPointerException if the object ID is <code>null</code>
+     */
+    public static final ReadRequest newRequest(Client client, Integer objectId, Integer objectInstanceId) {
+        return new ReadRequest(client, objectId, objectInstanceId, null);
+    }
+
+    /**
+     * Creates a request for reading a specific resource from a client.
+     * 
+     * @param client the LWM2M Client to read the resource from
+     * @param objectId the object ID of the resource
+     * @param objectInstanceId the object instance ID
+     * @param resourceId the (individual) resource's ID
+     * @return the request object
+     * @throws NullPointerException if the object ID is <code>null</code>
+     */
+    public static final ReadRequest newRequest(Client client, Integer objectId, Integer objectInstanceId,
+                                               Integer resourceId) {
+        return new ReadRequest(client, objectId, objectInstanceId, resourceId);
+    }
+
+    @Override
+    public ClientResponse send(LwM2mClientOperations operations) {
+
+        return operations.send(this);
+    }
 }

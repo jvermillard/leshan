@@ -31,7 +31,7 @@ package leshan.server.lwm2m;
 
 import leshan.server.LwM2mServer;
 import leshan.server.lwm2m.client.ClientRegistry;
-import leshan.server.lwm2m.client.RequestHandler;
+import leshan.server.lwm2m.message.LwM2mClientOperations;
 import leshan.server.lwm2m.resource.RegisterResource;
 
 import org.slf4j.Logger;
@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * provided to host the description of all the registered LW-M2M clients.
  * </p>
  * <p>
- * A {@link RequestHandler} is provided to perform server-initiated requests to LW-M2M clients.
+ * A {@link LwM2mClientOperations} is provided to perform server-initiated requests to LW-M2M clients.
  * </p>
  */
 public class CoapServer {
@@ -56,7 +56,7 @@ public class CoapServer {
     /** IANA assigned UDP port for CoAP (so for LWM2M) */
     public static final int PORT = 5684;
 
-    private final RequestHandler requestHandler;
+    private final LwM2mClientOperations requestHandler;
 
     public CoapServer(ClientRegistry clientRegistry) {
         // init CoAP server
@@ -66,7 +66,7 @@ public class CoapServer {
         RegisterResource rdResource = new RegisterResource(clientRegistry);
         coapServer.add(rdResource);
 
-        this.requestHandler = new RequestHandler(coapServer.getEndpoints().get(0));
+        this.requestHandler = new LwM2mClientOperations(coapServer.getEndpoints().get(0));
     }
 
     /**
@@ -84,7 +84,7 @@ public class CoapServer {
         coapServer.stop();
     }
 
-    public RequestHandler getRequestHandler() {
+    public LwM2mClientOperations getRequestHandler() {
         return this.requestHandler;
     }
 }
