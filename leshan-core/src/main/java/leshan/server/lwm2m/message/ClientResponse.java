@@ -48,11 +48,9 @@ public class ClientResponse {
             throw new NullPointerException("Response code must not be null");
         }
 
-        ContentFormat format = null;
+        ContentFormat format = contentFormatCode != null ? ContentFormat.fromCode(contentFormatCode) : null;
 
-        if (contentFormatCode != null) {
-            format = ContentFormat.fromCode(contentFormatCode);
-        } else if (payload != null) {
+        if (format == null && payload != null) {
             // HACK to guess the content format from the payload
             try {
                 String stringPayload = new String(payload, "UTF-8");

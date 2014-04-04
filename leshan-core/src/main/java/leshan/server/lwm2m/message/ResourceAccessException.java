@@ -36,14 +36,37 @@ package leshan.server.lwm2m.message;
 public class ResourceAccessException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
-    private final int code;
+    private final Integer code;
     private final String uri;
 
-    public ResourceAccessException(int code, String uri, String message) {
+    /**
+     * Initializes all fields.
+     * 
+     * @param code the CoAP response code returned by the LWM2M Client or
+     *            <code>null</code> if the client did not return a code, e.g.
+     *            because the request timed out
+     * @param uri the URI of the accessed resource
+     * @param message the message returned by the server or <code>null</code> if
+     *            the server did not return a message
+     * @throws NullPointerException if the uri is <code>null</code>
+     */
+    public ResourceAccessException(Integer code, String uri, String message) {
         this(code, uri, message, null);
     }
 
-    public ResourceAccessException(int code, String uri, String message, Throwable cause) {
+    /**
+     * Initializes all fields.
+     * 
+     * @param code the CoAP response code returned by the LWM2M Client or
+     *            <code>null</code> if the client did not return a code, e.g.
+     *            because the request timed out
+     * @param uri the URI of the accessed resource
+     * @param message the message returned by the server or <code>null</code> if
+     *            the server did not return a message
+     * @param cause the root cause of the access problem
+     * @throws NullPointerException if the uri is <code>null</code>
+     */
+    public ResourceAccessException(Integer code, String uri, String message, Throwable cause) {
         super(message, cause);
         if (uri == null) {
             throw new NullPointerException("Request URI must not be null");
@@ -53,11 +76,11 @@ public class ResourceAccessException extends RuntimeException {
     }
 
     /**
-     * Gets the CoAP response code returned by the client.
+     * Gets the CoAP response code returned by the LWM2M Client.
      * 
      * @return the code
      */
-    public int getCode() {
+    public Integer getCode() {
         return this.code;
     }
 

@@ -43,6 +43,8 @@ import ch.ethz.inf.vs.californium.network.Endpoint;
  */
 public class LwM2mClientOperations implements RequestHandler {
 
+    private static final int COAP_REQUEST_TIMEOUT_MILLIS = 5000;
+
     private static final Logger LOG = LoggerFactory.getLogger(LwM2mClientOperations.class);
 
     /** The CoAP end-point */
@@ -167,14 +169,15 @@ public class LwM2mClientOperations implements RequestHandler {
         this.endpoint.sendRequest(coapRequest);
         Response coapResponse = null;
         try {
-            coapResponse = coapRequest.waitForResponse(5000);
+            coapResponse = coapRequest.waitForResponse(COAP_REQUEST_TIMEOUT_MILLIS);
         } catch (InterruptedException e) {
             // no idea why some other thread should have interrupted this thread
             // but anyway, go ahead as if the timeout had been reached
+            LOG.debug("Caught an unexpected InterruptedException during execution of CoAP request", e);
         }
 
         if (coapResponse == null) {
-            return null;
+            throw new RequestTimeoutException(coapRequest.getURI(), COAP_REQUEST_TIMEOUT_MILLIS);
         } else {
             switch (coapResponse.getCode()) {
             case CONTENT:
