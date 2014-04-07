@@ -33,7 +33,5 @@ package leshan.server.lwm2m.message;
  * The operation types defined by Lightweight M2M for accessing resources.
  */
 public enum OperationType {
-    R, // READ
-    W, // WRITE
-    E // EXECUTE
+    READ, WRITE, EXEC
 }

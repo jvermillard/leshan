@@ -27,19 +27,22 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.lwm2m.operation;
+package leshan.server.lwm2m.message;
 
-/**
- * Indicates that a Lightweight M2M request cannot be processed due to
- * insufficient authorization.
- */
-public class AuthorizationException extends ResourceAccessException {
 
-    private static final int RESPONSE_CODE_UNAUTHORIZED = 129;
-    private static final long serialVersionUID = 1L;
+public class ObserveResponse extends ContentResponse {
 
-    public AuthorizationException(String uri, String message) {
-        super(RESPONSE_CODE_UNAUTHORIZED, uri, message);
+    private final String observationId;
+
+    public ObserveResponse(byte[] content, Integer contentFormat, String observationId) {
+        super(content, ContentFormat.fromCode(contentFormat));
+        if (observationId == null) {
+            throw new NullPointerException("Observation ID must not be null");
+        }
+        this.observationId = observationId;
     }
 
+    public final String getObservationId() {
+        return this.observationId;
+    }
 }

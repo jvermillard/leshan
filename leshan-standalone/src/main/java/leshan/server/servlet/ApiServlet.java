@@ -44,9 +44,12 @@ import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ContentFormat;
 import leshan.server.lwm2m.message.ExecRequest;
+import leshan.server.lwm2m.message.OperationNotSupportedException;
 import leshan.server.lwm2m.message.ReadRequest;
+import leshan.server.lwm2m.message.RequestHandler;
+import leshan.server.lwm2m.message.ResourceAccessException;
+import leshan.server.lwm2m.message.ResourceNotFoundException;
 import leshan.server.lwm2m.message.WriteRequest;
-import leshan.server.lwm2m.operation.LwM2mClientOperations;
 import leshan.server.lwm2m.tlv.Tlv;
 import leshan.server.servlet.json.ClientSerializer;
 import leshan.server.servlet.json.ResponseSerializer;
@@ -54,7 +57,6 @@ import leshan.server.servlet.json.TlvSerializer;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jetty.http.HttpFields;
 import org.slf4j.Logger;
@@ -62,6 +64,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+//import org.apache.commons.lang.NotImplementedException;
 
 /**
  * Service HTTP REST API calls.
@@ -72,13 +75,13 @@ public class ApiServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    private final LwM2mClientOperations requestHandler;
+    private final RequestHandler requestHandler;
 
     private final ClientRegistry clientRegistry;
 
     private final Gson gson;
 
-    public ApiServlet(LwM2mClientOperations requestHandler, ClientRegistry clientRegistry) {
+    public ApiServlet(RequestHandler requestHandler, ClientRegistry clientRegistry) {
         this.requestHandler = requestHandler;
         this.clientRegistry = clientRegistry;
 
@@ -146,12 +149,11 @@ public class ApiServlet extends HttpServlet {
                     ClientResponse cResponse = this.readRequest(client, requestInfo, resp);
                     processDeviceResponse(resp, cResponse);
                 }
-            } catch (IllegalArgumentException e) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-
-            } catch (NotImplementedException e) {
-                resp.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED, e.getMessage());
-            } catch (Exception e) {
+            } catch (ResourceNotFoundException e) {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+            } catch (OperationNotSupportedException e) {
+                resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, e.getMessage());
+            } catch (ResourceAccessException e) {
                 LOG.error("unexpected error", e);
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
@@ -181,11 +183,13 @@ public class ApiServlet extends HttpServlet {
                 processDeviceResponse(resp, cResponse);
             }
         } catch (IllegalArgumentException e) {
+            // content encoding other than text/plain is not supported (yet)
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-
-        } catch (NotImplementedException e) {
-            resp.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED, e.getMessage());
-        } catch (Exception e) {
+        } catch (ResourceNotFoundException e) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+        } catch (OperationNotSupportedException e) {
+            resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, e.getMessage());
+        } catch (ResourceAccessException e) {
             LOG.error("unexpected error", e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
@@ -214,12 +218,11 @@ public class ApiServlet extends HttpServlet {
                 ClientResponse cResponse = this.execRequest(client, requestInfo, resp);
                 processDeviceResponse(resp, cResponse);
             }
-        } catch (IllegalArgumentException e) {
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-
-        } catch (NotImplementedException e) {
-            resp.sendError(HttpServletResponse.SC_NOT_IMPLEMENTED, e.getMessage());
-        } catch (Exception e) {
+        } catch (ResourceNotFoundException e) {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+        } catch (OperationNotSupportedException e) {
+            resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, e.getMessage());
+        } catch (ResourceAccessException e) {
             LOG.error("unexpected error", e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
@@ -259,8 +262,10 @@ public class ApiServlet extends HttpServlet {
             String content = IOUtils.toString(req.getInputStream(), parameters.get("charset"));
             return WriteRequest.newReplaceRequest(client, requestInfo.objectId, requestInfo.objectInstanceId,
                     requestInfo.resourceId, content, ContentFormat.TEXT).send(this.requestHandler);
+        } else {
+            throw new IllegalArgumentException("content type " + req.getContentType()
+                    + " not supported for write requests");
         }
-        throw new NotImplementedException("content type " + req.getContentType() + " not supported for write requests");
     }
 
     class RequestInfo {

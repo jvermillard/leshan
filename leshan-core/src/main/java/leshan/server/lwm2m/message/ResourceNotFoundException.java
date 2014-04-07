@@ -27,14 +27,13 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.lwm2m.operation;
+package leshan.server.lwm2m.message;
 
 /**
  * Indicates that a resource accessed on a LWM2M Client cannot be found.
  */
 public class ResourceNotFoundException extends ResourceAccessException {
 
-    private static final int RESPONSE_CODE_NOT_FOUND = 132;
     private static final long serialVersionUID = 1L;
 
     public ResourceNotFoundException(String uri, String message) {
@@ -42,7 +41,7 @@ public class ResourceNotFoundException extends ResourceAccessException {
     }
 
     public ResourceNotFoundException(String uri, String message, Throwable cause) {
-        super(RESPONSE_CODE_NOT_FOUND, uri, message, cause);
+        super(ResponseCode.NOT_FOUND, uri, message, cause);
     }
 
 }

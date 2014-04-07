@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- 
 /*
  * Copyright (c) 2013, Sierra Wireless
  *
@@ -29,27 +27,49 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- -->
-<Configuration status="warn" strict="true" name="leshan standalone"
-               packages="org.apache.logging.log4j.test">
+package leshan.server.lwm2m.message;
 
-  <Appenders>
-    <Appender type="Console" name="STDOUT">
-      <Layout type="PatternLayout" pattern="%d %p %C{1.} [%t] %m%n"/>
-    </Appender>
-  </Appenders>
- 
-  <Loggers>
-    <Logger name="leshan.server.lwm2m" level="trace" additivity="false">
-      <AppenderRef ref="STDOUT"/>
-    </Logger>
-    <Logger name="leshan.server.servlet" level="trace" additivity="false">
-      <AppenderRef ref="STDOUT"/>
-    </Logger>
-  
-    <Root level="info">
-      <AppenderRef ref="STDOUT"/>
-    </Root>
-  </Loggers>
- 
-</Configuration>
+
+/**
+ * Indicates that a particular operation is not applicable/allowed for a given
+ * resource.
+ */
+public class OperationNotSupportedException extends ResourceAccessException {
+
+    private static final long serialVersionUID = 1L;
+    private final OperationType operation;
+
+    public OperationNotSupportedException(OperationType op, String uri, String message) {
+        this(op, uri, message, null);
+    }
+
+    public OperationNotSupportedException(OperationType op, String uri, String message, Throwable cause) {
+        super(ResponseCode.METHOD_NOT_ALLOWED, uri, message, cause);
+        if (op == null) {
+            throw new NullPointerException("Operation must not be null");
+        }
+        this.operation = op;
+    }
+
+    /**
+     * Gets the offending operation type.
+     * 
+     * @return the operation
+     */
+    public OperationType getOperation() {
+        return this.operation;
+    }
+
+    /**
+     * Returns a string representation of this exception.
+     * 
+     * @return the string representation
+     */
+    @Override
+    public String toString() {
+
+        return String.format("%s [operation: %s, responseCode: %s, request URI: %s, message: %s]", getOperation(),
+                getCode(), getUri(), getMessage());
+    }
+
+}

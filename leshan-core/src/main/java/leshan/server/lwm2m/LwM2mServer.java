@@ -30,49 +30,64 @@
 package leshan.server.lwm2m;
 
 import leshan.server.lwm2m.client.ClientRegistry;
-import leshan.server.lwm2m.operation.LwM2mClientOperations;
+import leshan.server.lwm2m.message.RequestHandler;
+import leshan.server.lwm2m.message.californium.CaliforniumBasedRequestHandler;
+import leshan.server.lwm2m.message.californium.CoapClient;
+import leshan.server.lwm2m.message.californium.SimpleCoapClient;
 import leshan.server.lwm2m.resource.RegisterResource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.ethz.inf.vs.californium.server.Server;
+
 /**
  * A Lightweight M2M server.
  * <p>
- * This CoAP server defines a /rd resources as described in the CoRE RD specification. A {@link ClientRegistry} must be
- * provided to host the description of all the registered LW-M2M clients.
+ * This CoAP server defines a /rd resources as described in the CoRE RD
+ * specification. A {@link ClientRegistry} must be provided to host the
+ * description of all the registered LW-M2M clients.
  * </p>
  * <p>
- * A {@link LwM2mClientOperations} is provided to perform server-initiated requests to LW-M2M clients.
+ * A {@link RequestHandler} is provided to perform server-initiated requests to
+ * LW-M2M clients.
  * </p>
  */
 public class LwM2mServer {
 
-    private ch.ethz.inf.vs.californium.server.Server coapServer;
+    private final Server coapServer;
 
     private static final Logger LOG = LoggerFactory.getLogger(LwM2mServer.class);
 
     /** IANA assigned UDP port for CoAP (so for LWM2M) */
     public static final int PORT = 5684;
 
-    private final LwM2mClientOperations requestHandler;
+    private final RequestHandler requestHandler;
 
     public LwM2mServer(ClientRegistry clientRegistry) {
+        if (clientRegistry == null) {
+            throw new NullPointerException("Client registry must not be null");
+        }
         // init CoAP server
-        coapServer = new ch.ethz.inf.vs.californium.server.Server(PORT);
+        this.coapServer = new Server(PORT);
 
         // define /rd resource
         RegisterResource rdResource = new RegisterResource(clientRegistry);
-        coapServer.add(rdResource);
+        this.coapServer.add(rdResource);
 
-        this.requestHandler = new LwM2mClientOperations(coapServer.getEndpoints().get(0));
+        CoapClient coapClient = new SimpleCoapClient(this.coapServer.getEndpoints().get(0));
+        CaliforniumBasedRequestHandler handler = new CaliforniumBasedRequestHandler(coapClient);
+        // register the request handler as listener in order to cancel
+        // observations and free up resources when clients unregister
+        clientRegistry.addListener(handler);
+        this.requestHandler = handler;
     }
 
     /**
      * Starts the server and binds it to assigned UDP port for LW-M2M (5684).
      */
     public void start() {
-        coapServer.start();
+        this.coapServer.start();
         LOG.info("LW-M2M server started on port " + PORT);
     }
 
@@ -80,10 +95,10 @@ public class LwM2mServer {
      * Stops the server and unbinds it from assigned port.
      */
     public void stop() {
-        coapServer.stop();
+        this.coapServer.stop();
     }
 
-    public LwM2mClientOperations getRequestHandler() {
+    public RequestHandler getRequestHandler() {
         return this.requestHandler;
     }
 }

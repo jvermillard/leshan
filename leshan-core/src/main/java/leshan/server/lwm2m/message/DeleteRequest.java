@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- 
 /*
  * Copyright (c) 2013, Sierra Wireless
  *
@@ -29,27 +27,38 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- -->
-<Configuration status="warn" strict="true" name="leshan standalone"
-               packages="org.apache.logging.log4j.test">
+package leshan.server.lwm2m.message;
 
-  <Appenders>
-    <Appender type="Console" name="STDOUT">
-      <Layout type="PatternLayout" pattern="%d %p %C{1.} [%t] %m%n"/>
-    </Appender>
-  </Appenders>
- 
-  <Loggers>
-    <Logger name="leshan.server.lwm2m" level="trace" additivity="false">
-      <AppenderRef ref="STDOUT"/>
-    </Logger>
-    <Logger name="leshan.server.servlet" level="trace" additivity="false">
-      <AppenderRef ref="STDOUT"/>
-    </Logger>
-  
-    <Root level="info">
-      <AppenderRef ref="STDOUT"/>
-    </Root>
-  </Loggers>
- 
-</Configuration>
+import leshan.server.lwm2m.client.Client;
+
+public class DeleteRequest extends AbstractLwM2mRequest implements LwM2mRequest<ClientResponse> {
+
+    private DeleteRequest(ResourceSpec target) {
+        super(target);
+    }
+
+    @Override
+    public ClientResponse send(RequestHandler handler) {
+        return handler.send(this);
+    }
+
+    @Override
+    public final String toString() {
+        return String.format("DeleteRequest [%s]", getTarget());
+    }
+
+    /**
+     * Creates a request for deleting a particular object instance implemented
+     * by a client.
+     * 
+     * @param client the LWM2M Client to delete the object instance on
+     * @param objectId the object type
+     * @param objectInstanceId the object instance
+     * @return the request object
+     * @throws NullPointerException if any of the object or object instance ID
+     *             is <code>null</code>
+     */
+    public static final DeleteRequest newRequest(Client client, Integer objectId, Integer objectInstanceId) {
+        return new DeleteRequest(new ResourceSpec(client, objectId, objectInstanceId, null));
+    }
+}

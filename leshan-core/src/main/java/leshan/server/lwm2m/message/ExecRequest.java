@@ -30,33 +30,31 @@
 package leshan.server.lwm2m.message;
 
 import leshan.server.lwm2m.client.Client;
-import leshan.server.lwm2m.operation.RequestHandler;
 import leshan.server.lwm2m.tlv.Tlv;
 
 /**
  * A request for executing resources on a client.
  */
-public class ExecRequest extends PayloadRequest {
+public class ExecRequest extends PayloadRequest implements LwM2mRequest<ClientResponse> {
 
-    private ExecRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId, Tlv[] payload) {
-        super(client, objectId, objectInstanceId, resourceId, payload);
+    private ExecRequest(ResourceSpec target, Tlv[] payload) {
+        super(target, payload);
     }
 
-    private ExecRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId, byte[] payload) {
-        super(client, objectId, objectInstanceId, resourceId, payload);
+    private ExecRequest(ResourceSpec target, byte[] payload) {
+        super(target, payload);
     }
 
-    private ExecRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId, String payload,
-            ContentFormat format) {
-        super(client, objectId, objectInstanceId, resourceId, payload, format);
+    private ExecRequest(ResourceSpec target, String payload, ContentFormat format) {
+        super(target, payload, format);
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("ExecRequest [client=").append(getClient().getEndpoint()).append(", objectId=")
-                .append(getObjectId()).append(", objectInstanceId=").append(getObjectInstanceId())
-                .append(", resourceId=").append(getResourceId()).append("]");
+        .append(getObjectId()).append(", objectInstanceId=").append(getObjectInstanceId())
+        .append(", resourceId=").append(getResourceId()).append("]");
         return builder.toString();
     }
 
@@ -70,7 +68,7 @@ public class ExecRequest extends PayloadRequest {
      * @return the request object
      */
     public static ExecRequest newRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId) {
-        return new ExecRequest(client, objectId, objectInstanceId, resourceId, null, null);
+        return new ExecRequest(new ResourceSpec(client, objectId, objectInstanceId, resourceId), null, null);
     }
 
     /**
@@ -84,8 +82,8 @@ public class ExecRequest extends PayloadRequest {
      * @return the request object
      */
     public static ExecRequest newRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId,
-            Tlv[] parameters) {
-        return new ExecRequest(client, objectId, objectInstanceId, resourceId, parameters);
+                                         Tlv[] parameters) {
+        return new ExecRequest(new ResourceSpec(client, objectId, objectInstanceId, resourceId), parameters);
     }
 
     /**
@@ -99,8 +97,8 @@ public class ExecRequest extends PayloadRequest {
      * @return the request object
      */
     public static ExecRequest newRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId,
-            String parameters, ContentFormat format) {
-        return new ExecRequest(client, objectId, objectInstanceId, resourceId, parameters, format);
+                                         String parameters, ContentFormat format) {
+        return new ExecRequest(new ResourceSpec(client, objectId, objectInstanceId, resourceId), parameters, format);
     }
 
     /**
@@ -114,8 +112,8 @@ public class ExecRequest extends PayloadRequest {
      * @return the request object
      */
     public static ExecRequest newRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId,
-            byte[] parameters) {
-        return new ExecRequest(client, objectId, objectInstanceId, resourceId, parameters);
+                                         byte[] parameters) {
+        return new ExecRequest(new ResourceSpec(client, objectId, objectInstanceId, resourceId), parameters);
     }
 
     /**

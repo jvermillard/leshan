@@ -29,13 +29,19 @@
  */
 package leshan.server.lwm2m.message;
 
-import leshan.server.lwm2m.operation.RequestHandler;
-import leshan.server.lwm2m.operation.ResourceAccessException;
+import leshan.server.lwm2m.client.Client;
 
 /**
  * A Lightweight M2M request.
  */
-public interface LwM2mRequest {
+public interface LwM2mRequest<T extends ClientResponse> {
+
+    /**
+     * Gets the LWM2M Client the request is targeted at.
+     * 
+     * @return the client
+     */
+    Client getClient();
 
     /**
      * Sends the request to the LWM2M Client.
@@ -44,5 +50,5 @@ public interface LwM2mRequest {
      * @return the response from the client
      * @throws ResourceAccessException if the request could not be processed by the client
      */
-    ClientResponse send(RequestHandler handler);
+    T send(RequestHandler handler);
 }

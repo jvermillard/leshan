@@ -30,22 +30,23 @@
 package leshan.server.lwm2m.message;
 
 import leshan.server.lwm2m.client.Client;
-import leshan.server.lwm2m.operation.RequestHandler;
 
 /**
- * The request to access the value of a Resource, an array of Resource Instances, an Object Instance or all the Object
- * Instances of an Object.
+ * A Lightweight M2M request for retrieving the values of resources from a LWM2M
+ * Client.
+ * 
+ * The request can be used to retrieve the value(s) of one or all attributes of
+ * one particular or all instances of a particular object type.
  */
-public class ReadRequest extends AbstractLwM2mRequest {
+public class ReadRequest extends AbstractLwM2mRequest implements LwM2mRequest<ContentResponse> {
 
-    private ReadRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId) {
-        super(client, objectId, objectInstanceId, resourceId);
+    private ReadRequest(ResourceSpec target) {
+        super(target);
     }
 
     @Override
     public final String toString() {
-        return String.format("ReadRequest [client=%s, objectId=%d, objectInstanceId=%d, resourceId=%d]", getClient()
-                .getEndpoint(), getObjectId(), getObjectInstanceId(), getResourceId());
+        return String.format("ReadRequest [%s]", getTarget());
     }
 
     /**
@@ -57,7 +58,7 @@ public class ReadRequest extends AbstractLwM2mRequest {
      * @throws NullPointerException if the object ID is <code>null</code>
      */
     public static final ReadRequest newRequest(Client client, Integer objectId) {
-        return new ReadRequest(client, objectId, null, null);
+        return new ReadRequest(new ResourceSpec(client, objectId, null, null));
     }
 
     /**
@@ -70,7 +71,7 @@ public class ReadRequest extends AbstractLwM2mRequest {
      * @throws NullPointerException if the object ID is <code>null</code>
      */
     public static final ReadRequest newRequest(Client client, Integer objectId, Integer objectInstanceId) {
-        return new ReadRequest(client, objectId, objectInstanceId, null);
+        return new ReadRequest(new ResourceSpec(client, objectId, objectInstanceId, null));
     }
 
     /**
@@ -84,15 +85,16 @@ public class ReadRequest extends AbstractLwM2mRequest {
      * @throws NullPointerException if the object ID is <code>null</code>
      */
     public static final ReadRequest newRequest(Client client, Integer objectId, Integer objectInstanceId,
-            Integer resourceId) {
-        return new ReadRequest(client, objectId, objectInstanceId, resourceId);
+                                               Integer resourceId) {
+        return new ReadRequest(new ResourceSpec(client, objectId, objectInstanceId, resourceId));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ClientResponse send(RequestHandler operations) {
+    public ContentResponse send(RequestHandler operations) {
+
         return operations.send(this);
     }
 }

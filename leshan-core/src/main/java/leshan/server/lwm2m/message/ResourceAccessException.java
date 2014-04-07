@@ -27,7 +27,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.lwm2m.operation;
+package leshan.server.lwm2m.message;
 
 /**
  * An exception indicating a problem while accessing a resource on a LWM2M
@@ -36,7 +36,7 @@ package leshan.server.lwm2m.operation;
 public class ResourceAccessException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
-    private final Integer code;
+    private final ResponseCode code;
     private final String uri;
 
     /**
@@ -50,7 +50,7 @@ public class ResourceAccessException extends RuntimeException {
      *            the server did not return a message
      * @throws NullPointerException if the uri is <code>null</code>
      */
-    public ResourceAccessException(Integer code, String uri, String message) {
+    public ResourceAccessException(ResponseCode code, String uri, String message) {
         this(code, uri, message, null);
     }
 
@@ -66,7 +66,7 @@ public class ResourceAccessException extends RuntimeException {
      * @param cause the root cause of the access problem
      * @throws NullPointerException if the uri is <code>null</code>
      */
-    public ResourceAccessException(Integer code, String uri, String message, Throwable cause) {
+    public ResourceAccessException(ResponseCode code, String uri, String message, Throwable cause) {
         super(message, cause);
         if (uri == null) {
             throw new NullPointerException("Request URI must not be null");
@@ -80,7 +80,7 @@ public class ResourceAccessException extends RuntimeException {
      * 
      * @return the code
      */
-    public Integer getCode() {
+    public ResponseCode getCode() {
         return this.code;
     }
 
