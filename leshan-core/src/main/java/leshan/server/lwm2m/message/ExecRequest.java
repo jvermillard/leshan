@@ -35,33 +35,32 @@ import leshan.server.lwm2m.tlv.Tlv;
 /**
  * A request for executing resources on a client.
  */
-public class ExecRequest extends WriteRequest {
+public class ExecRequest extends PayloadRequest {
 
     private ExecRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId, Tlv[] payload) {
-        super(client, objectId, objectInstanceId, resourceId, payload, false);
+        super(client, objectId, objectInstanceId, resourceId, payload);
     }
 
     private ExecRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId, byte[] payload) {
-        super(client, objectId, objectInstanceId, resourceId, payload, false);
+        super(client, objectId, objectInstanceId, resourceId, payload);
     }
 
     private ExecRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId, String payload,
-                        ContentFormat format) {
-        super(client, objectId, objectInstanceId, resourceId, payload, format, false);
+            ContentFormat format) {
+        super(client, objectId, objectInstanceId, resourceId, payload, format);
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("ExecRequest [client=").append(getClient().getEndpoint()).append(", objectId=")
-        .append(getObjectId()).append(", objectInstanceId=").append(getObjectInstanceId())
+                .append(getObjectId()).append(", objectInstanceId=").append(getObjectInstanceId())
                 .append(", resourceId=").append(getResourceId()).append("]");
         return builder.toString();
     }
 
     /**
-     * Creates a new <em>execute</em> request for a resource that does not
-     * require any parameters.
+     * Creates a new <em>execute</em> request for a resource that does not require any parameters.
      * 
      * @param client the LWM2M Client to execute the resource on
      * @param objectId the resource's object ID
@@ -74,8 +73,7 @@ public class ExecRequest extends WriteRequest {
     }
 
     /**
-     * Creates a new <em>execute</em> request for a resource accepting TLV
-     * encoded parameters.
+     * Creates a new <em>execute</em> request for a resource accepting TLV encoded parameters.
      * 
      * @param client the LWM2M Client to execute the resource on
      * @param objectId the resource's object ID
@@ -85,13 +83,12 @@ public class ExecRequest extends WriteRequest {
      * @return the request object
      */
     public static ExecRequest newRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId,
-                                         Tlv[] parameters) {
+            Tlv[] parameters) {
         return new ExecRequest(client, objectId, objectInstanceId, resourceId, parameters);
     }
 
     /**
-     * Creates a new <em>execute</em> request for a resource accepting
-     * parameters encoded as plain text of JSON.
+     * Creates a new <em>execute</em> request for a resource accepting parameters encoded as plain text or JSON.
      * 
      * @param client the LWM2M Client to execute the resource on
      * @param objectId the resource's object ID
@@ -101,13 +98,12 @@ public class ExecRequest extends WriteRequest {
      * @return the request object
      */
     public static ExecRequest newRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId,
-                                         String parameters, ContentFormat format) {
+            String parameters, ContentFormat format) {
         return new ExecRequest(client, objectId, objectInstanceId, resourceId, parameters, format);
     }
 
     /**
-     * Creates a new <em>execute</em> request for a resource accepting
-     * parameters encoded as an opaque byte array.
+     * Creates a new <em>execute</em> request for a resource accepting parameters encoded as an opaque byte array.
      * 
      * @param client the LWM2M Client to execute the resource on
      * @param objectId the resource's object ID
@@ -117,7 +113,7 @@ public class ExecRequest extends WriteRequest {
      * @return the request object
      */
     public static ExecRequest newRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId,
-                                         byte[] parameters) {
+            byte[] parameters) {
         return new ExecRequest(client, objectId, objectInstanceId, resourceId, parameters);
     }
 

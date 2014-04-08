@@ -66,7 +66,7 @@ public class LwM2mClientOperations implements RequestHandler {
     @Override
     public final ClientResponse send(ReadRequest readRequest) {
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Sending request: {}", readRequest);
+            LOG.debug("READ request for client {}: {}", readRequest.getClient().getEndpoint(), readRequest);
         }
 
         // TODO: check if client supports object ID
@@ -74,24 +74,9 @@ public class LwM2mClientOperations implements RequestHandler {
 
         Request coapRequest = Request.newGet();
 
-        // objectId
-        coapRequest.getOptions().addURIPath(Integer.toString(readRequest.getObjectId()));
-
-        // objectInstanceId
-        if (readRequest.getObjectInstanceId() == null) {
-            if (readRequest.getResourceId() != null) {
-                coapRequest.getOptions().addURIPath("0"); // default instanceId
-            }
-        } else {
-            coapRequest.getOptions().addURIPath(Integer.toString(readRequest.getObjectInstanceId()));
-        }
-
-        // resourceId
-        if (readRequest.getResourceId() != null) {
-            coapRequest.getOptions().addURIPath(Integer.toString(readRequest.getResourceId()));
-        }
-
+        setURIPath(coapRequest, readRequest);
         setDestination(coapRequest, readRequest.getClient());
+
         return sendRequest(coapRequest, OperationType.R);
     }
 
@@ -100,7 +85,15 @@ public class LwM2mClientOperations implements RequestHandler {
         if (LOG.isDebugEnabled()) {
             LOG.debug("EXEC request for client {}: {}", execRequest.getClient().getEndpoint(), execRequest);
         }
-        return send((WriteRequest) execRequest);
+
+        Request coapRequest = Request.newPost();
+
+        setURIPath(coapRequest, execRequest);
+        setDestination(coapRequest, execRequest.getClient());
+        coapRequest.setPayload(execRequest.getBytes());
+
+        return sendRequest(coapRequest, OperationType.E);
+
     }
 
     @Override
@@ -110,19 +103,10 @@ public class LwM2mClientOperations implements RequestHandler {
         }
         Request coapRequest = writeRequest.isReplaceRequest() ? Request.newPut() : Request.newPost();
 
-        // objectId
-        coapRequest.getOptions().addURIPath(Integer.toString(writeRequest.getObjectId()));
-
-        // objectInstanceId
-        coapRequest.getOptions().addURIPath(Integer.toString(writeRequest.getObjectInstanceId()));
-
-        // resourceId
-        if (writeRequest.getResourceId() != null) {
-            coapRequest.getOptions().addURIPath(Integer.toString(writeRequest.getResourceId()));
-        }
-
-        coapRequest.setPayload(writeRequest.getBytes());
+        setURIPath(coapRequest, writeRequest);
         setDestination(coapRequest, writeRequest.getClient());
+        coapRequest.setPayload(writeRequest.getBytes());
+
         return sendRequest(coapRequest, OperationType.W);
     }
 
@@ -133,18 +117,31 @@ public class LwM2mClientOperations implements RequestHandler {
         }
         Request coapRequest = Request.newPost();
 
-        // objectId
-        coapRequest.getOptions().addURIPath(Integer.toString(createRequest.getObjectId()));
-
-        // objectInstanceId
-        if (createRequest.getObjectInstanceId() != null) {
-            coapRequest.getOptions().addURIPath(Integer.toString(createRequest.getObjectInstanceId()));
-        }
-
+        setURIPath(coapRequest, createRequest);
+        setDestination(coapRequest, createRequest.getClient());
         coapRequest.getOptions().setContentFormat(createRequest.getContentFormat().getCode());
         coapRequest.setPayload(createRequest.getBytes());
-        setDestination(coapRequest, createRequest.getClient());
+
         return sendRequest(coapRequest, OperationType.W);
+    }
+
+    private final void setURIPath(Request coapRequest, AbstractLwM2mRequest lwM2mRequest) {
+        // objectId
+        coapRequest.getOptions().addURIPath(Integer.toString(lwM2mRequest.getObjectId()));
+
+        // objectInstanceId
+        if (lwM2mRequest.getObjectInstanceId() == null) {
+            if (lwM2mRequest.getResourceId() != null) {
+                coapRequest.getOptions().addURIPath("0"); // default instanceId
+            }
+        } else {
+            coapRequest.getOptions().addURIPath(Integer.toString(lwM2mRequest.getObjectInstanceId()));
+        }
+
+        // resourceId
+        if (lwM2mRequest.getResourceId() != null) {
+            coapRequest.getOptions().addURIPath(Integer.toString(lwM2mRequest.getResourceId()));
+        }
     }
 
     private final void setDestination(Request coapRequest, Client client) {
@@ -157,12 +154,9 @@ public class LwM2mClientOperations implements RequestHandler {
      * 
      * @param coapRequest the request
      * @param operationType the type of operation the request reflects
-     * @return the response from the client or <code>null</code> if the client
-     *         did not send a response within 5 seconds
-     * @throws NullPointerException if any of the parameters is
-     *             <code>null</code>
-     * @throws ResourceAccessException if the client could not process the
-     *             request
+     * @return the response from the client or <code>null</code> if the client did not send a response within 5 seconds
+     * @throws NullPointerException if any of the parameters is <code>null</code>
+     * @throws ResourceAccessException if the client could not process the request
      */
     protected final ClientResponse sendRequest(Request coapRequest, OperationType operationType) {
 

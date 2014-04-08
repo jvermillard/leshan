@@ -45,12 +45,6 @@ public abstract class PayloadRequest extends AbstractLwM2mRequest {
     private final byte[] bytePayload;
     private final ContentFormat contentFormat;
 
-    protected PayloadRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId,
-                             String payload,
-                             ContentFormat format, Tlv[] tlv) {
-        this(client, objectId, objectInstanceId, resourceId, payload, format, tlv, null);
-    }
-
     /**
      * Initializes all fields.
      * 
@@ -63,7 +57,7 @@ public abstract class PayloadRequest extends AbstractLwM2mRequest {
      * @param bytes
      */
     private PayloadRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId,
-                           String payload, ContentFormat format, Tlv[] tlv, byte[] bytes) {
+            String payload, ContentFormat format, Tlv[] tlv, byte[] bytes) {
         super(client, objectId, objectInstanceId, resourceId);
         this.stringPayload = payload;
         this.payload = tlv;
@@ -72,21 +66,50 @@ public abstract class PayloadRequest extends AbstractLwM2mRequest {
 
     }
 
+    /**
+     * Payload request with string payload.
+     * 
+     * @param client
+     * @param objectId
+     * @param objectInstanceId
+     * @param resourceId
+     * @param payload
+     * @param format the payload format (JSON or TEXT)
+     */
     protected PayloadRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId,
-                             String payload, ContentFormat format) {
-        this(client, objectId, objectInstanceId, resourceId, payload, format, null);
-        if (payload != null && (ContentFormat.TLV.equals(format) || ContentFormat.OPAQUE.equals(format))) {
+            String payload, ContentFormat format) {
+        this(client, objectId, objectInstanceId, resourceId, payload, format, null, null);
+        if (payload != null && !ContentFormat.TEXT.equals(format) && !ContentFormat.JSON.equals(format)) {
             throw new IllegalArgumentException("Content format must be either TEXT or JSON for string payload");
         }
     }
 
+    /**
+     * Payload request with TLV payload
+     * 
+     * @param client
+     * @param objectId
+     * @param objectInstanceId
+     * @param resourceId
+     * @param payload
+     */
     protected PayloadRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId,
-                             Tlv[] payload) {
-        this(client, objectId, objectInstanceId, resourceId, null, payload != null ? ContentFormat.TLV : null, payload);
+            Tlv[] payload) {
+        this(client, objectId, objectInstanceId, resourceId, null, payload != null ? ContentFormat.TLV : null, payload,
+                null);
     }
 
+    /**
+     * Payload request with binary payload.
+     * 
+     * @param client
+     * @param objectId
+     * @param objectInstanceId
+     * @param resourceId
+     * @param payload
+     */
     protected PayloadRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId,
-                             byte[] payload) {
+            byte[] payload) {
         this(client, objectId, objectInstanceId, resourceId, null, payload != null ? ContentFormat.OPAQUE : null, null,
                 payload);
     }
@@ -100,6 +123,10 @@ public abstract class PayloadRequest extends AbstractLwM2mRequest {
     }
 
     public final byte[] getBytes() {
+        if (contentFormat == null) {
+            return null;
+        }
+
         switch (this.contentFormat) {
         case TLV:
             TlvEncoder encoder = new TlvEncoder();
