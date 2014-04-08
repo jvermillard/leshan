@@ -31,7 +31,6 @@ package leshan.server.servlet;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.concurrent.ExecutionException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -40,10 +39,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.ClientRegistry;
-import leshan.server.lwm2m.client.RequestHandler;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ContentFormat;
 import leshan.server.lwm2m.message.ExecRequest;
+import leshan.server.lwm2m.message.LwM2mClientOperations;
 import leshan.server.lwm2m.message.ReadRequest;
 import leshan.server.lwm2m.message.WriteRequest;
 import leshan.server.lwm2m.tlv.Tlv;
@@ -70,13 +69,13 @@ public class ApiServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    private final RequestHandler requestHandler;
+    private final LwM2mClientOperations requestHandler;
 
     private final ClientRegistry clientRegistry;
 
     private final Gson gson;
 
-    public ApiServlet(RequestHandler requestHandler, ClientRegistry clientRegistry) {
+    public ApiServlet(LwM2mClientOperations requestHandler, ClientRegistry clientRegistry) {
         this.requestHandler = requestHandler;
         this.clientRegistry = clientRegistry;
 
@@ -84,7 +83,7 @@ public class ApiServlet extends HttpServlet {
         gsonBuilder.registerTypeAdapter(Tlv.class, new TlvSerializer());
         gsonBuilder.registerTypeHierarchyAdapter(Client.class, new ClientSerializer());
         gsonBuilder.registerTypeHierarchyAdapter(ClientResponse.class, new ResponseSerializer());
-        gson = gsonBuilder.create();
+        this.gson = gsonBuilder.create();
     }
 
     private boolean checkPath(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -115,19 +114,19 @@ public class ApiServlet extends HttpServlet {
         String[] path = StringUtils.split(req.getPathInfo(), '/');
 
         if (path.length == 1) { // all registered clients
-            Collection<Client> clients = clientRegistry.allClients();
+            Collection<Client> clients = this.clientRegistry.allClients();
 
-            String json = gson.toJson(clients.toArray(new Client[] {}));
+            String json = this.gson.toJson(clients.toArray(new Client[] {}));
             resp.setContentType("application/json");
             resp.getOutputStream().write(json.getBytes("UTF-8"));
             resp.setStatus(HttpServletResponse.SC_OK);
 
         } else if (path.length == 2) { // get client
             String clientEndpoint = path[1];
-            Client client = clientRegistry.get(clientEndpoint);
+            Client client = this.clientRegistry.get(clientEndpoint);
             if (client != null) {
                 resp.setContentType("application/json");
-                resp.getOutputStream().write(gson.toJson(client).getBytes("UTF-8"));
+                resp.getOutputStream().write(this.gson.toJson(client).getBytes("UTF-8"));
                 resp.setStatus(HttpServletResponse.SC_OK);
             } else {
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND, "unknown client " + clientEndpoint);
@@ -136,7 +135,7 @@ public class ApiServlet extends HttpServlet {
             try {
                 RequestInfo requestInfo = new RequestInfo(path);
 
-                Client client = clientRegistry.get(requestInfo.endpoint);
+                Client client = this.clientRegistry.get(requestInfo.endpoint);
                 if (client == null) {
                     resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "no registered client with id '"
                             + requestInfo.endpoint + "'");
@@ -170,7 +169,7 @@ public class ApiServlet extends HttpServlet {
         try {
             RequestInfo requestInfo = new RequestInfo(path);
 
-            Client client = clientRegistry.get(requestInfo.endpoint);
+            Client client = this.clientRegistry.get(requestInfo.endpoint);
             if (client == null) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "no registered client with id '"
                         + requestInfo.endpoint + "'");
@@ -203,7 +202,7 @@ public class ApiServlet extends HttpServlet {
         try {
             RequestInfo requestInfo = new RequestInfo(path);
 
-            Client client = clientRegistry.get(requestInfo.endpoint);
+            Client client = this.clientRegistry.get(requestInfo.endpoint);
             if (client == null) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "no registered client with id '"
                         + requestInfo.endpoint + "'");
@@ -228,7 +227,7 @@ public class ApiServlet extends HttpServlet {
         if (cResponse == null) {
             response = "Request timeout";
         } else {
-            response = gson.toJson(cResponse);
+            response = this.gson.toJson(cResponse);
         }
         resp.setContentType("application/json");
         resp.getOutputStream().write(response.getBytes());
@@ -236,27 +235,25 @@ public class ApiServlet extends HttpServlet {
         resp.setStatus(HttpServletResponse.SC_OK);
     }
 
-    private ClientResponse readRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp)
-            throws InterruptedException, ExecutionException, IOException {
+    private ClientResponse readRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp) {
 
-        return requestHandler.read(client, new ReadRequest(requestInfo.objectId, requestInfo.objectInstanceId,
-                requestInfo.resourceId));
+        return ReadRequest.newRequest(client, requestInfo.objectId, requestInfo.objectInstanceId,
+                requestInfo.resourceId).send(this.requestHandler);
     }
 
-    private ClientResponse execRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp)
-            throws InterruptedException, ExecutionException, IOException {
+    private ClientResponse execRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp) {
 
-        return requestHandler.exec(client, new ExecRequest(requestInfo.objectId, requestInfo.objectInstanceId,
-                requestInfo.resourceId));
+        return ExecRequest.newRequest(client, requestInfo.objectId, requestInfo.objectInstanceId,
+                requestInfo.resourceId).send(this.requestHandler);
     }
 
     private ClientResponse writeRequest(Client client, RequestInfo requestInfo, HttpServletRequest req,
-            HttpServletResponse resp) throws InterruptedException, ExecutionException, IOException {
+                                        HttpServletResponse resp) throws IOException {
 
         if ("text/plain".equals(req.getContentType())) {
             String content = IOUtils.toString(req.getInputStream(), "UTF-8");
-            return requestHandler.write(client, new WriteRequest(requestInfo.objectId, requestInfo.objectInstanceId,
-                    requestInfo.resourceId, ContentFormat.TEXT, content, null));
+            return WriteRequest.newReplaceRequest(client, requestInfo.objectId, requestInfo.objectInstanceId,
+                    requestInfo.resourceId, content, ContentFormat.TEXT).send(this.requestHandler);
         } else {
             throw new NotImplementedException("content type " + req.getContentType()
                     + " not supported for write requests");

@@ -31,95 +31,120 @@ package leshan.server.lwm2m.message;
 
 import java.util.Arrays;
 
+import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.tlv.Tlv;
-
-import org.apache.commons.lang.Validate;
 
 /**
  * The request to change the value of a Resource, an array of Resources Instances or multiple Resources from an Object
  * Instance.
  */
-public class WriteRequest {
+public class WriteRequest extends PayloadRequest {
 
-    private final Integer objectId;
+    private final boolean replaceRequest;
 
-    private final Integer objectInstanceId;
-
-    private final Integer resourceId;
-
-    private final ContentFormat format;
-
-    /** value for text and json content */
-    private final String stringValue;
-
-    /** value for TLV content */
-    private final Tlv[] tlvValues;
-
-    public WriteRequest(Integer objectId, Integer objectInstanceId, Integer resourceId, ContentFormat format,
-            String stringValue, Tlv[] tlvValues) {
-        Validate.notNull(objectId);
-        Validate.notNull(objectInstanceId);
-        Validate.notNull(format);
-
-        switch (format) {
-        case TEXT:
-            Validate.notNull(resourceId);
-        case JSON:
-            Validate.notNull(stringValue);
-            if (tlvValues != null) {
-                throw new IllegalArgumentException("a value with format " + format + " cannot contain Tlv values");
-            }
-            break;
-        case TLV:
-            Validate.notNull(tlvValues);
-            if (stringValue != null) {
-                throw new IllegalArgumentException("a value with format TLV cannot contain a String value");
-            }
-        default:
-            throw new IllegalArgumentException("unsupported content format for write request : " + format);
+    protected WriteRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId,
+                           Tlv[] payload, boolean replaceResources) {
+        super(client, objectId, objectInstanceId, resourceId, payload);
+        if (payload == null) {
+            throw new IllegalArgumentException("Payload must not be null");
         }
-
-        this.objectId = objectId;
-        this.objectInstanceId = objectInstanceId;
-        this.resourceId = resourceId;
-        this.format = format;
-        this.stringValue = stringValue;
-        this.tlvValues = tlvValues;
-
+        this.replaceRequest = replaceResources;
     }
 
-    public Integer getObjectId() {
-        return objectId;
+    protected WriteRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId,
+                           String payload, ContentFormat format, boolean replaceResources) {
+        super(client, objectId, objectInstanceId, resourceId, payload, format);
+        if (payload == null) {
+            throw new IllegalArgumentException("Payload must not be null");
+        } else if (ContentFormat.TEXT.equals(format) && resourceId == null) {
+            throw new IllegalArgumentException("Payload of type TEXT can only be written to specific resources");
+        }
+        this.replaceRequest = replaceResources;
     }
 
-    public Integer getObjectInstanceId() {
-        return objectInstanceId;
+    protected WriteRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId,
+                           byte[] payload, boolean replaceResources) {
+        super(client, objectId, objectInstanceId, resourceId, payload);
+        if (payload == null) {
+            throw new IllegalArgumentException("Payload must not be null");
+        }
+        this.replaceRequest = replaceResources;
     }
 
-    public Integer getResourceId() {
-        return resourceId;
-    }
-
+    /**
+     * 
+     * @return the content format
+     * @deprecated Use {@link #getContentFormat()} instead
+     */
+    @Deprecated
     public ContentFormat getFormat() {
-        return format;
+        return super.getContentFormat();
     }
 
+    /**
+     * 
+     * @return the string payload
+     * @deprecated Use {@link #getStringPayload()} instead
+     */
+    @Deprecated
     public String getStringValue() {
-        return stringValue;
+        return super.getStringPayload();
     }
 
+    /**
+     * 
+     * @return the TLV payload
+     * @deprecated Use {@link #getPayload()} instead
+     */
+    @Deprecated
     public Tlv[] getTlvValues() {
-        return tlvValues;
+        return super.getPayload();
+    }
+
+    /**
+     * Checks whether this write request is supposed to replace all resources or
+     * do a partial update only (see section 5.3.3 of the LW M2M spec).
+     * 
+     * @return <code>true</code> if all resources are to be replaced
+     */
+    public boolean isReplaceRequest() {
+        return this.replaceRequest;
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("WriteRequest [objectId=").append(objectId).append(", objectInstanceId=")
-                .append(objectInstanceId).append(", resourceId=").append(resourceId).append(", format=").append(format)
-                .append(", stringValue=").append(stringValue).append(", tlvValues=").append(Arrays.toString(tlvValues))
-                .append("]");
+        builder.append("WriteRequest [client=").append(getClient().getEndpoint()).append(", objectId=")
+        .append(getObjectId()).append(", objectInstanceId=").append(getObjectInstanceId())
+        .append(", resourceId=").append(getResourceId()).append(", format=").append(getContentFormat())
+        .append(", stringValue=").append(getStringPayload()).append(", tlvValues=")
+        .append(Arrays.toString(getPayload())).append("]");
         return builder.toString();
     }
 
+    @Override
+    public ClientResponse send(LwM2mClientOperations operations) {
+
+        return operations.send(this);
+    }
+
+    public static WriteRequest newReplaceRequest(Client client, Integer objectId, Integer objectInstanceId,
+                                                 Integer resourceId, Tlv[] payload) {
+        return new WriteRequest(client, objectId, objectInstanceId, resourceId, payload, true);
+    }
+
+    public static WriteRequest newUpdateRequest(Client client, Integer objectId, Integer objectInstanceId,
+                                                Integer resourceId, Tlv[] payload) {
+        return new WriteRequest(client, objectId, objectInstanceId, resourceId, payload, false);
+    }
+
+    public static WriteRequest newReplaceRequest(Client client, Integer objectId, Integer objectInstanceId,
+                                                 Integer resourceId, String payload, ContentFormat format) {
+        return new WriteRequest(client, objectId, objectInstanceId, resourceId, payload, format, true);
+    }
+
+    public static WriteRequest newUpdateRequest(Client client, Integer objectId, Integer objectInstanceId,
+                                                Integer resourceId, String payload, ContentFormat format) {
+        return new WriteRequest(client, objectId, objectInstanceId, resourceId, payload, format, false);
+    }
 }

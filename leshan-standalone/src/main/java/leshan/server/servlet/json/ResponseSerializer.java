@@ -53,14 +53,14 @@ public class ResponseSerializer implements JsonSerializer<ClientResponse> {
         try {
             JsonObject element = new JsonObject();
 
-            element.addProperty("status", src.getCode().toString());
+            element.addProperty("status", src.getCode());
 
             if (src instanceof ContentResponse) {
                 Object value = null;
                 ContentResponse cResponse = (ContentResponse) src;
                 switch (cResponse.getFormat()) {
                 case TLV:
-                    value = tlvDecoder.decode(ByteBuffer.wrap(cResponse.getContent()));
+                    value = this.tlvDecoder.decode(ByteBuffer.wrap(cResponse.getContent()));
                     break;
                 case TEXT:
                 case JSON:
