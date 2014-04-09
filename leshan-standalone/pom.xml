@@ -34,7 +34,7 @@
     <parent>
         <groupId>leshan</groupId>
         <artifactId>leshan-server</artifactId>
-        <version>0.1.0</version>
+        <version>0.1.1-SNAPSHOT</version>
     </parent>
     <artifactId>leshan-standalone</artifactId>
     <name>leshan - standalone server</name>
@@ -45,7 +45,7 @@
         <dependency>
             <groupId>leshan</groupId>
             <artifactId>leshan-core</artifactId>
-            <version>0.1.0</version>
+            <version>0.1.1-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
 
