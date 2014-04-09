@@ -29,7 +29,7 @@
  */
 package leshan.server;
 
-import leshan.server.lwm2m.CoapServer;
+import leshan.server.lwm2m.LwM2mServer;
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.client.ClientRegistryImpl;
 import leshan.server.servlet.ApiServlet;
@@ -41,9 +41,9 @@ import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LwM2mServer {
+public class LeshanMain {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LwM2mServer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LeshanMain.class);
 
     private Server server;
 
@@ -52,7 +52,7 @@ public class LwM2mServer {
         ClientRegistry clientRegistry = new ClientRegistryImpl();
 
         // LWM2M server
-        CoapServer lwServer = new CoapServer(clientRegistry);
+        LwM2mServer lwServer = new LwM2mServer(clientRegistry);
         lwServer.start();
 
         // now prepare and start jetty
@@ -95,7 +95,7 @@ public class LwM2mServer {
     }
 
     public static void main(String[] args) {
-        new LwM2mServer().start();
+        new LeshanMain().start();
     }
 
 }
