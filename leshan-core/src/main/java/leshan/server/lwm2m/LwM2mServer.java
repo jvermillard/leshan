@@ -29,7 +29,6 @@
  */
 package leshan.server.lwm2m;
 
-import leshan.server.LwM2mServer;
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.message.LwM2mClientOperations;
 import leshan.server.lwm2m.resource.RegisterResource;
@@ -47,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * A {@link LwM2mClientOperations} is provided to perform server-initiated requests to LW-M2M clients.
  * </p>
  */
-public class CoapServer {
+public class LwM2mServer {
 
     private ch.ethz.inf.vs.californium.server.Server coapServer;
 
@@ -58,7 +57,7 @@ public class CoapServer {
 
     private final LwM2mClientOperations requestHandler;
 
-    public CoapServer(ClientRegistry clientRegistry) {
+    public LwM2mServer(ClientRegistry clientRegistry) {
         // init CoAP server
         coapServer = new ch.ethz.inf.vs.californium.server.Server(PORT);
 

@@ -29,11 +29,11 @@
  */
 package leshan.server.lwm2m.resource;
 
-
 import java.util.List;
 
 import leshan.server.lwm2m.client.BindingMode;
 import leshan.server.lwm2m.client.Client;
+import leshan.server.lwm2m.client.ClientRegistrationException;
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.client.ClientUpdate;
 
@@ -86,12 +86,12 @@ public class RegisterResource extends ResourceBase {
 
         // TODO: assert content media type is APPLICATION LINK FORMAT?
 
+        String endpoint = null;
+        Long lifetime = null;
+        String smsNumber = null;
+        String lwVersion = null;
+        BindingMode binding = null;
         try {
-            String endpoint = null;
-            Long lifetime = null;
-            String smsNumber = null;
-            String lwVersion = null;
-            BindingMode binding = null;
 
             for (String param : request.getOptions().getURIQueries()) {
                 if (param.startsWith("ep=")) {
@@ -108,15 +108,15 @@ public class RegisterResource extends ResourceBase {
             }
 
             if (endpoint == null || endpoint.isEmpty()) {
-                exchange.respond( ResponseCode.BAD_REQUEST, "Client must specify an endpoint identifier" );
+                exchange.respond(ResponseCode.BAD_REQUEST, "Client must specify an endpoint identifier");
             } else {
                 // register
                 String registrationId = RegisterResource.createRegistrationId();
 
                 String[] objectLinks = new String(request.getPayload(), Charsets.UTF_8).split(",");
 
-                Client client = new Client(registrationId, endpoint, request.getSource(), request.getSourcePort(), lwVersion,
-                        lifetime, smsNumber, binding, objectLinks);
+                Client client = new Client(registrationId, endpoint, request.getSource(), request.getSourcePort(),
+                        lwVersion, lifetime, smsNumber, binding, objectLinks);
 
                 this.registry.registerClient(client);
                 LOG.debug("New registered client: {}", client);
@@ -126,6 +126,9 @@ public class RegisterResource extends ResourceBase {
             }
         } catch (NumberFormatException e) {
             exchange.respond(ResponseCode.BAD_REQUEST, "Lifetime parameter must be a valid number");
+        } catch (ClientRegistrationException e) {
+            LOG.debug("Registration failed for client " + endpoint, e);
+            exchange.respond(ResponseCode.BAD_REQUEST);
         }
     }
 
@@ -165,11 +168,16 @@ public class RegisterResource extends ResourceBase {
         ClientUpdate client = new ClientUpdate(registrationId, request.getSource(), request.getSourcePort(), lwVersion,
                 lifetime, smsNumber, binding, null);
 
-        Client c = this.registry.updateClient(client);
-        if (c == null) {
-            exchange.respond(ResponseCode.NOT_FOUND);
-        } else {
-            exchange.respond(ResponseCode.CHANGED);
+        try {
+            Client c = this.registry.updateClient(client);
+            if (c == null) {
+                exchange.respond(ResponseCode.NOT_FOUND);
+            } else {
+                exchange.respond(ResponseCode.CHANGED);
+            }
+        } catch (ClientRegistrationException e) {
+            LOG.debug("Registration update failed: " + client, e);
+            exchange.respond(ResponseCode.BAD_REQUEST);
         }
 
     }
@@ -180,14 +188,21 @@ public class RegisterResource extends ResourceBase {
 
         Client unregistered = null;
         List<String> uri = exchange.getRequestOptions().getURIPaths();
-        if (uri != null && uri.size() == 2 && RESOURCE_NAME.equals(uri.get(0))) {
-            unregistered = this.registry.deregisterClient(uri.get(1));
-        }
 
-        if (unregistered != null) {
-            exchange.respond(ResponseCode.DELETED);
-        } else {
-            LOG.debug("Invalid deregistration");
+        try {
+            if (uri != null && uri.size() == 2 && RESOURCE_NAME.equals(uri.get(0))) {
+                unregistered = this.registry.deregisterClient(uri.get(1));
+            }
+
+            if (unregistered != null) {
+                exchange.respond(ResponseCode.DELETED);
+            } else {
+                LOG.debug("Invalid deregistration");
+                exchange.respond(ResponseCode.BAD_REQUEST);
+            }
+
+        } catch (ClientRegistrationException e) {
+            LOG.debug("Deregistration failed", e);
             exchange.respond(ResponseCode.BAD_REQUEST);
         }
 

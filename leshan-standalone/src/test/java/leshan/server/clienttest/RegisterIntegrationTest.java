@@ -38,7 +38,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import leshan.server.LwM2mServer;
+import leshan.server.LeshanMain;
 
 import org.junit.Test;
 
@@ -51,7 +51,7 @@ public class RegisterIntegrationTest {
     @Test
     public void register_and_deregister() throws IOException, InterruptedException {
 
-        LwM2mServer server = new LwM2mServer();
+        LeshanMain server = new LeshanMain();
         server.start();
 
         Gson gson = new Gson();
