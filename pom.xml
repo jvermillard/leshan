@@ -48,7 +48,7 @@
     </modules>
 
     <scm>
-        <developerConnection>scm:git:ssh://git@github.com:jvermillard/leshan.git</developerConnection>
+        <developerConnection>scm:git:ssh://git@github.com/jvermillard/leshan.git</developerConnection>
     </scm>
 
     <properties>
