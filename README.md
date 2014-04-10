@@ -28,13 +28,17 @@ Screencast: http://ascii.io/a/4741
 
 Compile with maven, generate a runnable jar:
 
-> mvn install
-> cd leshan-standalone
-> mvn assembly:assembly -DdescriptorId=jar-with-dependencies
+```
+mvn install
+cd leshan-standalone
+mvn assembly:assembly -DdescriptorId=jar-with-dependencies
+```
 
 Run:
 
-> java -jar target/leshan-standalone-1.0-SNAPSHOT-jar-with-dependencies.jar
+```
+java -jar target/leshan-standalone-0.1.1-SNAPSHOT-jar-with-dependencies.jar 
+```
 
 Now you can register your LWM2M client.
 
