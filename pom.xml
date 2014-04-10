@@ -39,7 +39,7 @@
 
     <name>leshan</name>
     <url>http://github.com/jvermillard/leshan</url>
-    <description>A  Lightweight M2M Server implementation based on Californium</description>
+    <description>A Lightweight M2M Server implementation based on Californium</description>
 
     <modules>
         <module>leshan-core</module>
@@ -141,7 +141,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>leshan.server.LwM2mServer</mainClass>
+                            <mainClass>leshan.server.LeshanMain</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
