@@ -31,6 +31,8 @@ package leshan.server.servlet;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -54,6 +56,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.jetty.http.HttpFields;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -248,16 +251,16 @@ public class ApiServlet extends HttpServlet {
     }
 
     private ClientResponse writeRequest(Client client, RequestInfo requestInfo, HttpServletRequest req,
-                                        HttpServletResponse resp) throws IOException {
+            HttpServletResponse resp) throws IOException {
 
-        if ("text/plain".equals(req.getContentType())) {
-            String content = IOUtils.toString(req.getInputStream(), "UTF-8");
+        Map<String, String> parameters = new HashMap<String, String>();
+        String contentType = HttpFields.valueParameters(req.getContentType(), parameters);
+        if ("text/plain".equals(contentType)) {
+            String content = IOUtils.toString(req.getInputStream(), parameters.get("charset"));
             return WriteRequest.newReplaceRequest(client, requestInfo.objectId, requestInfo.objectInstanceId,
                     requestInfo.resourceId, content, ContentFormat.TEXT).send(this.requestHandler);
-        } else {
-            throw new NotImplementedException("content type " + req.getContentType()
-                    + " not supported for write requests");
         }
+        throw new NotImplementedException("content type " + req.getContentType() + " not supported for write requests");
     }
 
     class RequestInfo {
