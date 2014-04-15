@@ -44,21 +44,22 @@ public class ClientResponseTest {
 
     @Test
     public void testConstructorSetsAllFields() {
-        ClientResponse response = new ClientResponse("2.05", this.textPayload.getBytes(), ContentFormat.TEXT.getCode());
-        Assert.assertEquals("2.05", response.getCode());
+        ClientResponse response = new ClientResponse(ResponseCode.CONTENT, this.textPayload.getBytes(),
+                ContentFormat.TEXT);
+        Assert.assertEquals(ResponseCode.CONTENT, response.getCode());
         Assert.assertEquals(ContentFormat.TEXT, response.getFormat());
         Assert.assertArrayEquals(this.textPayload.getBytes(), response.getContent());
     }
 
     @Test
     public void testConstructorDeterminesContentFormatFromTextPayload() {
-        ClientResponse response = new ClientResponse("2.05", this.textPayload.getBytes(), null);
+        ClientResponse response = new ClientResponse(ResponseCode.CONTENT, this.textPayload.getBytes(), null);
         Assert.assertEquals(ContentFormat.TEXT, response.getFormat());
     }
 
     @Test
     public void testConstructorDeterminesContentFormatFromJsonPayload() {
-        ClientResponse response = new ClientResponse("2.05", this.jsonPayload.getBytes(), null);
+        ClientResponse response = new ClientResponse(ResponseCode.CONTENT, this.jsonPayload.getBytes(), null);
         Assert.assertEquals(ContentFormat.JSON, response.getFormat());
     }
 

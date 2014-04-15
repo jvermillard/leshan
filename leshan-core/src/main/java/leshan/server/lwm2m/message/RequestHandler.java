@@ -29,10 +29,8 @@
  */
 package leshan.server.lwm2m.message;
 
-
 /**
  * A set of operations that can be performed on Lightweight M2M request objects.
- * 
  */
 public interface RequestHandler {
 
@@ -40,8 +38,7 @@ public interface RequestHandler {
      * Reads one or more resources from a client.
      * 
      * @param readRequest the resource to read
-     * @return the client response or <code>null</code> if the request timed out
-     *         before the client sent a response
+     * @return the client response or <code>null</code> if the request timed out before the client sent a response
      * @throws ResourceAccessException if the resource could not be read
      */
     ClientResponse send(ReadRequest readRequest);
@@ -50,8 +47,7 @@ public interface RequestHandler {
      * Executes a resource on a client.
      * 
      * @param execRequest the resource to execute and its parameters (if any)
-     * @return the client response or <code>null</code> if the request timed out
-     *         before the client sent a response
+     * @return the client response or <code>null</code> if the request timed out before the client sent a response
      * @throws ResourceAccessException if the resource could not be executed
      */
     ClientResponse send(ExecRequest execRequest);
@@ -60,10 +56,8 @@ public interface RequestHandler {
      * Updates or replaces resources on a client.
      * 
      * @param writeRequest the resources to update or replace
-     * @return the client response or <code>null</code> if the request timed out
-     *         before the client sent a response
-     * @throws ResourceAccessException if the resource(s) could not be written
-     *             to
+     * @return the client response or <code>null</code> if the request timed out before the client sent a response
+     * @throws ResourceAccessException if the resource(s) could not be written to
      */
     ClientResponse send(WriteRequest writeRequest);
 
@@ -71,8 +65,7 @@ public interface RequestHandler {
      * Creates new resources on a client.
      * 
      * @param createRequest the resources to create
-     * @return the client response or <code>null</code> if the request timed out
-     *         before the client sent a response
+     * @return the client response or <code>null</code> if the request timed out before the client sent a response
      * @throws ResourceAccessException if the resource could not be created
      */
     ClientResponse send(CreateRequest createRequest);

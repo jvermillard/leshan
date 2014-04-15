@@ -30,23 +30,13 @@
 package leshan.server.lwm2m.message;
 
 import static org.mockito.Matchers.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 
 import leshan.server.lwm2m.client.Client;
-import leshan.server.lwm2m.message.AuthorizationException;
-import leshan.server.lwm2m.message.ClientResponse;
-import leshan.server.lwm2m.message.ContentFormat;
-import leshan.server.lwm2m.message.LwM2mClientOperations;
-import leshan.server.lwm2m.message.LwM2mRequest;
-import leshan.server.lwm2m.message.OperationNotSupportedException;
-import leshan.server.lwm2m.message.OperationType;
-import leshan.server.lwm2m.message.ResourceNotFoundException;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -136,7 +126,8 @@ public class LwM2mClientOperationsTest {
             Assert.assertArrayEquals(coapResponse.getPayload(), response.getContent());
             Assert.assertEquals(coapResponse.getOptions().getContentFormat(), response.getFormat().getCode());
         }
-        Assert.assertEquals(coapResponse.getCode().toString(), response.getCode());
+        Assert.assertEquals(leshan.server.lwm2m.message.ResponseCode.fromCoapCode(coapResponse.getCode()),
+                response.getCode());
         return response;
     }
 
@@ -157,8 +148,7 @@ public class LwM2mClientOperationsTest {
 
     private void givenASimpleClient() throws UnknownHostException {
         this.client = new Client("ID", "urn:client", this.destination, this.destinationPort, "1.0", 10000L, null, null,
-                null,
-                new Date());
+                null, new Date());
     }
 
     private void ifTheClientReturns(Response coapResponse) throws InterruptedException {

@@ -38,7 +38,7 @@ import leshan.server.lwm2m.tlv.Tlv;
 public class CreateRequest extends PayloadRequest {
 
     private CreateRequest(Client client, Integer objectId, Integer objectInstanceId, String payload,
-                          ContentFormat contentFormat) {
+            ContentFormat contentFormat) {
         super(client, objectId, objectInstanceId, null, payload, contentFormat);
     }
 
@@ -46,14 +46,16 @@ public class CreateRequest extends PayloadRequest {
         super(client, objectId, objectInstanceId, null, payload);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public ClientResponse send(LwM2mClientOperations operations) {
+    public ClientResponse send(RequestHandler operations) {
         return operations.send(this);
     }
 
     /**
-     * Creates a request for creating the (only) instance of a particular
-     * object.
+     * Creates a request for creating the (only) instance of a particular object.
      * 
      * @param client the LWM2M Client to create the object instance on
      * @param objectId the object ID
@@ -65,8 +67,7 @@ public class CreateRequest extends PayloadRequest {
     }
 
     /**
-     * Creates a request for creating the (only) instance of a particular
-     * object.
+     * Creates a request for creating the (only) instance of a particular object.
      * 
      * @param client the LWM2M Client to create the object instance on
      * @param objectId the object ID
@@ -79,8 +80,7 @@ public class CreateRequest extends PayloadRequest {
     }
 
     /**
-     * Creates a request for creating the (only) instance of a particular
-     * object.
+     * Creates a request for creating the (only) instance of a particular object.
      * 
      * @param client the LWM2M Client to create the object instance on
      * @param objectId the object ID
@@ -92,8 +92,7 @@ public class CreateRequest extends PayloadRequest {
     }
 
     /**
-     * Creates a request for creating an additional instance of a particular
-     * object.
+     * Creates a request for creating an additional instance of a particular object.
      * 
      * @param client the LWM2M Client to create the object instance on
      * @param objectId the object ID

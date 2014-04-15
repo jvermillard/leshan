@@ -53,7 +53,7 @@ public class ResponseSerializer implements JsonSerializer<ClientResponse> {
         try {
             JsonObject element = new JsonObject();
 
-            element.addProperty("status", src.getCode());
+            element.addProperty("status", src.getCode().toString());
 
             if (src instanceof ContentResponse) {
                 Object value = null;

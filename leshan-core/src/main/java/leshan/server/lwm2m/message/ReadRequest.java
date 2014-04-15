@@ -48,8 +48,7 @@ public class ReadRequest extends AbstractLwM2mRequest {
     }
 
     /**
-     * Creates a request for reading all instances of a particular object from a
-     * client.
+     * Creates a request for reading all instances of a particular object from a client.
      * 
      * @param client the LWM2M Client to read the resource from
      * @param objectId the object ID of the resource
@@ -84,13 +83,15 @@ public class ReadRequest extends AbstractLwM2mRequest {
      * @throws NullPointerException if the object ID is <code>null</code>
      */
     public static final ReadRequest newRequest(Client client, Integer objectId, Integer objectInstanceId,
-                                               Integer resourceId) {
+            Integer resourceId) {
         return new ReadRequest(client, objectId, objectInstanceId, resourceId);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public ClientResponse send(LwM2mClientOperations operations) {
-
+    public ClientResponse send(RequestHandler operations) {
         return operations.send(this);
     }
 }

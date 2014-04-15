@@ -31,15 +31,13 @@ package leshan.server.lwm2m.message;
 
 import java.util.Arrays;
 
-import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
-
 /**
  * A response with content from the LW-M2M client.
  */
 public class ContentResponse extends ClientResponse {
 
-    public ContentResponse(byte[] content, Integer contentFormat) {
-        super(ResponseCode.CONTENT.toString(), content, contentFormat);
+    public ContentResponse(byte[] content, ContentFormat contentFormat) {
+        super(ResponseCode.CONTENT, content, contentFormat);
     }
 
     @Override

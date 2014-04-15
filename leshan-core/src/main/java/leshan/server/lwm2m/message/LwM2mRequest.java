@@ -29,7 +29,6 @@
  */
 package leshan.server.lwm2m.message;
 
-
 /**
  * A Lightweight M2M request.
  */
@@ -38,11 +37,9 @@ public interface LwM2mRequest {
     /**
      * Sends the request to the LWM2M Client.
      * 
-     * @param operations the LWM2M protocol adapter to use for sending the
-     *            request
+     * @param handler the LWM2M protocol adapter to use for sending the request
      * @return the response from the client
-     * @throws ResourceAccessException if the request could not be processed by
-     *             the client
+     * @throws ResourceAccessException if the request could not be processed by the client
      */
-    ClientResponse send(LwM2mClientOperations operations);
+    ClientResponse send(RequestHandler handler);
 }

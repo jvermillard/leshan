@@ -117,8 +117,11 @@ public class ExecRequest extends PayloadRequest {
         return new ExecRequest(client, objectId, objectInstanceId, resourceId, parameters);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public ClientResponse send(LwM2mClientOperations operations) {
+    public ClientResponse send(RequestHandler operations) {
         return operations.send(this);
     }
 }

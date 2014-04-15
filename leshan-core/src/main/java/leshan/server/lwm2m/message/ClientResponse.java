@@ -41,15 +41,14 @@ public class ClientResponse {
 
     private final byte[] content;
     private final ContentFormat contentFormat;
-    protected final String code;
+    protected final ResponseCode code;
 
-    public ClientResponse(String code, byte[] payload, Integer contentFormatCode) {
+    public ClientResponse(ResponseCode code, byte[] payload, ContentFormat contentFormat) {
         if (code == null) {
             throw new NullPointerException("Response code must not be null");
         }
 
-        ContentFormat format = contentFormatCode != null ? ContentFormat.fromCode(contentFormatCode) : null;
-
+        ContentFormat format = contentFormat;
         if (format == null && payload != null) {
             // HACK to guess the content format from the payload
             try {
@@ -71,19 +70,18 @@ public class ClientResponse {
     }
 
     /**
-     * Gets the CoAP repsonse code.
+     * Gets the response code.
      * 
      * @return the code
      */
-    public final String getCode() {
+    public final ResponseCode getCode() {
         return this.code;
     }
 
     /**
      * Gets the payload contained in the repsonse.
      * 
-     * @return the payload or <code>null</code> if the client did not return any
-     *         payload
+     * @return the payload or <code>null</code> if the client did not return any payload
      */
     public final byte[] getContent() {
         return this.content;
@@ -92,8 +90,7 @@ public class ClientResponse {
     /**
      * Gets the content format of the response's payload.
      * 
-     * @return the content format or <code>null</code> if the response did not
-     *         specify a content format
+     * @return the content format or <code>null</code> if the response did not specify a content format
      */
     public final ContentFormat getFormat() {
         return this.contentFormat;

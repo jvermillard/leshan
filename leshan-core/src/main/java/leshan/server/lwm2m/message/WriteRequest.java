@@ -43,7 +43,7 @@ public class WriteRequest extends PayloadRequest {
     private final boolean replaceRequest;
 
     protected WriteRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId,
-                           Tlv[] payload, boolean replaceResources) {
+            Tlv[] payload, boolean replaceResources) {
         super(client, objectId, objectInstanceId, resourceId, payload);
         if (payload == null) {
             throw new IllegalArgumentException("Payload must not be null");
@@ -52,7 +52,7 @@ public class WriteRequest extends PayloadRequest {
     }
 
     protected WriteRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId,
-                           String payload, ContentFormat format, boolean replaceResources) {
+            String payload, ContentFormat format, boolean replaceResources) {
         super(client, objectId, objectInstanceId, resourceId, payload, format);
         if (payload == null) {
             throw new IllegalArgumentException("Payload must not be null");
@@ -63,7 +63,7 @@ public class WriteRequest extends PayloadRequest {
     }
 
     protected WriteRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId,
-                           byte[] payload, boolean replaceResources) {
+            byte[] payload, boolean replaceResources) {
         super(client, objectId, objectInstanceId, resourceId, payload);
         if (payload == null) {
             throw new IllegalArgumentException("Payload must not be null");
@@ -102,8 +102,8 @@ public class WriteRequest extends PayloadRequest {
     }
 
     /**
-     * Checks whether this write request is supposed to replace all resources or
-     * do a partial update only (see section 5.3.3 of the LW M2M spec).
+     * Checks whether this write request is supposed to replace all resources or do a partial update only (see section
+     * 5.3.3 of the LW M2M spec).
      * 
      * @return <code>true</code> if all resources are to be replaced
      */
@@ -115,36 +115,38 @@ public class WriteRequest extends PayloadRequest {
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("WriteRequest [client=").append(getClient().getEndpoint()).append(", objectId=")
-        .append(getObjectId()).append(", objectInstanceId=").append(getObjectInstanceId())
-        .append(", resourceId=").append(getResourceId()).append(", format=").append(getContentFormat())
-        .append(", stringValue=").append(getStringPayload()).append(", tlvValues=")
-        .append(Arrays.toString(getPayload())).append("]");
+                .append(getObjectId()).append(", objectInstanceId=").append(getObjectInstanceId())
+                .append(", resourceId=").append(getResourceId()).append(", format=").append(getContentFormat())
+                .append(", stringValue=").append(getStringPayload()).append(", tlvValues=")
+                .append(Arrays.toString(getPayload())).append("]");
         return builder.toString();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public ClientResponse send(LwM2mClientOperations operations) {
-
+    public ClientResponse send(RequestHandler operations) {
         return operations.send(this);
     }
 
     public static WriteRequest newReplaceRequest(Client client, Integer objectId, Integer objectInstanceId,
-                                                 Integer resourceId, Tlv[] payload) {
+            Integer resourceId, Tlv[] payload) {
         return new WriteRequest(client, objectId, objectInstanceId, resourceId, payload, true);
     }
 
     public static WriteRequest newUpdateRequest(Client client, Integer objectId, Integer objectInstanceId,
-                                                Integer resourceId, Tlv[] payload) {
+            Integer resourceId, Tlv[] payload) {
         return new WriteRequest(client, objectId, objectInstanceId, resourceId, payload, false);
     }
 
     public static WriteRequest newReplaceRequest(Client client, Integer objectId, Integer objectInstanceId,
-                                                 Integer resourceId, String payload, ContentFormat format) {
+            Integer resourceId, String payload, ContentFormat format) {
         return new WriteRequest(client, objectId, objectInstanceId, resourceId, payload, format, true);
     }
 
     public static WriteRequest newUpdateRequest(Client client, Integer objectId, Integer objectInstanceId,
-                                                Integer resourceId, String payload, ContentFormat format) {
+            Integer resourceId, String payload, ContentFormat format) {
         return new WriteRequest(client, objectId, objectInstanceId, resourceId, payload, format, false);
     }
 }

@@ -175,12 +175,13 @@ public class LwM2mClientOperations implements RequestHandler {
         } else {
             switch (coapResponse.getCode()) {
             case CONTENT:
-                return new ContentResponse(coapResponse.getPayload(), coapResponse.getOptions().getContentFormat());
+                return new ContentResponse(coapResponse.getPayload(), ContentFormat.fromCode(coapResponse.getOptions()
+                        .getContentFormat()));
             case CHANGED:
             case DELETED:
             case CREATED:
-                return new ClientResponse(coapResponse.getCode().toString(), coapResponse.getPayload(), coapResponse
-                        .getOptions().getContentFormat());
+                return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode()), coapResponse.getPayload(),
+                        ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()));
             case NOT_FOUND:
                 throw new ResourceNotFoundException(coapRequest.getURI(), coapResponse.getPayloadString());
             case UNAUTHORIZED:
