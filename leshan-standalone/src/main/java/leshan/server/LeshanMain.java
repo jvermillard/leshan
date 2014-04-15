@@ -30,7 +30,6 @@
 package leshan.server;
 
 import leshan.server.lwm2m.LwM2mServer;
-import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.client.ClientRegistryImpl;
 import leshan.server.servlet.ApiServlet;
 import leshan.server.servlet.EventServlet;
@@ -49,11 +48,12 @@ public class LeshanMain {
 
     public void start() {
 
-        ClientRegistry clientRegistry = new ClientRegistryImpl();
+        ClientRegistryImpl clientRegistry = new ClientRegistryImpl();
 
         // LWM2M server
         LwM2mServer lwServer = new LwM2mServer(clientRegistry);
         lwServer.start();
+        clientRegistry.start();
 
         // now prepare and start jetty
         String webappDirLocation = "src/main/webapp/";

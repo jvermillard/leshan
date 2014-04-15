@@ -31,8 +31,12 @@ package leshan.server.lwm2m.client;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
@@ -143,5 +147,37 @@ public class ClientRegistryImpl implements ClientRegistry {
         }
 
         return unregistered;
+    }
+
+    /**
+     * start the registration manager, will start regular cleanup of dead registrations.
+     */
+    public void start() {
+        // every 2 seconds clean the registration list
+        schedExecutor.scheduleAtFixedRate(new Cleaner(), 2, 2, TimeUnit.SECONDS);
+    }
+
+    /**
+     * Stop the underlying cleanup of the registrations.
+     */
+    public void stop() throws InterruptedException {
+        schedExecutor.shutdownNow();
+        schedExecutor.awaitTermination(5, TimeUnit.SECONDS);
+    }
+
+    private ScheduledExecutorService schedExecutor = Executors.newScheduledThreadPool(1);
+
+    private class Cleaner implements Runnable {
+
+        @Override
+        public void run() {
+            for (Map.Entry<String, Client> e : clientsByEp.entrySet()) {
+                if (!e.getValue().isAlive()) {
+                    // force de-registration
+                    deregisterClient(e.getValue().getRegistrationId());
+                }
+            }
+        }
+
     }
 }

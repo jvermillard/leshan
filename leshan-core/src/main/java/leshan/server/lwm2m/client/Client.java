@@ -64,6 +64,8 @@ public class Client {
 
     private final String[] objectLinks;
 
+    private Date lastUpdate;
+
     public Client(String registrationId, String endpoint, InetAddress address, int port) {
         this(registrationId, endpoint, address, port, null, null, null, null, null);
     }
@@ -90,6 +92,7 @@ public class Client {
         this.lwM2mVersion = lwM2mVersion == null ? DEFAULT_LWM2M_VERSION : lwM2mVersion;
         this.bindingMode = binding == null ? BindingMode.U : binding;
         this.smsNumber = smsNumber;
+        this.lastUpdate = new Date();
     }
 
     public String getRegistrationId() {
@@ -156,12 +159,24 @@ public class Client {
         this.bindingMode = bindingMode;
     }
 
-    @Override
-    public String toString() {
-        return "Client [registrationDate=" + registrationDate + ", address=" + address + ", port=" + port
-                + ", lifeTimeInSec=" + lifeTimeInSec + ", smsNumber=" + smsNumber + ", lwM2mVersion=" + lwM2mVersion
-                + ", bindingMode=" + bindingMode + ", endpoint=" + endpoint + ", registrationId=" + registrationId
-                + ", objectLinks=" + Arrays.toString(objectLinks) + "]";
+    public Date getLastUpdate() {
+        return lastUpdate;
     }
 
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
+
+    public boolean isAlive() {
+        // TODO
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return String
+                .format("Client [registrationDate=%s, address=%s, port=%s, lifeTimeInSec=%s, smsNumber=%s, lwM2mVersion=%s, bindingMode=%s, endpoint=%s, registrationId=%s, objectLinks=%s, lastUpdate=%s]",
+                        registrationDate, address, port, lifeTimeInSec, smsNumber, lwM2mVersion, bindingMode, endpoint,
+                        registrationId, Arrays.toString(objectLinks), lastUpdate);
+    }
 }
