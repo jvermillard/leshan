@@ -66,7 +66,9 @@ angular.module('lwResourcesDirective', [])
                     if (data.status = "CONTENT") {
                         scope.resource.value = data.value;
                     }
-                });
+                }).error(function(data, status, headers, config) {
+                    console.error("Unable to read resource ",scope.resource.path,"for",$routeParams.clientId, ":", status, data)
+                });;
             };
 
             scope.write = function() {
@@ -84,7 +86,10 @@ angular.module('lwResourcesDirective', [])
                             if (data.status = "CONTENT") {
                                 scope.resource.value = value;
                             }
-                        });
+                        }).error(function(data, status, headers, config) {
+                            alert("Failed to write resource.");
+                            console.error("Unable to write resource ",scope.resource.path,"for",$routeParams.clientId, ":", status, data)
+                        });;
                     }
                 });
 
@@ -92,10 +97,13 @@ angular.module('lwResourcesDirective', [])
             };
 
             scope.exec = function() {
-                $http.post("/api/clients/" + $routeParams.clientId + scope.resource.path)
+                $http.post("/api/clients/" + $routeParams.clientId+ scope.resource.path)
                 .success(function(data, status, headers, config) {
-                    alert("success!");
-                });
+                    alert("Success!");
+                }).error(function(data, status, headers, config) {
+                    alert("Failed to execute resource.");
+                    console.error("Unable to execute resource ",scope.resource.path,"for",$routeParams.clientId, ":", status, data)
+                });;
             };
 
             // add children

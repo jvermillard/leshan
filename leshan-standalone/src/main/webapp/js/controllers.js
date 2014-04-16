@@ -9,6 +9,8 @@ lwClientControllers.controller('ClientListCtrl', [
         $http.get('/api/clients').success(
             function(data, status, headers, config) {
             $scope.clients = data;
+        }). error(function(data, status, headers, config) {
+            console.error("Unable get client list:", status, data)
         });
 
         // listen for clients registration/deregistration
@@ -61,10 +63,13 @@ lwClientControllers.controller('ClientListCtrl', [
                     // update resource tree with client details
                     var tree = buildResourceTree($scope.client.objectLinks, data)
                     $scope.lwresources = tree;
-                }
-                );
+                }).error(function(data, status, headers, config) {
+                    console.error("Unable to load lw-resources.json :", status, data)
+                });;
 
-            });
+            }). error(function(data, status, headers, config) {
+                console.error("Unable get client",$routeParams.clientId, ":", status, data)
+            });;
 
             var buildResourceTree = function(objectLinks, lwResources) {
                 var tree = [];
