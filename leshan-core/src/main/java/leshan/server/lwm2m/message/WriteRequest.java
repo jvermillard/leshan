@@ -32,6 +32,7 @@ package leshan.server.lwm2m.message;
 import java.util.Arrays;
 
 import leshan.server.lwm2m.client.Client;
+import leshan.server.lwm2m.operation.RequestHandler;
 import leshan.server.lwm2m.tlv.Tlv;
 
 /**

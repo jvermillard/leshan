@@ -27,19 +27,51 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.lwm2m.message;
+package leshan.server.lwm2m.operation;
+
+import leshan.server.lwm2m.message.OperationType;
+
 
 /**
- * Indicates that a Lightweight M2M request cannot be processed due to
- * insufficient authorization.
+ * Indicates that a particular operation is not applicable/allowed for a given
+ * resource.
  */
-public class AuthorizationException extends ResourceAccessException {
+public class OperationNotSupportedException extends ResourceAccessException {
 
-    private static final int RESPONSE_CODE_UNAUTHORIZED = 129;
     private static final long serialVersionUID = 1L;
+    private final OperationType operation;
 
-    public AuthorizationException(String uri, String message) {
-        super(RESPONSE_CODE_UNAUTHORIZED, uri, message);
+    public OperationNotSupportedException(OperationType op, int code, String uri, String message) {
+        this(op, code, uri, message, null);
+    }
+
+    public OperationNotSupportedException(OperationType op, int code, String uri, String message, Throwable cause) {
+        super(code, uri, message, cause);
+        if (op == null) {
+            throw new NullPointerException("Operation must not be null");
+        }
+        this.operation = op;
+    }
+
+    /**
+     * Gets the offending operation type.
+     * 
+     * @return the operation
+     */
+    public OperationType getOperation() {
+        return this.operation;
+    }
+
+    /**
+     * Returns a string representation of this exception.
+     * 
+     * @return the string representation
+     */
+    @Override
+    public String toString() {
+
+        return String.format("%s [operation: %s, responseCode: %s, request URI: %s, message: %s]", getOperation(),
+                Integer.toString(getCode()), getUri(), getMessage());
     }
 
 }

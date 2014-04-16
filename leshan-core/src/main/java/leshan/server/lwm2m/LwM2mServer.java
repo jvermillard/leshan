@@ -30,7 +30,7 @@
 package leshan.server.lwm2m;
 
 import leshan.server.lwm2m.client.ClientRegistry;
-import leshan.server.lwm2m.message.LwM2mClientOperations;
+import leshan.server.lwm2m.operation.LwM2mClientOperations;
 import leshan.server.lwm2m.resource.RegisterResource;
 
 import org.slf4j.Logger;

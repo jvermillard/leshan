@@ -66,6 +66,9 @@ public class Client {
 
     private Date lastUpdate;
 
+    // does the client failed to answer the last server request
+    private boolean failedLastRequest = false;
+
     public Client(String registrationId, String endpoint, InetAddress address, int port) {
         this(registrationId, endpoint, address, port, null, null, null, null, null);
     }
@@ -167,16 +170,20 @@ public class Client {
         this.lastUpdate = lastUpdate;
     }
 
+    public void markLastRequestFaild() {
+        this.failedLastRequest = true;
+    }
+
     public boolean isAlive() {
-        // TODO
-        return false;
+        return failedLastRequest ? false : this.lastUpdate.getTime() + this.lifeTimeInSec * 1000 > System
+                .currentTimeMillis();
     }
 
     @Override
     public String toString() {
         return String
-                .format("Client [registrationDate=%s, address=%s, port=%s, lifeTimeInSec=%s, smsNumber=%s, lwM2mVersion=%s, bindingMode=%s, endpoint=%s, registrationId=%s, objectLinks=%s, lastUpdate=%s]",
+                .format("Client [registrationDate=%s, address=%s, port=%s, lifeTimeInSec=%s, smsNumber=%s, lwM2mVersion=%s, bindingMode=%s, endpoint=%s, registrationId=%s, objectLinks=%s, lastUpdate=%s, failedLastRequest=%s]",
                         registrationDate, address, port, lifeTimeInSec, smsNumber, lwM2mVersion, bindingMode, endpoint,
-                        registrationId, Arrays.toString(objectLinks), lastUpdate);
+                        registrationId, Arrays.toString(objectLinks), lastUpdate, failedLastRequest);
     }
 }

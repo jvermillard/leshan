@@ -29,6 +29,9 @@
  */
 package leshan.server.lwm2m.message;
 
+import leshan.server.lwm2m.operation.RequestHandler;
+import leshan.server.lwm2m.operation.ResourceAccessException;
+
 /**
  * A Lightweight M2M request.
  */

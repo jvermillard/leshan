@@ -178,6 +178,5 @@ public class ClientRegistryImpl implements ClientRegistry {
                 }
             }
         }
-
     }
 }

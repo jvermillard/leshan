@@ -30,6 +30,7 @@
 package leshan.server.lwm2m.message;
 
 import leshan.server.lwm2m.client.Client;
+import leshan.server.lwm2m.operation.RequestHandler;
 
 /**
  * The request to access the value of a Resource, an array of Resource Instances, an Object Instance or all the Object

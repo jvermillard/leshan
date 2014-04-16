@@ -27,9 +27,21 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.lwm2m.message;
+package leshan.server.lwm2m.operation;
+
+import java.util.Date;
 
 import leshan.server.lwm2m.client.Client;
+import leshan.server.lwm2m.message.AbstractLwM2mRequest;
+import leshan.server.lwm2m.message.ClientResponse;
+import leshan.server.lwm2m.message.ContentFormat;
+import leshan.server.lwm2m.message.ContentResponse;
+import leshan.server.lwm2m.message.CreateRequest;
+import leshan.server.lwm2m.message.ExecRequest;
+import leshan.server.lwm2m.message.OperationType;
+import leshan.server.lwm2m.message.ReadRequest;
+import leshan.server.lwm2m.message.ResponseCode;
+import leshan.server.lwm2m.message.WriteRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,7 +89,9 @@ public class LwM2mClientOperations implements RequestHandler {
         setURIPath(coapRequest, readRequest);
         setDestination(coapRequest, readRequest.getClient());
 
-        return sendRequest(coapRequest, OperationType.R);
+        ClientResponse cr = sendRequest(readRequest.getClient(), coapRequest, OperationType.R);
+        readRequest.getClient().setLastUpdate(new Date());
+        return cr;
     }
 
     @Override
@@ -92,7 +106,9 @@ public class LwM2mClientOperations implements RequestHandler {
         setDestination(coapRequest, execRequest.getClient());
         coapRequest.setPayload(execRequest.getBytes());
 
-        return sendRequest(coapRequest, OperationType.E);
+        execRequest.getClient().setLastUpdate(new Date());
+
+        return sendRequest(execRequest.getClient(), coapRequest, OperationType.E);
 
     }
 
@@ -107,7 +123,7 @@ public class LwM2mClientOperations implements RequestHandler {
         setDestination(coapRequest, writeRequest.getClient());
         coapRequest.setPayload(writeRequest.getBytes());
 
-        return sendRequest(coapRequest, OperationType.W);
+        return sendRequest(writeRequest.getClient(), coapRequest, OperationType.W);
     }
 
     @Override
@@ -122,7 +138,7 @@ public class LwM2mClientOperations implements RequestHandler {
         coapRequest.getOptions().setContentFormat(createRequest.getContentFormat().getCode());
         coapRequest.setPayload(createRequest.getBytes());
 
-        return sendRequest(coapRequest, OperationType.W);
+        return sendRequest(createRequest.getClient(), coapRequest, OperationType.W);
     }
 
     private final void setURIPath(Request coapRequest, AbstractLwM2mRequest lwM2mRequest) {
@@ -152,13 +168,14 @@ public class LwM2mClientOperations implements RequestHandler {
     /**
      * Sends a Lightweight M2M request to a client.
      * 
+     * @param client the registered client
      * @param coapRequest the request
      * @param operationType the type of operation the request reflects
      * @return the response from the client or <code>null</code> if the client did not send a response within 5 seconds
      * @throws NullPointerException if any of the parameters is <code>null</code>
      * @throws ResourceAccessException if the client could not process the request
      */
-    protected final ClientResponse sendRequest(Request coapRequest, OperationType operationType) {
+    protected final ClientResponse sendRequest(Client client, Request coapRequest, OperationType operationType) {
 
         this.endpoint.sendRequest(coapRequest);
         Response coapResponse = null;
@@ -171,8 +188,10 @@ public class LwM2mClientOperations implements RequestHandler {
         }
 
         if (coapResponse == null) {
+            client.markLastRequestFaild();
             throw new RequestTimeoutException(coapRequest.getURI(), COAP_REQUEST_TIMEOUT_MILLIS);
         } else {
+            client.setLastUpdate(new Date());
             switch (coapResponse.getCode()) {
             case CONTENT:
                 return new ContentResponse(coapResponse.getPayload(), ContentFormat.fromCode(coapResponse.getOptions()
@@ -195,5 +214,4 @@ public class LwM2mClientOperations implements RequestHandler {
             }
         }
     }
-
 }

@@ -27,7 +27,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.lwm2m.message;
+package leshan.server.lwm2m.operation;
 
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -37,6 +37,10 @@ import java.net.UnknownHostException;
 import java.util.Date;
 
 import leshan.server.lwm2m.client.Client;
+import leshan.server.lwm2m.message.ClientResponse;
+import leshan.server.lwm2m.message.ContentFormat;
+import leshan.server.lwm2m.message.LwM2mRequest;
+import leshan.server.lwm2m.message.OperationType;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -119,7 +123,7 @@ public class LwM2mClientOperationsTest {
         givenASimpleClient();
         ifTheClientReturns(coapResponse);
 
-        ClientResponse response = this.clientOperations.sendRequest(this.coapRequest, opType);
+        ClientResponse response = this.clientOperations.sendRequest(client, this.coapRequest, opType);
 
         Assert.assertTrue(response instanceof ClientResponse);
         if (coapResponse.getPayload() != null) {
@@ -140,7 +144,7 @@ public class LwM2mClientOperationsTest {
         givenASimpleClient();
         ifTheClientReturns(coapResponse);
 
-        this.clientOperations.sendRequest(this.coapRequest, OperationType.R);
+        this.clientOperations.sendRequest(client, this.coapRequest, OperationType.R);
 
         verify(this.endpoint).sendRequest(this.coapRequest);
         verify(this.coapRequest).waitForResponse(anyLong());

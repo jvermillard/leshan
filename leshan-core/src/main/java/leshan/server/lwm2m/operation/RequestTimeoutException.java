@@ -27,22 +27,20 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.lwm2m.message;
+package leshan.server.lwm2m.operation;
 
-/**
- * Indicates that a resource accessed on a LWM2M Client cannot be found.
- */
-public class ResourceNotFoundException extends ResourceAccessException {
 
-    private static final int RESPONSE_CODE_NOT_FOUND = 132;
-    private static final long serialVersionUID = 1L;
+public class RequestTimeoutException extends ResourceAccessException {
 
-    public ResourceNotFoundException(String uri, String message) {
-        this(uri, message, null);
+    private static final long serialVersionUID = -6372006578730743741L;
+
+    /**
+     * Sets all information.
+     * 
+     * @param uri the resource URI accessed
+     * @param timeout the number of milliseconds after which the request has timed out
+     */
+    public RequestTimeoutException(String uri, int timeout) {
+        super(null, uri, String.format("Request timed out after %d milliseconds", timeout));
     }
-
-    public ResourceNotFoundException(String uri, String message, Throwable cause) {
-        super(RESPONSE_CODE_NOT_FOUND, uri, message, cause);
-    }
-
 }

@@ -27,7 +27,13 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.lwm2m.message;
+package leshan.server.lwm2m.operation;
+
+import leshan.server.lwm2m.message.ClientResponse;
+import leshan.server.lwm2m.message.CreateRequest;
+import leshan.server.lwm2m.message.ExecRequest;
+import leshan.server.lwm2m.message.ReadRequest;
+import leshan.server.lwm2m.message.WriteRequest;
 
 /**
  * A set of operations that can be performed on Lightweight M2M request objects.
