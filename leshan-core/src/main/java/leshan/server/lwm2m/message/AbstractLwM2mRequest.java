@@ -35,7 +35,7 @@ import leshan.server.lwm2m.client.Client;
  * A base class for concrete LWM2M request types.
  * 
  * Provides generic support for specifying the target resource of the request.
- * 
+ *
  */
 public abstract class AbstractLwM2mRequest {
 

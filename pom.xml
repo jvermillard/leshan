@@ -55,7 +55,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <exclude.integration.tests>**/*Integration*</exclude.integration.tests>
         <internal.repo.path>file://${project.build.directory}/../../leshan-repo</internal.repo.path>
-        <californium.version>0.18.5</californium.version>      
+        <californium.version>0.18.6-final</californium.version>      
     </properties>
 
     <distributionManagement>
@@ -91,12 +91,12 @@
         <repository>
             <id>mkovatsc-github-releases</id>
             <name>mkovatsc-github</name>
-            <url>http://github.com/mkovatsc/maven/raw/master/releases/</url>
+            <url>http://raw.github.com/mkovatsc/maven/master/releases/</url>
         </repository>
         <repository>
             <id>mkovatsc-github-snapshots</id>
             <name>mkovatsc-github</name>
-            <url>http://github.com/mkovatsc/maven/raw/master/snapshots/</url>
+            <url>http://raw.github.com/mkovatsc/maven/master/snapshots/</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -104,7 +104,7 @@
         <repository>
             <id>mkovatsc-github-thirdparty</id>
             <name>mkovatsc-github</name>
-            <url>http://github.com/mkovatsc/maven/raw/master/thirdparty/</url>
+            <url>http://raw.github.com/mkovatsc/maven/master/thirdparty/</url>
         </repository>
     </repositories>
 

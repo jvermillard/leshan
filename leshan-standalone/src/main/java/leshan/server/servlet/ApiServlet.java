@@ -64,7 +64,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-//import org.apache.commons.lang.NotImplementedException;
 
 /**
  * Service HTTP REST API calls.
@@ -94,17 +93,11 @@ public class ApiServlet extends HttpServlet {
 
     private boolean checkPath(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String[] path = StringUtils.split(req.getPathInfo(), '/');
-
-        if (ArrayUtils.isEmpty(path)) {
+        if (ArrayUtils.isEmpty(path) || (!"clients".equals(path[0]))) {
             resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            resp.getWriter().format("%s%s api does not exist", req.getServletPath(), req.getPathInfo()).flush();
             return false;
         }
-
-        if (!("clients".equals(path[0]))) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, "not found: '" + req.getPathInfo() + "'");
-            return false;
-        }
-
         return true;
     }
 
@@ -119,15 +112,19 @@ public class ApiServlet extends HttpServlet {
 
         String[] path = StringUtils.split(req.getPathInfo(), '/');
 
-        if (path.length == 1) { // all registered clients
+        // /clients : all registered clients
+        if (path.length == 1) {
             Collection<Client> clients = this.clientRegistry.allClients();
 
             String json = this.gson.toJson(clients.toArray(new Client[] {}));
             resp.setContentType("application/json");
             resp.getOutputStream().write(json.getBytes("UTF-8"));
             resp.setStatus(HttpServletResponse.SC_OK);
+            return;
+        }
 
-        } else if (path.length == 2) { // get client
+        // /clients/endPoint : get client
+        if (path.length == 2) {
             String clientEndpoint = path[1];
             Client client = this.clientRegistry.get(clientEndpoint);
             if (client != null) {
@@ -135,28 +132,36 @@ public class ApiServlet extends HttpServlet {
                 resp.getOutputStream().write(this.gson.toJson(client).getBytes("UTF-8"));
                 resp.setStatus(HttpServletResponse.SC_OK);
             } else {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "unknown client " + clientEndpoint);
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                resp.getWriter().format("no registered client with id '%s'", clientEndpoint).flush();
             }
-        } else {
-            try {
-                RequestInfo requestInfo = new RequestInfo(path);
+            return;
+        }
 
-                Client client = this.clientRegistry.get(requestInfo.endpoint);
-                if (client == null) {
-                    resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "no registered client with id '"
-                            + requestInfo.endpoint + "'");
-                } else {
-                    ClientResponse cResponse = this.readRequest(client, requestInfo, resp);
-                    processDeviceResponse(resp, cResponse);
-                }
-            } catch (ResourceNotFoundException e) {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
-            } catch (OperationNotSupportedException e) {
-                resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, e.getMessage());
-            } catch (ResourceAccessException e) {
-                LOG.error("unexpected error", e);
-                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        // /clients/endPoint/LWRequest : do LightWeight M2M read request on a given client.
+        try {
+            RequestInfo requestInfo = new RequestInfo(path);
+            Client client = this.clientRegistry.get(requestInfo.endpoint);
+            if (client != null) {
+                ClientResponse cResponse = this.readRequest(client, requestInfo, resp);
+                processDeviceResponse(resp, cResponse);
+            } else {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                resp.getWriter().format("no registered client with id '%s'", requestInfo.endpoint).flush();
             }
+        } catch (IllegalArgumentException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().append(e.getMessage()).flush();
+        } catch (ResourceNotFoundException e) {
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            resp.getWriter().append(e.getMessage()).flush();
+        } catch (OperationNotSupportedException e) {
+            resp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+            resp.getWriter().append(e.getMessage()).flush();
+        } catch (ResourceAccessException e) {
+            LOG.error(String.format("Unexpected error for %s%s request.", req.getServletPath(), req.getPathInfo()), e);
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            resp.getWriter().append(e.getMessage()).flush();
         }
     }
 
@@ -169,29 +174,32 @@ public class ApiServlet extends HttpServlet {
             return;
         }
 
+        // /clients/endPoint/LWRequest : do LightWeight M2M write request on a given client.
         String[] path = StringUtils.split(req.getPathInfo(), '/');
-
         try {
             RequestInfo requestInfo = new RequestInfo(path);
-
             Client client = this.clientRegistry.get(requestInfo.endpoint);
-            if (client == null) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "no registered client with id '"
-                        + requestInfo.endpoint + "'");
-            } else {
+            if (client != null) {
                 ClientResponse cResponse = this.writeRequest(client, requestInfo, req, resp);
                 processDeviceResponse(resp, cResponse);
+            } else {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                resp.getWriter().format("no registered client with id '%s'", requestInfo.endpoint).flush();
             }
         } catch (IllegalArgumentException e) {
             // content encoding other than text/plain is not supported (yet)
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().append(e.getMessage()).flush();
         } catch (ResourceNotFoundException e) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            resp.getWriter().append(e.getMessage()).flush();
         } catch (OperationNotSupportedException e) {
-            resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, e.getMessage());
+            resp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+            resp.getWriter().append(e.getMessage()).flush();
         } catch (ResourceAccessException e) {
-            LOG.error("unexpected error", e);
+            LOG.error(String.format("Unexpected error for %s%s request.", req.getServletPath(), req.getPathInfo()), e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            resp.getWriter().append(e.getMessage()).flush();
         }
     }
 
@@ -204,27 +212,31 @@ public class ApiServlet extends HttpServlet {
             return;
         }
 
+        // /clients/endPoint/LWRequest : do LightWeight M2M execute request on a given client.
         String[] path = StringUtils.split(req.getPathInfo(), '/');
-
         try {
             RequestInfo requestInfo = new RequestInfo(path);
-
             Client client = this.clientRegistry.get(requestInfo.endpoint);
-            if (client == null) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "no registered client with id '"
-                        + requestInfo.endpoint + "'");
-
-            } else {
+            if (client != null) {
                 ClientResponse cResponse = this.execRequest(client, requestInfo, resp);
                 processDeviceResponse(resp, cResponse);
+            } else {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                resp.getWriter().format("no registered client with id '%s'", requestInfo.endpoint).flush();
             }
+        } catch (IllegalArgumentException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().append(e.getMessage()).flush();
         } catch (ResourceNotFoundException e) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND, e.getMessage());
+            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            resp.getWriter().append(e.getMessage()).flush();
         } catch (OperationNotSupportedException e) {
-            resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, e.getMessage());
+            resp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+            resp.getWriter().append(e.getMessage()).flush();
         } catch (ResourceAccessException e) {
-            LOG.error("unexpected error", e);
+            LOG.error(String.format("Unexpected error for %s%s request.", req.getServletPath(), req.getPathInfo()), e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            resp.getWriter().append(e.getMessage()).flush();
         }
     }
 
@@ -242,20 +254,17 @@ public class ApiServlet extends HttpServlet {
     }
 
     private ClientResponse readRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp) {
-
         return ReadRequest.newRequest(client, requestInfo.objectId, requestInfo.objectInstanceId,
                 requestInfo.resourceId).send(this.requestHandler);
     }
 
     private ClientResponse execRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp) {
-
         return ExecRequest.newRequest(client, requestInfo.objectId, requestInfo.objectInstanceId,
                 requestInfo.resourceId).send(this.requestHandler);
     }
 
     private ClientResponse writeRequest(Client client, RequestInfo requestInfo, HttpServletRequest req,
-            HttpServletResponse resp) throws IOException {
-
+                                        HttpServletResponse resp) throws IOException {
         Map<String, String> parameters = new HashMap<String, String>();
         String contentType = HttpFields.valueParameters(req.getContentType(), parameters);
         if ("text/plain".equals(contentType)) {
@@ -282,7 +291,7 @@ public class ApiServlet extends HttpServlet {
         RequestInfo(String[] path) {
 
             if (path.length < 3 || path.length > 6) {
-                throw new IllegalArgumentException("invalid path");
+                throw new IllegalArgumentException("invalid lightweight M2M path");
             }
 
             this.endpoint = path[1];
@@ -300,7 +309,7 @@ public class ApiServlet extends HttpServlet {
                     this.resourceInstanceId = Integer.valueOf(path[5]);
                 }
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("invalid path", e);
+                throw new IllegalArgumentException("invalid lightweight M2M path", e);
             }
         }
     }
