@@ -72,8 +72,10 @@ public class LeshanMain {
         WebAppContext root = new WebAppContext();
 
         root.setContextPath("/");
-        root.setDescriptor(webappDirLocation + "/WEB-INF/web.xml");
-        root.setResourceBase(webappDirLocation);
+        // root.setDescriptor(webappDirLocation + "/WEB-INF/web.xml");
+        root.setResourceBase(this.getClass().getClassLoader().getResource("webapp").toExternalForm());
+
+        // root.setResourceBase(webappDirLocation);
         root.setParentLoaderPriority(true);
 
         ServletHolder apiServletHolder = new ServletHolder(new ApiServlet(lwServer.getRequestHandler(), clientRegistry));
