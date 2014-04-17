@@ -40,7 +40,7 @@ body {
 }
 
 .client-icon {
-	background: url('/img/client-icon.png') center no-repeat;
+	background: url('../img/client-icon.png') center no-repeat;
 }
 
 .client-detail div {

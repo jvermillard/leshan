@@ -60,7 +60,7 @@ angular.module('lwResourcesDirective', [])
             }
 
             scope.read = function() {
-                $http.get("/api/clients/" + $routeParams.clientId + scope.resource.path)
+                $http.get("api/clients/" + $routeParams.clientId + scope.resource.path)
                 .success(function(data, status, headers, config) {
                     // alert(JSON.stringify(data));
                     if (data.status = "CONTENT") {
@@ -80,7 +80,7 @@ angular.module('lwResourcesDirective', [])
                     var value = $('#writeInputValue').val();
                     if(value) {
                         $('#writeModal').modal('hide');
-                        $http({method: 'PUT', url: "/api/clients/" + $routeParams.clientId + scope.resource.path, data: value, headers:{'Content-Type': 'text/plain'}})
+                        $http({method: 'PUT', url: "api/clients/" + $routeParams.clientId + scope.resource.path, data: value, headers:{'Content-Type': 'text/plain'}})
                         .success(function(data, status, headers, config) {
                             // alert(JSON.stringify(data));
                             if (data.status = "CONTENT") {
@@ -97,7 +97,7 @@ angular.module('lwResourcesDirective', [])
             };
 
             scope.exec = function() {
-                $http.post("/api/clients/" + $routeParams.clientId+ scope.resource.path)
+                $http.post("api/clients/" + $routeParams.clientId+ scope.resource.path)
                 .success(function(data, status, headers, config) {
                     alert("Success!");
                 }).error(function(data, status, headers, config) {

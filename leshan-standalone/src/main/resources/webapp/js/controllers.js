@@ -6,7 +6,7 @@ lwClientControllers.controller('ClientListCtrl', [
     function ClientListCtrl($scope, $http) {
 
         // get the list of connected clients
-        $http.get('/api/clients').success(
+        $http.get('api/clients').success(
             function(data, status, headers, config) {
             $scope.clients = data;
         }). error(function(data, status, headers, config) {
@@ -14,7 +14,7 @@ lwClientControllers.controller('ClientListCtrl', [
         });
 
         // listen for clients registration/deregistration
-        var source = new EventSource('/event');
+        var source = new EventSource('event');
 
         var registerCallback = function(msg) {
             $scope.$apply(function() {
@@ -53,12 +53,12 @@ lwClientControllers.controller('ClientListCtrl', [
             $scope.clientId = $routeParams.clientId;
 
             // get client details
-            $http.get('/api/clients/' + $routeParams.clientId)
+            $http.get('api/clients/' + $routeParams.clientId)
             .success(function(data, status, headers, config) {
                 $scope.client = data;
 
                 // get the lw resources description
-                $http.get('/json/lw-resources.json').success(
+                $http.get('json/lw-resources.json').success(
                     function(data, status, headers, config) {
                     // update resource tree with client details
                     var tree = buildResourceTree($scope.client.objectLinks, data)
