@@ -54,14 +54,26 @@ public abstract class AbstractLwM2mRequest implements LwM2mRequest {
         return this.client;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public final Integer getObjectId() {
         return this.objectId;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public final Integer getObjectInstanceId() {
         return this.objectInstanceId;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public final Integer getResourceId() {
         return this.resourceId;
     }

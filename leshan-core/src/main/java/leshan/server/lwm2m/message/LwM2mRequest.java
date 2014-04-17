@@ -38,6 +38,27 @@ import leshan.server.lwm2m.operation.ResourceAccessException;
 public interface LwM2mRequest {
 
     /**
+     * Returns the object ID in the request path.
+     * 
+     * @return the object ID
+     */
+    Integer getObjectId();
+
+    /**
+     * Returns the object instance ID in the request path.
+     * 
+     * @return the object instance ID. Can be <code>null</code> when the request targets the whole object.
+     */
+    Integer getObjectInstanceId();
+
+    /**
+     * Returns the resource ID in the request path.
+     * 
+     * @return the resource ID. Can be <code>null</code> when the request targets the whole object/object instance.
+     */
+    Integer getResourceId();
+
+    /**
      * Sends the request to the LWM2M Client.
      * 
      * @param handler the LWM2M protocol adapter to use for sending the request
