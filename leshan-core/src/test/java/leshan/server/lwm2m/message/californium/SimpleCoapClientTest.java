@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- 
 /*
  * Copyright (c) 2013, Sierra Wireless
  *
@@ -29,27 +27,35 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- -->
-<Configuration status="warn" strict="true" name="leshan standalone"
-               packages="org.apache.logging.log4j.test">
+package leshan.server.lwm2m.message.californium;
 
-  <Appenders>
-    <Appender type="Console" name="STDOUT">
-      <Layout type="PatternLayout" pattern="%d %p %C{1.} [%t] %m%n"/>
-    </Appender>
-  </Appenders>
- 
-  <Loggers>
-    <Logger name="leshan.server.lwm2m" level="trace" additivity="false">
-      <AppenderRef ref="STDOUT"/>
-    </Logger>
-    <Logger name="leshan.server.servlet" level="trace" additivity="false">
-      <AppenderRef ref="STDOUT"/>
-    </Logger>
-  
-    <Root level="info">
-      <AppenderRef ref="STDOUT"/>
-    </Root>
-  </Loggers>
- 
-</Configuration>
+import static org.mockito.Mockito.mock;
+import leshan.server.lwm2m.message.OperationType;
+import leshan.server.lwm2m.message.RequestTimeoutException;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import ch.ethz.inf.vs.californium.coap.Request;
+import ch.ethz.inf.vs.californium.network.Endpoint;
+
+public class SimpleCoapClientTest {
+
+    SimpleCoapClient endpoint;
+
+    @Before
+    public void setUp() throws Exception {
+
+        Endpoint coapEndpoint = mock(Endpoint.class);
+        this.endpoint = new SimpleCoapClient(coapEndpoint, 50);
+    }
+
+    @Test(expected = RequestTimeoutException.class)
+    public void testSendRequestThrowsRequestTimeoutException() throws Exception {
+        Request request = Request.newGet();
+        this.endpoint.send(request, OperationType.READ);
+        Assert.fail("Request should have timed out with exception");
+    }
+
+}

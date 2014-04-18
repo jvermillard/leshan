@@ -30,42 +30,45 @@
 package leshan.server.lwm2m.message;
 
 import leshan.server.lwm2m.client.Client;
+import leshan.server.lwm2m.observation.ObserveSpec;
 
-/**
- * A base class for concrete LWM2M request types.
- * 
- * Provides generic support for specifying the target resource of the request.
- *
- */
-public abstract class AbstractLwM2mRequest {
+public class WriteAttributesRequest extends AbstractLwM2mRequest implements LwM2mRequest<ClientResponse> {
 
-    private final ResourceSpec target;
+    private final ObserveSpec observeSpec;
 
-    protected AbstractLwM2mRequest(ResourceSpec target) {
-        if (target == null) {
-            throw new NullPointerException("Target resource must not be null");
+    private WriteAttributesRequest(ResourceSpec target, ObserveSpec observeSpec) {
+        super(target);
+        if (observeSpec == null) {
+            throw new NullPointerException("Observe spec must not be null");
         }
-        this.target = target;
+        this.observeSpec = observeSpec;
     }
 
-    public final Client getClient() {
-        return this.target.getClient();
+    @Override
+    public ClientResponse send(RequestHandler handler) {
+        return handler.send(this);
     }
 
-    public final ResourceSpec getTarget() {
-        return this.target;
+    public ObserveSpec getObserveSpec() {
+        return this.observeSpec;
     }
 
-    public final Integer getObjectId() {
-        return this.target.getObjectId();
+    @Override
+    public String toString() {
+        return String.format("WriteAttributesRequest [%s, attributes=%s]", getTarget(), getObserveSpec());
     }
 
-    public final Integer getObjectInstanceId() {
-        return this.target.getObjectInstanceId();
+    public static WriteAttributesRequest newRequest(Client client, Integer objectId, ObserveSpec observeSpec) {
+        return new WriteAttributesRequest(new ResourceSpec(client, objectId, null, null), observeSpec);
     }
 
-    public final Integer getResourceId() {
-        return this.target.getResourceId();
+    public static WriteAttributesRequest newRequest(Client client, Integer objectId, Integer objectInstanceId,
+                                                    ObserveSpec observeSpec) {
+        return new WriteAttributesRequest(new ResourceSpec(client, objectId, objectInstanceId, null), observeSpec);
     }
 
+    public static WriteAttributesRequest newRequest(Client client, Integer objectId, Integer objectInstanceId,
+                                                    Integer resourceId, ObserveSpec observeSpec) {
+        return new WriteAttributesRequest(new ResourceSpec(client, objectId, objectInstanceId, resourceId), observeSpec);
+    }
 }

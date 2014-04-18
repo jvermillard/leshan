@@ -27,20 +27,31 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.lwm2m.operation;
+package leshan.server.lwm2m.message.californium;
 
+import leshan.server.lwm2m.message.OperationType;
+import leshan.server.lwm2m.message.ResourceAccessException;
+import ch.ethz.inf.vs.californium.coap.Request;
+import ch.ethz.inf.vs.californium.coap.Response;
 
-public class RequestTimeoutException extends ResourceAccessException {
-
-    private static final long serialVersionUID = -6372006578730743741L;
+/**
+ * A <em>Californium</em> based client for sending CoAP requests.
+ * 
+ * This interface helps with unit testing code in that it abstracts out
+ * Californium's network access layer.
+ */
+public interface CoapClient {
 
     /**
-     * Sets all information.
+     * Sends a CoAP request to a CoAP server.
      * 
-     * @param uri the resource URI accessed
-     * @param timeout the number of milliseconds after which the request has timed out
+     * @param request the request
+     * @param operationType the type of operation the request represents
+     * @return the response from the client
+     * @throws NullPointerException if any of the parameters is
+     *             <code>null</code>
+     * @throws ResourceAccessException if the client could not process the
+     *             request
      */
-    public RequestTimeoutException(String uri, int timeout) {
-        super(null, uri, String.format("Request timed out after %d milliseconds", timeout));
-    }
+    Response send(Request request, OperationType operationType);
 }

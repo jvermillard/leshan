@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- 
 /*
  * Copyright (c) 2013, Sierra Wireless
  *
@@ -29,27 +27,23 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- -->
-<Configuration status="warn" strict="true" name="leshan standalone"
-               packages="org.apache.logging.log4j.test">
+package leshan.server.lwm2m.observation;
 
-  <Appenders>
-    <Appender type="Console" name="STDOUT">
-      <Layout type="PatternLayout" pattern="%d %p %C{1.} [%t] %m%n"/>
-    </Appender>
-  </Appenders>
- 
-  <Loggers>
-    <Logger name="leshan.server.lwm2m" level="trace" additivity="false">
-      <AppenderRef ref="STDOUT"/>
-    </Logger>
-    <Logger name="leshan.server.servlet" level="trace" additivity="false">
-      <AppenderRef ref="STDOUT"/>
-    </Logger>
-  
-    <Root level="info">
-      <AppenderRef ref="STDOUT"/>
-    </Root>
-  </Loggers>
- 
-</Configuration>
+import leshan.server.lwm2m.client.Client;
+
+public interface Observation {
+
+    String getId();
+
+    Integer getObjectId();
+
+    Integer getObjectInstanceId();
+
+    Integer getResourceId();
+
+    Client getResourceProvider();
+
+    ResourceObserver getResourceObserver();
+
+    void cancel();
+}

@@ -31,41 +31,54 @@ package leshan.server.lwm2m.message;
 
 import leshan.server.lwm2m.client.Client;
 
-/**
- * A base class for concrete LWM2M request types.
- * 
- * Provides generic support for specifying the target resource of the request.
- *
- */
-public abstract class AbstractLwM2mRequest {
+public final class ResourceSpec {
 
-    private final ResourceSpec target;
+    private final Client client;
+    private final Integer objectId;
+    private final Integer objectInstanceId;
+    private final Integer resourceId;
+    private String stringRepresentation;
 
-    protected AbstractLwM2mRequest(ResourceSpec target) {
-        if (target == null) {
-            throw new NullPointerException("Target resource must not be null");
+    public ResourceSpec(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId) {
+        if (client == null) {
+            throw new NullPointerException("Client must not be null");
+        } else if (objectId == null) {
+            throw new NullPointerException("Object ID must not be null");
         }
-        this.target = target;
+        this.client = client;
+        this.objectId = objectId;
+        this.objectInstanceId = objectInstanceId;
+        this.resourceId = resourceId;
     }
 
-    public final Client getClient() {
-        return this.target.getClient();
+    public Client getClient() {
+        return this.client;
     }
 
-    public final ResourceSpec getTarget() {
-        return this.target;
+    public Integer getObjectId() {
+        return this.objectId;
     }
 
-    public final Integer getObjectId() {
-        return this.target.getObjectId();
+    public Integer getObjectInstanceId() {
+        return this.objectInstanceId;
     }
 
-    public final Integer getObjectInstanceId() {
-        return this.target.getObjectInstanceId();
+    public Integer getResourceId() {
+        return this.resourceId;
     }
 
-    public final Integer getResourceId() {
-        return this.target.getResourceId();
+    @Override
+    public String toString() {
+        synchronized (this) {
+            if (this.stringRepresentation == null) {
+                StringBuilder b = new StringBuilder("client=");
+                b.append(getClient().getEndpoint());
+                b.append(", objectId=").append(getObjectId());
+                b.append(", objectInstanceId=").append(getObjectInstanceId());
+                b.append(", resourceId=").append(getResourceId());
+                this.stringRepresentation = b.toString();
+            }
+        }
+        return this.stringRepresentation;
     }
-
 }

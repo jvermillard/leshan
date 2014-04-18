@@ -1,5 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- 
 /*
  * Copyright (c) 2013, Sierra Wireless
  *
@@ -29,27 +27,43 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
- -->
-<Configuration status="warn" strict="true" name="leshan standalone"
-               packages="org.apache.logging.log4j.test">
+package leshan.server.lwm2m.observation;
 
-  <Appenders>
-    <Appender type="Console" name="STDOUT">
-      <Layout type="PatternLayout" pattern="%d %p %C{1.} [%t] %m%n"/>
-    </Appender>
-  </Appenders>
- 
-  <Loggers>
-    <Logger name="leshan.server.lwm2m" level="trace" additivity="false">
-      <AppenderRef ref="STDOUT"/>
-    </Logger>
-    <Logger name="leshan.server.servlet" level="trace" additivity="false">
-      <AppenderRef ref="STDOUT"/>
-    </Logger>
-  
-    <Root level="info">
-      <AppenderRef ref="STDOUT"/>
-    </Root>
-  </Loggers>
- 
-</Configuration>
+import leshan.server.lwm2m.client.Client;
+
+/**
+ * A registry for keeping track of observed resources implemented by LWM2M
+ * Clients.
+ * 
+ */
+public interface ObservationRegistry {
+
+    /**
+     * Adds an observation of resource(s) to the registry.
+     * 
+     * @param observation the observation
+     */
+    void addObservation(Observation observation);
+
+    /**
+     * Cancels an observation of resource(s).
+     * 
+     * As a consequence the LWM2M Client will stop sending notifications about
+     * updated values of resources in scope of the canceled observation.
+     * 
+     * @param observationId the ID of the observation to cancel (see
+     *            {@link ResourceObserver#notify(byte[], int, String)}
+     */
+    void cancelObservation(String observationId);
+
+    /**
+     * Cancels all active observations of resource(s) implemented by a
+     * particular LWM2M Client.
+     * 
+     * As a consequence the LWM2M Client will stop sending notifications about
+     * updated values of resources in scope of the canceled observation.
+     * 
+     * @param client the LWM2M Client to cancel observations for
+     */
+    void cancelObservations(Client client);
+}

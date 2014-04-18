@@ -30,21 +30,19 @@
 package leshan.server.lwm2m.message;
 
 import leshan.server.lwm2m.client.Client;
-import leshan.server.lwm2m.operation.RequestHandler;
 import leshan.server.lwm2m.tlv.Tlv;
 
 /**
  * A Lightweight M2M request for creating resources on a client.
  */
-public class CreateRequest extends PayloadRequest {
+public class CreateRequest extends PayloadRequest implements LwM2mRequest<ClientResponse> {
 
-    private CreateRequest(Client client, Integer objectId, Integer objectInstanceId, String payload,
-            ContentFormat contentFormat) {
-        super(client, objectId, objectInstanceId, null, payload, contentFormat);
+    private CreateRequest(ResourceSpec target, String payload, ContentFormat contentFormat) {
+        super(target, payload, contentFormat);
     }
 
-    private CreateRequest(Client client, Integer objectId, Integer objectInstanceId, Tlv[] payload) {
-        super(client, objectId, objectInstanceId, null, payload);
+    private CreateRequest(ResourceSpec target, Tlv[] payload) {
+        super(target, payload);
     }
 
     /**
@@ -53,6 +51,13 @@ public class CreateRequest extends PayloadRequest {
     @Override
     public ClientResponse send(RequestHandler operations) {
         return operations.send(this);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("CreateRequest [").append(getTarget()).append("]");
+        return builder.toString();
     }
 
     /**
@@ -77,7 +82,7 @@ public class CreateRequest extends PayloadRequest {
      * @return the request object
      */
     public static CreateRequest newRequest(Client client, Integer objectId, Integer objectInstanceId, Tlv[] values) {
-        return new CreateRequest(client, objectId, null, values);
+        return new CreateRequest(new ResourceSpec(client, objectId, objectInstanceId, null), values);
     }
 
     /**
@@ -102,7 +107,7 @@ public class CreateRequest extends PayloadRequest {
      * @return the request object
      */
     public static CreateRequest newRequest(Client client, Integer objectId, Integer objectInstanceId, String values) {
-        return new CreateRequest(client, objectId, null, values, ContentFormat.JSON);
+        return new CreateRequest(new ResourceSpec(client, objectId, objectInstanceId, null), values, ContentFormat.JSON);
     }
 
 }
