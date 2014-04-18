@@ -1,3 +1,4 @@
+[![Build Status](https://drone.io/github.com/jvermillard/leshan/status.png)](https://drone.io/github.com/jvermillard/leshan/latest)
 Leshan
 ======
 
