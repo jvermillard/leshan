@@ -1,7 +1,7 @@
 /* LWM2M app css stylesheet */
 
 body {
-  padding-top: 70px;
+  padding-top: 100px;
 }
 
 .container {
@@ -9,11 +9,27 @@ body {
 }
 
 .navbar-default {
-	background-color:#317eac;
+	background-color:#2B3033;
+	height:75px;
 }
 
 .navbar-default .navbar-brand {
 	color:white;
+	height:80px;
+	line-height:75px;
+	padding-left:50px;
+}
+
+.navbar-default div {
+	height: 80px;
+}
+
+.navbar-default img {
+	margin-top: 12px;
+}
+
+.navbar-default .navbar-brand:hover {
+	color:#2DA0FD;
 }
 
 .client-detail {
@@ -37,6 +53,7 @@ body {
 
 .client-detail:hover {
 	background-color: #eee;
+	border: 1px solid #2DA0FD;
 }
 
 .client-icon {
@@ -51,7 +68,6 @@ body {
 .client-attr-title {
 	font-weight: bold;
 	padding-right: 20px;
-	color: #317eac;
 }
 
 .resource-tree ul {
@@ -81,7 +97,7 @@ body {
 
 .resource-title-0 {
 	font-size: 18px;
-	color: #317eac;
+	color: #2DA0FD;
 }
 
 /* Object instance level */
@@ -114,7 +130,7 @@ body {
   width: 100%;
   /* Set the fixed height of the footer here */
   height: 40px;
-  background-color: #f5f5f5;
+  background-color: #eee;
   padding-top: 10px;
 }
 
