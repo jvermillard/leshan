@@ -79,15 +79,16 @@ public class EventServlet extends HttpServlet {
         gson = gsonBuilder.create();
     }
 
-    private Set<Continuation> continuations = new ConcurrentHashSet<>();
+    private final Set<Continuation> continuations = new ConcurrentHashSet<>();
 
-    private RegistryListener listener = new RegistryListener() {
+    private final RegistryListener listener = new RegistryListener() {
 
         @Override
         public void registered(Client client) {
             sendEvent("REGISTRATION", client);
         }
 
+        @Override
         public void updated(Client clientUpdated) {
             sendEvent("UPDATED", clientUpdated);
         };

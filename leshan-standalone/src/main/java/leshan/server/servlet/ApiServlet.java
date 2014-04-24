@@ -44,10 +44,12 @@ import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ContentFormat;
 import leshan.server.lwm2m.message.ExecRequest;
+import leshan.server.lwm2m.message.ObserveRequest;
 import leshan.server.lwm2m.message.ReadRequest;
 import leshan.server.lwm2m.message.RequestHandler;
 import leshan.server.lwm2m.message.ResourceAccessException;
 import leshan.server.lwm2m.message.WriteRequest;
+import leshan.server.lwm2m.observation.ResourceObserver;
 import leshan.server.lwm2m.tlv.Tlv;
 import leshan.server.servlet.json.ClientSerializer;
 import leshan.server.servlet.json.ResponseSerializer;
@@ -137,12 +139,18 @@ public class ApiServlet extends HttpServlet {
         }
 
         // /clients/endPoint/LWRequest : do LightWeight M2M read request on a given client.
+        boolean isObserveRequest = req.getParameter("obs") != null;
         try {
             RequestInfo requestInfo = new RequestInfo(path);
             Client client = this.clientRegistry.get(requestInfo.endpoint);
             if (client != null) {
-                ClientResponse cResponse = this.readRequest(client, requestInfo, resp);
-                processDeviceResponse(resp, cResponse);
+                if (isObserveRequest) {
+                    ClientResponse cResponse = this.observeRequest(client, requestInfo, resp);
+                    processDeviceResponse(resp, cResponse);
+                } else {
+                    ClientResponse cResponse = this.readRequest(client, requestInfo, resp);
+                    processDeviceResponse(resp, cResponse);
+                }
             } else {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 resp.getWriter().format("no registered client with id '%s'", requestInfo.endpoint).flush();
@@ -234,6 +242,19 @@ public class ApiServlet extends HttpServlet {
 
     private ClientResponse readRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp) {
         return ReadRequest.newRequest(client, requestInfo.objectId, requestInfo.objectInstanceId,
+                requestInfo.resourceId).send(this.requestHandler);
+    }
+
+    private ClientResponse observeRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp) {
+        ResourceObserver observer = new ResourceObserver() {
+
+            @Override
+            public void notify(byte[] content, int contentFormat, String observationId) {
+                LOG.trace("Received notification for observation [{}]: {}", observationId, new String(content));
+
+            }
+        };
+        return ObserveRequest.newRequest(client, observer, requestInfo.objectId, requestInfo.objectInstanceId,
                 requestInfo.resourceId).send(this.requestHandler);
     }
 

@@ -81,6 +81,18 @@ angular.module('lwResourcesDirective', [])
                 });;
             };
 
+            scope.observe = function() {
+                $http.get("api/clients/" + $routeParams.clientId + scope.resource.path + "?obs")
+                .success(function(data, status, headers, config) {
+                    // alert(JSON.stringify(data));
+                    if (data.status = "CONTENT") {
+                        scope.resource.value = data.value;
+                    }
+                }).error(function(data, status, headers, config) {
+                    console.error("Unable to observe resource ",scope.resource.path,"for",$routeParams.clientId, ":", status, data)
+                });;
+            };
+
             scope.write = function() {
                 $('#writeModalLabel').text(scope.resource.name);
                 $('#writeInputValue').val(scope.resource.value);
