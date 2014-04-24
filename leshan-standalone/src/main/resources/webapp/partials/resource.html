@@ -7,6 +7,10 @@
 		<div class="col-md-2">
 			<div class="row">
 				<div class="col-md-4">
+					<input type="checkbox" class="checkbox" ng-if="readable()"
+						ng-click="observe()" />
+				</div>
+				<div class="col-md-4">
 					<button ng-if="readable()" class="btn btn-default btn-xs"
 						ng-click="read()">Read</button>
 				</div>

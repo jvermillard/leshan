@@ -72,22 +72,23 @@ public class EventServlet extends HttpServlet {
     private static final byte[] TERMINATION = new byte[] { '\r', '\n' };
 
     public EventServlet(ClientRegistry registry) {
-        registry.addListener(listener);
+        registry.addListener(this.listener);
 
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeHierarchyAdapter(Client.class, new ClientSerializer());
-        gson = gsonBuilder.create();
+        this.gson = gsonBuilder.create();
     }
 
-    private Set<Continuation> continuations = new ConcurrentHashSet<>();
+    private final Set<Continuation> continuations = new ConcurrentHashSet<>();
 
-    private RegistryListener listener = new RegistryListener() {
+    private final RegistryListener listener = new RegistryListener() {
 
         @Override
         public void registered(Client client) {
             sendEvent("REGISTRATION", client);
         }
 
+        @Override
         public void updated(Client clientUpdated) {
             sendEvent("UPDATED", clientUpdated);
         };
@@ -102,27 +103,28 @@ public class EventServlet extends HttpServlet {
         LOG.debug("Registration event {} for client {}", event, client);
 
         Collection<Continuation> disconnected = new ArrayList<>();
-        String jClient = gson.toJson(client);
+        String jClient = this.gson.toJson(client);
 
-        for (Continuation c : continuations) {
+        for (Continuation c : this.continuations) {
             try {
                 OutputStream output = c.getServletResponse().getOutputStream();
-                output.write(EVENT);
+                output.write(this.EVENT);
                 output.write(event.getBytes("UTF-8"));
                 output.write(TERMINATION);
-                output.write(DATA);
+                output.write(this.DATA);
                 output.write(jClient.getBytes("UTF-8"));
                 output.write(TERMINATION);
                 output.write(TERMINATION);
                 output.flush();
                 c.getServletResponse().flushBuffer();
+                c.complete();
             } catch (IOException e) {
                 LOG.debug("Disconnected SSE client");
                 disconnected.add(c);
             }
         }
 
-        continuations.removeAll(disconnected);
+        this.continuations.removeAll(disconnected);
     }
 
     /**
@@ -131,8 +133,9 @@ public class EventServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("text/event-stream");
+
         OutputStream output = resp.getOutputStream();
-        output.write(VOID);
+        output.write(this.VOID);
         output.write("waiting for events".getBytes());
         output.write(TERMINATION);
         output.flush();
@@ -151,10 +154,10 @@ public class EventServlet extends HttpServlet {
             @Override
             public void onComplete(Continuation continuation) {
                 LOG.debug("continuation completed");
-                continuations.remove(continuation);
+                EventServlet.this.continuations.remove(continuation);
             }
         });
-        continuations.add(c);
+        this.continuations.add(c);
         c.suspend(resp);
     }
 }
