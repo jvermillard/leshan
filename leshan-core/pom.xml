@@ -93,13 +93,11 @@
                             leshan.server.lwm2m,
                             leshan.server.lwm2m.client,
                             leshan.server.lwm2m.message,
+                            leshan.server.lwm2m.message.californium,
                             leshan.server.lwm2m.observation,
                             leshan.server.lwm2m.resource,
                             leshan.server.lwm2m.tlv
                         </Export-Package>
-                        <PrivatePackage>
-                            leshan.server.lwm2m.message.californium
-                        </PrivatePackage>
                         <Import-Package>
                             ch.ethz.inf.vs.californium.*;version="[0.18.2, 0.19)",
                             org.apache.commons.lang.*;version="[2.6, 3)",
