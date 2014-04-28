@@ -83,15 +83,15 @@ public abstract class PayloadRequest extends AbstractLwM2mRequest {
         this(target, null, payload != null ? ContentFormat.OPAQUE : null, null, payload);
     }
 
-    public final Tlv[] getPayload() {
+    public Tlv[] getPayload() {
         return this.payload;
     }
 
-    public final String getStringPayload() {
+    public String getStringPayload() {
         return this.stringPayload;
     }
 
-    public final byte[] getBytes() {
+    public byte[] getBytes() {
         if (this.contentFormat == null) {
             return null;
         }
@@ -116,7 +116,7 @@ public abstract class PayloadRequest extends AbstractLwM2mRequest {
         }
     }
 
-    public final ContentFormat getContentFormat() {
+    public ContentFormat getContentFormat() {
         return this.contentFormat;
     }
 

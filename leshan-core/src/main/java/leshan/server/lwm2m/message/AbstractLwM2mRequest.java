@@ -48,23 +48,23 @@ public abstract class AbstractLwM2mRequest {
         this.target = target;
     }
 
-    public final Client getClient() {
+    public Client getClient() {
         return this.target.getClient();
     }
 
-    public final ResourceSpec getTarget() {
+    public ResourceSpec getTarget() {
         return this.target;
     }
 
-    public final Integer getObjectId() {
+    public Integer getObjectId() {
         return this.target.getObjectId();
     }
 
-    public final Integer getObjectInstanceId() {
+    public Integer getObjectInstanceId() {
         return this.target.getObjectInstanceId();
     }
 
-    public final Integer getResourceId() {
+    public Integer getResourceId() {
         return this.target.getResourceId();
     }
 
