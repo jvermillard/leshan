@@ -40,6 +40,10 @@
     <name>leshan - standalone server</name>
     <description>A LWM2M server running an embedded Jetty server</description>
 
+    <properties>
+        <internal.repo.path>file://${basedir}/../../leshan-repo</internal.repo.path>
+    </properties>
+
     <dependencies>
 
         <dependency>

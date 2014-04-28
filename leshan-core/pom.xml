@@ -41,6 +41,10 @@
     <name>leshan - core</name>
     <description>Core classes for implementing Lightweight M2M</description>
 
+    <properties>
+        <internal.repo.path>file://${basedir}/../../leshan-repo</internal.repo.path>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>ch.ethz.inf.vs</groupId>
