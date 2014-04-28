@@ -91,12 +91,12 @@
         <repository>
             <id>mkovatsc-github-releases</id>
             <name>mkovatsc-github</name>
-            <url>http://raw.github.com/mkovatsc/maven/master/releases/</url>
+            <url>https://github.com/mkovatsc/maven/master/releases/</url>
         </repository>
         <repository>
             <id>mkovatsc-github-snapshots</id>
             <name>mkovatsc-github</name>
-            <url>http://raw.github.com/mkovatsc/maven/master/snapshots/</url>
+            <url>https://github.com/mkovatsc/maven/master/snapshots/</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -104,7 +104,7 @@
         <repository>
             <id>mkovatsc-github-thirdparty</id>
             <name>mkovatsc-github</name>
-            <url>http://raw.github.com/mkovatsc/maven/master/thirdparty/</url>
+            <url>https://github.com/mkovatsc/maven/master/thirdparty/</url>
         </repository>
     </repositories>
 
