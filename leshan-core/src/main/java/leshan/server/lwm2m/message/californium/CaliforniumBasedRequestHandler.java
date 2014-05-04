@@ -29,7 +29,6 @@
  */
 package leshan.server.lwm2m.message.californium;
 
-
 import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.RegistryListener;
 import leshan.server.lwm2m.message.AuthorizationException;
@@ -64,12 +63,10 @@ import ch.ethz.inf.vs.californium.coap.Request;
 import ch.ethz.inf.vs.californium.coap.Response;
 
 /**
- * A handler in charge of sending server-initiated requests to registered
- * clients.
+ * A handler in charge of sending server-initiated requests to registered clients.
  * 
- * This class also implements {@link RegistryListener} in order to being able to
- * cancel existing observations of clients unregistering from the server, thus
- * freeing up resources.
+ * This class also implements {@link RegistryListener} in order to being able to cancel existing observations of clients
+ * unregistering from the server, thus freeing up resources.
  */
 public final class CaliforniumBasedRequestHandler implements RequestHandler, RegistryListener {
 
@@ -91,9 +88,8 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
      * Sets required collaborators.
      * 
      * @param endpoint the CoAP endpoint to use for sending requests
-     * @param observationRegistry the registry for keeping track of observed
-     *            resources, if <code>null</code> an instance of
-     *            {@link InMemoryObservationRegistry} is used
+     * @param observationRegistry the registry for keeping track of observed resources, if <code>null</code> an instance
+     *        of {@link InMemoryObservationRegistry} is used
      * @throws NullPointerException if the endpoint is <code>null</code>
      */
     public CaliforniumBasedRequestHandler(CoapClient endpoint, ObservationRegistry observationRegistry) {
@@ -137,10 +133,9 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
             if (MediaTypeRegistry.APPLICATION_LINK_FORMAT != coapResponse.getOptions().getContentFormat()) {
                 LOG.debug("Expected LWM2M Client [{}] to return application/link-format [{}] content but got [{}]",
                         request.getClient().getEndpoint(), MediaTypeRegistry.APPLICATION_LINK_FORMAT, coapResponse
-                        .getOptions().getContentFormat());
+                                .getOptions().getContentFormat());
             }
-            return new DiscoverResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value),
-                    coapResponse.getPayload());
+            return new DiscoverResponse(ResponseCode.fromCoapCode(coapResponse.getCode()), coapResponse.getPayload());
         default:
             handleUnexpectedResponseCode(request, coapRequest, coapResponse);
             return null;
@@ -178,8 +173,8 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
         Response coapResponse = send(request, coapRequest, OperationType.EXEC);
         switch (coapResponse.getCode()) {
         case CHANGED:
-            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value),
-                    coapResponse.getPayload(), ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()));
+            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode()), coapResponse.getPayload(),
+                    ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()));
         default:
             handleUnexpectedResponseCode(request, coapRequest, coapResponse);
             return null;
@@ -195,8 +190,8 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
         Response coapResponse = send(request, coapRequest, OperationType.WRITE);
         switch (coapResponse.getCode()) {
         case CHANGED:
-            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value),
-                    coapResponse.getPayload(), ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()));
+            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode()), coapResponse.getPayload(),
+                    ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()));
         default:
             handleUnexpectedResponseCode(request, coapRequest, coapResponse);
             return null;
@@ -216,8 +211,8 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
         Response coapResponse = send(request, coapRequest, OperationType.WRITE);
         switch (coapResponse.getCode()) {
         case CHANGED:
-            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value),
-                    coapResponse.getPayload(), ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()));
+            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode()), coapResponse.getPayload(),
+                    ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()));
         default:
             handleUnexpectedResponseCode(request, coapRequest, coapResponse);
             return null;
@@ -232,8 +227,8 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
         Response coapResponse = send(request, coapRequest, OperationType.WRITE);
         switch (coapResponse.getCode()) {
         case DELETED:
-            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value),
-                    coapResponse.getPayload(), ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()));
+            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode()), coapResponse.getPayload(),
+                    ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()));
         default:
             handleUnexpectedResponseCode(request, coapRequest, coapResponse);
             return null;
@@ -251,8 +246,8 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
         Response coapResponse = send(request, coapRequest, OperationType.WRITE);
         switch (coapResponse.getCode()) {
         case CREATED:
-            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value),
-                    coapResponse.getPayload(), ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()));
+            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode()), coapResponse.getPayload(),
+                    ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()));
         default:
             handleUnexpectedResponseCode(request, coapRequest, coapResponse);
             return null;
@@ -288,8 +283,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
      * @param coapRequest
      * @param operationType
      * @return the client's response
-     * @throws ResourceAccessException if the request could not be processed by
-     *             the client
+     * @throws ResourceAccessException if the request could not be processed by the client
      */
     protected final Response send(LwM2mRequest<?> request, Request coapRequest, OperationType operationType) {
         if (LOG.isTraceEnabled()) {
@@ -312,19 +306,17 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
     }
 
     /**
-     * Throws a generic {@link ResourceAccessException} indicating that the
-     * client returned an unexpected response code.
+     * Throws a generic {@link ResourceAccessException} indicating that the client returned an unexpected response code.
      * 
      * @param request
      * @param coapRequest
      * @param coapResponse
      */
     private void handleUnexpectedResponseCode(LwM2mRequest<?> request, Request coapRequest, Response coapResponse) {
-        String msg = String.format("Client [%s] returned unexpected response code [%s]",
-                request.getClient().getEndpoint(), coapResponse.getCode());
+        String msg = String.format("Client [%s] returned unexpected response code [%s]", request.getClient()
+                .getEndpoint(), coapResponse.getCode());
         LOG.debug(msg);
-        throw new ResourceAccessException(ResponseCode.fromCoapCode(coapResponse.getCode().value),
-                coapRequest.getURI(), msg);
+        throw new ResourceAccessException(ResponseCode.fromCoapCode(coapResponse.getCode()), coapRequest.getURI(), msg);
     }
 
     @Override

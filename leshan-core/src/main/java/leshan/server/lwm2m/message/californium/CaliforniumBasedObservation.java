@@ -32,6 +32,7 @@ package leshan.server.lwm2m.message.californium;
 import java.util.UUID;
 
 import leshan.server.lwm2m.client.Client;
+import leshan.server.lwm2m.message.ContentFormat;
 import leshan.server.lwm2m.message.ResourceSpec;
 import leshan.server.lwm2m.observation.Observation;
 import leshan.server.lwm2m.observation.ResourceObserver;
@@ -70,7 +71,11 @@ public final class CaliforniumBasedObservation extends MessageObserverAdapter im
 
     @Override
     public void onResponse(Response response) {
-        this.observer.notify(response.getPayload(), response.getOptions().getContentFormat(), this.id);
+        ContentFormat format = ContentFormat.fromCode(response.getOptions().getContentFormat());
+        if (format == null) {
+            format = ContentFormat.TEXT;
+        }
+        this.observer.notify(response.getPayload(), format, this.id, this.target);
     }
 
     @Override

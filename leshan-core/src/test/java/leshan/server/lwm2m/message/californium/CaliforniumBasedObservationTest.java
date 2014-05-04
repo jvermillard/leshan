@@ -36,6 +36,7 @@ import java.net.UnknownHostException;
 import java.util.Date;
 
 import leshan.server.lwm2m.client.Client;
+import leshan.server.lwm2m.message.ContentFormat;
 import leshan.server.lwm2m.message.ResourceSpec;
 import leshan.server.lwm2m.observation.ResourceObserver;
 
@@ -67,7 +68,7 @@ public class CaliforniumBasedObservationTest {
         ResourceObserver observer = new ResourceObserver() {
 
             @Override
-            public void notify(byte[] content, int contentFormat, String observationId) {
+            public void notify(byte[] content, ContentFormat contentFormat, String observationId, ResourceSpec target) {
                 Assert.assertArrayEquals(CaliforniumBasedObservationTest.this.reportedValue.getBytes(), content);
                 Assert.assertNotNull(observationId);
             }

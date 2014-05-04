@@ -30,8 +30,7 @@
 package leshan.server.lwm2m.message.californium;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -95,7 +94,7 @@ public class CaliforniumBasedRequestHandlerTest {
     public void testSendReadRequestReturnsContentResponse() throws Exception {
 
         ReadRequest request = ReadRequest.newRequest(this.client, OBJECT_ID_DEVICE);
-        ifTheClientReturns(newResponse(ResponseCode.CONTENT, TEXT_PAYLOAD));
+        ifTheClientReturns(newResponse(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT, TEXT_PAYLOAD));
 
         ClientResponse response = this.requestHandler.send(request);
         Assert.assertTrue(response instanceof ContentResponse);
@@ -141,7 +140,8 @@ public class CaliforniumBasedRequestHandlerTest {
 
         ResourceObserver observer = mock(ResourceObserver.class);
         ObserveRequest request = ObserveRequest.newRequest(this.client, observer, OBJECT_ID_DEVICE);
-        Response successfulResponse = newResponse(ResponseCode.CONTENT, TEXT_PAYLOAD);
+        Response successfulResponse = newResponse(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT,
+                TEXT_PAYLOAD);
         successfulResponse.getOptions().addOption(new Option(OptionNumberRegistry.OBSERVE));
 
         ifTheClientReturns(successfulResponse);
@@ -159,7 +159,8 @@ public class CaliforniumBasedRequestHandlerTest {
     public void testCancelObservation() {
         ResourceObserver observer = mock(ResourceObserver.class);
         ObserveRequest request = ObserveRequest.newRequest(this.client, observer, OBJECT_ID_DEVICE);
-        Response successfulResponse = newResponse(ResponseCode.CONTENT, TEXT_PAYLOAD);
+        Response successfulResponse = newResponse(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT,
+                TEXT_PAYLOAD);
         successfulResponse.getOptions().addOption(new Option(OptionNumberRegistry.OBSERVE));
 
         ifTheClientReturns(successfulResponse);
@@ -173,7 +174,7 @@ public class CaliforniumBasedRequestHandlerTest {
     @Test
     public void testSendWriteRequestReturnsChangedResponse() throws Exception {
         WriteRequest request = WriteRequest.newUpdateRequest(this.client, 15, 3, 1, "TEST", ContentFormat.TEXT);
-        ifTheClientReturns(newResponse(ResponseCode.CHANGED, null));
+        ifTheClientReturns(newResponse(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CHANGED, null));
 
         ClientResponse response = this.requestHandler.send(request);
         Assert.assertEquals(ResponseCode.CHANGED, response.getCode());
@@ -182,7 +183,7 @@ public class CaliforniumBasedRequestHandlerTest {
     @Test
     public void testSendCreateRequestReturnsCreatedResponse() throws Exception {
         CreateRequest request = CreateRequest.newRequest(this.client, 15, "TEST");
-        ifTheClientReturns(newResponse(ResponseCode.CREATED, null));
+        ifTheClientReturns(newResponse(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CREATED, null));
 
         ClientResponse response = this.requestHandler.send(request);
         Assert.assertEquals(ResponseCode.CREATED, response.getCode());
@@ -217,22 +218,19 @@ public class CaliforniumBasedRequestHandlerTest {
 
     private void givenASimpleClient() throws UnknownHostException {
         this.client = new Client("ID", "urn:client", this.destination, this.destinationPort, "1.0", 10000L, null, null,
-                null,
-                new Date());
+                null, new Date());
     }
 
     private void ifTheClientReturns(Response coapResponse) {
         when(this.coapEndpoint.send(any(Request.class), any(OperationType.class))).thenReturn(coapResponse);
     }
 
-    private Response newResponse(ResponseCode responseCode, String payload) {
-        Response response = new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.valueOf(responseCode
-                .getCode()));
+    private Response newResponse(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode responseCode, String payload) {
+        Response response = new Response(responseCode);
         if (payload != null) {
             response.getOptions().setContentFormat(ContentFormat.TEXT.getCode());
             response.setPayload(payload);
         }
         return response;
     }
-
 }

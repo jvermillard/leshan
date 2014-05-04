@@ -59,27 +59,19 @@ angular.module('lwResourcesDirective', [])
                 return false;
             }
 
-            scope.read = function() {
-                $http.get("api/clients/" + $routeParams.clientId + scope.resource.path)
+            scope.read = function(observe) {
+            	var uri = "api/clients/" + $routeParams.clientId + scope.resource.path;
+            	if (observe) {
+            		uri = uri + "?obs"; 
+            	}
+                $http.get(uri)
                 .success(function(data, status, headers, config) {
                     // alert(JSON.stringify(data));
                     if (data.status = "CONTENT") {
                         scope.resource.value = data.value;
                     }
                 }).error(function(data, status, headers, config) {
-                    console.error("Unable to read resource ",scope.resource.path,"for",$routeParams.clientId, ":", status, data)
-                });;
-            };
-
-            scope.observe = function() {
-                $http.get("api/clients/" + $routeParams.clientId + scope.resource.path + "?obs")
-                .success(function(data, status, headers, config) {
-                    // alert(JSON.stringify(data));
-                    if (data.status = "CONTENT") {
-                        scope.resource.value = data.value;
-                    }
-                }).error(function(data, status, headers, config) {
-                    console.error("Unable to observe resource ",scope.resource.path,"for",$routeParams.clientId, ":", status, data)
+                    console.error("Unable to read resource ",scope.resource.path," for ",$routeParams.clientId, ":", status, data)
                 });;
             };
 

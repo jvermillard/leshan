@@ -97,11 +97,13 @@ final class InMemoryObservationRegistry implements ObservationRegistry {
             return;
         }
 
-        if (this.LOG.isTraceEnabled()) {
-            this.LOG.trace("Canceling all observations of client {}", client.getEndpoint());
-        }
         Set<Observation> clientObservations = this.observationsByClient.get(client.getEndpoint());
+
         if (clientObservations != null) {
+            if (this.LOG.isTraceEnabled()) {
+                this.LOG.trace("Canceling {} observations of client {}", clientObservations.size(),
+                        client.getEndpoint());
+            }
             for (Observation obs : clientObservations) {
                 obs.cancel();
             }

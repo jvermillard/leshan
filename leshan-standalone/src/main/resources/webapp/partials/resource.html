@@ -8,11 +8,11 @@
 			<div class="row">
 				<div class="col-md-4">
 					<input type="checkbox" class="checkbox" ng-if="readable()"
-						ng-click="observe()" />
+						ng-click="read(true)" />
 				</div>
 				<div class="col-md-4">
 					<button ng-if="readable()" class="btn btn-default btn-xs"
-						ng-click="read()">Read</button>
+						ng-click="read(false)">Read</button>
 				</div>
 				<div class="col-md-4">
 					<button ng-if="writable()" class="btn btn-default btn-xs" ng-click="write()">Write</button>

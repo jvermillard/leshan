@@ -34,12 +34,16 @@
     <parent>
         <groupId>leshan</groupId>
         <artifactId>leshan-server</artifactId>
-        <version>0.1.1-SNAPSHOT</version>
+        <version>0.1.2-SNAPSHOT</version>
     </parent>
     <artifactId>leshan-core</artifactId>
     <packaging>bundle</packaging>
     <name>leshan - core</name>
     <description>Core classes for implementing Lightweight M2M</description>
+
+    <properties>
+        <internal.repo.path>file://${basedir}/../../leshan-repo</internal.repo.path>
+    </properties>
 
     <dependencies>
         <dependency>

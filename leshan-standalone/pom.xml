@@ -34,11 +34,15 @@
     <parent>
         <groupId>leshan</groupId>
         <artifactId>leshan-server</artifactId>
-        <version>0.1.1-SNAPSHOT</version>
+        <version>0.1.2-SNAPSHOT</version>
     </parent>
     <artifactId>leshan-standalone</artifactId>
     <name>leshan - standalone server</name>
     <description>A LWM2M server running an embedded Jetty server</description>
+
+    <properties>
+        <internal.repo.path>file://${basedir}/../../leshan-repo</internal.repo.path>
+    </properties>
 
     <dependencies>
 

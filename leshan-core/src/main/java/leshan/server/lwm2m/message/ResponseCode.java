@@ -1,34 +1,39 @@
 package leshan.server.lwm2m.message;
 
+import org.apache.commons.lang.Validate;
+
+import ch.ethz.inf.vs.californium.coap.CoAP;
 
 /**
  * Response codes defined for LWM2M enabler
  */
 public enum ResponseCode {
 
-    CREATED(65), DELETED(66), CHANGED(68), CONTENT(69), UNAUTHORIZED(129), BAD_REQUEST(128), METHOD_NOT_ALLOWED(133),
-    // CONFLICT,
-    NOT_FOUND(132);
+    CREATED, DELETED, CHANGED, CONTENT, UNAUTHORIZED, BAD_REQUEST, METHOD_NOT_ALLOWED, CONFLICT, NOT_FOUND;
 
-    private int code;
+    public static ResponseCode fromCoapCode(CoAP.ResponseCode code) {
+        Validate.notNull(code);
 
-    private ResponseCode(int code) {
-        this.code = code;
-    }
-
-    public int getCode() {
-        return this.code;
-    }
-
-    public static ResponseCode fromCoapCode(int code) {
-
-        for (ResponseCode responseCode : values()) {
-            if (responseCode.code == code) {
-                return responseCode;
-            }
+        switch (code) {
+        case CREATED:
+            return CREATED;
+        case DELETED:
+            return DELETED;
+        case CHANGED:
+            return CHANGED;
+        case CONTENT:
+            return CONTENT;
+        case BAD_REQUEST:
+            return BAD_REQUEST;
+        case UNAUTHORIZED:
+            return UNAUTHORIZED;
+        case NOT_FOUND:
+            return NOT_FOUND;
+        case METHOD_NOT_ALLOWED:
+            return METHOD_NOT_ALLOWED;
+        default:
+            throw new IllegalArgumentException("Invalid CoAP code for LWM2M response: " + code);
         }
-
-        throw new IllegalArgumentException("Invalid CoAP code for LWM2M response: " + code);
     }
 
 }

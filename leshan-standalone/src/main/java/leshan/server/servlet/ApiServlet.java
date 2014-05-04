@@ -78,14 +78,15 @@ public class ApiServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private final RequestHandler requestHandler;
-
+    private final ResourceObserver resourceObserver;
     private final ClientRegistry clientRegistry;
 
     private final Gson gson;
 
-    public ApiServlet(RequestHandler requestHandler, ClientRegistry clientRegistry) {
+    public ApiServlet(RequestHandler requestHandler, ClientRegistry clientRegistry, ResourceObserver observer) {
         this.requestHandler = requestHandler;
         this.clientRegistry = clientRegistry;
+        this.resourceObserver = observer;
 
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(Tlv.class, new TlvSerializer());
@@ -270,16 +271,8 @@ public class ApiServlet extends HttpServlet {
     }
 
     private ObserveResponse observeRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp) {
-        ResourceObserver observer = new ResourceObserver() {
-
-            @Override
-            public void notify(byte[] content, int contentFormat, String observationId) {
-                LOG.trace("Received notification for observation [{}]: {}", observationId, new String(content));
-
-            }
-        };
-        return ObserveRequest.newRequest(client, observer, requestInfo.objectId, requestInfo.objectInstanceId,
-                requestInfo.resourceId).send(this.requestHandler);
+        return ObserveRequest.newRequest(client, this.resourceObserver, requestInfo.objectId,
+                requestInfo.objectInstanceId, requestInfo.resourceId).send(this.requestHandler);
     }
 
     private ClientResponse execRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp) {

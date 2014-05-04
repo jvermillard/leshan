@@ -10,7 +10,7 @@ lwClientControllers.controller('ClientListCtrl', [
             function(data, status, headers, config) {
             $scope.clients = data;
         }). error(function(data, status, headers, config) {
-            console.error("Unable get client list:", status, data)
+            console.error("Unable to get client list:", status, data)
         });
 
         // listen for clients registration/deregistration
@@ -133,5 +133,33 @@ lwClientControllers.controller('ClientListCtrl', [
                     }
                 }
             }
+
+            var findResource = function(resourceId, resourceTree) {
+            	if (resourceId) {
+                	var nodeId = resourceId.shift();
+                	var node = findNode(nodeId, resourceTree);
+                	if (node && resourceId.length > 0) {
+                		return findResource(resourceId, node.values);
+                	} else {
+                		return node;
+                	}                	
+            	}
+            }
+            
+            // listen for notifications from client
+            var source = new EventSource('event?ep=' + $routeParams.clientId);
+            
+            var notificationCallback = function(msg) {
+                $scope.$apply(function() {
+                    var content = JSON.parse(msg.data);
+                    var resourceId = content.res.split("/");
+                    var resource = findResource(resourceId, $scope.lwresources);
+                    if (resource) {
+                    	resource.value = content.val;
+                    }
+                });
+            }
+            source.addEventListener('NOTIFICATION', notificationCallback, false);
+
 
         } ]);
