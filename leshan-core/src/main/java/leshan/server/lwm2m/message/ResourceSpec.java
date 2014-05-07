@@ -67,6 +67,18 @@ public final class ResourceSpec {
         return this.resourceId;
     }
 
+    public String asRelativePath() {
+        StringBuffer b = new StringBuffer();
+        b.append(getObjectId());
+        if (getObjectInstanceId() != null) {
+            b.append("/").append(getObjectInstanceId());
+            if (getResourceId() != null) {
+                b.append("/").append(getResourceId());
+            }
+        }
+        return b.toString();
+    }
+
     @Override
     public String toString() {
         synchronized (this) {

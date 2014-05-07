@@ -55,9 +55,6 @@ public class LeshanMain {
         lwServer.start();
         clientRegistry.start();
 
-        // now prepare and start jetty
-        String webappDirLocation = "src/main/webapp/";
-
         String webPort = System.getenv("PORT");
 
         if (webPort == null || webPort.isEmpty()) {
@@ -78,11 +75,13 @@ public class LeshanMain {
         // root.setResourceBase(webappDirLocation);
         root.setParentLoaderPriority(true);
 
-        ServletHolder apiServletHolder = new ServletHolder(new ApiServlet(lwServer.getRequestHandler(), clientRegistry));
-        root.addServlet(apiServletHolder, "/api/*");
-
-        ServletHolder eventServletHolder = new ServletHolder(new EventServlet(clientRegistry));
+        EventServlet eventServlet = new EventServlet(clientRegistry);
+        ServletHolder eventServletHolder = new ServletHolder(eventServlet);
         root.addServlet(eventServletHolder, "/event/*");
+
+        ServletHolder apiServletHolder = new ServletHolder(new ApiServlet(lwServer.getRequestHandler(), clientRegistry,
+                eventServlet));
+        root.addServlet(apiServletHolder, "/api/*");
 
         server.setHandler(root);
 

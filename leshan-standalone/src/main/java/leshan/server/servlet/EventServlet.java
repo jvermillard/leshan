@@ -43,6 +43,9 @@ import javax.servlet.http.HttpServletResponse;
 import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.client.RegistryListener;
+import leshan.server.lwm2m.message.ContentFormat;
+import leshan.server.lwm2m.message.ResourceSpec;
+import leshan.server.lwm2m.observation.ResourceObserver;
 import leshan.server.servlet.json.ClientSerializer;
 
 import org.eclipse.jetty.continuation.Continuation;
@@ -55,7 +58,17 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class EventServlet extends HttpServlet {
+public class EventServlet extends HttpServlet implements ResourceObserver {
+
+    private static final String EVENT_DEREGISTRATION = "DEREGISTRATION";
+
+    private static final String EVENT_UPDATED = "UPDATED";
+
+    private static final String EVENT_REGISTRATION = "REGISTRATION";
+
+    private static final String EVENT_NOTIFICATION = "NOTIFICATION";
+
+    private static final String QUERY_PARAM_ENDPOINT = "ep";
 
     private static final long serialVersionUID = 1L;
 
@@ -71,55 +84,98 @@ public class EventServlet extends HttpServlet {
 
     private static final byte[] TERMINATION = new byte[] { '\r', '\n' };
 
-    public EventServlet(ClientRegistry registry) {
-        registry.addListener(listener);
-
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeHierarchyAdapter(Client.class, new ClientSerializer());
-        gson = gsonBuilder.create();
-    }
-
     private final Set<Continuation> continuations = new ConcurrentHashSet<>();
 
     private final RegistryListener listener = new RegistryListener() {
 
         @Override
         public void registered(Client client) {
-            sendEvent("REGISTRATION", client);
+            String jClient = EventServlet.this.gson.toJson(client);
+
+            sendEvent(EVENT_REGISTRATION, jClient, client.getEndpoint());
         }
 
         @Override
         public void updated(Client clientUpdated) {
-            sendEvent("UPDATED", clientUpdated);
+            String jClient = EventServlet.this.gson.toJson(clientUpdated);
+
+            sendEvent(EVENT_UPDATED, jClient, clientUpdated.getEndpoint());
         };
 
         @Override
         public void unregistered(Client client) {
-            sendEvent("DEREGISTRATION", client);
+            String jClient = EventServlet.this.gson.toJson(client);
+            for (Continuation c : EventServlet.this.continuations) {
+                if (client.getEndpoint().equals(c.getAttribute(QUERY_PARAM_ENDPOINT))) {
+                    EventServlet.this.continuations.remove(c);
+                }
+            }
+            sendEvent(EVENT_DEREGISTRATION, jClient, client.getEndpoint());
         }
     };
 
-    private void sendEvent(String event, Client client) {
-        LOG.debug("Registration event {} for client {}", event, client);
+    public EventServlet(ClientRegistry registry) {
+        registry.addListener(this.listener);
+
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        gsonBuilder.registerTypeHierarchyAdapter(Client.class, new ClientSerializer());
+        this.gson = gsonBuilder.create();
+    }
+
+    @Override
+    public void notify(byte[] content, ContentFormat contentFormat, ResourceSpec target) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Received notification from client {}, value: {}", target, new String(content));
+        }
+
+        String data = null;
+        switch (contentFormat) {
+        case OPAQUE:
+            // TODO: handle binary data
+            LOG.debug("Binary data not supported yet");
+            return;
+        case TLV:
+            // TODO: decode TLV
+            LOG.debug("TLV encoded data not supported yet");
+            return;
+        case JSON:
+            // TODO: handle JSON data
+            LOG.debug("JSON encoded data not supported yet");
+            return;
+        case TEXT:
+        default:
+            data = new StringBuffer("{\"ep\":\"").append(target.getClient().getEndpoint()).append("\",\"res\":\"")
+                    .append(target.asRelativePath()).append("\",\"val\":\"").append(new String(content)).append("\"}")
+                    .toString();
+
+        }
+        sendEvent(EVENT_NOTIFICATION, data, target.getClient().getEndpoint());
+    }
+
+    private void sendEvent(String event, String data, String endpoint) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Dispatching {} event from endpoint {}", event, endpoint);
+        }
 
         Collection<Continuation> disconnected = new ArrayList<>();
-        String jClient = gson.toJson(client);
 
         for (Continuation c : continuations) {
-            try {
-                OutputStream output = c.getServletResponse().getOutputStream();
-                output.write(EVENT);
-                output.write(event.getBytes("UTF-8"));
-                output.write(TERMINATION);
-                output.write(DATA);
-                output.write(jClient.getBytes("UTF-8"));
-                output.write(TERMINATION);
-                output.write(TERMINATION);
-                output.flush();
-                c.getServletResponse().flushBuffer();
-            } catch (IOException e) {
-                LOG.debug("Disconnected SSE client");
-                disconnected.add(c);
+            if (endpoint.equals(c.getAttribute(QUERY_PARAM_ENDPOINT)) || !EVENT_NOTIFICATION.equals(event)) {
+                try {
+                    OutputStream output = c.getServletResponse().getOutputStream();
+                    output.write(EVENT);
+                    output.write(event.getBytes("UTF-8"));
+                    output.write(TERMINATION);
+                    output.write(DATA);
+                    output.write(data.getBytes("UTF-8"));
+                    output.write(TERMINATION);
+                    output.write(TERMINATION);
+                    output.flush();
+                    c.getServletResponse().flushBuffer();
+                } catch (IOException e) {
+                    LOG.debug("Disconnected SSE client");
+                    disconnected.add(c);
+                }
             }
         }
 
@@ -155,6 +211,12 @@ public class EventServlet extends HttpServlet {
                 continuations.remove(continuation);
             }
         });
+
+        String endpoint = req.getParameter(QUERY_PARAM_ENDPOINT);
+        if (endpoint != null) {
+            // mark continuation as notification listener for endpoint
+            c.setAttribute(QUERY_PARAM_ENDPOINT, endpoint);
+        }
         continuations.add(c);
         c.suspend(resp);
     }

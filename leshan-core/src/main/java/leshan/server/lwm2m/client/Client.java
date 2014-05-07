@@ -123,7 +123,7 @@ public class Client {
     }
 
     public synchronized long getLifeTimeInSec() {
-        return this.lifeTimeInSec;
+        return lifeTimeInSec;
     }
 
     public String getSmsNumber() {
@@ -182,7 +182,33 @@ public class Client {
     public String toString() {
         return String
                 .format("Client [registrationDate=%s, address=%s, port=%s, lifeTimeInSec=%s, smsNumber=%s, lwM2mVersion=%s, bindingMode=%s, endpoint=%s, registrationId=%s, objectLinks=%s, lastUpdate=%s, failedLastRequest=%s]",
-                        registrationDate, address, port, lifeTimeInSec, smsNumber, lwM2mVersion, bindingMode, endpoint,
-                        registrationId, Arrays.toString(objectLinks), lastUpdate, failedLastRequest);
+                        this.registrationDate, this.address, this.port, this.lifeTimeInSec, this.smsNumber, this.lwM2mVersion, this.bindingMode, this.endpoint,
+                        this.registrationId, Arrays.toString(this.objectLinks), this.lastUpdate, this.failedLastRequest);
+    }
+
+    /**
+     * Computes a hash code for this client.
+     * 
+     * @return the hash code based on the <em>endpoint</em> property
+     */
+    @Override
+    public int hashCode() {
+        return getEndpoint().hashCode();
+    }
+
+    /**
+     * Compares this Client to another object.
+     * 
+     * @return <code>true</code> if the other object is a Client instance and
+     *         its <em>endpoint</em> property has the same value as this Client
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Client) {
+            Client other = (Client) obj;
+            return this.getEndpoint().equals(other.getEndpoint());
+        } else {
+            return false;
+        }
     }
 }

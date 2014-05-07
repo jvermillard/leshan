@@ -75,14 +75,15 @@ public class ApiServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private final RequestHandler requestHandler;
-
+    private final ResourceObserver resourceObserver;
     private final ClientRegistry clientRegistry;
 
     private final Gson gson;
 
-    public ApiServlet(RequestHandler requestHandler, ClientRegistry clientRegistry) {
+    public ApiServlet(RequestHandler requestHandler, ClientRegistry clientRegistry, ResourceObserver observer) {
         this.requestHandler = requestHandler;
         this.clientRegistry = clientRegistry;
+        this.resourceObserver = observer;
 
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(Tlv.class, new TlvSerializer());
@@ -144,13 +145,13 @@ public class ApiServlet extends HttpServlet {
             RequestInfo requestInfo = new RequestInfo(path);
             Client client = this.clientRegistry.get(requestInfo.endpoint);
             if (client != null) {
+                ClientResponse cResponse = null;
                 if (isObserveRequest) {
-                    ClientResponse cResponse = this.observeRequest(client, requestInfo, resp);
-                    processDeviceResponse(resp, cResponse);
+                    cResponse = this.observeRequest(client, requestInfo, resp);
                 } else {
-                    ClientResponse cResponse = this.readRequest(client, requestInfo, resp);
-                    processDeviceResponse(resp, cResponse);
+                    cResponse = this.readRequest(client, requestInfo, resp);
                 }
+                processDeviceResponse(resp, cResponse);
             } else {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 resp.getWriter().format("no registered client with id '%s'", requestInfo.endpoint).flush();
@@ -246,16 +247,9 @@ public class ApiServlet extends HttpServlet {
     }
 
     private ClientResponse observeRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp) {
-        ResourceObserver observer = new ResourceObserver() {
-
-            @Override
-            public void notify(byte[] content, int contentFormat, String observationId) {
-                LOG.trace("Received notification for observation [{}]: {}", observationId, new String(content));
-
-            }
-        };
-        return ObserveRequest.newRequest(client, observer, requestInfo.objectId, requestInfo.objectInstanceId,
-                requestInfo.resourceId).send(this.requestHandler);
+        ClientResponse response = ObserveRequest.newRequest(client, this.resourceObserver, requestInfo.objectId,
+                requestInfo.objectInstanceId, requestInfo.resourceId).send(this.requestHandler);
+        return response;
     }
 
     private ClientResponse execRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp) {
@@ -279,11 +273,12 @@ public class ApiServlet extends HttpServlet {
 
     class RequestInfo {
 
-        String endpoint;
-        Integer objectId;
+        final String endpoint;
+        final Integer objectId;
         Integer objectInstanceId;
         Integer resourceId;
         Integer resourceInstanceId;
+        final String uri;
 
         /**
          * Build LW request info from URI path
@@ -294,23 +289,34 @@ public class ApiServlet extends HttpServlet {
                 throw new IllegalArgumentException("invalid lightweight M2M path");
             }
 
-            this.endpoint = path[1];
+            StringBuffer b = new StringBuffer();
+            endpoint = path[1];
+            b.append(endpoint);
 
             try {
                 this.objectId = Integer.valueOf(path[2]);
+                b.append("/").append(objectId);
 
                 if (path.length > 3) {
-                    this.objectInstanceId = Integer.valueOf(path[3]);
+                    objectInstanceId = Integer.valueOf(path[3]);
+                    b.append("/").append(objectInstanceId);
                 }
                 if (path.length > 4) {
-                    this.resourceId = Integer.valueOf(path[4]);
+                    resourceId = Integer.valueOf(path[4]);
+                    b.append("/").append(resourceId);
                 }
                 if (path.length > 5) {
-                    this.resourceInstanceId = Integer.valueOf(path[5]);
+                    resourceInstanceId = Integer.valueOf(path[5]);
                 }
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException("invalid lightweight M2M path", e);
             }
+            uri = b.toString();
+        }
+
+        @Override
+        public String toString() {
+            return uri;
         }
     }
 }

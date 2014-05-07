@@ -83,7 +83,7 @@ lwClientControllers.controller('ClientDetailCtrl', [
             $scope.lwresources = tree;
 
             // listen for clients registration/deregistration
-            $scope.eventsource = new EventSource('event');
+            $scope.eventsource = new EventSource('event?ep=' + $routeParams.clientId);
 
             var registerCallback = function(msg) {
                 $scope.$apply(function() {
@@ -102,6 +102,18 @@ lwClientControllers.controller('ClientDetailCtrl', [
                 });
             }
             $scope.eventsource.addEventListener('DEREGISTRATION', deregisterCallback, false);
+
+            var notificationCallback = function(msg) {
+                $scope.$apply(function() {
+                    var content = JSON.parse(msg.data);
+                    var resourceId = content.res.split("/");
+                    var resource = findResource(resourceId, $scope.lwresources);
+                    if (resource) {
+                    	resource.value = content.val;
+                    }
+                });
+            }
+            source.addEventListener('NOTIFICATION', notificationCallback, false);
         });
 
         var buildResourceTree = function(objectLinks, lwResources) {
@@ -132,9 +144,14 @@ lwClientControllers.controller('ClientDetailCtrl', [
             }
             else {
                 if(lwNode) {
+                    // add properties for tracking observations
+                    lwNode.observationId = null;
+                    lwNode.observed = false;
                     treeNode.push(lwNode);
                     if(nodeIds.length > 0) {
-                        // clean up children nodes and add next node
+                        // this is not a resource, thus
+                        // remove children defined by lw-resources.json
+                        // and add nodes at next level
                         var newNode = treeNode[treeNode.length - 1];
                         newNode.values = [];
                         addNodes(newNode.values, lwNode.values, nodeIds);
@@ -165,5 +182,17 @@ lwClientControllers.controller('ClientDetailCtrl', [
                     }
                 }
             }
+        }
+        
+        var findResource = function(resourceId, resourceTree) {
+            if (resourceId) {
+                var nodeId = resourceId.shift();
+                var node = findNode(nodeId, resourceTree);
+                if (node && resourceId.length > 0) {
+                    return findResource(resourceId, node.values);
+                } else {
+                    return node;
+                }
+            	}
         }
 }]);

@@ -30,12 +30,7 @@
 package leshan.server.lwm2m.message.californium;
 
 import static org.mockito.Mockito.mock;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Date;
-
-import leshan.server.lwm2m.client.Client;
+import leshan.server.lwm2m.message.ContentFormat;
 import leshan.server.lwm2m.message.ResourceSpec;
 import leshan.server.lwm2m.observation.ResourceObserver;
 
@@ -48,12 +43,11 @@ import ch.ethz.inf.vs.californium.coap.MediaTypeRegistry;
 import ch.ethz.inf.vs.californium.coap.Request;
 import ch.ethz.inf.vs.californium.coap.Response;
 
-public class CaliforniumBasedObservationTest {
+public class CaliforniumBasedObservationTest extends BasicTestSupport {
 
     final String reportedValue = "15";
     Request coapRequest;
     ResourceSpec target;
-    Client client;
 
     @Before
     public void setUp() throws Exception {
@@ -67,9 +61,11 @@ public class CaliforniumBasedObservationTest {
         ResourceObserver observer = new ResourceObserver() {
 
             @Override
-            public void notify(byte[] content, int contentFormat, String observationId) {
+            public void notify(byte[] content, ContentFormat contentFormat, ResourceSpec target) {
                 Assert.assertArrayEquals(CaliforniumBasedObservationTest.this.reportedValue.getBytes(), content);
-                Assert.assertNotNull(observationId);
+                Assert.assertEquals((Integer) 3, target.getObjectId());
+                Assert.assertEquals((Integer) 0, target.getObjectInstanceId());
+                Assert.assertEquals((Integer) 15, target.getResourceId());
             }
         };
 
@@ -92,11 +88,6 @@ public class CaliforniumBasedObservationTest {
         observation.cancel();
 
         Assert.assertTrue(this.coapRequest.isCanceled());
-    }
-
-    private void givenASimpleClient() throws UnknownHostException {
-        this.client = new Client("ID", "urn:client", InetAddress.getLocalHost(), 5683, "1.0", 10000L, null, null, null,
-                new Date());
     }
 
     private void givenAnObserveRequest(ResourceSpec target) {

@@ -29,10 +29,15 @@
  */
 package leshan.server.lwm2m.message.californium;
 
+import java.nio.ByteBuffer;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import javax.xml.bind.DatatypeConverter;
 
 import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.observation.Observation;
@@ -42,8 +47,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A <code>Map</code> based registry for keeping track of this server's
- * observed resources on LWM2M Clients.
+ * A <code>Map</code> based registry for keeping track of this server's observed resources on LWM2M Clients.
  * 
  */
 final class InMemoryObservationRegistry implements ObservationRegistry {
@@ -58,17 +62,24 @@ final class InMemoryObservationRegistry implements ObservationRegistry {
     }
 
     @Override
-    public synchronized void addObservation(Observation observation) {
+    public synchronized String addObservation(Observation observation) {
+        String id = null;
+
         if (observation != null) {
-            String endpoint = observation.getResourceProvider().getEndpoint();
-            this.observationsById.put(observation.getId(), observation);
-            Set<Observation> clientObservations = this.observationsByClient.get(endpoint);
-            if (clientObservations == null) {
-                clientObservations = new HashSet<Observation>();
-                this.observationsByClient.put(endpoint, clientObservations);
+            id = createDigest(observation);
+            if (!this.observationsById.containsKey(id)) {
+                String endpoint = observation.getResourceProvider().getEndpoint();
+                Set<Observation> clientObservations = this.observationsByClient.get(endpoint);
+                if (clientObservations == null) {
+                    clientObservations = new HashSet<Observation>();
+                    this.observationsByClient.put(endpoint, clientObservations);
+                }
+
+                clientObservations.add(observation);
+                this.observationsById.put(id, observation);
             }
-            clientObservations.add(observation);
         }
+        return id;
     }
 
     @Override
@@ -92,25 +103,47 @@ final class InMemoryObservationRegistry implements ObservationRegistry {
     }
 
     @Override
-    public synchronized void cancelObservations(Client client) {
-        if (client == null) {
-            return;
-        }
+    public synchronized int cancelObservations(Client client) {
+        int count = 0;
+        if (client != null) {
 
-        if (this.LOG.isTraceEnabled()) {
-            this.LOG.trace("Canceling all observations of client {}", client.getEndpoint());
-        }
-        Set<Observation> clientObservations = this.observationsByClient.get(client.getEndpoint());
-        if (clientObservations != null) {
-            for (Observation obs : clientObservations) {
-                obs.cancel();
+            Set<Observation> clientObservations = this.observationsByClient.get(client.getEndpoint());
+
+            if (clientObservations != null) {
+                count = clientObservations.size();
+                if (this.LOG.isTraceEnabled()) {
+                    this.LOG.trace("Canceling {} observations of client {}", count, client.getEndpoint());
+                }
+                for (Observation obs : clientObservations) {
+                    obs.cancel();
+                }
+                clientObservations.clear();
+                this.observationsByClient.remove(client.getEndpoint());
             }
-            clientObservations.clear();
-            this.observationsByClient.remove(client.getEndpoint());
         }
+        return count;
     }
 
     public synchronized Observation getObservation(String observationId) {
         return this.observationsById.get(observationId);
     }
+
+    protected String createDigest(Observation observation) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            md.update(observation.getResourceProvider().getEndpoint().getBytes());
+            ByteBuffer b = ByteBuffer.allocate(16);
+            b.putInt(observation.getResourceObserver().hashCode());
+            b.putInt(observation.getObjectId());
+            b.putInt(observation.getObjectInstanceId() != null ? observation.getObjectInstanceId() : -1);
+            b.putInt(observation.getResourceId() != null ? observation.getResourceId() : -1);
+            md.update(b.array());
+            return DatatypeConverter.printHexBinary(md.digest());
+        } catch (NoSuchAlgorithmException e) {
+            // cannot happen since SHA-256 is a mandatory algorithm as per Java
+            // 7 Spec
+            return "";
+        }
+    }
+
 }
