@@ -123,7 +123,7 @@ public class EventServlet extends HttpServlet implements ResourceObserver {
     }
 
     @Override
-    public void notify(byte[] content, ContentFormat contentFormat, String observationId, ResourceSpec target) {
+    public void notify(byte[] content, ContentFormat contentFormat, ResourceSpec target) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Received notification from client {}, value: {}", target, new String(content));
         }

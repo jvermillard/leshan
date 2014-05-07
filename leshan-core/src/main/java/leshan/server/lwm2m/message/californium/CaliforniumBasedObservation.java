@@ -29,8 +29,6 @@
  */
 package leshan.server.lwm2m.message.californium;
 
-import java.util.UUID;
-
 import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.message.ContentFormat;
 import leshan.server.lwm2m.message.ResourceSpec;
@@ -45,7 +43,6 @@ public final class CaliforniumBasedObservation extends MessageObserverAdapter im
     private final Request coapRequest;
     private final ResourceObserver observer;
     private final ResourceSpec target;
-    private final String id;
 
     public CaliforniumBasedObservation(Request request, ResourceObserver observer, ResourceSpec target) {
         if (request == null) {
@@ -61,7 +58,6 @@ public final class CaliforniumBasedObservation extends MessageObserverAdapter im
         this.coapRequest = request;
         this.observer = observer;
         this.target = target;
-        this.id = UUID.randomUUID().toString();
     }
 
     @Override
@@ -75,7 +71,7 @@ public final class CaliforniumBasedObservation extends MessageObserverAdapter im
         if (format == null) {
             format = ContentFormat.TEXT;
         }
-        this.observer.notify(response.getPayload(), format, this.id, this.target);
+        this.observer.notify(response.getPayload(), format, this.target);
     }
 
     @Override
@@ -104,26 +100,8 @@ public final class CaliforniumBasedObservation extends MessageObserverAdapter im
     }
 
     @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof Observation) {
-            return this.id.equals(((Observation) obj).getId());
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    public int hashCode() {
-        return this.id.hashCode();
-    }
-
-    @Override
     public String toString() {
-        return String.format("CaliforniumObservation [id=%s, %s]", this.id, this.target);
+        return String.format("CaliforniumObservation [%s]", this.target);
     }
+
 }

@@ -99,9 +99,14 @@ lwClientControllers.controller('ClientListCtrl', [
                 }
                 else {
                     if(lwNode) {
+                    	// add properties for tracking observations
+                    	lwNode.observationId = null;
+                    	lwNode.observed = false;
                         treeNode.push(lwNode);
                         if(nodeIds.length > 0) {
-                            // clean up children nodes and add next node
+                        	// this is not a resource, thus
+                            // remove children defined by lw-resources.json
+                        	// and add nodes at next level
                             var newNode = treeNode[treeNode.length - 1];
                             newNode.values = [];
                             addNodes(newNode.values, lwNode.values, nodeIds);

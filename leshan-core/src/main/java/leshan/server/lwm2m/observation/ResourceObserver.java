@@ -43,11 +43,7 @@ public interface ResourceObserver {
      * 
      * @param content the updated resource value
      * @param contentFormat the format of the value
-     * @param observationId the ID of the observation this notification is due
-     *            to. The observer can use this ID to cancel the observation
-     *            using the
-     *            {@link ObservationRegistry#cancelObservation(String)} method
      * @param target the observed resource on the LWM2MClient
      */
-    void notify(byte[] content, ContentFormat contentFormat, String observationId, ResourceSpec target);
+    void notify(byte[] content, ContentFormat contentFormat, ResourceSpec target);
 }

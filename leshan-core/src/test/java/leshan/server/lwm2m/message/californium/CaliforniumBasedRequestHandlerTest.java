@@ -30,13 +30,11 @@
 package leshan.server.lwm2m.message.californium;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Date;
 
-import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.message.AuthorizationException;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ContentFormat;
@@ -68,7 +66,7 @@ import ch.ethz.inf.vs.californium.coap.OptionNumberRegistry;
 import ch.ethz.inf.vs.californium.coap.Request;
 import ch.ethz.inf.vs.californium.coap.Response;
 
-public class CaliforniumBasedRequestHandlerTest {
+public class CaliforniumBasedRequestHandlerTest extends BasicTestSupport {
 
     private static final Integer OBJECT_ID_DEVICE = 3;
 
@@ -76,9 +74,6 @@ public class CaliforniumBasedRequestHandlerTest {
 
     CoapClient coapEndpoint;
     CaliforniumBasedRequestHandler requestHandler;
-    Client client;
-    InetAddress destination;
-    int destinationPort = 5000;
     InMemoryObservationRegistry observationRegistry;
 
     @Before
@@ -214,11 +209,6 @@ public class CaliforniumBasedRequestHandlerTest {
 
         this.requestHandler.send(request);
         Assert.fail("Should have thrown Exception");
-    }
-
-    private void givenASimpleClient() throws UnknownHostException {
-        this.client = new Client("ID", "urn:client", this.destination, this.destinationPort, "1.0", 10000L, null, null,
-                null, new Date());
     }
 
     private void ifTheClientReturns(Response coapResponse) {

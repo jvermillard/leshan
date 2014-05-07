@@ -148,15 +148,13 @@ public class ApiServlet extends HttpServlet {
             RequestInfo requestInfo = new RequestInfo(path);
             Client client = this.clientRegistry.get(requestInfo.endpoint);
             if (client != null) {
+                ClientResponse cResponse = null;
                 if (isObserveRequest) {
-                    ObserveResponse cResponse = this.observeRequest(client, requestInfo, resp);
-                    LOG.trace("Observing resource [{}] with observation ID [{}]", req.getPathInfo(),
-                            cResponse.getObservationId());
-                    processDeviceResponse(resp, cResponse);
+                    cResponse = this.observeRequest(client, requestInfo, resp);
                 } else {
-                    ClientResponse cResponse = this.readRequest(client, requestInfo, resp);
-                    processDeviceResponse(resp, cResponse);
+                    cResponse = this.readRequest(client, requestInfo, resp);
                 }
+                processDeviceResponse(resp, cResponse);
             } else {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 resp.getWriter().format("no registered client with id '%s'", requestInfo.endpoint).flush();
@@ -271,8 +269,11 @@ public class ApiServlet extends HttpServlet {
     }
 
     private ObserveResponse observeRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp) {
-        return ObserveRequest.newRequest(client, this.resourceObserver, requestInfo.objectId,
+        ObserveResponse response = ObserveRequest.newRequest(client, this.resourceObserver, requestInfo.objectId,
                 requestInfo.objectInstanceId, requestInfo.resourceId).send(this.requestHandler);
+        LOG.trace("Observing resource [{}] with observation ID [{}]", requestInfo.toString(),
+                response.getObservationId());
+        return response;
     }
 
     private ClientResponse execRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp) {
@@ -296,11 +297,12 @@ public class ApiServlet extends HttpServlet {
 
     class RequestInfo {
 
-        String endpoint;
-        Integer objectId;
+        final String endpoint;
+        final Integer objectId;
         Integer objectInstanceId;
         Integer resourceId;
         Integer resourceInstanceId;
+        final String uri;
 
         /**
          * Build LW request info from URI path
@@ -311,16 +313,21 @@ public class ApiServlet extends HttpServlet {
                 throw new IllegalArgumentException("invalid lightweight M2M path");
             }
 
+            StringBuffer b = new StringBuffer();
             this.endpoint = path[1];
+            b.append(this.endpoint);
 
             try {
                 this.objectId = Integer.valueOf(path[2]);
+                b.append("/").append(this.objectId);
 
                 if (path.length > 3) {
                     this.objectInstanceId = Integer.valueOf(path[3]);
+                    b.append("/").append(this.objectInstanceId);
                 }
                 if (path.length > 4) {
                     this.resourceId = Integer.valueOf(path[4]);
+                    b.append("/").append(this.resourceId);
                 }
                 if (path.length > 5) {
                     this.resourceInstanceId = Integer.valueOf(path[5]);
@@ -328,6 +335,12 @@ public class ApiServlet extends HttpServlet {
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException("invalid lightweight M2M path", e);
             }
+            this.uri = b.toString();
+        }
+
+        @Override
+        public String toString() {
+            return this.uri;
         }
     }
 }
