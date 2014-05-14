@@ -47,7 +47,7 @@
     <dependencies>
 
         <dependency>
-            <groupId>leshan</groupId>
+            <groupId>org.github.leshan</groupId>
             <artifactId>leshan-core</artifactId>
             <version>${project.version}</version>
             <type>jar</type>
