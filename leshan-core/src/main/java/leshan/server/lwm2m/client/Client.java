@@ -29,6 +29,7 @@
  */
 package leshan.server.lwm2m.client;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Date;
@@ -36,9 +37,15 @@ import java.util.Date;
 import org.apache.commons.lang.Validate;
 
 /**
- * A LW-M2M client registered on the server
+ * A LW-M2M client registered on the server.
+ * 
  */
-public class Client {
+public class Client implements Serializable {
+
+    /**
+     * Serializable in order to support (distributed) caching, e.g. via JSR 107
+     */
+    private static final long serialVersionUID = 1L;
 
     private static final long DEFAULT_LIFETIME_IN_SEC = 86400L;
 
@@ -74,12 +81,12 @@ public class Client {
     }
 
     public Client(String registrationId, String endpoint, InetAddress address, int port, String lwM2mVersion,
-                  Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks) {
+            Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks) {
         this(registrationId, endpoint, address, port, lwM2mVersion, lifetime, smsNumber, binding, objectLinks, null);
     }
 
     public Client(String registrationId, String endpoint, InetAddress address, int port, String lwM2mVersion,
-                  Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks, Date registrationDate) {
+            Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks, Date registrationDate) {
 
         Validate.notEmpty(endpoint);
         Validate.notNull(address);
