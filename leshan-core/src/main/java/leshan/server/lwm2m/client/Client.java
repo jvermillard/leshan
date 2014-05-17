@@ -62,7 +62,7 @@ public class Client {
 
     private final String registrationId;
 
-    private final String[] objectLinks;
+    private String[] objectLinks;
 
     private Date lastUpdate;
 
@@ -118,6 +118,10 @@ public class Client {
         return objectLinks;
     }
 
+    public void setObjectLinks(String[] objectLinks) {
+        this.objectLinks = objectLinks;
+    }
+
     public long getLifeTimeInSec() {
         return lifeTimeInSec;
     }
@@ -167,10 +171,11 @@ public class Client {
     }
 
     public void setLastUpdate(Date lastUpdate) {
+        // TODO should probably better be done "implicitly" as part of the other setters
         this.lastUpdate = lastUpdate;
     }
 
-    public void markLastRequestFaild() {
+    public void markLastRequestFailed() {
         this.failedLastRequest = true;
     }
 
