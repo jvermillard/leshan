@@ -84,8 +84,13 @@ body {
 }
 
 
-.resource-value {
+.resource-value-read {
 	font-weight: bold;
+}
+
+.resource-value-write {
+	font-weight: bold;
+	color: #AAAAAA;
 }
 
 /* Object level */
