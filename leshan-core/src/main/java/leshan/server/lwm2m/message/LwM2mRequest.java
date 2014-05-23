@@ -34,7 +34,7 @@ import leshan.server.lwm2m.client.Client;
 /**
  * A Lightweight M2M request.
  */
-public interface LwM2mRequest<T extends ClientResponse> {
+public interface LwM2mRequest {
 
     /**
      * Gets the LWM2M Client the request is targeted at.
@@ -71,5 +71,5 @@ public interface LwM2mRequest<T extends ClientResponse> {
      * @return the response from the client
      * @throws ResourceAccessException if the request could not be processed by the client
      */
-    T send(RequestHandler handler);
+    ClientResponse send(RequestHandler handler);
 }

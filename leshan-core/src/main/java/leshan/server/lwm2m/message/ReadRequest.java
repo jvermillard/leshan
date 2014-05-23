@@ -32,13 +32,12 @@ package leshan.server.lwm2m.message;
 import leshan.server.lwm2m.client.Client;
 
 /**
- * A Lightweight M2M request for retrieving the values of resources from a LWM2M
- * Client.
+ * A Lightweight M2M request for retrieving the values of resources from a LWM2M Client.
  * 
- * The request can be used to retrieve the value(s) of one or all attributes of
- * one particular or all instances of a particular object type.
+ * The request can be used to retrieve the value(s) of one or all attributes of one particular or all instances of a
+ * particular object type.
  */
-public class ReadRequest extends AbstractLwM2mRequest implements LwM2mRequest<ContentResponse> {
+public class ReadRequest extends AbstractLwM2mRequest implements LwM2mRequest {
 
     private ReadRequest(ResourceSpec target) {
         super(target);
@@ -85,7 +84,7 @@ public class ReadRequest extends AbstractLwM2mRequest implements LwM2mRequest<Co
      * @throws NullPointerException if the object ID is <code>null</code>
      */
     public static final ReadRequest newRequest(Client client, Integer objectId, Integer objectInstanceId,
-                                               Integer resourceId) {
+            Integer resourceId) {
         return new ReadRequest(new ResourceSpec(client, objectId, objectInstanceId, resourceId));
     }
 
@@ -93,7 +92,7 @@ public class ReadRequest extends AbstractLwM2mRequest implements LwM2mRequest<Co
      * {@inheritDoc}
      */
     @Override
-    public ContentResponse send(RequestHandler operations) {
+    public ClientResponse send(RequestHandler operations) {
 
         return operations.send(this);
     }

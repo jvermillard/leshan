@@ -44,11 +44,9 @@ import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ContentFormat;
 import leshan.server.lwm2m.message.ExecRequest;
-import leshan.server.lwm2m.message.OperationNotSupportedException;
 import leshan.server.lwm2m.message.ReadRequest;
 import leshan.server.lwm2m.message.RequestHandler;
 import leshan.server.lwm2m.message.ResourceAccessException;
-import leshan.server.lwm2m.message.ResourceNotFoundException;
 import leshan.server.lwm2m.message.WriteRequest;
 import leshan.server.lwm2m.tlv.Tlv;
 import leshan.server.servlet.json.ClientSerializer;
@@ -152,12 +150,6 @@ public class ApiServlet extends HttpServlet {
         } catch (IllegalArgumentException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().append(e.getMessage()).flush();
-        } catch (ResourceNotFoundException e) {
-            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            resp.getWriter().append(e.getMessage()).flush();
-        } catch (OperationNotSupportedException e) {
-            resp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-            resp.getWriter().append(e.getMessage()).flush();
         } catch (ResourceAccessException e) {
             LOG.error(String.format("Unexpected error for %s%s request.", req.getServletPath(), req.getPathInfo()), e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -190,12 +182,6 @@ public class ApiServlet extends HttpServlet {
             // content encoding other than text/plain is not supported (yet)
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().append(e.getMessage()).flush();
-        } catch (ResourceNotFoundException e) {
-            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            resp.getWriter().append(e.getMessage()).flush();
-        } catch (OperationNotSupportedException e) {
-            resp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-            resp.getWriter().append(e.getMessage()).flush();
         } catch (ResourceAccessException e) {
             LOG.error(String.format("Unexpected error for %s%s request.", req.getServletPath(), req.getPathInfo()), e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -227,12 +213,6 @@ public class ApiServlet extends HttpServlet {
         } catch (IllegalArgumentException e) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().append(e.getMessage()).flush();
-        } catch (ResourceNotFoundException e) {
-            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            resp.getWriter().append(e.getMessage()).flush();
-        } catch (OperationNotSupportedException e) {
-            resp.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-            resp.getWriter().append(e.getMessage()).flush();
         } catch (ResourceAccessException e) {
             LOG.error(String.format("Unexpected error for %s%s request.", req.getServletPath(), req.getPathInfo()), e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -249,7 +229,6 @@ public class ApiServlet extends HttpServlet {
         }
         resp.setContentType("application/json");
         resp.getOutputStream().write(response.getBytes());
-
         resp.setStatus(HttpServletResponse.SC_OK);
     }
 
@@ -264,7 +243,7 @@ public class ApiServlet extends HttpServlet {
     }
 
     private ClientResponse writeRequest(Client client, RequestInfo requestInfo, HttpServletRequest req,
-                                        HttpServletResponse resp) throws IOException {
+            HttpServletResponse resp) throws IOException {
         Map<String, String> parameters = new HashMap<String, String>();
         String contentType = HttpFields.valueParameters(req.getContentType(), parameters);
         if ("text/plain".equals(contentType)) {

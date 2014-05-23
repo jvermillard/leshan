@@ -30,7 +30,8 @@
 package leshan.server.lwm2m.message.californium;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -40,7 +41,6 @@ import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.message.AuthorizationException;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ContentFormat;
-import leshan.server.lwm2m.message.ContentResponse;
 import leshan.server.lwm2m.message.CreateRequest;
 import leshan.server.lwm2m.message.DeleteRequest;
 import leshan.server.lwm2m.message.DiscoverRequest;
@@ -97,7 +97,7 @@ public class CaliforniumBasedRequestHandlerTest {
         ifTheClientReturns(newResponse(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT, TEXT_PAYLOAD));
 
         ClientResponse response = this.requestHandler.send(request);
-        Assert.assertTrue(response instanceof ContentResponse);
+        Assert.assertTrue(response.getCode() == ResponseCode.CONTENT);
         Assert.assertEquals(TEXT_PAYLOAD, new String(response.getContent()));
     }
 
@@ -110,7 +110,8 @@ public class CaliforniumBasedRequestHandlerTest {
         coapResponse.setPayload(coreLinkPayload, MediaTypeRegistry.APPLICATION_XML);
         ifTheClientReturns(coapResponse);
 
-        DiscoverResponse response = this.requestHandler.send(request);
+        ClientResponse response = this.requestHandler.send(request);
+        Assert.assertTrue(response instanceof DiscoverResponse);
         Assert.assertArrayEquals(coreLinkPayload.getBytes(), response.getContent());
     }
 
@@ -146,11 +147,13 @@ public class CaliforniumBasedRequestHandlerTest {
 
         ifTheClientReturns(successfulResponse);
 
-        ObserveResponse response = this.requestHandler.send(request);
-        Assert.assertNotNull(response.getObservationId());
+        ClientResponse response = this.requestHandler.send(request);
+        Assert.assertTrue(response instanceof ObserveResponse);
+        ObserveResponse observeResponse = (ObserveResponse) response;
+        Assert.assertNotNull(observeResponse.getObservationId());
         Assert.assertArrayEquals(TEXT_PAYLOAD.getBytes(), response.getContent());
 
-        Observation observation = this.observationRegistry.getObservation(response.getObservationId());
+        Observation observation = this.observationRegistry.getObservation(observeResponse.getObservationId());
         Assert.assertEquals(observer, observation.getResourceObserver());
 
     }
@@ -165,10 +168,12 @@ public class CaliforniumBasedRequestHandlerTest {
 
         ifTheClientReturns(successfulResponse);
 
-        ObserveResponse response = this.requestHandler.send(request);
-        Assert.assertNotNull(response.getObservationId());
-        this.observationRegistry.cancelObservation(response.getObservationId());
-        Assert.assertNull(this.observationRegistry.getObservation(response.getObservationId()));
+        ClientResponse response = this.requestHandler.send(request);
+        Assert.assertTrue(response instanceof ObserveResponse);
+        ObserveResponse observeResponse = (ObserveResponse) response;
+        Assert.assertNotNull(observeResponse.getObservationId());
+        this.observationRegistry.cancelObservation(observeResponse.getObservationId());
+        Assert.assertNull(this.observationRegistry.getObservation(observeResponse.getObservationId()));
     }
 
     @Test

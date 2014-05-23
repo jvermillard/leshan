@@ -29,13 +29,12 @@
  */
 package leshan.server.lwm2m.message;
 
-
-public class ObserveResponse extends ContentResponse {
+public class ObserveResponse extends ClientResponse {
 
     private final String observationId;
 
     public ObserveResponse(byte[] content, Integer contentFormat, String observationId) {
-        super(content, ContentFormat.fromCode(contentFormat));
+        super(ResponseCode.CONTENT, content, ContentFormat.fromCode(contentFormat));
         if (observationId == null) {
             throw new NullPointerException("Observation ID must not be null");
         }

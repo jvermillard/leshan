@@ -38,7 +38,7 @@ import leshan.server.lwm2m.tlv.Tlv;
  * The request to change the value of a Resource, an array of Resources Instances or multiple Resources from an Object
  * Instance.
  */
-public class WriteRequest extends PayloadRequest implements LwM2mRequest<ClientResponse> {
+public class WriteRequest extends PayloadRequest implements LwM2mRequest {
 
     private final boolean replaceRequest;
 
@@ -112,8 +112,8 @@ public class WriteRequest extends PayloadRequest implements LwM2mRequest<ClientR
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("WriteRequest [").append(getTarget()).append(", format=").append(getContentFormat())
-        .append(", stringValue=").append(getStringPayload()).append(", tlvValues=")
-        .append(Arrays.toString(getPayload())).append("]");
+                .append(", stringValue=").append(getStringPayload()).append(", tlvValues=")
+                .append(Arrays.toString(getPayload())).append("]");
         return builder.toString();
     }
 
@@ -126,22 +126,22 @@ public class WriteRequest extends PayloadRequest implements LwM2mRequest<ClientR
     }
 
     public static WriteRequest newReplaceRequest(Client client, Integer objectId, Integer objectInstanceId,
-                                                 Integer resourceId, Tlv[] payload) {
+            Integer resourceId, Tlv[] payload) {
         return new WriteRequest(new ResourceSpec(client, objectId, objectInstanceId, resourceId), payload, true);
     }
 
     public static WriteRequest newUpdateRequest(Client client, Integer objectId, Integer objectInstanceId,
-                                                Integer resourceId, Tlv[] payload) {
+            Integer resourceId, Tlv[] payload) {
         return new WriteRequest(new ResourceSpec(client, objectId, objectInstanceId, resourceId), payload, false);
     }
 
     public static WriteRequest newReplaceRequest(Client client, Integer objectId, Integer objectInstanceId,
-                                                 Integer resourceId, String payload, ContentFormat format) {
+            Integer resourceId, String payload, ContentFormat format) {
         return new WriteRequest(new ResourceSpec(client, objectId, objectInstanceId, resourceId), payload, format, true);
     }
 
     public static WriteRequest newUpdateRequest(Client client, Integer objectId, Integer objectInstanceId,
-                                                Integer resourceId, String payload, ContentFormat format) {
+            Integer resourceId, String payload, ContentFormat format) {
         return new WriteRequest(new ResourceSpec(client, objectId, objectInstanceId, resourceId), payload, format,
                 false);
     }

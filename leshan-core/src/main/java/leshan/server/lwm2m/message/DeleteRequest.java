@@ -31,7 +31,7 @@ package leshan.server.lwm2m.message;
 
 import leshan.server.lwm2m.client.Client;
 
-public class DeleteRequest extends AbstractLwM2mRequest implements LwM2mRequest<ClientResponse> {
+public class DeleteRequest extends AbstractLwM2mRequest implements LwM2mRequest {
 
     private DeleteRequest(ResourceSpec target) {
         super(target);
@@ -48,15 +48,13 @@ public class DeleteRequest extends AbstractLwM2mRequest implements LwM2mRequest<
     }
 
     /**
-     * Creates a request for deleting a particular object instance implemented
-     * by a client.
+     * Creates a request for deleting a particular object instance implemented by a client.
      * 
      * @param client the LWM2M Client to delete the object instance on
      * @param objectId the object type
      * @param objectInstanceId the object instance
      * @return the request object
-     * @throws NullPointerException if any of the object or object instance ID
-     *             is <code>null</code>
+     * @throws NullPointerException if any of the object or object instance ID is <code>null</code>
      */
     public static final DeleteRequest newRequest(Client client, Integer objectId, Integer objectInstanceId) {
         return new DeleteRequest(new ResourceSpec(client, objectId, objectInstanceId, null));

@@ -35,7 +35,7 @@ import leshan.server.lwm2m.tlv.Tlv;
 /**
  * A request for executing resources on a client.
  */
-public class ExecRequest extends PayloadRequest implements LwM2mRequest<ClientResponse> {
+public class ExecRequest extends PayloadRequest implements LwM2mRequest {
 
     private ExecRequest(ResourceSpec target, Tlv[] payload) {
         super(target, payload);
@@ -53,8 +53,8 @@ public class ExecRequest extends PayloadRequest implements LwM2mRequest<ClientRe
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("ExecRequest [client=").append(getClient().getEndpoint()).append(", objectId=")
-        .append(getObjectId()).append(", objectInstanceId=").append(getObjectInstanceId())
-        .append(", resourceId=").append(getResourceId()).append("]");
+                .append(getObjectId()).append(", objectInstanceId=").append(getObjectInstanceId())
+                .append(", resourceId=").append(getResourceId()).append("]");
         return builder.toString();
     }
 
@@ -82,7 +82,7 @@ public class ExecRequest extends PayloadRequest implements LwM2mRequest<ClientRe
      * @return the request object
      */
     public static ExecRequest newRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId,
-                                         Tlv[] parameters) {
+            Tlv[] parameters) {
         return new ExecRequest(new ResourceSpec(client, objectId, objectInstanceId, resourceId), parameters);
     }
 
@@ -97,7 +97,7 @@ public class ExecRequest extends PayloadRequest implements LwM2mRequest<ClientRe
      * @return the request object
      */
     public static ExecRequest newRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId,
-                                         String parameters, ContentFormat format) {
+            String parameters, ContentFormat format) {
         return new ExecRequest(new ResourceSpec(client, objectId, objectInstanceId, resourceId), parameters, format);
     }
 
@@ -112,7 +112,7 @@ public class ExecRequest extends PayloadRequest implements LwM2mRequest<ClientRe
      * @return the request object
      */
     public static ExecRequest newRequest(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId,
-                                         byte[] parameters) {
+            byte[] parameters) {
         return new ExecRequest(new ResourceSpec(client, objectId, objectInstanceId, resourceId), parameters);
     }
 

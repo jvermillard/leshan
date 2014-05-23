@@ -32,7 +32,7 @@ package leshan.server.lwm2m.message;
 import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.observation.ResourceObserver;
 
-public class ObserveRequest extends AbstractLwM2mRequest implements LwM2mRequest<ObserveResponse> {
+public class ObserveRequest extends AbstractLwM2mRequest implements LwM2mRequest {
 
     private final ResourceObserver observer;
 
@@ -45,8 +45,7 @@ public class ObserveRequest extends AbstractLwM2mRequest implements LwM2mRequest
     }
 
     /**
-     * Creates a request for observing future changes of all instances of a
-     * particular object of a client.
+     * Creates a request for observing future changes of all instances of a particular object of a client.
      * 
      * @param client the LWM2M Client to observe the resource of
      * @param observer the object to notify about future changes
@@ -59,8 +58,7 @@ public class ObserveRequest extends AbstractLwM2mRequest implements LwM2mRequest
     }
 
     /**
-     * Creates a request for observing future changes of a particular object
-     * instance of a client.
+     * Creates a request for observing future changes of a particular object instance of a client.
      * 
      * @param client the LWM2M Client to observe the resource of
      * @param observer the object to notify about future changes
@@ -70,13 +68,12 @@ public class ObserveRequest extends AbstractLwM2mRequest implements LwM2mRequest
      * @throws NullPointerException if the object ID is <code>null</code>
      */
     public static final ObserveRequest newRequest(Client client, ResourceObserver observer, Integer objectId,
-                                                  Integer objectInstanceId) {
+            Integer objectInstanceId) {
         return new ObserveRequest(new ResourceSpec(client, objectId, objectInstanceId, null), observer);
     }
 
     /**
-     * Creates a request for observing future changes of a specific resource of
-     * a client.
+     * Creates a request for observing future changes of a specific resource of a client.
      * 
      * @param client the LWM2M Client to observe the resource of
      * @param observer the object to notify about future changes
@@ -87,13 +84,12 @@ public class ObserveRequest extends AbstractLwM2mRequest implements LwM2mRequest
      * @throws NullPointerException if the object ID is <code>null</code>
      */
     public static final ObserveRequest newRequest(Client client, ResourceObserver observer, Integer objectId,
-                                                  Integer objectInstanceId,
-                                                  Integer resourceId) {
+            Integer objectInstanceId, Integer resourceId) {
         return new ObserveRequest(new ResourceSpec(client, objectId, objectInstanceId, resourceId), observer);
     }
 
     @Override
-    public ObserveResponse send(RequestHandler operations) {
+    public ClientResponse send(RequestHandler operations) {
         return operations.send(this);
     }
 
