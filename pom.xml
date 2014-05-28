@@ -166,16 +166,16 @@
         </profile>
     </profiles>
 
-    <repositories>
+   <repositories>
         <repository>
             <id>mkovatsc-github-releases</id>
             <name>mkovatsc-github</name>
-            <url>https://github.com/mkovatsc/maven/tree/master/releases/</url>
+            <url>https://raw.githubusercontent.com/mkovatsc/maven/master/releases/</url>
         </repository>
         <repository>
             <id>mkovatsc-github-snapshots</id>
             <name>mkovatsc-github</name>
-            <url>https://github.com/mkovatsc/maven/tree/master/snapshots/</url>
+            <url>https://raw.githubusercontent.com/mkovatsc/maven/master/snapshots/</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -183,7 +183,7 @@
         <repository>
             <id>mkovatsc-github-thirdparty</id>
             <name>mkovatsc-github</name>
-            <url>https://github.com/mkovatsc/maven/tree/master/thirdparty/</url>
+            <url>https://raw.githubusercontent.com/mkovatsc/maven/master/thirdparty/</url>
         </repository>
     </repositories>
 
