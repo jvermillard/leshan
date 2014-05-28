@@ -166,7 +166,7 @@
         </profile>
     </profiles>
 
-    <repositories>
+   <repositories>
         <repository>
             <id>mkovatsc-github-releases</id>
             <name>mkovatsc-github</name>

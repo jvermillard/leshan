@@ -32,7 +32,7 @@ package leshan.server.lwm2m.message;
 import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.observation.ObserveSpec;
 
-public class WriteAttributesRequest extends AbstractLwM2mRequest implements LwM2mRequest<ClientResponse> {
+public class WriteAttributesRequest extends AbstractLwM2mRequest implements LwM2mRequest {
 
     private final ObserveSpec observeSpec;
 
@@ -63,12 +63,12 @@ public class WriteAttributesRequest extends AbstractLwM2mRequest implements LwM2
     }
 
     public static WriteAttributesRequest newRequest(Client client, Integer objectId, Integer objectInstanceId,
-                                                    ObserveSpec observeSpec) {
+            ObserveSpec observeSpec) {
         return new WriteAttributesRequest(new ResourceSpec(client, objectId, objectInstanceId, null), observeSpec);
     }
 
     public static WriteAttributesRequest newRequest(Client client, Integer objectId, Integer objectInstanceId,
-                                                    Integer resourceId, ObserveSpec observeSpec) {
+            Integer resourceId, ObserveSpec observeSpec) {
         return new WriteAttributesRequest(new ResourceSpec(client, objectId, objectInstanceId, resourceId), observeSpec);
     }
 }

@@ -43,6 +43,10 @@ public class ClientResponse {
     private final ContentFormat contentFormat;
     protected final ResponseCode code;
 
+    public ClientResponse(ResponseCode code) {
+        this(code, null, null);
+    }
+
     public ClientResponse(ResponseCode code, byte[] payload, ContentFormat contentFormat) {
         if (code == null) {
             throw new NullPointerException("Response code must not be null");

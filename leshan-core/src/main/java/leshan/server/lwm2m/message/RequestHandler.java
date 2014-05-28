@@ -44,30 +44,28 @@ public interface RequestHandler {
      * @return the current value(s) of the resource(s)
      * @throws ResourceAccessException if the resource could not be read
      */
-    ContentResponse send(ReadRequest request);
+    ClientResponse send(ReadRequest request);
 
     /**
      * Starts observation of one or more resources implemented by a client.
      * 
      * @param request the resource(s) to observe
-     * @return the current value(s) of the resource(s) along with an
-     *         <em>observation ID</em> which can be used to cancel the
-     *         observation later on
+     * @return the current value(s) of the resource(s) along with an <em>observation ID</em> which can be used to cancel
+     *         the observation later on
      * @throws ResourceAccessException if the resource could not be read
      */
-    ObserveResponse send(ObserveRequest request);
+    ClientResponse send(ObserveRequest request);
 
     /**
-     * Sets conditions a client is supposed to consider when sending
-     * notifications for resources observed by the LWM2M Server.
+     * Sets conditions a client is supposed to consider when sending notifications for resources observed by the LWM2M
+     * Server.
      * 
-     * This operation can also be used to cancel observation of resources by
-     * means of setting the <em>cancel</em> attribute (see {@link ObserveSpec}).
+     * This operation can also be used to cancel observation of resources by means of setting the <em>cancel</em>
+     * attribute (see {@link ObserveSpec}).
      * 
      * @param request the parameters
      * @return an empty response if the update succeeded
-     * @throws ResourceAccessException if the attributes could not be
-     *             set/updated
+     * @throws ResourceAccessException if the attributes could not be set/updated
      */
     ClientResponse send(WriteAttributesRequest request);
 
@@ -75,8 +73,7 @@ public interface RequestHandler {
      * Executes a resource on a client.
      * 
      * @param request the resource to execute and its parameters (if any)
-     * @return the client response or <code>null</code> if the request timed out
-     *         before the client sent a response
+     * @return the client response or <code>null</code> if the request timed out before the client sent a response
      * @throws ResourceAccessException if the resource could not be executed
      */
     ClientResponse send(ExecRequest request);
@@ -85,10 +82,8 @@ public interface RequestHandler {
      * Updates or replaces resources on a client.
      * 
      * @param request the resources to update or replace
-     * @return the client response or <code>null</code> if the request timed out
-     *         before the client sent a response
-     * @throws ResourceAccessException if the resource(s) could not be written
-     *             to
+     * @return the client response or <code>null</code> if the request timed out before the client sent a response
+     * @throws ResourceAccessException if the resource(s) could not be written to
      */
     ClientResponse send(WriteRequest request);
 
@@ -96,8 +91,7 @@ public interface RequestHandler {
      * Creates new resources on a client.
      * 
      * @param request the resources to create
-     * @return the client response or <code>null</code> if the request timed out
-     *         before the client sent a response
+     * @return the client response or <code>null</code> if the request timed out before the client sent a response
      * @throws ResourceAccessException if the resource could not be created
      */
     ClientResponse send(CreateRequest request);
@@ -106,11 +100,10 @@ public interface RequestHandler {
      * Discovers resources and their attributes implemented by a client.
      * 
      * @param request the resources to discover
-     * @return the implemented resources and their attributes represented as
-     *         CoRE links
+     * @return the implemented resources and their attributes represented as CoRE links
      * @throws ResourceAccessException if the resources could not be discovered
      */
-    DiscoverResponse send(DiscoverRequest request);
+    ClientResponse send(DiscoverRequest request);
 
     /**
      * Deletes an object instance on a client.

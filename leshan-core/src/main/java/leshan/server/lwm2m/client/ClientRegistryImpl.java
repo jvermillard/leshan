@@ -30,6 +30,7 @@
 package leshan.server.lwm2m.client;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,7 +50,7 @@ public class ClientRegistryImpl implements ClientRegistry {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientRegistryImpl.class);
 
-    private ConcurrentHashMap<String /* end-point */, Client> clientsByEp = new ConcurrentHashMap<>();
+    private Map<String /* end-point */, Client> clientsByEp = new ConcurrentHashMap<>();
 
     private List<RegistryListener> listeners = new CopyOnWriteArrayList<>();
 
@@ -93,67 +94,73 @@ public class ClientRegistryImpl implements ClientRegistry {
     @Override
     public Client updateClient(ClientUpdate clientUpdated) {
         LOG.debug("Updating registration for client: {}", clientUpdated);
-        Validate.notNull(clientUpdated.getRegistrationId());
-        for (Client client : clientsByEp.values()) {
-            if (clientUpdated.getRegistrationId().equals(client.getRegistrationId())) {
-                // update client
-                if (clientUpdated.getAddress() != null) {
-                    client.setAddress(clientUpdated.getAddress());
-                }
-
-                if (clientUpdated.getPort() > 0) {
-                    client.setPort(clientUpdated.getPort());
-                }
-
-                if (clientUpdated.getLwM2mVersion() != null) {
-                    client.setLwM2mVersion(clientUpdated.getLwM2mVersion());
-                }
-
-                if (clientUpdated.getBindingMode() != null) {
-                    client.setBindingMode(clientUpdated.getBindingMode());
-                }
-
-                if (clientUpdated.getSmsNumber() != null) {
-                    client.setSmsNumber(clientUpdated.getSmsNumber());
-                }
-                return client;
+        Client client = findByRegistrationId(clientUpdated.getRegistrationId());
+        if (client == null) {
+            return null;
+        } else {
+            // update client
+            if (clientUpdated.getAddress() != null) {
+                client.setAddress(clientUpdated.getAddress());
             }
+
+            if (clientUpdated.getPort() > 0) {
+                client.setPort(clientUpdated.getPort());
+            }
+
+            if (clientUpdated.getObjectLinks() != null) {
+                client.setObjectLinks(clientUpdated.getObjectLinks());
+            }
+            
+            client.setLifeTimeInSec(clientUpdated.getLifeTimeInSec());
+            client.setLwM2mVersion(clientUpdated.getLwM2mVersion());
+            client.setBindingMode(clientUpdated.getBindingMode());
+
+            if (clientUpdated.getSmsNumber() != null) {
+                client.setSmsNumber(clientUpdated.getSmsNumber());
+            }
+
+            client.setLastUpdate(new Date());
+            return client;
         }
-        return null;
     }
 
     @Override
     public Client deregisterClient(String registrationId) {
-        LOG.debug("Deregistering client with registrationId: {}", registrationId);
         Validate.notNull(registrationId);
+        LOG.debug("Deregistering client with registrationId: {}", registrationId);
 
-        String endpoint = null;
-
-        for (Client client : clientsByEp.values()) {
-            if (registrationId.equals(client.getRegistrationId())) {
-                endpoint = client.getEndpoint();
-                break;
-            }
-        }
-
-        Client unregistered = null;
-
-        if (endpoint != null) {
-            unregistered = clientsByEp.remove(endpoint);
+        Client toBeUnregistered = findByRegistrationId(registrationId);
+        if (toBeUnregistered == null) {
+            return null;
+        } else {
+            Client unregistered = clientsByEp.remove(toBeUnregistered.getEndpoint());
             for (RegistryListener l : listeners) {
                 l.unregistered(unregistered);
             }
-            LOG.debug("Unregistered client: {}", unregistered);
-        }
-
-        return unregistered;
+            LOG.debug("Deregistered client: {}", unregistered);
+            return unregistered;
+        }        
     }
 
+    private Client findByRegistrationId(String id) {
+        Client result = null;
+        if (id != null) {
+            for (Client client : clientsByEp.values()) {
+                if (id.equals(client.getRegistrationId())) {
+                    result = client;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+    
     /**
      * start the registration manager, will start regular cleanup of dead registrations.
      */
     public void start() {
         // every 2 seconds clean the registration list
+        // TODO re-consider clean-up interval: wouldn't 5 minutes do as well?
         schedExecutor.scheduleAtFixedRate(new Cleaner(), 2, 2, TimeUnit.SECONDS);
     }
 
@@ -171,10 +178,10 @@ public class ClientRegistryImpl implements ClientRegistry {
 
         @Override
         public void run() {
-            for (Map.Entry<String, Client> e : clientsByEp.entrySet()) {
-                if (!e.getValue().isAlive()) {
+            for (Client client : clientsByEp.values()) {
+                if (!client.isAlive()) {
                     // force de-registration
-                    deregisterClient(e.getValue().getRegistrationId());
+                    deregisterClient(client.getRegistrationId());
                 }
             }
         }

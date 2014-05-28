@@ -31,7 +31,7 @@ package leshan.server.lwm2m.message;
 
 import leshan.server.lwm2m.client.Client;
 
-public class DiscoverRequest extends AbstractLwM2mRequest implements LwM2mRequest<DiscoverResponse> {
+public class DiscoverRequest extends AbstractLwM2mRequest implements LwM2mRequest {
 
     private DiscoverRequest(ResourceSpec target) {
         super(target);
@@ -43,8 +43,7 @@ public class DiscoverRequest extends AbstractLwM2mRequest implements LwM2mReques
     }
 
     /**
-     * Creates a request for discovering the resources implemented by a client
-     * for a particular object type.
+     * Creates a request for discovering the resources implemented by a client for a particular object type.
      * 
      * @param client the LWM2M Client to discover resources for
      * @param objectId the object type
@@ -56,8 +55,7 @@ public class DiscoverRequest extends AbstractLwM2mRequest implements LwM2mReques
     }
 
     /**
-     * Creates a request for discovering the resources implemented by a client
-     * for a particular object instance.
+     * Creates a request for discovering the resources implemented by a client for a particular object instance.
      * 
      * @param client the LWM2M Client to discover resources for
      * @param objectId the object type
@@ -70,8 +68,7 @@ public class DiscoverRequest extends AbstractLwM2mRequest implements LwM2mReques
     }
 
     /**
-     * Creates a request for discovering the attributes of a particular resource
-     * implemented by a client.
+     * Creates a request for discovering the attributes of a particular resource implemented by a client.
      * 
      * @param client the LWM2M Client to discover resources for
      * @param objectId the object type
@@ -81,12 +78,12 @@ public class DiscoverRequest extends AbstractLwM2mRequest implements LwM2mReques
      * @throws NullPointerException if the object ID is <code>null</code>
      */
     public static final DiscoverRequest newRequest(Client client, Integer objectId, Integer objectInstanceId,
-                                                   Integer resourceId) {
+            Integer resourceId) {
         return new DiscoverRequest(new ResourceSpec(client, objectId, objectInstanceId, resourceId));
     }
 
     @Override
-    public DiscoverResponse send(RequestHandler operations) {
+    public ClientResponse send(RequestHandler operations) {
 
         return operations.send(this);
     }

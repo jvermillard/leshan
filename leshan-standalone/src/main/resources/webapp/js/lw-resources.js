@@ -31,7 +31,10 @@ angular.module('lwResourcesDirective', [])
             }
             scope.resource.path = parentPath + "/" + scope.resource.id;
             scope.resource.treeDepth = treeDepth;
-
+            scope.resource.read  =  {tooltip : "Read "   + scope.resource.path};
+            scope.resource.write =  {tooltip : "Write "  + scope.resource.path};
+            scope.resource.exec  =  {tooltip : "Execute "+ scope.resource.path};
+            
             scope.readable = function() {
                 if(scope.resource.instances != "multiple") {
                     if(scope.resource.hasOwnProperty("operations")) {
@@ -66,12 +69,19 @@ angular.module('lwResourcesDirective', [])
             	}
                 $http.get(uri)
                 .success(function(data, status, headers, config) {
-                    // alert(JSON.stringify(data));
-                    if (data.status = "CONTENT") {
-                        scope.resource.value = data.value;
+                    var read = scope.resource.read;
+                    if (data.status == "CONTENT") {
+                        read.value = data.value;
+                        scope.resource.write.value = null
                     }
+                    read.status = data.status;
+                    read.date = new Date();
+                    var formattedDate = read.date.getHours()+":"+read.date.getMinutes()+":"+read.date.getSeconds()+":"+read.date.getMilliseconds();
+                    read.tooltip = formattedDate + " " + read.status;
                 }).error(function(data, status, headers, config) {
-                    console.error("Unable to read resource ",scope.resource.path," for ",$routeParams.clientId, ":", status, data)
+                    errormessage = "Unable to read resource " + scope.resource.path + " for "+ $routeParams.clientId + " : " + status +" "+ data
+                    alert(errormessage);
+                    console.error(errormessage)
                 });;
             };
 
@@ -86,13 +96,19 @@ angular.module('lwResourcesDirective', [])
                         $('#writeModal').modal('hide');
                         $http({method: 'PUT', url: "api/clients/" + $routeParams.clientId + scope.resource.path, data: value, headers:{'Content-Type': 'text/plain'}})
                         .success(function(data, status, headers, config) {
-                            // alert(JSON.stringify(data));
-                            if (data.status = "CONTENT") {
-                                scope.resource.value = value;
+                            write = scope.resource.write;
+                            if (data.status == "CHANGED") {
+                                scope.resource.read.value = null;
+                                write.value = value;
                             }
+                            write.status = data.status;
+                            write.date = new Date();
+                            var formattedDate = write.date.getHours()+":"+write.date.getMinutes()+":"+write.date.getSeconds()+":"+write.date.getMilliseconds();
+                            write.tooltip = formattedDate + " " + write.status;
                         }).error(function(data, status, headers, config) {
-                            alert("Failed to write resource.");
-                            console.error("Unable to write resource ",scope.resource.path,"for",$routeParams.clientId, ":", status, data)
+                            errormessage = "Unable to write resource " + scope.resource.path + " for "+ $routeParams.clientId + " : " + status +" "+ data
+                            alert(errormessage);
+                            console.error(errormessage)
                         });;
                     }
                 });
@@ -103,10 +119,15 @@ angular.module('lwResourcesDirective', [])
             scope.exec = function() {
                 $http.post("api/clients/" + $routeParams.clientId+ scope.resource.path)
                 .success(function(data, status, headers, config) {
-                    alert("Success!");
+                    var exec = scope.resource.exec;
+                    exec.status = data.status;
+                    exec.date = new Date();
+                    var formattedDate = exec.date.getHours()+":"+exec.date.getMinutes()+":"+exec.date.getSeconds()+":"+exec.date.getMilliseconds();
+                    exec.tooltip = formattedDate + " " + exec.status;
                 }).error(function(data, status, headers, config) {
-                    alert("Failed to execute resource.");
-                    console.error("Unable to execute resource ",scope.resource.path,"for",$routeParams.clientId, ":", status, data)
+                    errormessage = "Unable to execute resource " + scope.resource.path + " for "+ $routeParams.clientId + " : " + status +" "+ data
+                    alert(errormessage);
+                    console.error(errormessage)
                 });;
             };
 

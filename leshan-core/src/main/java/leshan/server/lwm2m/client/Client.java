@@ -69,7 +69,7 @@ public class Client implements Serializable {
 
     private final String registrationId;
 
-    private final String[] objectLinks;
+    private String[] objectLinks;
 
     private Date lastUpdate;
 
@@ -125,6 +125,10 @@ public class Client implements Serializable {
         return this.objectLinks;
     }
 
+    public void setObjectLinks(String[] objectLinks) {
+        this.objectLinks = objectLinks;
+    }
+
     public long getLifeTimeInSec() {
         return this.lifeTimeInSec;
     }
@@ -174,10 +178,11 @@ public class Client implements Serializable {
     }
 
     public void setLastUpdate(Date lastUpdate) {
+        // TODO should probably better be done "implicitly" as part of the other setters
         this.lastUpdate = lastUpdate;
     }
 
-    public void markLastRequestFaild() {
+    public void markLastRequestFailed() {
         this.failedLastRequest = true;
     }
 

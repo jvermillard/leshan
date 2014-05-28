@@ -9,17 +9,39 @@
 						ng-click="read(true)" />
 				</div>
 				<div class="col-md-4">
-					<button ng-if="readable()" class="btn btn-default btn-xs"
-						ng-click="read(false)">Read</button>
+					<button ng-if="readable()" ng-click="resource.read.status = null; read()"
+							tooltip="{{resource.read.tooltip}}" tooltip-placement="right" tooltip-animation="false"
+					        ng-class="{
+								'btn': true,
+								'btn-xs': true,
+								'btn-default': resource.read.status == null,
+								'btn-danger': resource.read.status != null && resource.read.status != 'CONTENT',
+								'btn-success': resource.read.status == 'CONTENT' }">Read</button>
 				</div>
 				<div class="col-md-4">
-					<button ng-if="writable()" class="btn btn-default btn-xs" ng-click="write()">Write</button>
+					<button ng-if="writable()" ng-click="resource.write.status = null; write()"
+							tooltip="{{resource.write.tooltip}}" tooltip-placement="right" tooltip-animation="false"
+							ng-class="{
+								'btn': true,
+								'btn-xs': true,
+								'btn-default': resource.write.status == null,
+								'btn-danger': resource.write.status != null && resource.write.status != 'CHANGED',
+								'btn-success': resource.write.status == 'CHANGED' }">Write</button>
+								
 				</div>
 				<div class="col-md-4">
-					<button ng-if="executable()" class="btn btn-default btn-xs" ng-click="exec()">Exec</button>
+					<button ng-if="executable()" ng-click="resource.exec.status = null; exec();"
+							tooltip="{{resource.exec.tooltip}}" tooltip-placement="right" tooltip-animation="false"
+							ng-class="{
+								'btn': true,
+								'btn-xs': true,
+								'btn-default': resource.exec.status == null,
+								'btn-danger':  resource.exec.status != null && resource.exec.status != 'CHANGED',
+								'btn-success': resource.exec.status == 'CHANGED' }">Exec</button>
 				</div>
 			</div>
 		</div>
-		<div class="col-md-4 resource-value">{{resource.value}}</div>
+		<div ng-if="resource.read.value"  class="col-md-4 resource-value-read">{{resource.read.value}}</div>
+		<div ng-if="resource.write.value" class="col-md-4 resource-value-write">{{resource.write.value}}</div>
 	</div>
 </li>

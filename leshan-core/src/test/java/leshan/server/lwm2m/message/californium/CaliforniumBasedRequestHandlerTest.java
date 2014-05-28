@@ -35,20 +35,16 @@ import static org.mockito.Mockito.when;
 
 import java.net.InetAddress;
 
-import leshan.server.lwm2m.message.AuthorizationException;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ContentFormat;
-import leshan.server.lwm2m.message.ContentResponse;
 import leshan.server.lwm2m.message.CreateRequest;
 import leshan.server.lwm2m.message.DeleteRequest;
 import leshan.server.lwm2m.message.DiscoverRequest;
 import leshan.server.lwm2m.message.DiscoverResponse;
 import leshan.server.lwm2m.message.ObserveRequest;
 import leshan.server.lwm2m.message.ObserveResponse;
-import leshan.server.lwm2m.message.OperationNotSupportedException;
 import leshan.server.lwm2m.message.OperationType;
 import leshan.server.lwm2m.message.ReadRequest;
-import leshan.server.lwm2m.message.ResourceNotFoundException;
 import leshan.server.lwm2m.message.ResponseCode;
 import leshan.server.lwm2m.message.WriteAttributesRequest;
 import leshan.server.lwm2m.message.WriteRequest;
@@ -92,7 +88,7 @@ public class CaliforniumBasedRequestHandlerTest extends BasicTestSupport {
         ifTheClientReturns(newResponse(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT, TEXT_PAYLOAD));
 
         ClientResponse response = this.requestHandler.send(request);
-        Assert.assertTrue(response instanceof ContentResponse);
+        Assert.assertTrue(response.getCode() == ResponseCode.CONTENT);
         Assert.assertEquals(TEXT_PAYLOAD, new String(response.getContent()));
     }
 
@@ -105,7 +101,8 @@ public class CaliforniumBasedRequestHandlerTest extends BasicTestSupport {
         coapResponse.setPayload(coreLinkPayload, MediaTypeRegistry.APPLICATION_XML);
         ifTheClientReturns(coapResponse);
 
-        DiscoverResponse response = this.requestHandler.send(request);
+        ClientResponse response = this.requestHandler.send(request);
+        Assert.assertTrue(response instanceof DiscoverResponse);
         Assert.assertArrayEquals(coreLinkPayload.getBytes(), response.getContent());
     }
 
@@ -141,11 +138,13 @@ public class CaliforniumBasedRequestHandlerTest extends BasicTestSupport {
 
         ifTheClientReturns(successfulResponse);
 
-        ObserveResponse response = this.requestHandler.send(request);
-        Assert.assertNotNull(response.getObservationId());
+        ClientResponse response = this.requestHandler.send(request);
+        Assert.assertTrue(response instanceof ObserveResponse);
+        ObserveResponse observeResponse = (ObserveResponse) response;
+        Assert.assertNotNull(observeResponse.getObservationId());
         Assert.assertArrayEquals(TEXT_PAYLOAD.getBytes(), response.getContent());
 
-        Observation observation = this.observationRegistry.getObservation(response.getObservationId());
+        Observation observation = this.observationRegistry.getObservation(observeResponse.getObservationId());
         Assert.assertEquals(observer, observation.getResourceObserver());
 
     }
@@ -160,10 +159,12 @@ public class CaliforniumBasedRequestHandlerTest extends BasicTestSupport {
 
         ifTheClientReturns(successfulResponse);
 
-        ObserveResponse response = this.requestHandler.send(request);
-        Assert.assertNotNull(response.getObservationId());
-        this.observationRegistry.cancelObservation(response.getObservationId());
-        Assert.assertNull(this.observationRegistry.getObservation(response.getObservationId()));
+        ClientResponse response = this.requestHandler.send(request);
+        Assert.assertTrue(response instanceof ObserveResponse);
+        ObserveResponse observeResponse = (ObserveResponse) response;
+        Assert.assertNotNull(observeResponse.getObservationId());
+        this.observationRegistry.cancelObservation(observeResponse.getObservationId());
+        Assert.assertNull(this.observationRegistry.getObservation(observeResponse.getObservationId()));
     }
 
     @Test
@@ -184,31 +185,31 @@ public class CaliforniumBasedRequestHandlerTest extends BasicTestSupport {
         Assert.assertEquals(ResponseCode.CREATED, response.getCode());
     }
 
-    @Test(expected = AuthorizationException.class)
-    public void testSendRequestThrowsAuthorizationException() throws Exception {
+    @Test
+    public void testSendRequestReturnsNotAuthorized() throws Exception {
         ReadRequest request = ReadRequest.newRequest(this.client, OBJECT_ID_DEVICE);
         ifTheClientReturns(new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.UNAUTHORIZED));
 
-        this.requestHandler.send(request);
-        Assert.fail("Should have thrown Exception");
+        ClientResponse response = this.requestHandler.send(request);
+        Assert.assertEquals(ResponseCode.UNAUTHORIZED, response.getCode());
     }
 
-    @Test(expected = ResourceNotFoundException.class)
-    public void testSendRequestThrowsResourceNotFoundException() throws Exception {
+    @Test
+    public void testSendRequestReturnsNotFound() throws Exception {
         ReadRequest request = ReadRequest.newRequest(this.client, OBJECT_ID_DEVICE);
         ifTheClientReturns(new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.NOT_FOUND));
 
-        this.requestHandler.send(request);
-        Assert.fail("Should have thrown Exception");
+        ClientResponse response = this.requestHandler.send(request);
+        Assert.assertEquals(ResponseCode.NOT_FOUND, response.getCode());
     }
 
-    @Test(expected = OperationNotSupportedException.class)
-    public void testCreateRequestThrowsOperationNotSupportedException() throws Exception {
+    @Test
+    public void testCreateRequestReturnsMethodNotAllowed() throws Exception {
         CreateRequest request = CreateRequest.newRequest(this.client, OBJECT_ID_DEVICE, "TEST");
         ifTheClientReturns(new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.METHOD_NOT_ALLOWED));
 
-        this.requestHandler.send(request);
-        Assert.fail("Should have thrown Exception");
+        ClientResponse response = this.requestHandler.send(request);
+        Assert.assertEquals(ResponseCode.METHOD_NOT_ALLOWED, response.getCode());
     }
 
     private void ifTheClientReturns(Response coapResponse) {

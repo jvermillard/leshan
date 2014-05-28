@@ -29,6 +29,9 @@
  */
 package leshan.server.lwm2m;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.message.RequestHandler;
 import leshan.server.lwm2m.message.californium.CaliforniumBasedRequestHandler;
@@ -39,18 +42,18 @@ import leshan.server.lwm2m.resource.RegisterResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
+import ch.ethz.inf.vs.californium.network.Endpoint;
 import ch.ethz.inf.vs.californium.server.Server;
 
 /**
  * A Lightweight M2M server.
  * <p>
- * This CoAP server defines a /rd resources as described in the CoRE RD
- * specification. A {@link ClientRegistry} must be provided to host the
- * description of all the registered LW-M2M clients.
+ * This CoAP server defines a /rd resources as described in the CoRE RD specification. A {@link ClientRegistry} must be
+ * provided to host the description of all the registered LW-M2M clients.
  * </p>
  * <p>
- * A {@link RequestHandler} is provided to perform server-initiated requests to
- * LW-M2M clients.
+ * A {@link RequestHandler} is provided to perform server-initiated requests to LW-M2M clients.
  * </p>
  */
 public class LwM2mServer {
@@ -64,18 +67,39 @@ public class LwM2mServer {
 
     private final RequestHandler requestHandler;
 
+    /**
+     * Initialize a server which will bind to default UDP port for CoAP (5684).
+     * 
+     * @param clientRegistry the client registry
+     */
     public LwM2mServer(ClientRegistry clientRegistry) {
+        this(new InetSocketAddress((InetAddress) null, PORT), clientRegistry);
+    }
+
+    /**
+     * Initialize a server which will bind to the specified address and port.
+     * 
+     * @param localAddress the address to bind the CoAP server.
+     * @param clientRegistry the client registry
+     */
+    public LwM2mServer(InetSocketAddress localAddress, ClientRegistry clientRegistry) {
         if (clientRegistry == null) {
-            throw new NullPointerException("Client registry must not be null");
+            throw new IllegalArgumentException("Client registry must not be null");
         }
+        if (localAddress == null) {
+            throw new IllegalArgumentException("IP address cannot be null");
+        }
+
         // init CoAP server
-        this.coapServer = new Server(PORT);
+        this.coapServer = new Server();
+        Endpoint endpoint = new CoAPEndpoint(localAddress);
+        this.coapServer.addEndpoint(endpoint);
 
         // define /rd resource
         RegisterResource rdResource = new RegisterResource(clientRegistry);
         this.coapServer.add(rdResource);
 
-        CoapClient coapClient = new SimpleCoapClient(this.coapServer.getEndpoints().get(0));
+        CoapClient coapClient = new SimpleCoapClient(endpoint);
         CaliforniumBasedRequestHandler handler = new CaliforniumBasedRequestHandler(coapClient);
         // register the request handler as listener in order to cancel
         // observations and free up resources when clients unregister
@@ -84,11 +108,11 @@ public class LwM2mServer {
     }
 
     /**
-     * Starts the server and binds it to assigned UDP port for LW-M2M (5684).
+     * Starts the server and binds it to the specified port.
      */
     public void start() {
         this.coapServer.start();
-        LOG.info("LW-M2M server started on port " + PORT);
+        LOG.info("LW-M2M server started");
     }
 
     /**

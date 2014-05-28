@@ -35,7 +35,7 @@ import leshan.server.lwm2m.tlv.Tlv;
 /**
  * A Lightweight M2M request for creating resources on a client.
  */
-public class CreateRequest extends PayloadRequest implements LwM2mRequest<ClientResponse> {
+public class CreateRequest extends PayloadRequest implements LwM2mRequest {
 
     private CreateRequest(ResourceSpec target, String payload, ContentFormat contentFormat) {
         super(target, payload, contentFormat);

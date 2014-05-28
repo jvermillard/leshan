@@ -34,7 +34,7 @@ import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 
 import leshan.server.lwm2m.message.ClientResponse;
-import leshan.server.lwm2m.message.ContentResponse;
+import leshan.server.lwm2m.message.ResponseCode;
 import leshan.server.lwm2m.tlv.TlvDecoder;
 
 import org.apache.commons.codec.binary.Hex;
@@ -55,25 +55,26 @@ public class ResponseSerializer implements JsonSerializer<ClientResponse> {
 
             element.addProperty("status", src.getCode().toString());
 
-            if (src instanceof ContentResponse) {
+            if (src instanceof ClientResponse) {
                 Object value = null;
-                ContentResponse cResponse = (ContentResponse) src;
-                switch (cResponse.getFormat()) {
-                case TLV:
-                    value = this.tlvDecoder.decode(ByteBuffer.wrap(cResponse.getContent()));
-                    break;
-                case TEXT:
-                case JSON:
-                case LINK:
-                    value = new String(cResponse.getContent(), "UTF-8");
-                    break;
-                case OPAQUE:
-                    value = Hex.encodeHexString(cResponse.getContent());
-                    break;
+                ClientResponse cResponse = (ClientResponse) src;
+                if (cResponse.getCode() == ResponseCode.CONTENT) {
+                    switch (cResponse.getFormat()) {
+                    case TLV:
+                        value = this.tlvDecoder.decode(ByteBuffer.wrap(cResponse.getContent()));
+                        break;
+                    case TEXT:
+                    case JSON:
+                    case LINK:
+                        value = new String(cResponse.getContent(), "UTF-8");
+                        break;
+                    case OPAQUE:
+                        value = Hex.encodeHexString(cResponse.getContent());
+                        break;
+                    }
+                    element.add("value", context.serialize(value));
                 }
-                element.add("value", context.serialize(value));
             }
-
             return element;
         } catch (UnsupportedEncodingException e) {
             throw new IllegalStateException(e);
