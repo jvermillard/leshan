@@ -58,6 +58,16 @@ import ch.ethz.inf.vs.californium.server.resources.ResourceBase;
  */
 public class RegisterResource extends ResourceBase {
 
+    private static final String QUERY_PARAM_ENDPOINT = "ep=";
+
+    private static final String QUERY_PARAM_BINDING_MODE = "b=";
+
+    private static final String QUERY_PARAM_LWM2M_VERSION = "lwm2m=";
+
+    private static final String QUERY_PARAM_SMS = "sms=";
+
+    private static final String QUERY_PARAM_LIFETIME = "lt=";
+
     private static final Logger LOG = LoggerFactory.getLogger(RegisterResource.class);
 
     public static final String RESOURCE_NAME = "rd";
@@ -91,18 +101,19 @@ public class RegisterResource extends ResourceBase {
         String smsNumber = null;
         String lwVersion = null;
         BindingMode binding = null;
+        String[] objectLinks = null;
         try {
 
             for (String param : request.getOptions().getURIQueries()) {
-                if (param.startsWith("ep=")) {
+                if (param.startsWith(QUERY_PARAM_ENDPOINT)) {
                     endpoint = param.substring(3);
-                } else if (param.startsWith("lt=")) {
+                } else if (param.startsWith(QUERY_PARAM_LIFETIME)) {
                     lifetime = Long.valueOf(param.substring(3));
-                } else if (param.startsWith("sms=")) {
+                } else if (param.startsWith(QUERY_PARAM_SMS)) {
                     smsNumber = param.substring(4);
-                } else if (param.startsWith("lwm2m=")) {
+                } else if (param.startsWith(QUERY_PARAM_LWM2M_VERSION)) {
                     lwVersion = param.substring(6);
-                } else if (param.startsWith("b=")) {
+                } else if (param.startsWith(QUERY_PARAM_BINDING_MODE)) {
                     binding = BindingMode.valueOf(param.substring(2));
                 }
             }
@@ -112,8 +123,9 @@ public class RegisterResource extends ResourceBase {
             } else {
                 // register
                 String registrationId = RegisterResource.createRegistrationId();
-
-                String[] objectLinks = new String(request.getPayload(), Charsets.UTF_8).split(",");
+                if (request.getPayload() != null) {
+                    objectLinks = new String(request.getPayload(), Charsets.UTF_8).split(",");
+                }
 
                 Client client = new Client(registrationId, endpoint, request.getSource(), request.getSourcePort(),
                         lwVersion, lifetime, smsNumber, binding, objectLinks);
@@ -154,19 +166,26 @@ public class RegisterResource extends ResourceBase {
         String smsNumber = null;
         String lwVersion = null;
         BindingMode binding = null;
+        String [] objectLinks = null;
+
         for (String param : request.getOptions().getURIQueries()) {
-            if (param.startsWith("lt=")) {
+            if (param.startsWith(QUERY_PARAM_LIFETIME)) {
                 lifetime = Long.valueOf(param.substring(3));
-            } else if (param.startsWith("sms=")) {
+            } else if (param.startsWith(QUERY_PARAM_SMS)) {
                 smsNumber = param.substring(4);
-            } else if (param.startsWith("lwm2m=")) {
+            } else if (param.startsWith(QUERY_PARAM_LWM2M_VERSION)) {
                 lwVersion = param.substring(6);
-            } else if (param.startsWith("b=")) {
+            } else if (param.startsWith(QUERY_PARAM_BINDING_MODE)) {
                 binding = BindingMode.valueOf(param.substring(2));
             }
         }
+        
+        if (request.getPayload() != null) {
+            objectLinks = new String(request.getPayload(), Charsets.UTF_8).split(",");    
+        }
+
         ClientUpdate client = new ClientUpdate(registrationId, request.getSource(), request.getSourcePort(), lwVersion,
-                lifetime, smsNumber, binding, null);
+                lifetime, smsNumber, binding, objectLinks);
 
         try {
             Client c = this.registry.updateClient(client);
