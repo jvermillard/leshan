@@ -30,15 +30,13 @@
 package leshan.server.lwm2m.message.californium;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 
 import leshan.server.lwm2m.client.Client;
-import leshan.server.lwm2m.message.AuthorizationException;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ContentFormat;
 import leshan.server.lwm2m.message.CreateRequest;
@@ -47,10 +45,8 @@ import leshan.server.lwm2m.message.DiscoverRequest;
 import leshan.server.lwm2m.message.DiscoverResponse;
 import leshan.server.lwm2m.message.ObserveRequest;
 import leshan.server.lwm2m.message.ObserveResponse;
-import leshan.server.lwm2m.message.OperationNotSupportedException;
 import leshan.server.lwm2m.message.OperationType;
 import leshan.server.lwm2m.message.ReadRequest;
-import leshan.server.lwm2m.message.ResourceNotFoundException;
 import leshan.server.lwm2m.message.ResponseCode;
 import leshan.server.lwm2m.message.WriteAttributesRequest;
 import leshan.server.lwm2m.message.WriteRequest;
@@ -194,31 +190,31 @@ public class CaliforniumBasedRequestHandlerTest {
         Assert.assertEquals(ResponseCode.CREATED, response.getCode());
     }
 
-    @Test(expected = AuthorizationException.class)
-    public void testSendRequestThrowsAuthorizationException() throws Exception {
+    @Test
+    public void testSendRequestReturnsNotAuthorized() throws Exception {
         ReadRequest request = ReadRequest.newRequest(this.client, OBJECT_ID_DEVICE);
         ifTheClientReturns(new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.UNAUTHORIZED));
 
-        this.requestHandler.send(request);
-        Assert.fail("Should have thrown Exception");
+        ClientResponse response = this.requestHandler.send(request);
+        Assert.assertEquals(ResponseCode.UNAUTHORIZED, response.getCode());
     }
 
-    @Test(expected = ResourceNotFoundException.class)
-    public void testSendRequestThrowsResourceNotFoundException() throws Exception {
+    @Test
+    public void testSendRequestReturnsNotFound() throws Exception {
         ReadRequest request = ReadRequest.newRequest(this.client, OBJECT_ID_DEVICE);
         ifTheClientReturns(new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.NOT_FOUND));
 
-        this.requestHandler.send(request);
-        Assert.fail("Should have thrown Exception");
+        ClientResponse response = this.requestHandler.send(request);
+        Assert.assertEquals(ResponseCode.NOT_FOUND, response.getCode());
     }
 
-    @Test(expected = OperationNotSupportedException.class)
-    public void testCreateRequestThrowsOperationNotSupportedException() throws Exception {
+    @Test
+    public void testCreateRequestReturnsMethodNotAllowed() throws Exception {
         CreateRequest request = CreateRequest.newRequest(this.client, OBJECT_ID_DEVICE, "TEST");
         ifTheClientReturns(new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.METHOD_NOT_ALLOWED));
 
-        this.requestHandler.send(request);
-        Assert.fail("Should have thrown Exception");
+        ClientResponse response = this.requestHandler.send(request);
+        Assert.assertEquals(ResponseCode.METHOD_NOT_ALLOWED, response.getCode());
     }
 
     private void givenASimpleClient() throws UnknownHostException {
