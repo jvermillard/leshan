@@ -10,7 +10,7 @@ lwClientControllers.controller('ClientListCtrl', [
             function(data, status, headers, config) {
             $scope.clients = data;
         }). error(function(data, status, headers, config) {
-            console.error("Unable get client list:", status, data)
+            console.error("Unable to get client list:", status, data)
         });
 
         // listen for clients registration/deregistration
@@ -49,7 +49,8 @@ lwClientControllers.controller('ClientListCtrl', [
         '$location',
         '$routeParams',
         '$http',
-        function($scope, $location, $routeParams, $http) {
+        '$filter',
+        function($scope, $location, $routeParams, $http, $filter) {
             $scope.clientId = $routeParams.clientId;
 
             // get client details
@@ -99,9 +100,14 @@ lwClientControllers.controller('ClientListCtrl', [
                 }
                 else {
                     if(lwNode) {
+                    	// add properties for tracking observations
+                    	lwNode.observationId = null;
+                    	lwNode.observed = false;
                         treeNode.push(lwNode);
                         if(nodeIds.length > 0) {
-                            // clean up children nodes and add next node
+                        	// this is not a resource, thus
+                            // remove children defined by lw-resources.json
+                        	// and add nodes at next level
                             var newNode = treeNode[treeNode.length - 1];
                             newNode.values = [];
                             addNodes(newNode.values, lwNode.values, nodeIds);
@@ -133,5 +139,39 @@ lwClientControllers.controller('ClientListCtrl', [
                     }
                 }
             }
+
+            var findResource = function(resourceId, resourceTree) {
+            	if (resourceId) {
+                	var nodeId = resourceId.shift();
+                	var node = findNode(nodeId, resourceTree);
+                	if (node && resourceId.length > 0) {
+                		return findResource(resourceId, node.values);
+                	} else {
+                		return node;
+                	}                	
+            	}
+            }
+            
+            // listen for notifications from client
+            var source = new EventSource('event?ep=' + $routeParams.clientId);
+            
+            var notificationCallback = function(msg) {
+                $scope.$apply(function() {
+                    var content = JSON.parse(msg.data);
+                    var resourceId = content.res.split("/");
+                    var resource = findResource(resourceId, $scope.lwresources);
+                    if (resource) {
+                        resource.observe.status = true;
+                    	resource.read.value = content.val;
+                    	resource.read.status = "CONTENT";
+                        resource.read.date = new Date();
+                        var formattedDate = $filter('date')(resource.read.date, 'HH:mm:ss.sss');
+                        resource.read.tooltip = formattedDate + " " + resource.read.status;
+                    	resource.write.value = null;
+                    }
+                });
+            }
+            source.addEventListener('NOTIFICATION', notificationCallback, false);
+
 
         } ]);

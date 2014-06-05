@@ -44,10 +44,13 @@ import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ContentFormat;
 import leshan.server.lwm2m.message.ExecRequest;
+import leshan.server.lwm2m.message.ObserveRequest;
+import leshan.server.lwm2m.message.ObserveResponse;
 import leshan.server.lwm2m.message.ReadRequest;
 import leshan.server.lwm2m.message.RequestHandler;
 import leshan.server.lwm2m.message.ResourceAccessException;
 import leshan.server.lwm2m.message.WriteRequest;
+import leshan.server.lwm2m.observation.ResourceObserver;
 import leshan.server.lwm2m.tlv.Tlv;
 import leshan.server.servlet.json.ClientSerializer;
 import leshan.server.servlet.json.ResponseSerializer;
@@ -73,14 +76,15 @@ public class ApiServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private final RequestHandler requestHandler;
-
+    private final ResourceObserver resourceObserver;
     private final ClientRegistry clientRegistry;
 
     private final Gson gson;
 
-    public ApiServlet(RequestHandler requestHandler, ClientRegistry clientRegistry) {
+    public ApiServlet(RequestHandler requestHandler, ClientRegistry clientRegistry, ResourceObserver observer) {
         this.requestHandler = requestHandler;
         this.clientRegistry = clientRegistry;
+        this.resourceObserver = observer;
 
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(Tlv.class, new TlvSerializer());
@@ -137,11 +141,17 @@ public class ApiServlet extends HttpServlet {
         }
 
         // /clients/endPoint/LWRequest : do LightWeight M2M read request on a given client.
+        boolean isObserveRequest = req.getParameter("obs") != null;
         try {
             RequestInfo requestInfo = new RequestInfo(path);
             Client client = this.clientRegistry.get(requestInfo.endpoint);
             if (client != null) {
-                ClientResponse cResponse = this.readRequest(client, requestInfo, resp);
+                ClientResponse cResponse = null;
+                if (isObserveRequest) {
+                    cResponse = this.observeRequest(client, requestInfo, resp);
+                } else {
+                    cResponse = this.readRequest(client, requestInfo, resp);
+                }
                 processDeviceResponse(resp, cResponse);
             } else {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -151,7 +161,7 @@ public class ApiServlet extends HttpServlet {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().append(e.getMessage()).flush();
         } catch (ResourceAccessException e) {
-            LOG.error(String.format("Unexpected error for %s%s request.", req.getServletPath(), req.getPathInfo()), e);
+            LOG.debug(String.format("Error accessing resource %s%s.", req.getServletPath(), req.getPathInfo()), e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             resp.getWriter().append(e.getMessage()).flush();
         }
@@ -183,7 +193,7 @@ public class ApiServlet extends HttpServlet {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().append(e.getMessage()).flush();
         } catch (ResourceAccessException e) {
-            LOG.error(String.format("Unexpected error for %s%s request.", req.getServletPath(), req.getPathInfo()), e);
+            LOG.debug(String.format("Error accessing resource %s%s.", req.getServletPath(), req.getPathInfo()), e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             resp.getWriter().append(e.getMessage()).flush();
         }
@@ -214,7 +224,7 @@ public class ApiServlet extends HttpServlet {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().append(e.getMessage()).flush();
         } catch (ResourceAccessException e) {
-            LOG.error(String.format("Unexpected error for %s%s request.", req.getServletPath(), req.getPathInfo()), e);
+            LOG.debug(String.format("Error accessing resource %s%s.", req.getServletPath(), req.getPathInfo()), e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             resp.getWriter().append(e.getMessage()).flush();
         }
@@ -235,6 +245,14 @@ public class ApiServlet extends HttpServlet {
     private ClientResponse readRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp) {
         return ReadRequest.newRequest(client, requestInfo.objectId, requestInfo.objectInstanceId,
                 requestInfo.resourceId).send(this.requestHandler);
+    }
+
+    private ClientResponse observeRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp) {
+        ObserveResponse response = (ObserveResponse) ObserveRequest.newRequest(client, this.resourceObserver,
+                requestInfo.objectId, requestInfo.objectInstanceId, requestInfo.resourceId).send(this.requestHandler);
+        LOG.trace("Observing resource [{}] with observation ID [{}]", requestInfo.toString(),
+                response.getObservationId());
+        return response;
     }
 
     private ClientResponse execRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp) {
@@ -258,11 +276,12 @@ public class ApiServlet extends HttpServlet {
 
     class RequestInfo {
 
-        String endpoint;
-        Integer objectId;
+        final String endpoint;
+        final Integer objectId;
         Integer objectInstanceId;
         Integer resourceId;
         Integer resourceInstanceId;
+        final String uri;
 
         /**
          * Build LW request info from URI path
@@ -273,16 +292,21 @@ public class ApiServlet extends HttpServlet {
                 throw new IllegalArgumentException("invalid lightweight M2M path");
             }
 
+            StringBuffer b = new StringBuffer();
             this.endpoint = path[1];
+            b.append(this.endpoint);
 
             try {
                 this.objectId = Integer.valueOf(path[2]);
+                b.append("/").append(this.objectId);
 
                 if (path.length > 3) {
                     this.objectInstanceId = Integer.valueOf(path[3]);
+                    b.append("/").append(this.objectInstanceId);
                 }
                 if (path.length > 4) {
                     this.resourceId = Integer.valueOf(path[4]);
+                    b.append("/").append(this.resourceId);
                 }
                 if (path.length > 5) {
                     this.resourceInstanceId = Integer.valueOf(path[5]);
@@ -290,6 +314,12 @@ public class ApiServlet extends HttpServlet {
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException("invalid lightweight M2M path", e);
             }
+            this.uri = b.toString();
+        }
+
+        @Override
+        public String toString() {
+            return this.uri;
         }
     }
 }

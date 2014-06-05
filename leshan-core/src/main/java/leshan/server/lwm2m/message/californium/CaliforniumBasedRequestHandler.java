@@ -133,7 +133,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
             if (MediaTypeRegistry.APPLICATION_LINK_FORMAT != coapResponse.getOptions().getContentFormat()) {
                 LOG.debug("Expected LWM2M Client [{}] to return application/link-format [{}] content but got [{}]",
                         request.getClient().getEndpoint(), MediaTypeRegistry.APPLICATION_LINK_FORMAT, coapResponse
-                                .getOptions().getContentFormat());
+                        .getOptions().getContentFormat());
             }
             return new DiscoverResponse(ResponseCode.fromCoapCode(coapResponse.getCode()), coapResponse.getPayload());
         case NOT_FOUND:
@@ -154,13 +154,13 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
 
         CaliforniumBasedObservation observation = new CaliforniumBasedObservation(coapRequest, request.getObserver(),
                 request.getTarget());
-        this.observationRegistry.addObservation(observation);
+        String observationId = this.observationRegistry.addObservation(observation);
 
         Response coapResponse = send(request, coapRequest, OperationType.READ);
         switch (coapResponse.getCode()) {
         case CONTENT:
             return new ObserveResponse(coapResponse.getPayload(), coapResponse.getOptions().getContentFormat(),
-                    observation.getId());
+                    observationId);
         case NOT_FOUND:
         case METHOD_NOT_ALLOWED:
             return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode()));

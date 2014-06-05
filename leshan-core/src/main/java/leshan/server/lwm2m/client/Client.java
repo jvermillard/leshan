@@ -29,6 +29,7 @@
  */
 package leshan.server.lwm2m.client;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Date;
@@ -36,9 +37,15 @@ import java.util.Date;
 import org.apache.commons.lang.Validate;
 
 /**
- * A LW-M2M client registered on the server
+ * A LW-M2M client registered on the server.
+ * 
  */
-public class Client {
+public class Client implements Serializable {
+
+    /**
+     * Serializable in order to support (distributed) caching, e.g. via JSR 107
+     */
+    private static final long serialVersionUID = 1L;
 
     private static final long DEFAULT_LIFETIME_IN_SEC = 86400L;
 
@@ -99,23 +106,23 @@ public class Client {
     }
 
     public String getRegistrationId() {
-        return registrationId;
+        return this.registrationId;
     }
 
     public Date getRegistrationDate() {
-        return registrationDate;
+        return this.registrationDate;
     }
 
     public InetAddress getAddress() {
-        return address;
+        return this.address;
     }
 
     public int getPort() {
-        return port;
+        return this.port;
     }
 
     public String[] getObjectLinks() {
-        return objectLinks;
+        return this.objectLinks;
     }
 
     public void setObjectLinks(String[] objectLinks) {
@@ -123,23 +130,23 @@ public class Client {
     }
 
     public long getLifeTimeInSec() {
-        return lifeTimeInSec;
+        return this.lifeTimeInSec;
     }
 
     public String getSmsNumber() {
-        return smsNumber;
+        return this.smsNumber;
     }
 
     public String getLwM2mVersion() {
-        return lwM2mVersion;
+        return this.lwM2mVersion;
     }
 
     public BindingMode getBindingMode() {
-        return bindingMode;
+        return this.bindingMode;
     }
 
     public String getEndpoint() {
-        return endpoint;
+        return this.endpoint;
     }
 
     public void setAddress(InetAddress address) {
@@ -167,7 +174,7 @@ public class Client {
     }
 
     public Date getLastUpdate() {
-        return lastUpdate;
+        return this.lastUpdate;
     }
 
     public void setLastUpdate(Date lastUpdate) {
@@ -180,7 +187,7 @@ public class Client {
     }
 
     public boolean isAlive() {
-        return failedLastRequest ? false : this.lastUpdate.getTime() + this.lifeTimeInSec * 1000 > System
+        return this.failedLastRequest ? false : this.lastUpdate.getTime() + this.lifeTimeInSec * 1000 > System
                 .currentTimeMillis();
     }
 
@@ -188,7 +195,33 @@ public class Client {
     public String toString() {
         return String
                 .format("Client [registrationDate=%s, address=%s, port=%s, lifeTimeInSec=%s, smsNumber=%s, lwM2mVersion=%s, bindingMode=%s, endpoint=%s, registrationId=%s, objectLinks=%s, lastUpdate=%s, failedLastRequest=%s]",
-                        registrationDate, address, port, lifeTimeInSec, smsNumber, lwM2mVersion, bindingMode, endpoint,
-                        registrationId, Arrays.toString(objectLinks), lastUpdate, failedLastRequest);
+                        this.registrationDate, this.address, this.port, this.lifeTimeInSec, this.smsNumber, this.lwM2mVersion, this.bindingMode, this.endpoint,
+                        this.registrationId, Arrays.toString(this.objectLinks), this.lastUpdate, this.failedLastRequest);
+    }
+
+    /**
+     * Computes a hash code for this client.
+     * 
+     * @return the hash code based on the <em>endpoint</em> property
+     */
+    @Override
+    public int hashCode() {
+        return getEndpoint().hashCode();
+    }
+
+    /**
+     * Compares this Client to another object.
+     * 
+     * @return <code>true</code> if the other object is a Client instance and
+     *         its <em>endpoint</em> property has the same value as this Client
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Client) {
+            Client other = (Client) obj;
+            return this.getEndpoint().equals(other.getEndpoint());
+        } else {
+            return false;
+        }
     }
 }

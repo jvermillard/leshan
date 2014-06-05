@@ -55,9 +55,6 @@ public class LeshanMain {
         lwServer.start();
         clientRegistry.start();
 
-        // now prepare and start jetty
-        String webappDirLocation = "src/main/webapp/";
-
         String webPort = System.getenv("PORT");
 
         if (webPort == null || webPort.isEmpty()) {
@@ -68,7 +65,7 @@ public class LeshanMain {
             webPort = "8080";
         }
 
-        server = new Server(Integer.valueOf(webPort));
+        this.server = new Server(Integer.valueOf(webPort));
         WebAppContext root = new WebAppContext();
 
         root.setContextPath("/");
@@ -78,16 +75,18 @@ public class LeshanMain {
         // root.setResourceBase(webappDirLocation);
         root.setParentLoaderPriority(true);
 
-        ServletHolder apiServletHolder = new ServletHolder(new ApiServlet(lwServer.getRequestHandler(), clientRegistry));
-        root.addServlet(apiServletHolder, "/api/*");
-
-        ServletHolder eventServletHolder = new ServletHolder(new EventServlet(clientRegistry));
+        EventServlet eventServlet = new EventServlet(clientRegistry);
+        ServletHolder eventServletHolder = new ServletHolder(eventServlet);
         root.addServlet(eventServletHolder, "/event/*");
 
-        server.setHandler(root);
+        ServletHolder apiServletHolder = new ServletHolder(new ApiServlet(lwServer.getRequestHandler(), clientRegistry,
+                eventServlet));
+        root.addServlet(apiServletHolder, "/api/*");
+
+        this.server.setHandler(root);
 
         try {
-            server.start();
+            this.server.start();
         } catch (Exception e) {
             LOG.error("jetty error", e);
         }
@@ -95,7 +94,7 @@ public class LeshanMain {
 
     public void stop() {
         try {
-            server.stop();
+            this.server.stop();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
