@@ -4,11 +4,16 @@
 		<div class="col-md-1 text-muted small">{{resource.path}}</div>
 		<div class="col-md-2">
 			<div class="row">
-				<div class="col-md-4">
-					<input type="checkbox" class="checkbox" ng-if="readable()"
-						ng-click="observe()" />
-
-					<button ng-if="readable()" ng-click="resource.read.status = null; read()"
+				<div class="col-md-3">
+					<button ng-if="readable()" ng-click="resource.observe.status = false; read(true)"
+							tooltip="{{resource.observe.tooltip}}" tooltip-placement="right" tooltip-animation="false"
+					        ng-class="{
+								'btn': true,
+								'btn-xs': true,
+								'btn-default': !resource.observe.status,
+								'btn-success': resource.observe.status }">Obs</button>
+				</div>
+				<div class="col-md-3">					<button ng-if="readable()" ng-click="resource.read.status = null; read()"
 							tooltip="{{resource.read.tooltip}}" tooltip-placement="right" tooltip-animation="false"
 					        ng-class="{
 								'btn': true,
@@ -17,7 +22,7 @@
 								'btn-danger': resource.read.status != null && resource.read.status != 'CONTENT',
 								'btn-success': resource.read.status == 'CONTENT' }">Read</button>
 				</div>
-				<div class="col-md-4">
+				<div class="col-md-3">
 					<button ng-if="writable()" ng-click="resource.write.status = null; write()"
 							tooltip="{{resource.write.tooltip}}" tooltip-placement="right" tooltip-animation="false"
 							ng-class="{
@@ -28,7 +33,7 @@
 								'btn-success': resource.write.status == 'CHANGED' }">Write</button>
 								
 				</div>
-				<div class="col-md-4">
+				<div class="col-md-3">
 					<button ng-if="executable()" ng-click="resource.exec.status = null; exec();"
 							tooltip="{{resource.exec.tooltip}}" tooltip-placement="right" tooltip-animation="false"
 							ng-class="{

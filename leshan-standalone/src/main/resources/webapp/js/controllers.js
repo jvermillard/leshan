@@ -59,7 +59,8 @@ lwClientControllers.controller('ClientDetailCtrl', [
     '$routeParams',
     '$http',
     'lwResources',
-    function($scope, $location, $routeParams, $http, lwResources) {
+    '$filter',
+    function($scope, $location, $routeParams, $http, lwResources,$filter) {
         // free resource when controller is destroyed
         $scope.$on('$destroy', function(){
             if ($scope.eventsource){
@@ -109,11 +110,17 @@ lwClientControllers.controller('ClientDetailCtrl', [
                     var resourceId = content.res.split("/");
                     var resource = findResource(resourceId, $scope.lwresources);
                     if (resource) {
-                    	resource.value = content.val;
+                        resource.observe.status = true;
+                    	resource.read.value = content.val;
+                    	resource.read.status = "CONTENT";
+                        resource.read.date = new Date();
+                        var formattedDate = $filter('date')(resource.read.date, 'HH:mm:ss.sss');
+                        resource.read.tooltip = formattedDate + " " + resource.read.status;
+                    	resource.write.value = null;
                     }
                 });
             }
-            source.addEventListener('NOTIFICATION', notificationCallback, false);
+            $scope.eventsource.addEventListener('NOTIFICATION', notificationCallback, false);
         });
 
         var buildResourceTree = function(objectLinks, lwResources) {
