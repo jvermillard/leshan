@@ -4,6 +4,13 @@ lwClientControllers.controller('ClientListCtrl', [
     '$scope',
     '$http',
     function ClientListCtrl($scope, $http) {
+        // free resource when controller is destroyed
+        $scope.$on('$destroy', function(){
+            if ($scope.eventsource){
+                console.log("close")
+                $scope.eventsource.close()
+            }
+        });
 
         // get the list of connected clients
         $http.get('api/clients').success(
@@ -14,7 +21,7 @@ lwClientControllers.controller('ClientListCtrl', [
         });
 
         // listen for clients registration/deregistration
-        var source = new EventSource('event');
+        $scope.eventsource = new EventSource('event');
 
         var registerCallback = function(msg) {
             $scope.$apply(function() {
@@ -22,7 +29,7 @@ lwClientControllers.controller('ClientListCtrl', [
                 $scope.clients.push(client);
             });
         }
-        source.addEventListener('REGISTRATION', registerCallback, false);
+        $scope.eventsource.addEventListener('REGISTRATION', registerCallback, false);
 
         var getClientIdx = function(client) {
             for (var i = 0; i < $scope.clients.length; i++) {
@@ -40,7 +47,7 @@ lwClientControllers.controller('ClientListCtrl', [
                 }
             });
         }
-        source.addEventListener('DEREGISTRATION', deregisterCallback, false);
+        $scope.eventsource.addEventListener('DEREGISTRATION', deregisterCallback, false);
 
     } ]);
 
