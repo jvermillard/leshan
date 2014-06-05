@@ -4,45 +4,54 @@ lwClientControllers.controller('ClientListCtrl', [
     '$scope',
     '$http',
     function ClientListCtrl($scope, $http) {
-
-        // get the list of connected clients
-        $http.get('api/clients').success(
-            function(data, status, headers, config) {
-            $scope.clients = data;
-        }). error(function(data, status, headers, config) {
-            console.error("Unable to get client list:", status, data)
+        // free resource when controller is destroyed
+        $scope.$on('$destroy', function(){
+            if ($scope.eventsource){
+                $scope.eventsource.close()
+            }
         });
 
-        // listen for clients registration/deregistration
-        var source = new EventSource('event');
+        // get the list of connected clients
+        $http.get('api/clients'). error(function(data, status, headers, config){
+            $scope.error = "Unable get client list: " + status + " " + data  
+            console.error($scope.error)
+        }).success(function(data, status, headers, config) {
+            $scope.clients = data;
+            
+            // HACK : we can not use ng-if="clients"
+            // because of https://github.com/angular/angular.js/issues/3969
+            $scope.clientslist = true;
+            
+            // listen for clients registration/deregistration
+            $scope.eventsource = new EventSource('event');
 
-        var registerCallback = function(msg) {
-            $scope.$apply(function() {
-                var client = JSON.parse(msg.data);
-                $scope.clients.push(client);
-            });
-        }
-        source.addEventListener('REGISTRATION', registerCallback, false);
-
-        var getClientIdx = function(client) {
-            for (var i = 0; i < $scope.clients.length; i++) {
-                if ($scope.clients[i].registrationId == client.registrationId) {
-                    return i;
-                }
+            var registerCallback = function(msg) {
+                $scope.$apply(function() {
+                    var client = JSON.parse(msg.data);
+                    $scope.clients.push(client);
+                });
             }
-            return -1;
-        }
-        var deregisterCallback = function(msg) {
-            $scope.$apply(function() {
-                var clientIdx = getClientIdx(JSON.parse(msg.data));
-                if(clientIdx >= 0) {
-                    $scope.clients.splice(clientIdx, 1);
-                }
-            });
-        }
-        source.addEventListener('DEREGISTRATION', deregisterCallback, false);
+            $scope.eventsource.addEventListener('REGISTRATION', registerCallback, false);
 
-    } ]);
+            var getClientIdx = function(client) {
+                for (var i = 0; i < $scope.clients.length; i++) {
+                    if ($scope.clients[i].registrationId == client.registrationId) {
+                        return i;
+                    }
+                }
+                return -1;
+            }
+            var deregisterCallback = function(msg) {
+                $scope.$apply(function() {
+                    var clientIdx = getClientIdx(JSON.parse(msg.data));
+                    if(clientIdx >= 0) {
+                        $scope.clients.splice(clientIdx, 1);
+                    }
+                });
+            }
+            $scope.eventsource.addEventListener('DEREGISTRATION', deregisterCallback, false);
+        });
+}]);
 
     lwClientControllers.controller('ClientDetailCtrl', [
         '$scope',

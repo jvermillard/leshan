@@ -129,7 +129,7 @@ public class Client implements Serializable {
         this.objectLinks = objectLinks;
     }
 
-    public long getLifeTimeInSec() {
+    public synchronized long getLifeTimeInSec() {
         return this.lifeTimeInSec;
     }
 
@@ -173,20 +173,20 @@ public class Client implements Serializable {
         this.bindingMode = bindingMode;
     }
 
-    public Date getLastUpdate() {
+    public synchronized Date getLastUpdate() {
         return this.lastUpdate;
     }
 
-    public void setLastUpdate(Date lastUpdate) {
+    public synchronized void setLastUpdate(Date lastUpdate) {
         // TODO should probably better be done "implicitly" as part of the other setters
         this.lastUpdate = lastUpdate;
     }
 
-    public void markLastRequestFailed() {
+    public synchronized void markLastRequestFailed() {
         this.failedLastRequest = true;
     }
 
-    public boolean isAlive() {
+    public synchronized boolean isAlive() {
         return this.failedLastRequest ? false : this.lastUpdate.getTime() + this.lifeTimeInSec * 1000 > System
                 .currentTimeMillis();
     }

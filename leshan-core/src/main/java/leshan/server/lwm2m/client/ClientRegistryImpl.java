@@ -110,7 +110,7 @@ public class ClientRegistryImpl implements ClientRegistry {
             if (clientUpdated.getObjectLinks() != null) {
                 client.setObjectLinks(clientUpdated.getObjectLinks());
             }
-            
+
             client.setLifeTimeInSec(clientUpdated.getLifeTimeInSec());
             client.setLwM2mVersion(clientUpdated.getLwM2mVersion());
             client.setBindingMode(clientUpdated.getBindingMode());
@@ -139,7 +139,7 @@ public class ClientRegistryImpl implements ClientRegistry {
             }
             LOG.debug("Deregistered client: {}", unregistered);
             return unregistered;
-        }        
+        }
     }
 
     private Client findByRegistrationId(String id) {
@@ -154,7 +154,7 @@ public class ClientRegistryImpl implements ClientRegistry {
         }
         return result;
     }
-    
+
     /**
      * start the registration manager, will start regular cleanup of dead registrations.
      */
@@ -179,9 +179,11 @@ public class ClientRegistryImpl implements ClientRegistry {
         @Override
         public void run() {
             for (Client client : clientsByEp.values()) {
-                if (!client.isAlive()) {
-                    // force de-registration
-                    deregisterClient(client.getRegistrationId());
+                synchronized (client) {
+                    if (!client.isAlive()) {
+                        // force de-registration
+                        deregisterClient(client.getRegistrationId());
+                    }
                 }
             }
         }

@@ -30,8 +30,8 @@
 package leshan.server.lwm2m.message.californium;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.net.InetAddress;
 
@@ -43,8 +43,8 @@ import leshan.server.lwm2m.message.DiscoverRequest;
 import leshan.server.lwm2m.message.DiscoverResponse;
 import leshan.server.lwm2m.message.ObserveRequest;
 import leshan.server.lwm2m.message.ObserveResponse;
-import leshan.server.lwm2m.message.OperationType;
 import leshan.server.lwm2m.message.ReadRequest;
+import leshan.server.lwm2m.message.RequestTimeoutException;
 import leshan.server.lwm2m.message.ResponseCode;
 import leshan.server.lwm2m.message.WriteAttributesRequest;
 import leshan.server.lwm2m.message.WriteRequest;
@@ -55,12 +55,15 @@ import leshan.server.lwm2m.observation.ResourceObserver;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import ch.ethz.inf.vs.californium.coap.MediaTypeRegistry;
 import ch.ethz.inf.vs.californium.coap.Option;
 import ch.ethz.inf.vs.californium.coap.OptionNumberRegistry;
 import ch.ethz.inf.vs.californium.coap.Request;
 import ch.ethz.inf.vs.californium.coap.Response;
+import ch.ethz.inf.vs.californium.network.Endpoint;
 
 public class CaliforniumBasedRequestHandlerTest extends BasicTestSupport {
 
@@ -68,14 +71,14 @@ public class CaliforniumBasedRequestHandlerTest extends BasicTestSupport {
 
     private static final String TEXT_PAYLOAD = "payload";
 
-    CoapClient coapEndpoint;
+    Endpoint coapEndpoint;
     CaliforniumBasedRequestHandler requestHandler;
     InMemoryObservationRegistry observationRegistry;
 
     @Before
     public void setUp() throws Exception {
         this.destination = InetAddress.getLocalHost();
-        this.coapEndpoint = mock(CoapClient.class);
+        this.coapEndpoint = mock(Endpoint.class);
         this.observationRegistry = new InMemoryObservationRegistry();
         this.requestHandler = new CaliforniumBasedRequestHandler(this.coapEndpoint, this.observationRegistry);
         givenASimpleClient();
@@ -212,8 +215,24 @@ public class CaliforniumBasedRequestHandlerTest extends BasicTestSupport {
         Assert.assertEquals(ResponseCode.METHOD_NOT_ALLOWED, response.getCode());
     }
 
-    private void ifTheClientReturns(Response coapResponse) {
-        when(this.coapEndpoint.send(any(Request.class), any(OperationType.class))).thenReturn(coapResponse);
+    @Test(expected = RequestTimeoutException.class)
+    public void testSendRequestThrowsRequestTimeoutException() throws Exception {
+        ReadRequest request = ReadRequest.newRequest(this.client, OBJECT_ID_DEVICE);
+        this.requestHandler.send(request);
+        Assert.fail("Request should have timed out with exception");
+    }
+
+    private void ifTheClientReturns(final Response coapResponse) {
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocation) {
+                Object[] args = invocation.getArguments();
+                if (args.length > 0 && args[0] instanceof Request) {
+                    ((Request) args[0]).setResponse(coapResponse);
+                }
+                return null;
+            }
+        }).when(this.coapEndpoint).sendRequest(any(Request.class));
     }
 
     private Response newResponse(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode responseCode, String payload) {
