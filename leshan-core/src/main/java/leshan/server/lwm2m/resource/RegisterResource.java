@@ -144,6 +144,11 @@ public class RegisterResource extends ResourceBase {
         }
     }
 
+    /**
+     * Updates an existing Client registration.
+     * 
+     * @param exchange the CoAP request containing the updated regsitration properties
+     */
     @Override
     public void handlePUT(CoapExchange exchange) {
         Request request = exchange.advanced().getRequest();
@@ -164,7 +169,6 @@ public class RegisterResource extends ResourceBase {
 
         Long lifetime = null;
         String smsNumber = null;
-        String lwVersion = null;
         BindingMode binding = null;
         String [] objectLinks = null;
 
@@ -173,18 +177,16 @@ public class RegisterResource extends ResourceBase {
                 lifetime = Long.valueOf(param.substring(3));
             } else if (param.startsWith(QUERY_PARAM_SMS)) {
                 smsNumber = param.substring(4);
-            } else if (param.startsWith(QUERY_PARAM_LWM2M_VERSION)) {
-                lwVersion = param.substring(6);
             } else if (param.startsWith(QUERY_PARAM_BINDING_MODE)) {
                 binding = BindingMode.valueOf(param.substring(2));
             }
         }
-        
+
         if (request.getPayload() != null) {
-            objectLinks = new String(request.getPayload(), Charsets.UTF_8).split(",");    
+            objectLinks = new String(request.getPayload(), Charsets.UTF_8).split(",");
         }
 
-        ClientUpdate client = new ClientUpdate(registrationId, request.getSource(), request.getSourcePort(), lwVersion,
+        ClientUpdate client = new ClientUpdate(registrationId, request.getSource(), request.getSourcePort(),
                 lifetime, smsNumber, binding, objectLinks);
 
         try {

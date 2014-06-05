@@ -33,116 +33,101 @@ import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Date;
 
-import org.apache.commons.lang.Validate;
-
 /**
- * A LW-M2M client registered on the server
+ * A container object for updating a LW-M2M client's registration properties on the server.
  */
 public class ClientUpdate {
 
-    private static final long DEFAULT_LIFETIME_IN_SEC = 86400L;
+    private final InetAddress address;
 
-    private static final String DEFAULT_LWM2M_VERSION = "1.0";
+    private final int port;
 
-    private InetAddress address;
+    private final Long lifeTimeInSec;
 
-    private int port;
+    private final String smsNumber;
 
-    private long lifeTimeInSec;
-
-    private String smsNumber;
-
-    private String lwM2mVersion;
-
-    private BindingMode bindingMode;
+    private final BindingMode bindingMode;
 
     private final String registrationId;
 
     private final String[] objectLinks;
 
     public ClientUpdate(String registrationId, InetAddress address, int port) {
-        this(registrationId, address, port, null, null, null, null, null);
+        this(registrationId, address, port, null, null, null, null);
     }
 
-    public ClientUpdate(String registrationId, InetAddress address, int port, String lwM2mVersion, Long lifetime,
+    public ClientUpdate(String registrationId, InetAddress address, int port, Long lifetime,
             String smsNumber, BindingMode binding, String[] objectLinks) {
-        this(registrationId, address, port, lwM2mVersion, lifetime, smsNumber, binding, objectLinks, null);
+        this(registrationId, address, port, lifetime, smsNumber, binding, objectLinks, null);
     }
 
-    public ClientUpdate(String registrationId, InetAddress address, int port, String lwM2mVersion, Long lifetime,
+    /**
+     * Sets all fields.
+     * 
+     * @param registrationId
+     * @param address
+     * @param port
+     * @param lifetime
+     * @param smsNumber
+     * @param binding
+     * @param objectLinks
+     * @param registrationDate
+     * @throws NullPointerException if the registration ID is <code>null</code>
+     */
+    public ClientUpdate(String registrationId, InetAddress address, int port, Long lifetime,
             String smsNumber, BindingMode binding, String[] objectLinks, Date registrationDate) {
 
-        Validate.notEmpty(registrationId);
+        if (registrationId == null) {
+            throw new NullPointerException("Registration ID must not be null");
+        }
         this.registrationId = registrationId;
         this.address = address;
         this.port = port;
         this.objectLinks = objectLinks;
-        this.lifeTimeInSec = lifetime == null ? DEFAULT_LIFETIME_IN_SEC : lifetime;
-        this.lwM2mVersion = lwM2mVersion == null ? DEFAULT_LWM2M_VERSION : lwM2mVersion;
-        this.bindingMode = binding == null ? BindingMode.U : binding;
+        this.lifeTimeInSec = lifetime;
+        this.bindingMode = binding;
         this.smsNumber = smsNumber;
     }
 
     public String getRegistrationId() {
-        return registrationId;
+        return this.registrationId;
     }
 
     public InetAddress getAddress() {
-        return address;
+        return this.address;
     }
 
     public int getPort() {
-        return port;
+        return this.port;
     }
 
     public String[] getObjectLinks() {
-        return objectLinks;
+        return this.objectLinks;
     }
 
-    public long getLifeTimeInSec() {
-        return lifeTimeInSec;
+    public Long getLifeTimeInSec() {
+        return this.lifeTimeInSec;
     }
 
     public String getSmsNumber() {
-        return smsNumber;
-    }
-
-    public String getLwM2mVersion() {
-        return lwM2mVersion;
+        return this.smsNumber;
     }
 
     public BindingMode getBindingMode() {
-        return bindingMode;
-    }
-
-    public void setAddress(InetAddress address) {
-        this.address = address;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
-    }
-
-    public void setLifeTimeInSec(long lifeTimeInSec) {
-        this.lifeTimeInSec = lifeTimeInSec;
-    }
-
-    public void setSmsNumber(String smsNumber) {
-        this.smsNumber = smsNumber;
-    }
-
-    public void setLwM2mVersion(String lwM2mVersion) {
-        this.lwM2mVersion = lwM2mVersion;
-    }
-
-    public void setBindingMode(BindingMode bindingMode) {
-        this.bindingMode = bindingMode;
+        return this.bindingMode;
     }
 
     @Override
     public String toString() {
-        return "ClientUpdate [address=" + address + ", port=" + port + ", lifeTimeInSec=" + lifeTimeInSec
-                + ", smsNumber=" + smsNumber + ", lwM2mVersion=" + lwM2mVersion + ", bindingMode=" + bindingMode
-                + ", registrationId=" + registrationId + ", objectLinks=" + Arrays.toString(objectLinks) + "]";
+        StringBuffer b = new StringBuffer();
+        b.append("ClientUpdate [address=").append(this.address);
+        b.append(", port=").append(this.port);
+        b.append(", lifeTimeInSec=").append(this.lifeTimeInSec);
+        b.append(", smsNumber=").append(this.smsNumber);
+        b.append(", bindingMode=").append(this.bindingMode);
+        b.append(", registrationId=").append(this.registrationId);
+        b.append(", objectLinks=").append(Arrays.toString(this.objectLinks));
+        b.append("]");
+        return b.toString();
     }
 }

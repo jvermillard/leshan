@@ -50,41 +50,41 @@ public class ClientRegistryImpl implements ClientRegistry {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientRegistryImpl.class);
 
-    private Map<String /* end-point */, Client> clientsByEp = new ConcurrentHashMap<>();
+    private final Map<String /* end-point */, Client> clientsByEp = new ConcurrentHashMap<>();
 
-    private List<RegistryListener> listeners = new CopyOnWriteArrayList<>();
+    private final List<RegistryListener> listeners = new CopyOnWriteArrayList<>();
 
     @Override
     public void addListener(RegistryListener listener) {
-        listeners.add(listener);
+        this.listeners.add(listener);
     }
 
     @Override
     public void removeListener(RegistryListener listener) {
-        listeners.remove(listener);
+        this.listeners.remove(listener);
     }
 
     @Override
     public Collection<Client> allClients() {
-        return clientsByEp.values();
+        return this.clientsByEp.values();
     }
 
     @Override
     public Client get(String endpoint) {
-        return clientsByEp.get(endpoint);
+        return this.clientsByEp.get(endpoint);
     }
 
     @Override
     public Client registerClient(Client client) {
         LOG.debug("Registering new client: {}", client);
 
-        Client previous = clientsByEp.put(client.getEndpoint(), client);
+        Client previous = this.clientsByEp.put(client.getEndpoint(), client);
         if (previous != null) {
-            for (RegistryListener l : listeners) {
+            for (RegistryListener l : this.listeners) {
                 l.unregistered(previous);
             }
         }
-        for (RegistryListener l : listeners) {
+        for (RegistryListener l : this.listeners) {
             l.registered(client);
         }
 
@@ -110,10 +110,14 @@ public class ClientRegistryImpl implements ClientRegistry {
             if (clientUpdated.getObjectLinks() != null) {
                 client.setObjectLinks(clientUpdated.getObjectLinks());
             }
-            
-            client.setLifeTimeInSec(clientUpdated.getLifeTimeInSec());
-            client.setLwM2mVersion(clientUpdated.getLwM2mVersion());
-            client.setBindingMode(clientUpdated.getBindingMode());
+
+            if (clientUpdated.getLifeTimeInSec() != null) {
+                client.setLifeTimeInSec(clientUpdated.getLifeTimeInSec());
+            }
+
+            if (clientUpdated.getBindingMode() != null) {
+                client.setBindingMode(clientUpdated.getBindingMode());
+            }
 
             if (clientUpdated.getSmsNumber() != null) {
                 client.setSmsNumber(clientUpdated.getSmsNumber());
@@ -133,19 +137,19 @@ public class ClientRegistryImpl implements ClientRegistry {
         if (toBeUnregistered == null) {
             return null;
         } else {
-            Client unregistered = clientsByEp.remove(toBeUnregistered.getEndpoint());
-            for (RegistryListener l : listeners) {
+            Client unregistered = this.clientsByEp.remove(toBeUnregistered.getEndpoint());
+            for (RegistryListener l : this.listeners) {
                 l.unregistered(unregistered);
             }
             LOG.debug("Deregistered client: {}", unregistered);
             return unregistered;
-        }        
+        }
     }
 
     private Client findByRegistrationId(String id) {
         Client result = null;
         if (id != null) {
-            for (Client client : clientsByEp.values()) {
+            for (Client client : this.clientsByEp.values()) {
                 if (id.equals(client.getRegistrationId())) {
                     result = client;
                     break;
@@ -154,31 +158,31 @@ public class ClientRegistryImpl implements ClientRegistry {
         }
         return result;
     }
-    
+
     /**
      * start the registration manager, will start regular cleanup of dead registrations.
      */
     public void start() {
         // every 2 seconds clean the registration list
         // TODO re-consider clean-up interval: wouldn't 5 minutes do as well?
-        schedExecutor.scheduleAtFixedRate(new Cleaner(), 2, 2, TimeUnit.SECONDS);
+        this.schedExecutor.scheduleAtFixedRate(new Cleaner(), 2, 2, TimeUnit.SECONDS);
     }
 
     /**
      * Stop the underlying cleanup of the registrations.
      */
     public void stop() throws InterruptedException {
-        schedExecutor.shutdownNow();
-        schedExecutor.awaitTermination(5, TimeUnit.SECONDS);
+        this.schedExecutor.shutdownNow();
+        this.schedExecutor.awaitTermination(5, TimeUnit.SECONDS);
     }
 
-    private ScheduledExecutorService schedExecutor = Executors.newScheduledThreadPool(1);
+    private final ScheduledExecutorService schedExecutor = Executors.newScheduledThreadPool(1);
 
     private class Cleaner implements Runnable {
 
         @Override
         public void run() {
-            for (Client client : clientsByEp.values()) {
+            for (Client client : ClientRegistryImpl.this.clientsByEp.values()) {
                 if (!client.isAlive()) {
                     // force de-registration
                     deregisterClient(client.getRegistrationId());
