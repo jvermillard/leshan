@@ -34,6 +34,7 @@ angular.module('lwResourcesDirective', [])
             scope.resource.read  =  {tooltip : "Read "   + scope.resource.path};
             scope.resource.write =  {tooltip : "Write "  + scope.resource.path};
             scope.resource.exec  =  {tooltip : "Execute "+ scope.resource.path};
+            scope.resource.observe  =  {tooltip : "Observe "+ scope.resource.path, status: false};
             
             scope.readable = function() {
                 if(scope.resource.instances != "multiple") {
@@ -69,6 +70,9 @@ angular.module('lwResourcesDirective', [])
             	}
                 $http.get(uri)
                 .success(function(data, status, headers, config) {
+                    if (observe) {
+                    	scope.resource.observe.status = true;
+                    }
                     var read = scope.resource.read;
                     if (data.status == "CONTENT") {
                         read.value = data.value;
@@ -76,9 +80,12 @@ angular.module('lwResourcesDirective', [])
                     }
                     read.status = data.status;
                     read.date = new Date();
-                    var formattedDate = read.date.getHours()+":"+read.date.getMinutes()+":"+read.date.getSeconds()+":"+read.date.getMilliseconds();
+                    var formattedDate = read.date.getHours()+":"+read.date.getMinutes()+":"+read.date.getSeconds()+"."+read.date.getMilliseconds();
                     read.tooltip = formattedDate + " " + read.status;
                 }).error(function(data, status, headers, config) {
+                    if (observe) {
+                    	scope.resource.observe.status = false;
+                    }
                     errormessage = "Unable to read resource " + scope.resource.path + " for "+ $routeParams.clientId + " : " + status +" "+ data
                     alert(errormessage);
                     console.error(errormessage)
@@ -103,7 +110,7 @@ angular.module('lwResourcesDirective', [])
                             }
                             write.status = data.status;
                             write.date = new Date();
-                            var formattedDate = write.date.getHours()+":"+write.date.getMinutes()+":"+write.date.getSeconds()+":"+write.date.getMilliseconds();
+                            var formattedDate = write.date.getHours()+":"+write.date.getMinutes()+":"+write.date.getSeconds()+"."+write.date.getMilliseconds();
                             write.tooltip = formattedDate + " " + write.status;
                         }).error(function(data, status, headers, config) {
                             errormessage = "Unable to write resource " + scope.resource.path + " for "+ $routeParams.clientId + " : " + status +" "+ data

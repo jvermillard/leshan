@@ -49,7 +49,8 @@ lwClientControllers.controller('ClientListCtrl', [
         '$location',
         '$routeParams',
         '$http',
-        function($scope, $location, $routeParams, $http) {
+        '$filter',
+        function($scope, $location, $routeParams, $http, $filter) {
             $scope.clientId = $routeParams.clientId;
 
             // get client details
@@ -160,7 +161,13 @@ lwClientControllers.controller('ClientListCtrl', [
                     var resourceId = content.res.split("/");
                     var resource = findResource(resourceId, $scope.lwresources);
                     if (resource) {
-                    	resource.value = content.val;
+                        resource.observe.status = true;
+                    	resource.read.value = content.val;
+                    	resource.read.status = "CONTENT";
+                        resource.read.date = new Date();
+                        var formattedDate = $filter('date')(resource.read.date, 'HH:mm:ss.sss');
+                        resource.read.tooltip = formattedDate + " " + resource.read.status;
+                    	resource.write.value = null;
                     }
                 });
             }

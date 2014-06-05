@@ -161,7 +161,7 @@ public class ApiServlet extends HttpServlet {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().append(e.getMessage()).flush();
         } catch (ResourceAccessException e) {
-            LOG.error(String.format("Unexpected error for %s%s request.", req.getServletPath(), req.getPathInfo()), e);
+            LOG.debug(String.format("Error accessing resource %s%s.", req.getServletPath(), req.getPathInfo()), e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             resp.getWriter().append(e.getMessage()).flush();
         }
@@ -193,7 +193,7 @@ public class ApiServlet extends HttpServlet {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().append(e.getMessage()).flush();
         } catch (ResourceAccessException e) {
-            LOG.error(String.format("Unexpected error for %s%s request.", req.getServletPath(), req.getPathInfo()), e);
+            LOG.debug(String.format("Error accessing resource %s%s.", req.getServletPath(), req.getPathInfo()), e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             resp.getWriter().append(e.getMessage()).flush();
         }
@@ -224,7 +224,7 @@ public class ApiServlet extends HttpServlet {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().append(e.getMessage()).flush();
         } catch (ResourceAccessException e) {
-            LOG.error(String.format("Unexpected error for %s%s request.", req.getServletPath(), req.getPathInfo()), e);
+            LOG.debug(String.format("Error accessing resource %s%s.", req.getServletPath(), req.getPathInfo()), e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             resp.getWriter().append(e.getMessage()).flush();
         }
