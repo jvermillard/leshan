@@ -35,8 +35,6 @@ import java.net.InetSocketAddress;
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.message.RequestHandler;
 import leshan.server.lwm2m.message.californium.CaliforniumBasedRequestHandler;
-import leshan.server.lwm2m.message.californium.CoapClient;
-import leshan.server.lwm2m.message.californium.SimpleCoapClient;
 import leshan.server.lwm2m.resource.RegisterResource;
 
 import org.slf4j.Logger;
@@ -99,8 +97,7 @@ public class LwM2mServer {
         RegisterResource rdResource = new RegisterResource(clientRegistry);
         this.coapServer.add(rdResource);
 
-        CoapClient coapClient = new SimpleCoapClient(endpoint);
-        CaliforniumBasedRequestHandler handler = new CaliforniumBasedRequestHandler(coapClient);
+        CaliforniumBasedRequestHandler handler = new CaliforniumBasedRequestHandler(endpoint);
         // register the request handler as listener in order to cancel
         // observations and free up resources when clients unregister
         clientRegistry.addListener(handler);
