@@ -6,8 +6,12 @@
 	<div class="alert alert-danger">{{error}}</div>
 </div>
 
+<div ng-if='deregistered'>
+	<h4>Client <b>{{clientId}}</b> is no more registered.</h4>
+</div>
+
 <!-- Write modal -->
-<div class="modal fade bs-example-modal-sm" id="writeModal" tabindex="-1" role="dialog"
+<div class="modal bs-example-modal-sm" id="writeModal" tabindex="-1" role="dialog"
 	aria-labelledby="writeModalLabel" aria-hidden="true">
 	<div class="modal-dialog">
 		<div class="modal-content">

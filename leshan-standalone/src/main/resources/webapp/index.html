@@ -18,6 +18,7 @@
 	<script src="js/controllers.js"></script>
 	<script src="js/lw-resources-services.js"></script>
 	<script src="js/lw-resources.js"></script>
+	<script src="js/ui-dialog-services.js"></script>
 </head>
 
 <body>
@@ -40,6 +41,24 @@
         <p class="text-muted text-center"><small>Powered by: <a href="http://github.com/jvermillard/leshan">Leshan Lightweight M2M server</a> - <a href="http://github.com/jvermillard/leshan/issues">Report a bug</a></small></p>
       </div>
     </div>
+
+
+    <!-- Message Dialog  -->
+	<div class="modal bs-example-modal-sm" id="messageModal" tabindex="-1" role="dialog" aria-labelledby="messageModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">Alert</h4>
+				</div>
+				<div class="modal-body">
+					<label id="messageModalLabel"></label>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
 
 </body>
 </html>

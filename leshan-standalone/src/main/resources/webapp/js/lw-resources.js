@@ -12,7 +12,7 @@ angular.module('lwResourcesDirective', [])
     }
 })
 
-.directive('resource', function ($compile, $routeParams, $http) {
+.directive('resource', function ($compile, $routeParams, $http, dialog) {
     return {
         restrict: "E",
         replace: true,
@@ -76,7 +76,7 @@ angular.module('lwResourcesDirective', [])
                     read.tooltip = formattedDate + " " + read.status;
                 }).error(function(data, status, headers, config) {
                     errormessage = "Unable to read resource " + scope.resource.path + " for "+ $routeParams.clientId + " : " + status +" "+ data
-                    alert(errormessage);
+                    dialog.open(errormessage);
                     console.error(errormessage)
                 });;
             };
@@ -103,7 +103,7 @@ angular.module('lwResourcesDirective', [])
                             write.tooltip = formattedDate + " " + write.status;
                         }).error(function(data, status, headers, config) {
                             errormessage = "Unable to write resource " + scope.resource.path + " for "+ $routeParams.clientId + " : " + status +" "+ data
-                            alert(errormessage);
+                            dialog.open(errormessage);
                             console.error(errormessage)
                         });;
                     }
@@ -122,7 +122,7 @@ angular.module('lwResourcesDirective', [])
                     exec.tooltip = formattedDate + " " + exec.status;
                 }).error(function(data, status, headers, config) {
                     errormessage = "Unable to execute resource " + scope.resource.path + " for "+ $routeParams.clientId + " : " + status +" "+ data
-                    alert(errormessage);
+                    dialog.open(errormessage);
                     console.error(errormessage)
                 });;
             };

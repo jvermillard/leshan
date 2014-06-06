@@ -60,19 +60,48 @@ lwClientControllers.controller('ClientDetailCtrl', [
     '$http',
     'lwResources',
     function($scope, $location, $routeParams, $http, lwResources) {
+        // free resource when controller is destroyed
+        $scope.$on('$destroy', function(){
+            if ($scope.eventsource){
+                $scope.eventsource.close()
+            }
+        });
+        
         $scope.clientId = $routeParams.clientId;
 
         // get client details
         $http.get('api/clients/' + $routeParams.clientId)
+        .error(function(data, status, headers, config) {
+            $scope.error = "Unable get client " + $routeParams.clientId+" : "+ status + " " + data;  
+            console.error($scope.error);
+        })
         .success(function(data, status, headers, config) {
             $scope.client = data;
 
             // update resource tree with client details
             var tree = buildResourceTree($scope.client.objectLinks, lwResources.getModel())
             $scope.lwresources = tree;
-        }).error(function(data, status, headers, config) {
-            $scope.error = "Unable get client " + $routeParams.clientId+" : "+ status + " " + data  
-            console.error($scope.error)
+
+            // listen for clients registration/deregistration
+            $scope.eventsource = new EventSource('event');
+
+            var registerCallback = function(msg) {
+                $scope.$apply(function() {
+                    $scope.deregistered = false;
+                    $scope.client = JSON.parse(msg.data);
+                    var tree = buildResourceTree($scope.client.objectLinks, lwResources.getModel())
+                    $scope.lwresources = tree;
+                });
+            }
+            $scope.eventsource.addEventListener('REGISTRATION', registerCallback, false);
+
+            var deregisterCallback = function(msg) {
+                $scope.$apply(function() {
+                    $scope.deregistered = true;
+                    $scope.client = null;
+                });
+            }
+            $scope.eventsource.addEventListener('DEREGISTRATION', deregisterCallback, false);
         });
 
         var buildResourceTree = function(objectLinks, lwResources) {
