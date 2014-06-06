@@ -71,7 +71,6 @@ public interface ClientRegistry {
      * @param client the client to register, identified by its end-point.
      * @return the previously registered client with this end-point or <code>null</code> if this is a new client.
      * @throws ClientRegistrationException when the client registration has failed
-     * @throws NullPointerException if the given client is <code>null</code>
      */
     Client registerClient(Client client) throws ClientRegistrationException;
 
@@ -81,7 +80,6 @@ public interface ClientRegistry {
      * @param client the client containing the values to update
      * @return the registered client or <code>null</code>
      * @throws ClientRegistrationException when the registration update has failed
-     * @throws NullPointerException if the given client update is <code>null</code>
      */
     Client updateClient(ClientUpdate update) throws ClientRegistrationException;
 
@@ -91,7 +89,6 @@ public interface ClientRegistry {
      * @param registrationId the client registrationId
      * @return the previously registered client or <code>null</code>
      * @throws ClientRegistrationException when the client de-registation has failed
-     * @throws NullPointerException if the given ID is <code>null</code>
      */
     Client deregisterClient(String registrationId) throws ClientRegistrationException;
 }

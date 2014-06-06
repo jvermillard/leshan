@@ -33,12 +33,13 @@ import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Date;
 
+import org.apache.commons.lang.Validate;
+
 /**
- * A container object for updating a LW-M2M client's registration properties on
- * the server.
+ * A container object for updating a LW-M2M client's registration properties on the server.
  * 
- * According to the LWM2M spec only those properties need to be set that have
- * changed and thus should be updated on the server.
+ * According to the LWM2M spec only those properties need to be set that have changed and thus should be updated on the
+ * server.
  */
 public class ClientUpdate {
 
@@ -60,8 +61,8 @@ public class ClientUpdate {
         this(registrationId, address, port, null, null, null, null);
     }
 
-    public ClientUpdate(String registrationId, InetAddress address, Integer port, Long lifetime,
-                        String smsNumber, BindingMode binding, String[] objectLinks) {
+    public ClientUpdate(String registrationId, InetAddress address, Integer port, Long lifetime, String smsNumber,
+            BindingMode binding, String[] objectLinks) {
         this(registrationId, address, port, lifetime, smsNumber, binding, objectLinks, null);
     }
 
@@ -71,18 +72,15 @@ public class ClientUpdate {
      * @param registrationId the ID under which the client is registered
      * @param address the client's host name or IP address
      * @param port the UDP port the client uses for communication
-     * @param lifetime the number of seconds the client would like its
-     *            registration to be valid
+     * @param lifetime the number of seconds the client would like its registration to be valid
      * @param smsNumber the SMS number the client can receive messages under
      * @param binding the binding mode(s) the client supports
-     * @param objectLinks the objects and object instances the client
-     *            hosts/supports
-     * @param registrationDate the point in time the client registered with the
-     *            server (?)
+     * @param objectLinks the objects and object instances the client hosts/supports
+     * @param registrationDate the point in time the client registered with the server (?)
      * @throws NullPointerException if the registration ID is <code>null</code>
      */
-    public ClientUpdate(String registrationId, InetAddress address, Integer port, Long lifetime,
-                        String smsNumber, BindingMode binding, String[] objectLinks, Date registrationDate) {
+    public ClientUpdate(String registrationId, InetAddress address, Integer port, Long lifetime, String smsNumber,
+            BindingMode binding, String[] objectLinks, Date registrationDate) {
 
         if (registrationId == null) {
             throw new NullPointerException("Registration ID must not be null");
@@ -97,44 +95,40 @@ public class ClientUpdate {
     }
 
     public String getRegistrationId() {
-        return this.registrationId;
+        return registrationId;
     }
 
     public InetAddress getAddress() {
-        return this.address;
+        return address;
     }
 
     public Integer getPort() {
-        return this.port;
+        return port;
     }
 
     public String[] getObjectLinks() {
-        return this.objectLinks;
+        return objectLinks;
     }
 
     public Long getLifeTimeInSec() {
-        return this.lifeTimeInSec;
+        return lifeTimeInSec;
     }
 
     public String getSmsNumber() {
-        return this.smsNumber;
+        return smsNumber;
     }
 
     public BindingMode getBindingMode() {
-        return this.bindingMode;
+        return bindingMode;
     }
 
     /**
      * Applies the registration property changes to a given client registration object.
      * 
      * @param client the registration to apply the changes to
-     * @throws NullPointerException if the given client registration is <code>null</code>
      */
     public void apply(Client client) {
-
-        if (client == null) {
-            throw new NullPointerException("Client must not be null");
-        }
+        Validate.notNull(client);
 
         if (getAddress() != null) {
             client.setAddress(getAddress());
@@ -167,15 +161,10 @@ public class ClientUpdate {
 
     @Override
     public String toString() {
-        StringBuffer b = new StringBuffer();
-        b.append("ClientUpdate [address=").append(this.address);
-        b.append(", port=").append(this.port);
-        b.append(", lifeTimeInSec=").append(this.lifeTimeInSec);
-        b.append(", smsNumber=").append(this.smsNumber);
-        b.append(", bindingMode=").append(this.bindingMode);
-        b.append(", registrationId=").append(this.registrationId);
-        b.append(", objectLinks=").append(Arrays.toString(this.objectLinks));
-        b.append("]");
-        return b.toString();
+        return String
+                .format("ClientUpdate [address=%s, port=%s, lifeTimeInSec=%s, smsNumber=%s, bindingMode=%s, registrationId=%s, objectLinks=%s]",
+                        address, port, lifeTimeInSec, smsNumber, bindingMode, registrationId,
+                        Arrays.toString(objectLinks));
     }
+
 }

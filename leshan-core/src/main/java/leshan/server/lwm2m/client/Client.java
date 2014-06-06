@@ -74,12 +74,12 @@ public class Client {
     }
 
     public Client(String registrationId, String endpoint, InetAddress address, int port, String lwM2mVersion,
-                  Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks) {
+            Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks) {
         this(registrationId, endpoint, address, port, lwM2mVersion, lifetime, smsNumber, binding, objectLinks, null);
     }
 
     public Client(String registrationId, String endpoint, InetAddress address, int port, String lwM2mVersion,
-                  Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks, Date registrationDate) {
+            Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks, Date registrationDate) {
 
         Validate.notEmpty(endpoint);
         Validate.notNull(address);
@@ -99,23 +99,23 @@ public class Client {
     }
 
     public String getRegistrationId() {
-        return this.registrationId;
+        return registrationId;
     }
 
     public Date getRegistrationDate() {
-        return this.registrationDate;
+        return registrationDate;
     }
 
     public InetAddress getAddress() {
-        return this.address;
+        return address;
     }
 
     public int getPort() {
-        return this.port;
+        return port;
     }
 
     public String[] getObjectLinks() {
-        return this.objectLinks;
+        return objectLinks;
     }
 
     void setObjectLinks(String[] objectLinks) {
@@ -127,19 +127,19 @@ public class Client {
     }
 
     public String getSmsNumber() {
-        return this.smsNumber;
+        return smsNumber;
     }
 
     public String getLwM2mVersion() {
-        return this.lwM2mVersion;
+        return lwM2mVersion;
     }
 
     public BindingMode getBindingMode() {
-        return this.bindingMode;
+        return bindingMode;
     }
 
     public String getEndpoint() {
-        return this.endpoint;
+        return endpoint;
     }
 
     void setAddress(InetAddress address) {
@@ -163,7 +163,7 @@ public class Client {
     }
 
     public synchronized Date getLastUpdate() {
-        return this.lastUpdate;
+        return lastUpdate;
     }
 
     synchronized void setLastUpdate(Date lastUpdate) {
@@ -171,19 +171,18 @@ public class Client {
     }
 
     public synchronized void markLastRequestFailed() {
-        this.failedLastRequest = true;
+        failedLastRequest = true;
     }
 
     public synchronized boolean isAlive() {
-        return this.failedLastRequest ? false : this.lastUpdate.getTime() + this.lifeTimeInSec * 1000 > System
-                .currentTimeMillis();
+        return failedLastRequest ? false : lastUpdate.getTime() + lifeTimeInSec * 1000 > System.currentTimeMillis();
     }
 
     @Override
     public String toString() {
         return String
                 .format("Client [registrationDate=%s, address=%s, port=%s, lifeTimeInSec=%s, smsNumber=%s, lwM2mVersion=%s, bindingMode=%s, endpoint=%s, registrationId=%s, objectLinks=%s, lastUpdate=%s, failedLastRequest=%s]",
-                        this.registrationDate, this.address, this.port, this.lifeTimeInSec, this.smsNumber, this.lwM2mVersion, this.bindingMode, this.endpoint,
-                        this.registrationId, Arrays.toString(this.objectLinks), this.lastUpdate, this.failedLastRequest);
+                        registrationDate, address, port, lifeTimeInSec, smsNumber, lwM2mVersion, bindingMode, endpoint,
+                        registrationId, Arrays.toString(objectLinks), lastUpdate, failedLastRequest);
     }
 }

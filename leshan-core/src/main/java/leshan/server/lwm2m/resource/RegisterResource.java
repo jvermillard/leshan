@@ -130,7 +130,7 @@ public class RegisterResource extends ResourceBase {
                 Client client = new Client(registrationId, endpoint, request.getSource(), request.getSourcePort(),
                         lwVersion, lifetime, smsNumber, binding, objectLinks);
 
-                this.registry.registerClient(client);
+                registry.registerClient(client);
                 LOG.debug("New registered client: {}", client);
 
                 exchange.setLocationPath(RESOURCE_NAME + "/" + client.getRegistrationId());
@@ -170,7 +170,7 @@ public class RegisterResource extends ResourceBase {
         Long lifetime = null;
         String smsNumber = null;
         BindingMode binding = null;
-        String [] objectLinks = null;
+        String[] objectLinks = null;
 
         for (String param : request.getOptions().getURIQueries()) {
             if (param.startsWith(QUERY_PARAM_LIFETIME)) {
@@ -186,11 +186,11 @@ public class RegisterResource extends ResourceBase {
             objectLinks = new String(request.getPayload(), Charsets.UTF_8).split(",");
         }
 
-        ClientUpdate client = new ClientUpdate(registrationId, request.getSource(), request.getSourcePort(),
-                lifetime, smsNumber, binding, objectLinks);
+        ClientUpdate client = new ClientUpdate(registrationId, request.getSource(), request.getSourcePort(), lifetime,
+                smsNumber, binding, objectLinks);
 
         try {
-            Client c = this.registry.updateClient(client);
+            Client c = registry.updateClient(client);
             if (c == null) {
                 exchange.respond(ResponseCode.NOT_FOUND);
             } else {
@@ -212,7 +212,7 @@ public class RegisterResource extends ResourceBase {
 
         try {
             if (uri != null && uri.size() == 2 && RESOURCE_NAME.equals(uri.get(0))) {
-                unregistered = this.registry.deregisterClient(uri.get(1));
+                unregistered = registry.deregisterClient(uri.get(1));
             }
 
             if (unregistered != null) {

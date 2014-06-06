@@ -39,6 +39,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,39 +56,37 @@ public class ClientRegistryImpl implements ClientRegistry {
 
     @Override
     public void addListener(RegistryListener listener) {
-        this.listeners.add(listener);
+        listeners.add(listener);
     }
 
     @Override
     public void removeListener(RegistryListener listener) {
-        this.listeners.remove(listener);
+        listeners.remove(listener);
     }
 
     @Override
     public Collection<Client> allClients() {
-        return Collections.unmodifiableCollection(this.clientsByEp.values());
+        return Collections.unmodifiableCollection(clientsByEp.values());
     }
 
     @Override
     public Client get(String endpoint) {
-        return this.clientsByEp.get(endpoint);
+        return clientsByEp.get(endpoint);
     }
 
     @Override
     public Client registerClient(Client client) {
-        if (client == null) {
-            throw new NullPointerException("Client must not be null");
-        }
+        Validate.notNull(client);
 
         LOG.debug("Registering new client: {}", client);
 
-        Client previous = this.clientsByEp.put(client.getEndpoint(), client);
+        Client previous = clientsByEp.put(client.getEndpoint(), client);
         if (previous != null) {
-            for (RegistryListener l : this.listeners) {
+            for (RegistryListener l : listeners) {
                 l.unregistered(previous);
             }
         }
-        for (RegistryListener l : this.listeners) {
+        for (RegistryListener l : listeners) {
             l.registered(client);
         }
 
@@ -96,9 +95,7 @@ public class ClientRegistryImpl implements ClientRegistry {
 
     @Override
     public Client updateClient(ClientUpdate clientUpdated) {
-        if (clientUpdated == null) {
-            throw new NullPointerException("Client update must not be null");
-        }
+        Validate.notNull(clientUpdated);
 
         LOG.debug("Updating registration for client: {}", clientUpdated);
         Client client = findByRegistrationId(clientUpdated.getRegistrationId());
@@ -112,9 +109,7 @@ public class ClientRegistryImpl implements ClientRegistry {
 
     @Override
     public Client deregisterClient(String registrationId) {
-        if (registrationId == null) {
-            throw new NullPointerException("Registration ID must not be null");
-        }
+        Validate.notNull(registrationId);
 
         LOG.debug("Deregistering client with registrationId: {}", registrationId);
 
@@ -122,8 +117,8 @@ public class ClientRegistryImpl implements ClientRegistry {
         if (toBeUnregistered == null) {
             return null;
         } else {
-            Client unregistered = this.clientsByEp.remove(toBeUnregistered.getEndpoint());
-            for (RegistryListener l : this.listeners) {
+            Client unregistered = clientsByEp.remove(toBeUnregistered.getEndpoint());
+            for (RegistryListener l : listeners) {
                 l.unregistered(unregistered);
             }
             LOG.debug("Deregistered client: {}", unregistered);
@@ -134,7 +129,7 @@ public class ClientRegistryImpl implements ClientRegistry {
     private Client findByRegistrationId(String id) {
         Client result = null;
         if (id != null) {
-            for (Client client : this.clientsByEp.values()) {
+            for (Client client : clientsByEp.values()) {
                 if (id.equals(client.getRegistrationId())) {
                     result = client;
                     break;
@@ -150,15 +145,15 @@ public class ClientRegistryImpl implements ClientRegistry {
     public void start() {
         // every 2 seconds clean the registration list
         // TODO re-consider clean-up interval: wouldn't 5 minutes do as well?
-        this.schedExecutor.scheduleAtFixedRate(new Cleaner(), 2, 2, TimeUnit.SECONDS);
+        schedExecutor.scheduleAtFixedRate(new Cleaner(), 2, 2, TimeUnit.SECONDS);
     }
 
     /**
      * Stop the underlying cleanup of the registrations.
      */
     public void stop() throws InterruptedException {
-        this.schedExecutor.shutdownNow();
-        this.schedExecutor.awaitTermination(5, TimeUnit.SECONDS);
+        schedExecutor.shutdownNow();
+        schedExecutor.awaitTermination(5, TimeUnit.SECONDS);
     }
 
     private final ScheduledExecutorService schedExecutor = Executors.newScheduledThreadPool(1);
@@ -167,7 +162,7 @@ public class ClientRegistryImpl implements ClientRegistry {
 
         @Override
         public void run() {
-            for (Client client : ClientRegistryImpl.this.clientsByEp.values()) {
+            for (Client client : clientsByEp.values()) {
                 synchronized (client) {
                     if (!client.isAlive()) {
                         // force de-registration
