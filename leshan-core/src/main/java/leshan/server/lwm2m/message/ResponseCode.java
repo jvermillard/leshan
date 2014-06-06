@@ -9,31 +9,48 @@ import ch.ethz.inf.vs.californium.coap.CoAP;
  */
 public enum ResponseCode {
 
-    CREATED, DELETED, CHANGED, CONTENT, UNAUTHORIZED, BAD_REQUEST, METHOD_NOT_ALLOWED, CONFLICT, NOT_FOUND;
+    /** Resource correctly created */
+    CREATED,
+    /** Resource correctly deleted */
+    DELETED,
+    /** Resource correctly changed */
+    CHANGED,
+    /** Content correctly delivered */
+    CONTENT,
+    /** Operation not authorized */
+    UNAUTHORIZED,
+    /** Cannot fulfill the request, it's incorrect */
+    BAD_REQUEST,
+    /** This method (GET/PUT/POST/DELETE) is not allowed on this resource */
+    METHOD_NOT_ALLOWED,
+    /** The End-point Client Name results in a duplicate entry on the LWM2M Server */
+    CONFLICT,
+    /** Resource not found */
+    NOT_FOUND;
 
-    public static ResponseCode fromCoapCode(CoAP.ResponseCode code) {
+    public static ResponseCode fromCoapCode(int code) {
         Validate.notNull(code);
 
-        switch (code) {
-        case CREATED:
+        if (code == CoAP.ResponseCode.CREATED.value) {
             return CREATED;
-        case DELETED:
+        } else if (code == CoAP.ResponseCode.DELETED.value) {
             return DELETED;
-        case CHANGED:
+        } else if (code == CoAP.ResponseCode.CHANGED.value) {
             return CHANGED;
-        case CONTENT:
+        } else if (code == CoAP.ResponseCode.CONTENT.value) {
             return CONTENT;
-        case BAD_REQUEST:
+        } else if (code == CoAP.ResponseCode.BAD_REQUEST.value) {
             return BAD_REQUEST;
-        case UNAUTHORIZED:
+        } else if (code == CoAP.ResponseCode.UNAUTHORIZED.value) {
             return UNAUTHORIZED;
-        case NOT_FOUND:
+        } else if (code == CoAP.ResponseCode.NOT_FOUND.value) {
             return NOT_FOUND;
-        case METHOD_NOT_ALLOWED:
+        } else if (code == CoAP.ResponseCode.METHOD_NOT_ALLOWED.value) {
             return METHOD_NOT_ALLOWED;
-        default:
+        } else if (code == 137) {
+            return CONFLICT;
+        } else {
             throw new IllegalArgumentException("Invalid CoAP code for LWM2M response: " + code);
         }
     }
-
 }
