@@ -3,7 +3,7 @@
 /* App Module */
 
 var lwClientApp = angular.module('lwClientApp', [ 'ngRoute',
-        'lwClientControllers', 'lwResourcesDirective', 'ui.bootstrap']);
+        'lwClientControllers', 'lwResourcesDirective', 'lwResourcesServices', 'ui.bootstrap']);
 
 lwClientApp.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
 
