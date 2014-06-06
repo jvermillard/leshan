@@ -70,9 +70,10 @@ lwClientControllers.controller('ClientDetailCtrl', [
             // update resource tree with client details
             var tree = buildResourceTree($scope.client.objectLinks, lwResources.getModel())
             $scope.lwresources = tree;
-        }). error(function(data, status, headers, config) {
-            console.error("Unable get client",$routeParams.clientId, ":", status, data)
-        });;
+        }).error(function(data, status, headers, config) {
+            $scope.error = "Unable get client " + $routeParams.clientId+" : "+ status + " " + data  
+            console.error($scope.error)
+        });
 
         var buildResourceTree = function(objectLinks, lwResources) {
             var tree = [];

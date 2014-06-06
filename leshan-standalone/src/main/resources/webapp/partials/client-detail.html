@@ -2,8 +2,8 @@
 	<resourceslist list='lwresources'></resourceslist>
 </div>
 
-<div ng-if='!client'>
-	<h4>Client <b>{{clientId}}</b> not registered</h4>
+<div ng-if='error'>
+	<div class="alert alert-danger">{{error}}</div>
 </div>
 
 <!-- Write modal -->
