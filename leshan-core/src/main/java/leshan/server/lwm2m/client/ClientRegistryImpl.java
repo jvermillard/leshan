@@ -168,9 +168,11 @@ public class ClientRegistryImpl implements ClientRegistry {
         @Override
         public void run() {
             for (Client client : ClientRegistryImpl.this.clientsByEp.values()) {
-                if (!client.isAlive()) {
-                    // force de-registration
-                    deregisterClient(client.getRegistrationId());
+                synchronized (client) {
+                    if (!client.isAlive()) {
+                        // force de-registration
+                        deregisterClient(client.getRegistrationId());
+                    }
                 }
             }
         }

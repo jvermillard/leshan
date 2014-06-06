@@ -44,6 +44,7 @@ import leshan.server.lwm2m.message.ObserveResponse;
 import leshan.server.lwm2m.message.OperationType;
 import leshan.server.lwm2m.message.ReadRequest;
 import leshan.server.lwm2m.message.RequestHandler;
+import leshan.server.lwm2m.message.RequestTimeoutException;
 import leshan.server.lwm2m.message.ResourceAccessException;
 import leshan.server.lwm2m.message.ResourceSpec;
 import leshan.server.lwm2m.message.ResponseCode;
@@ -57,6 +58,7 @@ import org.slf4j.LoggerFactory;
 import ch.ethz.inf.vs.californium.coap.MediaTypeRegistry;
 import ch.ethz.inf.vs.californium.coap.Request;
 import ch.ethz.inf.vs.californium.coap.Response;
+import ch.ethz.inf.vs.californium.network.Endpoint;
 
 /**
  * A handler in charge of sending server-initiated requests to registered clients.
@@ -67,7 +69,10 @@ import ch.ethz.inf.vs.californium.coap.Response;
 public final class CaliforniumBasedRequestHandler implements RequestHandler, RegistryListener {
 
     private static final Logger LOG = LoggerFactory.getLogger(CaliforniumBasedRequestHandler.class);
-    private final CoapClient endpoint;
+    private static final int COAP_REQUEST_TIMEOUT_MILLIS = 5000;
+
+    private final Endpoint endpoint;
+    private final int timeoutMillis;
     private final ObservationRegistry observationRegistry;
 
     /**
@@ -76,7 +81,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
      * @param endpoint the CoAP endpoint to use for sending requests
      * @throws NullPointerException if the endpoint is <code>null</code>
      */
-    public CaliforniumBasedRequestHandler(CoapClient endpoint) {
+    public CaliforniumBasedRequestHandler(Endpoint endpoint) {
         this(endpoint, null);
     }
 
@@ -88,7 +93,20 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
      *        of {@link InMemoryObservationRegistry} is used
      * @throws NullPointerException if the endpoint is <code>null</code>
      */
-    public CaliforniumBasedRequestHandler(CoapClient endpoint, ObservationRegistry observationRegistry) {
+    public CaliforniumBasedRequestHandler(Endpoint endpoint, ObservationRegistry observationRegistry) {
+        this(endpoint, observationRegistry, COAP_REQUEST_TIMEOUT_MILLIS);
+    }
+
+    /**
+     * Sets required collaborators.
+     * 
+     * @param endpoint the CoAP endpoint to use for sending requests
+     * @param observationRegistry the registry for keeping track of observed resources, if <code>null</code> an instance
+     *        of {@link InMemoryObservationRegistry} is used
+     * @param timeoutMillis timeout for CoAP request
+     * @throws NullPointerException if the endpoint is <code>null</code>
+     */
+    public CaliforniumBasedRequestHandler(Endpoint endpoint, ObservationRegistry observationRegistry, int timeoutMillis) {
         if (endpoint == null) {
             throw new NullPointerException("CoAP Endpoint must not be null");
         }
@@ -97,6 +115,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
         } else {
             this.observationRegistry = observationRegistry;
         }
+        this.timeoutMillis = timeoutMillis;
         this.endpoint = endpoint;
     }
 
@@ -319,8 +338,23 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
         if (LOG.isTraceEnabled()) {
             LOG.trace("Sending {}", request);
         }
-        Response coapResponse = this.endpoint.send(coapRequest, operationType);
-        return coapResponse;
+
+        this.endpoint.sendRequest(coapRequest);
+        Response coapResponse = null;
+        try {
+            coapResponse = coapRequest.waitForResponse(this.timeoutMillis);
+        } catch (InterruptedException e) {
+            // no idea why some other thread should have interrupted this thread
+            // but anyway, go ahead as if the timeout had been reached
+            LOG.debug("Caught an unexpected InterruptedException during execution of CoAP request", e);
+        }
+
+        if (coapResponse == null) {
+            request.getClient().markLastRequestFailed();
+            throw new RequestTimeoutException(coapRequest.getURI(), this.timeoutMillis);
+        } else {
+            return coapResponse;
+        }
     }
 
     /**

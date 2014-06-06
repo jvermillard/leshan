@@ -74,12 +74,12 @@ public class Client {
     }
 
     public Client(String registrationId, String endpoint, InetAddress address, int port, String lwM2mVersion,
-            Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks) {
+                  Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks) {
         this(registrationId, endpoint, address, port, lwM2mVersion, lifetime, smsNumber, binding, objectLinks, null);
     }
 
     public Client(String registrationId, String endpoint, InetAddress address, int port, String lwM2mVersion,
-            Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks, Date registrationDate) {
+                  Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks, Date registrationDate) {
 
         Validate.notEmpty(endpoint);
         Validate.notNull(address);
@@ -122,7 +122,7 @@ public class Client {
         this.objectLinks = objectLinks;
     }
 
-    public long getLifeTimeInSec() {
+    public synchronized long getLifeTimeInSec() {
         return this.lifeTimeInSec;
     }
 
@@ -162,19 +162,19 @@ public class Client {
         this.bindingMode = bindingMode;
     }
 
-    public Date getLastUpdate() {
+    public synchronized Date getLastUpdate() {
         return this.lastUpdate;
     }
 
-    void setLastUpdate(Date lastUpdate) {
+    synchronized void setLastUpdate(Date lastUpdate) {
         this.lastUpdate = lastUpdate;
     }
 
-    public void markLastRequestFailed() {
+    public synchronized void markLastRequestFailed() {
         this.failedLastRequest = true;
     }
 
-    public boolean isAlive() {
+    public synchronized boolean isAlive() {
         return this.failedLastRequest ? false : this.lastUpdate.getTime() + this.lifeTimeInSec * 1000 > System
                 .currentTimeMillis();
     }
