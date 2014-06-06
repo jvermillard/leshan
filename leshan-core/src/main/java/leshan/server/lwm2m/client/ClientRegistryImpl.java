@@ -30,7 +30,7 @@
 package leshan.server.lwm2m.client;
 
 import java.util.Collection;
-import java.util.Date;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,7 +39,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +65,7 @@ public class ClientRegistryImpl implements ClientRegistry {
 
     @Override
     public Collection<Client> allClients() {
-        return this.clientsByEp.values();
+        return Collections.unmodifiableCollection(this.clientsByEp.values());
     }
 
     @Override
@@ -76,6 +75,10 @@ public class ClientRegistryImpl implements ClientRegistry {
 
     @Override
     public Client registerClient(Client client) {
+        if (client == null) {
+            throw new NullPointerException("Client must not be null");
+        }
+
         LOG.debug("Registering new client: {}", client);
 
         Client previous = this.clientsByEp.put(client.getEndpoint(), client);
@@ -93,44 +96,26 @@ public class ClientRegistryImpl implements ClientRegistry {
 
     @Override
     public Client updateClient(ClientUpdate clientUpdated) {
+        if (clientUpdated == null) {
+            throw new NullPointerException("Client update must not be null");
+        }
+
         LOG.debug("Updating registration for client: {}", clientUpdated);
         Client client = findByRegistrationId(clientUpdated.getRegistrationId());
         if (client == null) {
             return null;
         } else {
-            // update client
-            if (clientUpdated.getAddress() != null) {
-                client.setAddress(clientUpdated.getAddress());
-            }
-
-            if (clientUpdated.getPort() > 0) {
-                client.setPort(clientUpdated.getPort());
-            }
-
-            if (clientUpdated.getObjectLinks() != null) {
-                client.setObjectLinks(clientUpdated.getObjectLinks());
-            }
-
-            if (clientUpdated.getLifeTimeInSec() != null) {
-                client.setLifeTimeInSec(clientUpdated.getLifeTimeInSec());
-            }
-
-            if (clientUpdated.getBindingMode() != null) {
-                client.setBindingMode(clientUpdated.getBindingMode());
-            }
-
-            if (clientUpdated.getSmsNumber() != null) {
-                client.setSmsNumber(clientUpdated.getSmsNumber());
-            }
-
-            client.setLastUpdate(new Date());
+            clientUpdated.apply(client);
             return client;
         }
     }
 
     @Override
     public Client deregisterClient(String registrationId) {
-        Validate.notNull(registrationId);
+        if (registrationId == null) {
+            throw new NullPointerException("Registration ID must not be null");
+        }
+
         LOG.debug("Deregistering client with registrationId: {}", registrationId);
 
         Client toBeUnregistered = findByRegistrationId(registrationId);

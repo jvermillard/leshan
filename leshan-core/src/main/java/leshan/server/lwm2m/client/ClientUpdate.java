@@ -117,6 +117,47 @@ public class ClientUpdate {
         return this.bindingMode;
     }
 
+    /**
+     * Applies the registration property changes to a given client registration object.
+     * 
+     * @param client the registration to apply the changes to
+     * @throws NullPointerException if the given client registration is <code>null</code>
+     */
+    public void apply(Client client) {
+
+        if (client == null) {
+            throw new NullPointerException("Client must not be null");
+        }
+
+        if (getAddress() != null) {
+            client.setAddress(getAddress());
+        }
+
+        if (getPort() > 0) {
+            client.setPort(getPort());
+        }
+
+        if (getObjectLinks() != null) {
+            client.setObjectLinks(getObjectLinks());
+        }
+
+        if (getLifeTimeInSec() != null) {
+            client.setLifeTimeInSec(getLifeTimeInSec());
+        }
+
+        if (getBindingMode() != null) {
+            client.setBindingMode(getBindingMode());
+        }
+
+        if (getSmsNumber() != null) {
+            client.setSmsNumber(getSmsNumber());
+        }
+
+        // this needs to be done in any case, even if no properties have changed, in order
+        // to extend the client registration's time-to-live period ...
+        client.setLastUpdate(new Date());
+    }
+
     @Override
     public String toString() {
         StringBuffer b = new StringBuffer();

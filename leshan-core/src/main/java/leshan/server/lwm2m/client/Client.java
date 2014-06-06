@@ -54,7 +54,7 @@ public class Client {
 
     private String smsNumber;
 
-    private String lwM2mVersion;
+    private final String lwM2mVersion;
 
     private BindingMode bindingMode;
 
@@ -66,7 +66,7 @@ public class Client {
 
     private Date lastUpdate;
 
-    // does the client failed to answer the last server request
+    // true, if the client failed to answer the last server request
     private boolean failedLastRequest = false;
 
     public Client(String registrationId, String endpoint, InetAddress address, int port) {
@@ -99,79 +99,74 @@ public class Client {
     }
 
     public String getRegistrationId() {
-        return registrationId;
+        return this.registrationId;
     }
 
     public Date getRegistrationDate() {
-        return registrationDate;
+        return this.registrationDate;
     }
 
     public InetAddress getAddress() {
-        return address;
+        return this.address;
     }
 
     public int getPort() {
-        return port;
+        return this.port;
     }
 
     public String[] getObjectLinks() {
-        return objectLinks;
+        return this.objectLinks;
     }
 
-    public void setObjectLinks(String[] objectLinks) {
+    void setObjectLinks(String[] objectLinks) {
         this.objectLinks = objectLinks;
     }
 
     public long getLifeTimeInSec() {
-        return lifeTimeInSec;
+        return this.lifeTimeInSec;
     }
 
     public String getSmsNumber() {
-        return smsNumber;
+        return this.smsNumber;
     }
 
     public String getLwM2mVersion() {
-        return lwM2mVersion;
+        return this.lwM2mVersion;
     }
 
     public BindingMode getBindingMode() {
-        return bindingMode;
+        return this.bindingMode;
     }
 
     public String getEndpoint() {
-        return endpoint;
+        return this.endpoint;
     }
 
-    public void setAddress(InetAddress address) {
+    void setAddress(InetAddress address) {
         this.address = address;
     }
 
-    public void setPort(int port) {
+    void setPort(int port) {
         this.port = port;
     }
 
-    public void setLifeTimeInSec(long lifeTimeInSec) {
+    void setLifeTimeInSec(long lifeTimeInSec) {
         this.lifeTimeInSec = lifeTimeInSec;
     }
 
-    public void setSmsNumber(String smsNumber) {
+    void setSmsNumber(String smsNumber) {
         this.smsNumber = smsNumber;
     }
 
-    public void setLwM2mVersion(String lwM2mVersion) {
-        this.lwM2mVersion = lwM2mVersion;
-    }
-
-    public void setBindingMode(BindingMode bindingMode) {
+    void setBindingMode(BindingMode bindingMode) {
         this.bindingMode = bindingMode;
     }
 
     public Date getLastUpdate() {
-        return lastUpdate;
+        return this.lastUpdate;
     }
 
-    public void setLastUpdate(Date lastUpdate) {
-        // TODO should probably better be done "implicitly" as part of the other setters
+    void setLastUpdate(Date lastUpdate) {
         this.lastUpdate = lastUpdate;
     }
 
@@ -180,7 +175,7 @@ public class Client {
     }
 
     public boolean isAlive() {
-        return failedLastRequest ? false : this.lastUpdate.getTime() + this.lifeTimeInSec * 1000 > System
+        return this.failedLastRequest ? false : this.lastUpdate.getTime() + this.lifeTimeInSec * 1000 > System
                 .currentTimeMillis();
     }
 
@@ -188,7 +183,7 @@ public class Client {
     public String toString() {
         return String
                 .format("Client [registrationDate=%s, address=%s, port=%s, lifeTimeInSec=%s, smsNumber=%s, lwM2mVersion=%s, bindingMode=%s, endpoint=%s, registrationId=%s, objectLinks=%s, lastUpdate=%s, failedLastRequest=%s]",
-                        registrationDate, address, port, lifeTimeInSec, smsNumber, lwM2mVersion, bindingMode, endpoint,
-                        registrationId, Arrays.toString(objectLinks), lastUpdate, failedLastRequest);
+                        this.registrationDate, this.address, this.port, this.lifeTimeInSec, this.smsNumber, this.lwM2mVersion, this.bindingMode, this.endpoint,
+                        this.registrationId, Arrays.toString(this.objectLinks), this.lastUpdate, this.failedLastRequest);
     }
 }

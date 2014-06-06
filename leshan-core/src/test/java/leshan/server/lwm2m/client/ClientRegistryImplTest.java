@@ -46,6 +46,7 @@ public class ClientRegistryImplTest {
     BindingMode binding = BindingMode.UQS;
     String[] objectLinks = new String[] { "</3>" };
     String registrationId = "4711";
+    Client client;
 
     @Before
     public void setUp() throws Exception {
@@ -56,17 +57,39 @@ public class ClientRegistryImplTest {
 
     @Test
     public void testUpdateClientKeepsUnchangedProperties() {
-        Client client = new Client(this.registrationId, this.ep, this.address, this.port, null, this.lifetime,
-                this.sms, this.binding, this.objectLinks, null);
-        this.registry.registerClient(client);
+        givenASimpleClient(this.lifetime);
+        this.registry.registerClient(this.client);
 
-        ClientUpdate updatedClient = new ClientUpdate(this.registrationId, this.address, this.port);
-        this.registry.updateClient(updatedClient);
+        ClientUpdate clientUpdate = new ClientUpdate(this.registrationId, this.address, this.port);
+        this.registry.updateClient(clientUpdate);
 
-        client = this.registry.get(this.ep);
-        Assert.assertEquals((long) this.lifetime, client.getLifeTimeInSec());
-        Assert.assertSame(this.binding, client.getBindingMode());
-        Assert.assertEquals(this.sms, client.getSmsNumber());
+        Client registeredClient = this.registry.get(this.ep);
+        Assert.assertEquals((long) this.lifetime, registeredClient.getLifeTimeInSec());
+        Assert.assertSame(this.binding, registeredClient.getBindingMode());
+        Assert.assertEquals(this.sms, registeredClient.getSmsNumber());
     }
 
+    @Test
+    public void testRegisterClientSetsTimeToLive() {
+        givenASimpleClient(this.lifetime);
+        this.registry.registerClient(this.client);
+        Assert.assertTrue(this.client.isAlive());
+    }
+
+    @Test
+    public void testUpdateClientExtendsTimeToLive() {
+        givenASimpleClient(0L);
+        this.registry.registerClient(this.client);
+        Assert.assertFalse(this.client.isAlive());
+
+        ClientUpdate clientUpdate = new ClientUpdate(this.registrationId, this.address, this.port, this.lifetime, null,
+                null, null);
+        this.registry.updateClient(clientUpdate);
+        Assert.assertTrue(this.client.isAlive());
+    }
+
+    private void givenASimpleClient(Long lifetime) {
+        this.client = new Client(this.registrationId, this.ep, this.address, this.port, null, lifetime, this.sms,
+                this.binding, this.objectLinks, null);
+    }
 }
