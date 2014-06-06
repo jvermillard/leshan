@@ -61,7 +61,7 @@ public class Client implements Serializable {
 
     private String smsNumber;
 
-    private String lwM2mVersion;
+    private final String lwM2mVersion;
 
     private BindingMode bindingMode;
 
@@ -73,7 +73,7 @@ public class Client implements Serializable {
 
     private Date lastUpdate;
 
-    // does the client failed to answer the last server request
+    // true, if the client failed to answer the last server request
     private boolean failedLastRequest = false;
 
     public Client(String registrationId, String endpoint, InetAddress address, int port) {
@@ -81,12 +81,12 @@ public class Client implements Serializable {
     }
 
     public Client(String registrationId, String endpoint, InetAddress address, int port, String lwM2mVersion,
-            Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks) {
+                  Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks) {
         this(registrationId, endpoint, address, port, lwM2mVersion, lifetime, smsNumber, binding, objectLinks, null);
     }
 
     public Client(String registrationId, String endpoint, InetAddress address, int port, String lwM2mVersion,
-            Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks, Date registrationDate) {
+                  Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks, Date registrationDate) {
 
         Validate.notEmpty(endpoint);
         Validate.notNull(address);
@@ -125,7 +125,7 @@ public class Client implements Serializable {
         return this.objectLinks;
     }
 
-    public void setObjectLinks(String[] objectLinks) {
+    void setObjectLinks(String[] objectLinks) {
         this.objectLinks = objectLinks;
     }
 
@@ -149,27 +149,23 @@ public class Client implements Serializable {
         return this.endpoint;
     }
 
-    public void setAddress(InetAddress address) {
+    void setAddress(InetAddress address) {
         this.address = address;
     }
 
-    public void setPort(int port) {
+    void setPort(int port) {
         this.port = port;
     }
 
-    public void setLifeTimeInSec(long lifeTimeInSec) {
+    void setLifeTimeInSec(long lifeTimeInSec) {
         this.lifeTimeInSec = lifeTimeInSec;
     }
 
-    public void setSmsNumber(String smsNumber) {
+    void setSmsNumber(String smsNumber) {
         this.smsNumber = smsNumber;
     }
 
-    public void setLwM2mVersion(String lwM2mVersion) {
-        this.lwM2mVersion = lwM2mVersion;
-    }
-
-    public void setBindingMode(BindingMode bindingMode) {
+    void setBindingMode(BindingMode bindingMode) {
         this.bindingMode = bindingMode;
     }
 
@@ -177,8 +173,7 @@ public class Client implements Serializable {
         return this.lastUpdate;
     }
 
-    public synchronized void setLastUpdate(Date lastUpdate) {
-        // TODO should probably better be done "implicitly" as part of the other setters
+    synchronized void setLastUpdate(Date lastUpdate) {
         this.lastUpdate = lastUpdate;
     }
 
