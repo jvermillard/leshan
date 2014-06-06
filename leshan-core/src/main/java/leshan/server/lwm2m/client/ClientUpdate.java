@@ -34,13 +34,17 @@ import java.util.Arrays;
 import java.util.Date;
 
 /**
- * A container object for updating a LW-M2M client's registration properties on the server.
+ * A container object for updating a LW-M2M client's registration properties on
+ * the server.
+ * 
+ * According to the LWM2M spec only those properties need to be set that have
+ * changed and thus should be updated on the server.
  */
 public class ClientUpdate {
 
     private final InetAddress address;
 
-    private final int port;
+    private final Integer port;
 
     private final Long lifeTimeInSec;
 
@@ -52,30 +56,33 @@ public class ClientUpdate {
 
     private final String[] objectLinks;
 
-    public ClientUpdate(String registrationId, InetAddress address, int port) {
+    public ClientUpdate(String registrationId, InetAddress address, Integer port) {
         this(registrationId, address, port, null, null, null, null);
     }
 
-    public ClientUpdate(String registrationId, InetAddress address, int port, Long lifetime,
-            String smsNumber, BindingMode binding, String[] objectLinks) {
+    public ClientUpdate(String registrationId, InetAddress address, Integer port, Long lifetime,
+                        String smsNumber, BindingMode binding, String[] objectLinks) {
         this(registrationId, address, port, lifetime, smsNumber, binding, objectLinks, null);
     }
 
     /**
      * Sets all fields.
      * 
-     * @param registrationId
-     * @param address
-     * @param port
-     * @param lifetime
-     * @param smsNumber
-     * @param binding
-     * @param objectLinks
-     * @param registrationDate
+     * @param registrationId the ID under which the client is registered
+     * @param address the client's host name or IP address
+     * @param port the UDP port the client uses for communication
+     * @param lifetime the number of seconds the client would like its
+     *            registration to be valid
+     * @param smsNumber the SMS number the client can receive messages under
+     * @param binding the binding mode(s) the client supports
+     * @param objectLinks the objects and object instances the client
+     *            hosts/supports
+     * @param registrationDate the point in time the client registered with the
+     *            server (?)
      * @throws NullPointerException if the registration ID is <code>null</code>
      */
-    public ClientUpdate(String registrationId, InetAddress address, int port, Long lifetime,
-            String smsNumber, BindingMode binding, String[] objectLinks, Date registrationDate) {
+    public ClientUpdate(String registrationId, InetAddress address, Integer port, Long lifetime,
+                        String smsNumber, BindingMode binding, String[] objectLinks, Date registrationDate) {
 
         if (registrationId == null) {
             throw new NullPointerException("Registration ID must not be null");
@@ -97,7 +104,7 @@ public class ClientUpdate {
         return this.address;
     }
 
-    public int getPort() {
+    public Integer getPort() {
         return this.port;
     }
 
@@ -133,7 +140,7 @@ public class ClientUpdate {
             client.setAddress(getAddress());
         }
 
-        if (getPort() > 0) {
+        if (getPort() != null) {
             client.setPort(getPort());
         }
 
