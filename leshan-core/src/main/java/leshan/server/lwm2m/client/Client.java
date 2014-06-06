@@ -54,7 +54,7 @@ public class Client {
 
     private String smsNumber;
 
-    private String lwM2mVersion;
+    private final String lwM2mVersion;
 
     private BindingMode bindingMode;
 
@@ -66,7 +66,7 @@ public class Client {
 
     private Date lastUpdate;
 
-    // does the client failed to answer the last server request
+    // true, if the client failed to answer the last server request
     private boolean failedLastRequest = false;
 
     public Client(String registrationId, String endpoint, InetAddress address, int port) {
@@ -118,12 +118,12 @@ public class Client {
         return objectLinks;
     }
 
-    public void setObjectLinks(String[] objectLinks) {
+    void setObjectLinks(String[] objectLinks) {
         this.objectLinks = objectLinks;
     }
 
     public synchronized long getLifeTimeInSec() {
-        return lifeTimeInSec;
+        return this.lifeTimeInSec;
     }
 
     public String getSmsNumber() {
@@ -142,27 +142,23 @@ public class Client {
         return endpoint;
     }
 
-    public void setAddress(InetAddress address) {
+    void setAddress(InetAddress address) {
         this.address = address;
     }
 
-    public void setPort(int port) {
+    void setPort(int port) {
         this.port = port;
     }
 
-    public void setLifeTimeInSec(long lifeTimeInSec) {
+    void setLifeTimeInSec(long lifeTimeInSec) {
         this.lifeTimeInSec = lifeTimeInSec;
     }
 
-    public void setSmsNumber(String smsNumber) {
+    void setSmsNumber(String smsNumber) {
         this.smsNumber = smsNumber;
     }
 
-    public void setLwM2mVersion(String lwM2mVersion) {
-        this.lwM2mVersion = lwM2mVersion;
-    }
-
-    public void setBindingMode(BindingMode bindingMode) {
+    void setBindingMode(BindingMode bindingMode) {
         this.bindingMode = bindingMode;
     }
 
@@ -170,18 +166,16 @@ public class Client {
         return lastUpdate;
     }
 
-    public synchronized void setLastUpdate(Date lastUpdate) {
-        // TODO should probably better be done "implicitly" as part of the other setters
+    synchronized void setLastUpdate(Date lastUpdate) {
         this.lastUpdate = lastUpdate;
     }
 
     public synchronized void markLastRequestFailed() {
-        this.failedLastRequest = true;
+        failedLastRequest = true;
     }
 
     public synchronized boolean isAlive() {
-        return failedLastRequest ? false : this.lastUpdate.getTime() + this.lifeTimeInSec * 1000 > System
-                .currentTimeMillis();
+        return failedLastRequest ? false : lastUpdate.getTime() + lifeTimeInSec * 1000 > System.currentTimeMillis();
     }
 
     @Override

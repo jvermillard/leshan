@@ -37,16 +37,16 @@ import java.util.Collection;
 public interface ClientRegistry {
 
     /**
-     * Retrieve a {@link Client} by endpoint.
-     *
+     * Retrieves a {@link Client} by endpoint.
+     * 
      * @param endpoint
      * @return the matching client or <code>null</code> if not found
      */
     Client get(String endpoint);
 
     /**
-     * Return the list of all registered clients
-     *
+     * Returns an unmodifiable list of all registered clients.
+     * 
      * @return the registered clients
      */
     Collection<Client> allClients();
@@ -67,7 +67,7 @@ public interface ClientRegistry {
 
     /**
      * Register a new client
-     *
+     * 
      * @param client the client to register, identified by its end-point.
      * @return the previously registered client with this end-point or <code>null</code> if this is a new client.
      * @throws ClientRegistrationException when the client registration has failed
@@ -76,7 +76,7 @@ public interface ClientRegistry {
 
     /**
      * Update a client registration
-     *
+     * 
      * @param client the client containing the values to update
      * @return the registered client or <code>null</code>
      * @throws ClientRegistrationException when the registration update has failed
@@ -85,7 +85,7 @@ public interface ClientRegistry {
 
     /**
      * De-register a client.
-     *
+     * 
      * @param registrationId the client registrationId
      * @return the previously registered client or <code>null</code>
      * @throws ClientRegistrationException when the client de-registation has failed
