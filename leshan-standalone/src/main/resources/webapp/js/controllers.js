@@ -166,6 +166,7 @@ lwClientControllers.controller('ClientDetailCtrl', [
                     }
                 }
             }
+        }
 
         var findResource = function(resourceId, resourceTree) {
         	if (resourceId) {
