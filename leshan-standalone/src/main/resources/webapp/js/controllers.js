@@ -58,8 +58,9 @@ lwClientControllers.controller('ClientDetailCtrl', [
     '$location',
     '$routeParams',
     '$http',
+    '$filter',
     'lwResources',
-    function($scope, $location, $routeParams, $http, lwResources) {
+    function($scope, $location, $routeParams, $http, $filter, lwResources) {
         // free resource when controller is destroyed
         $scope.$on('$destroy', function(){
             if ($scope.eventsource){
@@ -166,4 +167,39 @@ lwClientControllers.controller('ClientDetailCtrl', [
                 }
             }
         }
-}]);
+
+        var findResource = function(resourceId, resourceTree) {
+        	if (resourceId) {
+            	var nodeId = resourceId.shift();
+            	var node = findNode(nodeId, resourceTree);
+            	if (node && resourceId.length > 0) {
+            		return findResource(resourceId, node.values);
+            	} else {
+            		return node;
+            	}                	
+        	}
+        }
+        
+        // listen for notifications from client
+        var source = new EventSource('event?ep=' + $routeParams.clientId);
+        
+        var notificationCallback = function(msg) {
+            $scope.$apply(function() {
+                var content = JSON.parse(msg.data);
+                var resourceId = content.res.split("/");
+                var resource = findResource(resourceId, $scope.lwresources);
+                if (resource) {
+                    resource.observe.status = true;
+                	resource.read.value = content.val;
+                	resource.read.status = "CONTENT";
+                    resource.read.date = new Date();
+                    var formattedDate = $filter('date')(resource.read.date, 'HH:mm:ss.sss');
+                    resource.read.tooltip = formattedDate + " " + resource.read.status;
+                	resource.write.value = null;
+                }
+            });
+        }
+        source.addEventListener('NOTIFICATION', notificationCallback, false);
+
+
+} ]);

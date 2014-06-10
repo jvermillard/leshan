@@ -34,10 +34,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Date;
 
-import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ContentFormat;
 import leshan.server.lwm2m.message.CreateRequest;
@@ -68,7 +65,7 @@ import ch.ethz.inf.vs.californium.coap.Request;
 import ch.ethz.inf.vs.californium.coap.Response;
 import ch.ethz.inf.vs.californium.network.Endpoint;
 
-public class CaliforniumBasedRequestHandlerTest {
+public class CaliforniumBasedRequestHandlerTest extends BasicTestSupport {
 
     private static final Integer OBJECT_ID_DEVICE = 3;
 
@@ -76,9 +73,6 @@ public class CaliforniumBasedRequestHandlerTest {
 
     Endpoint coapEndpoint;
     CaliforniumBasedRequestHandler requestHandler;
-    Client client;
-    InetAddress destination;
-    int destinationPort = 5000;
     InMemoryObservationRegistry observationRegistry;
 
     @Before
@@ -228,13 +222,9 @@ public class CaliforniumBasedRequestHandlerTest {
         Assert.fail("Request should have timed out with exception");
     }
 
-    private void givenASimpleClient() throws UnknownHostException {
-        this.client = new Client("ID", "urn:client", this.destination, this.destinationPort, "1.0", 10000L, null, null,
-                null, new Date());
-    }
-
     private void ifTheClientReturns(final Response coapResponse) {
         doAnswer(new Answer<Void>() {
+            @Override
             public Void answer(InvocationOnMock invocation) {
                 Object[] args = invocation.getArguments();
                 if (args.length > 0 && args[0] instanceof Request) {

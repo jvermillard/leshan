@@ -33,8 +33,6 @@ import leshan.server.lwm2m.client.Client;
 
 public interface Observation {
 
-    String getId();
-
     Integer getObjectId();
 
     Integer getObjectInstanceId();

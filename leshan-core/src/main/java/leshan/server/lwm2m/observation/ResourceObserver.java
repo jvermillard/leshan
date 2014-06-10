@@ -29,6 +29,9 @@
  */
 package leshan.server.lwm2m.observation;
 
+import leshan.server.lwm2m.message.ContentFormat;
+import leshan.server.lwm2m.message.ResourceSpec;
+
 /**
  * An observer of resources provided by a LWM2M Client.
  * 
@@ -40,10 +43,7 @@ public interface ResourceObserver {
      * 
      * @param content the updated resource value
      * @param contentFormat the format of the value
-     * @param observationId the ID of the observation this notification is due
-     *            to. The observer can use this ID to cancel the observation
-     *            using the
-     *            {@link ObservationRegistry#cancelObservation(String)} method
+     * @param target the observed resource on the LWM2MClient
      */
-    void notify(byte[] content, int contentFormat, String observationId);
+    void notify(byte[] content, ContentFormat contentFormat, ResourceSpec target);
 }
