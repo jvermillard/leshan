@@ -37,7 +37,7 @@ import java.util.Collection;
 public interface ClientRegistry {
 
     /**
-     * Retrieves a {@link Client} by endpoint.
+     * Retrieves a registered client by end-point.
      * 
      * @param endpoint
      * @return the matching client or <code>null</code> if not found
@@ -52,43 +52,57 @@ public interface ClientRegistry {
     Collection<Client> allClients();
 
     /**
-     * Add a new listener to be notified with client registration events.
-     *
+     * Adds a new listener to be notified with client registration events.
+     * 
      * @param listener
      */
     void addListener(RegistryListener listener);
 
     /**
-     * Remove a client registration listener.
-     *
+     * Removes a client registration listener.
+     * 
      * @param listener the listener to be removed
      */
     void removeListener(RegistryListener listener);
 
     /**
-     * Register a new client
+     * Registers a new client.
+     * 
+     * An implementation must notify all registered listeners as part of
+     * processing the registration request.
      * 
      * @param client the client to register, identified by its end-point.
-     * @return the previously registered client with this end-point or <code>null</code> if this is a new client.
-     * @throws ClientRegistrationException when the client registration has failed
+     * @return any <em>stale</em> registration information for the given
+     *         client's end-point name or <code>null</code> if no stale
+     *         registration info exists for the end-point. This may happen, if a
+     *         client somehow loses track of its registration status with this
+     *         server and simply starts over with a new registration request in
+     *         order to remedy the situation. According to the LWM2M spec an
+     *         implementation must remove the <em>stale</em> registration
+     *         information in this case.
+     * @throws ClientRegistrationException if registration fails
      */
     Client registerClient(Client client) throws ClientRegistrationException;
 
     /**
-     * Update a client registration
+     * Updates registration properties for a given client.
      * 
-     * @param client the client containing the values to update
-     * @return the registered client or <code>null</code>
-     * @throws ClientRegistrationException when the registration update has failed
+     * @param client the registration properties to update
+     * @return the updated registered client or <code>null</code> if no client
+     *         is registered under the given end-point name
+     * @throws ClientRegistrationException when the registration update has
+     *             failed
      */
     Client updateClient(ClientUpdate update) throws ClientRegistrationException;
 
     /**
-     * De-register a client.
+     * De-registers a client.
      * 
      * @param registrationId the client registrationId
-     * @return the previously registered client or <code>null</code>
-     * @throws ClientRegistrationException when the client de-registation has failed
+     * @return the previously registered client or <code>null</code> if no
+     *         client is registered under the given ID
+     * @throws ClientRegistrationException when the client de-registation has
+     *             failed
      */
     Client deregisterClient(String registrationId) throws ClientRegistrationException;
 }
