@@ -128,12 +128,12 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
         Response coapResponse = send(request, coapRequest, OperationType.READ);
         switch (coapResponse.getCode()) {
         case CONTENT:
-            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode()), coapResponse.getPayload(),
-                    ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()));
+            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value),
+                    coapResponse.getPayload(), ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()));
         case UNAUTHORIZED:
         case NOT_FOUND:
         case METHOD_NOT_ALLOWED:
-            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode()));
+            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value));
         default:
             handleUnexpectedResponseCode(request, coapRequest, coapResponse);
             return null;
@@ -154,11 +154,12 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
                         request.getClient().getEndpoint(), MediaTypeRegistry.APPLICATION_LINK_FORMAT, coapResponse
                         .getOptions().getContentFormat());
             }
-            return new DiscoverResponse(ResponseCode.fromCoapCode(coapResponse.getCode()), coapResponse.getPayload());
+            return new DiscoverResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value),
+                    coapResponse.getPayload());
         case NOT_FOUND:
         case UNAUTHORIZED:
         case METHOD_NOT_ALLOWED:
-            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode()));
+            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value));
         default:
             handleUnexpectedResponseCode(request, coapRequest, coapResponse);
             return null;
@@ -182,7 +183,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
                     observationId);
         case NOT_FOUND:
         case METHOD_NOT_ALLOWED:
-            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode()));
+            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value));
         default:
             handleUnexpectedResponseCode(request, coapRequest, coapResponse);
             return null;
@@ -199,13 +200,13 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
         Response coapResponse = send(request, coapRequest, OperationType.EXEC);
         switch (coapResponse.getCode()) {
         case CHANGED:
-            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode()), coapResponse.getPayload(),
-                    ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()));
+            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value),
+                    coapResponse.getPayload(), ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()));
         case BAD_REQUEST:
         case UNAUTHORIZED:
         case NOT_FOUND:
         case METHOD_NOT_ALLOWED:
-            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode()));
+            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value));
 
         default:
             handleUnexpectedResponseCode(request, coapRequest, coapResponse);
@@ -222,13 +223,13 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
         Response coapResponse = send(request, coapRequest, OperationType.WRITE);
         switch (coapResponse.getCode()) {
         case CHANGED:
-            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode()), coapResponse.getPayload(),
-                    ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()));
+            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value),
+                    coapResponse.getPayload(), ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()));
         case BAD_REQUEST:
         case NOT_FOUND:
         case UNAUTHORIZED:
         case METHOD_NOT_ALLOWED:
-            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode()));
+            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value));
         default:
             handleUnexpectedResponseCode(request, coapRequest, coapResponse);
             return null;
@@ -248,13 +249,13 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
         Response coapResponse = send(request, coapRequest, OperationType.WRITE);
         switch (coapResponse.getCode()) {
         case CHANGED:
-            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode()), coapResponse.getPayload(),
-                    ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()));
+            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value),
+                    coapResponse.getPayload(), ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()));
         case BAD_REQUEST:
         case NOT_FOUND:
         case UNAUTHORIZED:
         case METHOD_NOT_ALLOWED:
-            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode()));
+            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value));
         default:
             handleUnexpectedResponseCode(request, coapRequest, coapResponse);
             return null;
@@ -269,12 +270,12 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
         Response coapResponse = send(request, coapRequest, OperationType.WRITE);
         switch (coapResponse.getCode()) {
         case DELETED:
-            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode()), coapResponse.getPayload(),
-                    ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()));
+            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value),
+                    coapResponse.getPayload(), ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()));
         case UNAUTHORIZED:
         case NOT_FOUND:
         case METHOD_NOT_ALLOWED:
-            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode()));
+            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value));
         default:
             handleUnexpectedResponseCode(request, coapRequest, coapResponse);
             return null;
@@ -292,13 +293,13 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
         Response coapResponse = send(request, coapRequest, OperationType.WRITE);
         switch (coapResponse.getCode()) {
         case CREATED:
-            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode()), coapResponse.getPayload(),
-                    ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()));
+            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value),
+                    coapResponse.getPayload(), ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()));
         case BAD_REQUEST:
         case UNAUTHORIZED:
         case NOT_FOUND:
         case METHOD_NOT_ALLOWED:
-            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode()));
+            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value));
         default:
             handleUnexpectedResponseCode(request, coapRequest, coapResponse);
             return null;
@@ -368,7 +369,8 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
         String msg = String.format("Client [%s] returned unexpected response code [%s]", request.getClient()
                 .getEndpoint(), coapResponse.getCode());
         LOG.debug(msg);
-        throw new ResourceAccessException(ResponseCode.fromCoapCode(coapResponse.getCode()), coapRequest.getURI(), msg);
+        throw new ResourceAccessException(ResponseCode.fromCoapCode(coapResponse.getCode().value),
+                coapRequest.getURI(), msg);
     }
 
     @Override
