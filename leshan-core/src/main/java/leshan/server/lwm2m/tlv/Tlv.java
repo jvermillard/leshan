@@ -29,23 +29,40 @@
  */
 package leshan.server.lwm2m.tlv;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
+import java.util.Date;
+
+import org.apache.commons.io.Charsets;
+import org.apache.commons.lang.Validate;
 
 /**
  * A Type-Length-Value container, can contain multiple TLV entries.
  */
 public class Tlv {
 
+    // type of TLV, indicate if it's containing a value or TLV containing more TLV or values
+    private TlvType type;
+
+    // if of type OBJECT_INSTANCE,MULTIPLE_RESOURCE or null
+    private Tlv[] children;
+
+    // if type RESOURCE_VALUE or RESOURCE_INSTANCE => null
+    private byte[] value;
+
+    private int identifier;
+
     /**
      * Creates a TLV container.
      * 
      * @param type the type of TLV
      * @param children the list of children TLV (must be <code>null</code> for type {@link TlvType#RESOURCE_VALUE}
-     * @param value the raw contained value, only for type {@link TlvType#RESOURCE_VALUE} <code>null</code> for the other types
+     * @param value the raw contained value, only for type {@link TlvType#RESOURCE_VALUE} <code>null</code> for the
+     *        other types
      * @param identifier the TLV identifier (resource id, instance id,..)
      */
     public Tlv(TlvType type, Tlv[] children, byte[] value, int identifier) {
-        super();
         this.type = type;
         this.children = children;
         this.value = value;
@@ -66,16 +83,75 @@ public class Tlv {
         }
     }
 
-    // type of TLV, indicate if it's containing a value or TLV containing more TLV or values
-    private TlvType type;
+    /**
+     * Creates a TLV container for an Integer value.
+     * 
+     * @param type the type of TLV. Must be {@link TlvType#RESOURCE_VALUE} or {@link TlvType#RESOURCE_INSTANCE}
+     * @param value the integer value
+     * @param identifier the TLV identifier (resource id, instance id...)
+     */
+    public static Tlv newIntegerValue(TlvType type, int value, int identifier) {
+        // TODO optimize for 1-byte and 2-byte long values
+        ByteBuffer bb = ByteBuffer.allocate(4);
+        bb.order(ByteOrder.BIG_ENDIAN);
+        bb.putInt(value);
+        return new Tlv(type, null, bb.array(), identifier);
+    }
 
-    // if of type OBJECT_INSTANCE,MULTIPLE_RESOURCE or null
-    private Tlv[] children;
+    /**
+     * Creates a TLV container for an Long value.
+     * 
+     * @param type the type of TLV. Must be {@link TlvType#RESOURCE_VALUE} or {@link TlvType#RESOURCE_INSTANCE}
+     * @param value the long value
+     * @param identifier the TLV identifier (resource id, instance id...)
+     */
+    public static Tlv newLongValue(TlvType type, long value, int identifier) {
+        ByteBuffer bb = ByteBuffer.allocate(8);
+        bb.order(ByteOrder.BIG_ENDIAN);
+        bb.putLong(value);
+        return new Tlv(type, null, bb.array(), identifier);
+    }
 
-    // if type RESOURCE_VALUE or RESOURCE_INSTANCE => null
-    private byte[] value;
+    /**
+     * Creates a TLV container for a String value.
+     * 
+     * @param type the type of TLV. Must be {@link TlvType#RESOURCE_VALUE} or {@link TlvType#RESOURCE_INSTANCE}
+     * @param value the String value
+     * @param identifier the TLV identifier (resource id, instance id...)
+     */
+    public static Tlv newStringValue(TlvType type, String value, int identifier) {
+        Validate.notEmpty(value);
+        return new Tlv(type, null, value.getBytes(Charsets.UTF_8), identifier);
+    }
 
-    private int identifier;
+    /**
+     * Creates a TLV container for a boolean value.
+     * 
+     * @param type the type of TLV. Must be {@link TlvType#RESOURCE_VALUE} or {@link TlvType#RESOURCE_INSTANCE}
+     * @param value the boolean value
+     * @param identifier the TLV identifier (resource id, instance id...)
+     */
+    public static Tlv newBooleanValue(TlvType type, boolean value, int identifier) {
+        byte[] bValue;
+        if (value) {
+            bValue = new byte[] { 0x01 };
+        } else {
+            bValue = new byte[] { 0x00 };
+        }
+        return new Tlv(type, null, bValue, identifier);
+    }
+
+    /**
+     * Creates a TLV container for a Date value.
+     * 
+     * @param type the type of TLV. Must be {@link TlvType#RESOURCE_VALUE} or {@link TlvType#RESOURCE_INSTANCE}
+     * @param value the Date value
+     * @param identifier the TLV identifier (resource id, instance id...)
+     */
+    public static Tlv newDateValue(TlvType type, Date value, int identifier) {
+        // the number of seconds since Jan 1st, 1970 in the UTC time zone.
+        return newLongValue(type, value.getTime() / 1000L, identifier);
+    }
 
     public TlvType getType() {
         return type;
@@ -111,8 +187,10 @@ public class Tlv {
 
     @Override
     public String toString() {
-    	return String.format("Tlv [type=%s, children=%s, value=%s, identifier=%s]",
-    			new Object[]{type.name(), Arrays.toString(children), Arrays.toString(value), Integer.toString(identifier)});
+        return String.format(
+                "Tlv [type=%s, children=%s, value=%s, identifier=%s]",
+                new Object[] { type.name(), Arrays.toString(children), Arrays.toString(value),
+                                        Integer.toString(identifier) });
     }
 
     @Override
