@@ -98,9 +98,6 @@
         </repository>
     </distributionManagement>
 
-    <dependencies>
-    </dependencies>
-
     <profiles>
         <profile>
             <!-- This profile includes all the tests, even the integration ones -->
