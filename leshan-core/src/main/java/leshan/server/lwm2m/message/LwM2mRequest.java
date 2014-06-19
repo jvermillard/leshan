@@ -65,11 +65,19 @@ public interface LwM2mRequest {
     Integer getResourceId();
 
     /**
-     * Sends the request to the LWM2M Client.
+     * Sends the request to the LWM2M Client and waits for the response.
      * 
      * @param handler the LWM2M protocol adapter to use for sending the request
      * @return the response from the client
      * @throws ResourceAccessException if the request could not be processed by the client
      */
     ClientResponse send(RequestHandler handler);
+
+    /**
+     * Sends the request to the LWM2M Client.
+     * 
+     * @param handler the LWM2M protocol adapter to use for sending the request
+     * @param listener the listener to be notified of the client response
+     */
+    void send(RequestHandler handler, ResponseCallback listener);
 }

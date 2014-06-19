@@ -44,9 +44,20 @@ public class WriteAttributesRequest extends AbstractLwM2mRequest implements LwM2
         this.observeSpec = observeSpec;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public ClientResponse send(RequestHandler handler) {
         return handler.send(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void send(RequestHandler handler, ResponseCallback listener) {
+        handler.send(this, listener);
     }
 
     public ObserveSpec getObserveSpec() {

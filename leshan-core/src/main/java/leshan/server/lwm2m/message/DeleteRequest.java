@@ -37,16 +37,6 @@ public class DeleteRequest extends AbstractLwM2mRequest implements LwM2mRequest 
         super(target);
     }
 
-    @Override
-    public ClientResponse send(RequestHandler handler) {
-        return handler.send(this);
-    }
-
-    @Override
-    public final String toString() {
-        return String.format("DeleteRequest [%s]", getTarget());
-    }
-
     /**
      * Creates a request for deleting a particular object instance implemented by a client.
      * 
@@ -59,4 +49,26 @@ public class DeleteRequest extends AbstractLwM2mRequest implements LwM2mRequest 
     public static final DeleteRequest newRequest(Client client, Integer objectId, Integer objectInstanceId) {
         return new DeleteRequest(new ResourceSpec(client, objectId, objectInstanceId, null));
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ClientResponse send(RequestHandler handler) {
+        return handler.send(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void send(RequestHandler handler, ResponseCallback callback) {
+        handler.send(this, callback);
+    }
+
+    @Override
+    public final String toString() {
+        return String.format("DeleteRequest [%s]", getTarget());
+    }
+
 }

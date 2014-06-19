@@ -46,21 +46,6 @@ public class CreateRequest extends PayloadRequest implements LwM2mRequest {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public ClientResponse send(RequestHandler operations) {
-        return operations.send(this);
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("CreateRequest [").append(getTarget()).append("]");
-        return builder.toString();
-    }
-
-    /**
      * Creates a request for creating the (only) instance of a particular object.
      * 
      * @param client the LWM2M Client to create the object instance on
@@ -108,6 +93,29 @@ public class CreateRequest extends PayloadRequest implements LwM2mRequest {
      */
     public static CreateRequest newRequest(Client client, Integer objectId, Integer objectInstanceId, String values) {
         return new CreateRequest(new ResourceSpec(client, objectId, objectInstanceId, null), values, ContentFormat.JSON);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ClientResponse send(RequestHandler handler) {
+        return handler.send(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void send(RequestHandler handler, ResponseCallback callback) {
+        handler.send(this, callback);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("CreateRequest [").append(getTarget()).append("]");
+        return builder.toString();
     }
 
 }
