@@ -97,7 +97,7 @@ public class LwM2mServer {
         RegisterResource rdResource = new RegisterResource(clientRegistry);
         this.coapServer.add(rdResource);
 
-        CaliforniumBasedRequestHandler handler = new CaliforniumBasedRequestHandler(endpoint);
+        CaliforniumBasedRequestHandler handler = new CaliforniumBasedRequestHandler(endpoint, null, 0);
         // register the request handler as listener in order to cancel
         // observations and free up resources when clients unregister
         clientRegistry.addListener(handler);
