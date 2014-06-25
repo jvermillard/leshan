@@ -74,7 +74,8 @@ public class CaliforniumBasedObservationTest {
         };
 
         givenAnObserveRequest(this.target);
-        CaliforniumBasedObservation observation = new CaliforniumBasedObservation(this.coapRequest, observer, this.target);
+        CaliforniumBasedObservation observation = new CaliforniumBasedObservation(this.coapRequest, observer,
+                this.target);
 
         Response coapResponse = new Response(ResponseCode.CONTENT);
         coapResponse.setPayload(this.reportedValue, MediaTypeRegistry.TEXT_PLAIN);
@@ -87,7 +88,8 @@ public class CaliforniumBasedObservationTest {
         ResourceObserver observer = mock(ResourceObserver.class);
         givenAnObserveRequest(this.target);
         Assert.assertFalse(this.coapRequest.isCanceled());
-        CaliforniumBasedObservation observation = new CaliforniumBasedObservation(this.coapRequest, observer, this.target);
+        CaliforniumBasedObservation observation = new CaliforniumBasedObservation(this.coapRequest, observer,
+                this.target);
 
         observation.cancel();
 
@@ -96,7 +98,7 @@ public class CaliforniumBasedObservationTest {
 
     private void givenASimpleClient() throws UnknownHostException {
         this.client = new Client("ID", "urn:client", InetAddress.getLocalHost(), 5683, "1.0", 10000L, null, null, null,
-                new Date());
+                new Date(), false);
     }
 
     private void givenAnObserveRequest(ResourceSpec target) {

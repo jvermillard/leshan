@@ -66,20 +66,24 @@ public class Client {
 
     private Date lastUpdate;
 
+    private final boolean secure;
+
     // true, if the client failed to answer the last server request
     private boolean failedLastRequest = false;
 
     public Client(String registrationId, String endpoint, InetAddress address, int port) {
-        this(registrationId, endpoint, address, port, null, null, null, null, null);
+        this(registrationId, endpoint, address, port, null, null, null, null, null, false);
     }
 
     public Client(String registrationId, String endpoint, InetAddress address, int port, String lwM2mVersion,
-            Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks) {
-        this(registrationId, endpoint, address, port, lwM2mVersion, lifetime, smsNumber, binding, objectLinks, null);
+            Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks, boolean secure) {
+        this(registrationId, endpoint, address, port, lwM2mVersion, lifetime, smsNumber, binding, objectLinks, null,
+                secure);
     }
 
     public Client(String registrationId, String endpoint, InetAddress address, int port, String lwM2mVersion,
-            Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks, Date registrationDate) {
+            Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks, Date registrationDate,
+            boolean secure) {
 
         Validate.notEmpty(endpoint);
         Validate.notNull(address);
@@ -96,6 +100,7 @@ public class Client {
         this.bindingMode = binding == null ? BindingMode.U : binding;
         this.smsNumber = smsNumber;
         this.lastUpdate = new Date();
+        this.secure = secure;
     }
 
     public String getRegistrationId() {
@@ -178,11 +183,15 @@ public class Client {
         return failedLastRequest ? false : lastUpdate.getTime() + lifeTimeInSec * 1000 > System.currentTimeMillis();
     }
 
+    public boolean isSecure() {
+        return secure;
+    }
+
     @Override
     public String toString() {
         return String
-                .format("Client [registrationDate=%s, address=%s, port=%s, lifeTimeInSec=%s, smsNumber=%s, lwM2mVersion=%s, bindingMode=%s, endpoint=%s, registrationId=%s, objectLinks=%s, lastUpdate=%s, failedLastRequest=%s]",
+                .format("Client [registrationDate=%s, address=%s, port=%s, lifeTimeInSec=%s, smsNumber=%s, lwM2mVersion=%s, bindingMode=%s, endpoint=%s, registrationId=%s, objectLinks=%s, lastUpdate=%s, secure=%s, failedLastRequest=%s]",
                         registrationDate, address, port, lifeTimeInSec, smsNumber, lwM2mVersion, bindingMode, endpoint,
-                        registrationId, Arrays.toString(objectLinks), lastUpdate, failedLastRequest);
+                        registrationId, Arrays.toString(objectLinks), lastUpdate, secure, failedLastRequest);
     }
 }

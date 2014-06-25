@@ -56,7 +56,6 @@ public class LeshanMain {
         clientRegistry.start();
 
         // now prepare and start jetty
-        String webappDirLocation = "src/main/webapp/";
 
         String webPort = System.getenv("PORT");
 

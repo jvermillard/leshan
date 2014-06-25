@@ -52,6 +52,7 @@ import leshan.server.lwm2m.message.WriteAttributesRequest;
 import leshan.server.lwm2m.message.WriteRequest;
 import leshan.server.lwm2m.observation.ObservationRegistry;
 
+import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,6 +74,8 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
     private static final int COAP_REQUEST_TIMEOUT_MILLIS = 5000;
 
     private final Endpoint endpoint;
+    private final Endpoint endpointSecure;
+
     private final int timeoutMillis;
     private final ObservationRegistry observationRegistry;
 
@@ -80,37 +83,37 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
      * Sets required collaborators.
      * 
      * @param endpoint the CoAP endpoint to use for sending requests
-     * @throws NullPointerException if the endpoint is <code>null</code>
      */
-    public CaliforniumBasedRequestHandler(Endpoint endpoint) {
-        this(endpoint, null);
+    public CaliforniumBasedRequestHandler(Endpoint endpoint, Endpoint endpointSecure) {
+        this(endpoint, endpointSecure, null);
     }
 
     /**
      * Sets required collaborators.
      * 
      * @param endpoint the CoAP endpoint to use for sending requests
+     * @param endpointSecure the CoAP DTLS endpoint to use for sending requests
      * @param observationRegistry the registry for keeping track of observed resources, if <code>null</code> an instance
      *        of {@link InMemoryObservationRegistry} is used
-     * @throws NullPointerException if the endpoint is <code>null</code>
      */
-    public CaliforniumBasedRequestHandler(Endpoint endpoint, ObservationRegistry observationRegistry) {
-        this(endpoint, observationRegistry, COAP_REQUEST_TIMEOUT_MILLIS);
+    public CaliforniumBasedRequestHandler(Endpoint endpoint, Endpoint endpointSecure,
+            ObservationRegistry observationRegistry) {
+        this(endpoint, endpointSecure, observationRegistry, COAP_REQUEST_TIMEOUT_MILLIS);
     }
 
     /**
      * Sets required collaborators.
      * 
      * @param endpoint the CoAP endpoint to use for sending requests
+     * @param endpointSecure the CoAP DTLS endpoint to use for sending requests
      * @param observationRegistry the registry for keeping track of observed resources, if <code>null</code> an instance
      *        of {@link InMemoryObservationRegistry} is used
      * @param timeoutMillis timeout for CoAP request
-     * @throws NullPointerException if the endpoint is <code>null</code>
      */
-    public CaliforniumBasedRequestHandler(Endpoint endpoint, ObservationRegistry observationRegistry, int timeoutMillis) {
-        if (endpoint == null) {
-            throw new NullPointerException("CoAP Endpoint must not be null");
-        }
+    public CaliforniumBasedRequestHandler(Endpoint endpoint, Endpoint endpointSecure,
+            ObservationRegistry observationRegistry, int timeoutMillis) {
+        Validate.notNull(endpoint);
+        Validate.notNull(endpointSecure);
         if (observationRegistry == null) {
             this.observationRegistry = new InMemoryObservationRegistry();
         } else {
@@ -118,6 +121,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
         }
         this.timeoutMillis = timeoutMillis;
         this.endpoint = endpoint;
+        this.endpointSecure = endpointSecure;
     }
 
     // ////// READ request /////////////
@@ -142,7 +146,8 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
                 callback.onResponse(buildReadResponse(request, coapRequest, coapResponse));
             }
         });
-        this.endpoint.sendRequest(coapRequest);
+
+        doSend(request, coapRequest);
     }
 
     private ClientResponse buildReadResponse(ReadRequest request, Request coapRequest, Response coapResponse) {
@@ -180,7 +185,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
                 callback.onResponse(buildDiscoverResponse(request, coapRequest, coapResponse));
             }
         });
-        this.endpoint.sendRequest(coapRequest);
+        doSend(request, coapRequest);
     }
 
     private Request prepareRequest(DiscoverRequest request) {
@@ -230,7 +235,8 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
                 callback.onResponse(buildObserveResponse(request, coapRequest, coapResponse));
             }
         });
-        this.endpoint.sendRequest(coapRequest);
+
+        doSend(request, coapRequest);
     }
 
     private Request prepareRequest(ObserveRequest request) {
@@ -279,7 +285,8 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
                 callback.onResponse(buildExecResponse(request, coapRequest, coapResponse));
             }
         });
-        this.endpoint.sendRequest(coapRequest);
+
+        doSend(request, coapRequest);
     }
 
     private Request prepareRequest(ExecRequest request) {
@@ -325,7 +332,8 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
                 callback.onResponse(buildWriteResponse(request, coapRequest, coapResponse));
             }
         });
-        this.endpoint.sendRequest(coapRequest);
+
+        doSend(request, coapRequest);
     }
 
     private Request prepareRequest(WriteRequest request) {
@@ -371,7 +379,8 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
                 callback.onResponse(buildWriteAttributeResponse(request, coapRequest, coapResponse));
             }
         });
-        this.endpoint.sendRequest(coapRequest);
+
+        doSend(request, coapRequest);
     }
 
     private Request prepareRequest(WriteAttributesRequest request) {
@@ -424,7 +433,8 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
                 callback.onResponse(buildDeleteResponse(request, coapRequest, coapResponse));
             }
         });
-        this.endpoint.sendRequest(coapRequest);
+
+        doSend(request, coapRequest);
     }
 
     private ClientResponse buildDeleteResponse(DeleteRequest request, Request coapRequest, Response coapResponse) {
@@ -462,7 +472,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
                 callback.onResponse(buildCreateResponse(request, coapRequest, coapResponse));
             }
         });
-        this.endpoint.sendRequest(coapRequest);
+        doSend(request, coapRequest);
     }
 
     private Request prepareRequest(CreateRequest request) {
@@ -526,7 +536,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
             LOG.trace("Sending {}", request);
         }
 
-        this.endpoint.sendRequest(coapRequest);
+        doSend(request, coapRequest);
         Response coapResponse = null;
         long start = System.currentTimeMillis();
 
@@ -543,6 +553,14 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
             throw new RequestTimeoutException(coapRequest.getURI(), (int) (System.currentTimeMillis() - start));
         } else {
             return coapResponse;
+        }
+    }
+
+    private void doSend(LwM2mRequest request, Request coapRequest) {
+        if (request.getClient().isSecure()) {
+            endpointSecure.sendRequest(coapRequest);
+        } else {
+            endpoint.sendRequest(coapRequest);
         }
     }
 
