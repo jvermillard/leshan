@@ -32,8 +32,7 @@ package leshan.server.lwm2m.observation;
 import leshan.server.lwm2m.client.Client;
 
 /**
- * A registry for keeping track of observed resources implemented by LWM2M
- * Clients.
+ * A registry for keeping track of observed resources implemented by LWM2M Clients.
  * 
  */
 public interface ObservationRegistry {
@@ -42,32 +41,31 @@ public interface ObservationRegistry {
      * Adds an observation of resource(s) to the registry.
      * 
      * @param observation the observation
-     * @return the ID under which the observation is registered. This ID can be
-     *         used to cancel the observation (see
+     * @return the ID under which the observation is registered. This ID can be used to cancel the observation (see
      *         {@link #cancelObservation(String))
      */
-    String addObservation(Observation observation);
+    void addObservation(Observation observation);
 
     /**
-     * Cancels an observation of resource(s).
+     * Cancels all active observations of resource(s) implemented by a particular LWM2M Client.
      * 
-     * As a consequence the LWM2M Client will stop sending notifications about
-     * updated values of resources in scope of the canceled observation.
-     * 
-     * @param id the id of the observation to cancel (see
-     *            {@link ResourceObserver#notify(byte[], int, String)}
-     */
-    void cancelObservation(String id);
-
-    /**
-     * Cancels all active observations of resource(s) implemented by a
-     * particular LWM2M Client.
-     * 
-     * As a consequence the LWM2M Client will stop sending notifications about
-     * updated values of resources in scope of the canceled observation.
+     * As a consequence the LWM2M Client will stop sending notifications about updated values of resources in scope of
+     * the canceled observation.
      * 
      * @param client the LWM2M Client to cancel observations for
      * @return the number of canceled observations
      */
     int cancelObservations(Client client);
+
+    /**
+     * Cancels the active observations for the given resource.
+     * 
+     * As a consequence the LWM2M Client will stop sending notifications about updated values of resources in scope of
+     * the canceled observation.
+     * 
+     * @param client the LWM2M Client to cancel observation for
+     * @param resourcepath resource to cancel observation for
+     * @return the number of canceled observations
+     */
+    void cancelObservation(Client client, String resourcepath);
 }

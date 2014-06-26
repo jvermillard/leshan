@@ -41,16 +41,13 @@ import leshan.server.lwm2m.message.CreateRequest;
 import leshan.server.lwm2m.message.DeleteRequest;
 import leshan.server.lwm2m.message.DiscoverRequest;
 import leshan.server.lwm2m.message.DiscoverResponse;
-import leshan.server.lwm2m.message.ObserveRequest;
-import leshan.server.lwm2m.message.ObserveResponse;
 import leshan.server.lwm2m.message.ReadRequest;
 import leshan.server.lwm2m.message.RequestTimeoutException;
 import leshan.server.lwm2m.message.ResponseCode;
 import leshan.server.lwm2m.message.WriteAttributesRequest;
 import leshan.server.lwm2m.message.WriteRequest;
-import leshan.server.lwm2m.observation.Observation;
+import leshan.server.lwm2m.observation.ObservationRegistryImpl;
 import leshan.server.lwm2m.observation.ObserveSpec;
-import leshan.server.lwm2m.observation.ResourceObserver;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -59,8 +56,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import ch.ethz.inf.vs.californium.coap.MediaTypeRegistry;
-import ch.ethz.inf.vs.californium.coap.Option;
-import ch.ethz.inf.vs.californium.coap.OptionNumberRegistry;
 import ch.ethz.inf.vs.californium.coap.Request;
 import ch.ethz.inf.vs.californium.coap.Response;
 import ch.ethz.inf.vs.californium.network.Endpoint;
@@ -73,13 +68,13 @@ public class CaliforniumBasedRequestHandlerTest extends BasicTestSupport {
 
     Endpoint coapEndpoint;
     CaliforniumBasedRequestHandler requestHandler;
-    InMemoryObservationRegistry observationRegistry;
+    ObservationRegistryImpl observationRegistry;
 
     @Before
     public void setUp() throws Exception {
         this.destination = InetAddress.getLocalHost();
         this.coapEndpoint = mock(Endpoint.class);
-        this.observationRegistry = new InMemoryObservationRegistry();
+        this.observationRegistry = new ObservationRegistryImpl();
         this.requestHandler = new CaliforniumBasedRequestHandler(this.coapEndpoint, this.observationRegistry);
         givenASimpleClient();
     }
@@ -128,46 +123,6 @@ public class CaliforniumBasedRequestHandlerTest extends BasicTestSupport {
 
         ClientResponse response = this.requestHandler.send(request);
         Assert.assertNull(response.getContent());
-    }
-
-    @Test
-    public void testSendObserveRequestReturnsObserveResponseWithObservationId() throws Exception {
-
-        ResourceObserver observer = mock(ResourceObserver.class);
-        ObserveRequest request = ObserveRequest.newRequest(this.client, observer, OBJECT_ID_DEVICE);
-        Response successfulResponse = newResponse(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT,
-                TEXT_PAYLOAD);
-        successfulResponse.getOptions().addOption(new Option(OptionNumberRegistry.OBSERVE));
-
-        ifTheClientReturns(successfulResponse);
-
-        ClientResponse response = this.requestHandler.send(request);
-        Assert.assertTrue(response instanceof ObserveResponse);
-        ObserveResponse observeResponse = (ObserveResponse) response;
-        Assert.assertNotNull(observeResponse.getObservationId());
-        Assert.assertArrayEquals(TEXT_PAYLOAD.getBytes(), response.getContent());
-
-        Observation observation = this.observationRegistry.getObservation(observeResponse.getObservationId());
-        Assert.assertEquals(observer, observation.getResourceObserver());
-
-    }
-
-    @Test
-    public void testCancelObservation() {
-        ResourceObserver observer = mock(ResourceObserver.class);
-        ObserveRequest request = ObserveRequest.newRequest(this.client, observer, OBJECT_ID_DEVICE);
-        Response successfulResponse = newResponse(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT,
-                TEXT_PAYLOAD);
-        successfulResponse.getOptions().addOption(new Option(OptionNumberRegistry.OBSERVE));
-
-        ifTheClientReturns(successfulResponse);
-
-        ClientResponse response = this.requestHandler.send(request);
-        Assert.assertTrue(response instanceof ObserveResponse);
-        ObserveResponse observeResponse = (ObserveResponse) response;
-        Assert.assertNotNull(observeResponse.getObservationId());
-        this.observationRegistry.cancelObservation(observeResponse.getObservationId());
-        Assert.assertNull(this.observationRegistry.getObservation(observeResponse.getObservationId()));
     }
 
     @Test

@@ -29,6 +29,11 @@
  */
 package leshan.server.lwm2m.message.californium;
 
+import java.util.EnumSet;
+import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
+
 import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.RegistryListener;
 import leshan.server.lwm2m.message.ClientResponse;
@@ -40,7 +45,6 @@ import leshan.server.lwm2m.message.DiscoverResponse;
 import leshan.server.lwm2m.message.ExecRequest;
 import leshan.server.lwm2m.message.LwM2mRequest;
 import leshan.server.lwm2m.message.ObserveRequest;
-import leshan.server.lwm2m.message.ObserveResponse;
 import leshan.server.lwm2m.message.OperationType;
 import leshan.server.lwm2m.message.ReadRequest;
 import leshan.server.lwm2m.message.RequestHandler;
@@ -50,12 +54,16 @@ import leshan.server.lwm2m.message.ResourceSpec;
 import leshan.server.lwm2m.message.ResponseCode;
 import leshan.server.lwm2m.message.WriteAttributesRequest;
 import leshan.server.lwm2m.message.WriteRequest;
+import leshan.server.lwm2m.observation.Observation;
 import leshan.server.lwm2m.observation.ObservationRegistry;
+import leshan.server.lwm2m.observation.ObservationRegistryImpl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.ethz.inf.vs.californium.coap.CoAP;
 import ch.ethz.inf.vs.californium.coap.MediaTypeRegistry;
+import ch.ethz.inf.vs.californium.coap.MessageObserverAdapter;
 import ch.ethz.inf.vs.californium.coap.Request;
 import ch.ethz.inf.vs.californium.coap.Response;
 import ch.ethz.inf.vs.californium.network.Endpoint;
@@ -90,7 +98,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
      * 
      * @param endpoint the CoAP endpoint to use for sending requests
      * @param observationRegistry the registry for keeping track of observed resources, if <code>null</code> an instance
-     *        of {@link InMemoryObservationRegistry} is used
+     *        of {@link ObservationRegistryImpl} is used
      * @throws NullPointerException if the endpoint is <code>null</code>
      */
     public CaliforniumBasedRequestHandler(Endpoint endpoint, ObservationRegistry observationRegistry) {
@@ -102,7 +110,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
      * 
      * @param endpoint the CoAP endpoint to use for sending requests
      * @param observationRegistry the registry for keeping track of observed resources, if <code>null</code> an instance
-     *        of {@link InMemoryObservationRegistry} is used
+     *        of {@link ObservationRegistryImpl} is used
      * @param timeoutMillis timeout for CoAP request
      * @throws NullPointerException if the endpoint is <code>null</code>
      */
@@ -111,7 +119,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
             throw new NullPointerException("CoAP Endpoint must not be null");
         }
         if (observationRegistry == null) {
-            this.observationRegistry = new InMemoryObservationRegistry();
+            this.observationRegistry = new ObservationRegistryImpl();
         } else {
             this.observationRegistry = observationRegistry;
         }
@@ -172,15 +180,15 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
         coapRequest.setObserve();
         setTarget(coapRequest, request.getTarget());
 
-        CaliforniumBasedObservation observation = new CaliforniumBasedObservation(coapRequest, request.getObserver(),
+        Observation observation = new CaliforniumBasedObservation(coapRequest, request.getObserver(),
                 request.getTarget());
-        String observationId = this.observationRegistry.addObservation(observation);
 
-        Response coapResponse = send(request, coapRequest, OperationType.READ);
+        Response coapResponse = send(request, coapRequest, OperationType.READ, EnumSet.of(CoAP.ResponseCode.CHANGED));
         switch (coapResponse.getCode()) {
         case CONTENT:
-            return new ObserveResponse(coapResponse.getPayload(), coapResponse.getOptions().getContentFormat(),
-                    observationId);
+            observationRegistry.addObservation(observation);
+            return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value),
+                    coapResponse.getPayload(), ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()));
         case NOT_FOUND:
         case METHOD_NOT_ALLOWED:
             return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value));
@@ -349,6 +357,57 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
             // but anyway, go ahead as if the timeout had been reached
             LOG.debug("Caught an unexpected InterruptedException during execution of CoAP request", e);
         }
+
+        if (coapResponse == null) {
+            request.getClient().markLastRequestFailed();
+            throw new RequestTimeoutException(coapRequest.getURI(), this.timeoutMillis);
+        } else {
+            return coapResponse;
+        }
+    }
+
+    protected final Response send(LwM2mRequest request, Request coapRequest, OperationType operationType,
+            final Set<CoAP.ResponseCode> ignoreCode) {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Sending {}", request);
+        }
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        final AtomicReference<Response> ref = new AtomicReference<Response>(null);
+        coapRequest.addMessageObserver(new MessageObserverAdapter() {
+            @Override
+            public void onResponse(Response response) {
+                if (!ignoreCode.contains(response.getCode())) {
+                    ref.set(response);
+                    latch.countDown();
+                }
+            }
+
+            @Override
+            public void onReject() {
+                latch.countDown();
+            }
+
+            @Override
+            public void onCancel() {
+                latch.countDown();
+            }
+
+            @Override
+            public void onTimeout() {
+                latch.countDown();
+            }
+        });
+        this.endpoint.sendRequest(coapRequest);
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            // no idea why some other thread should have interrupted this thread
+            // but anyway, go ahead as if the timeout had been reached
+            LOG.debug("Caught an unexpected InterruptedException during execution of CoAP request", e);
+        }
+        Response coapResponse = ref.get();
 
         if (coapResponse == null) {
             request.getClient().markLastRequestFailed();
