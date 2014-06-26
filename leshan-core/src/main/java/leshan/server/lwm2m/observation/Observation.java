@@ -43,5 +43,7 @@ public interface Observation {
 
     ResourceObserver getResourceObserver();
 
+    String getResourceRelativePath();
+
     void cancel();
 }

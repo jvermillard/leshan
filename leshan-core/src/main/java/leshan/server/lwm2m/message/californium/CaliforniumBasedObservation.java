@@ -34,6 +34,7 @@ import leshan.server.lwm2m.message.ContentFormat;
 import leshan.server.lwm2m.message.ResourceSpec;
 import leshan.server.lwm2m.observation.Observation;
 import leshan.server.lwm2m.observation.ResourceObserver;
+import ch.ethz.inf.vs.californium.coap.CoAP;
 import ch.ethz.inf.vs.californium.coap.MessageObserverAdapter;
 import ch.ethz.inf.vs.californium.coap.Request;
 import ch.ethz.inf.vs.californium.coap.Response;
@@ -67,11 +68,13 @@ public final class CaliforniumBasedObservation extends MessageObserverAdapter im
 
     @Override
     public void onResponse(Response response) {
-        ContentFormat format = ContentFormat.fromCode(response.getOptions().getContentFormat());
-        if (format == null) {
-            format = ContentFormat.TEXT;
+        if (response.getCode() == CoAP.ResponseCode.CHANGED) {
+            ContentFormat format = ContentFormat.fromCode(response.getOptions().getContentFormat());
+            if (format == null) {
+                format = ContentFormat.TEXT;
+            }
+            this.observer.notify(response.getPayload(), format, this.target);
         }
-        this.observer.notify(response.getPayload(), format, this.target);
     }
 
     @Override
@@ -104,4 +107,16 @@ public final class CaliforniumBasedObservation extends MessageObserverAdapter im
         return String.format("CaliforniumObservation [%s]", this.target);
     }
 
+    @Override
+    public String getResourceRelativePath() {
+        StringBuffer b = new StringBuffer();
+        b.append("/").append(getObjectId());
+        if (getObjectInstanceId() != null) {
+            b.append("/").append(getObjectInstanceId());
+            if (getResourceId() != null) {
+                b.append("/").append(getResourceId());
+            }
+        }
+        return b.toString();
+    }
 }
