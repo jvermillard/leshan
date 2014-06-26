@@ -105,11 +105,6 @@ public class EventServlet extends HttpServlet implements ResourceObserver {
         @Override
         public void unregistered(Client client) {
             String jClient = EventServlet.this.gson.toJson(client);
-            for (Continuation c : EventServlet.this.continuations) {
-                if (client.getEndpoint().equals(c.getAttribute(QUERY_PARAM_ENDPOINT))) {
-                    EventServlet.this.continuations.remove(c);
-                }
-            }
             sendEvent(EVENT_DEREGISTRATION, jClient, client.getEndpoint());
         }
     };
@@ -152,7 +147,7 @@ public class EventServlet extends HttpServlet implements ResourceObserver {
         sendEvent(EVENT_NOTIFICATION, data, target.getClient().getEndpoint());
     }
 
-    private void sendEvent(String event, String data, String endpoint) {
+    private synchronized void sendEvent(String event, String data, String endpoint) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Dispatching {} event from endpoint {}", event, endpoint);
         }
@@ -217,7 +212,9 @@ public class EventServlet extends HttpServlet implements ResourceObserver {
             // mark continuation as notification listener for endpoint
             c.setAttribute(QUERY_PARAM_ENDPOINT, endpoint);
         }
-        continuations.add(c);
-        c.suspend(resp);
+        synchronized (this) {
+            continuations.add(c);
+            c.suspend(resp);
+        }
     }
 }
