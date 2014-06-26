@@ -49,6 +49,7 @@ import leshan.server.lwm2m.message.ReadRequest;
 import leshan.server.lwm2m.message.RequestHandler;
 import leshan.server.lwm2m.message.ResourceAccessException;
 import leshan.server.lwm2m.message.WriteRequest;
+import leshan.server.lwm2m.observation.ObservationRegistry;
 import leshan.server.lwm2m.observation.ResourceObserver;
 import leshan.server.lwm2m.tlv.Tlv;
 import leshan.server.servlet.json.ClientSerializer;
@@ -77,12 +78,15 @@ public class ApiServlet extends HttpServlet {
     private final RequestHandler requestHandler;
     private final ResourceObserver resourceObserver;
     private final ClientRegistry clientRegistry;
+    private final ObservationRegistry observationRegistry;
 
     private final Gson gson;
 
-    public ApiServlet(RequestHandler requestHandler, ClientRegistry clientRegistry, ResourceObserver observer) {
+    public ApiServlet(RequestHandler requestHandler, ClientRegistry clientRegistry,
+            ObservationRegistry observationRegistry, ResourceObserver observer) {
         this.requestHandler = requestHandler;
         this.clientRegistry = clientRegistry;
+        this.observationRegistry = observationRegistry;
         this.resourceObserver = observer;
 
         GsonBuilder gsonBuilder = new GsonBuilder();
@@ -110,7 +114,6 @@ public class ApiServlet extends HttpServlet {
         if (!checkPath(req, resp)) {
             return;
         }
-
         String[] path = StringUtils.split(req.getPathInfo(), '/');
 
         // /clients : all registered clients
@@ -140,17 +143,11 @@ public class ApiServlet extends HttpServlet {
         }
 
         // /clients/endPoint/LWRequest : do LightWeight M2M read request on a given client.
-        boolean isObserveRequest = req.getParameter("obs") != null;
         try {
             RequestInfo requestInfo = new RequestInfo(path);
             Client client = this.clientRegistry.get(requestInfo.endpoint);
             if (client != null) {
-                ClientResponse cResponse = null;
-                if (isObserveRequest) {
-                    cResponse = this.observeRequest(client, requestInfo, resp);
-                } else {
-                    cResponse = this.readRequest(client, requestInfo, resp);
-                }
+                ClientResponse cResponse = this.readRequest(client, requestInfo, resp);
                 processDeviceResponse(resp, cResponse);
             } else {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -174,9 +171,9 @@ public class ApiServlet extends HttpServlet {
         if (!checkPath(req, resp)) {
             return;
         }
+        String[] path = StringUtils.split(req.getPathInfo(), '/');
 
         // /clients/endPoint/LWRequest : do LightWeight M2M write request on a given client.
-        String[] path = StringUtils.split(req.getPathInfo(), '/');
         try {
             RequestInfo requestInfo = new RequestInfo(path);
             Client client = this.clientRegistry.get(requestInfo.endpoint);
@@ -206,12 +203,35 @@ public class ApiServlet extends HttpServlet {
         if (!checkPath(req, resp)) {
             return;
         }
+        String[] path = StringUtils.split(req.getPathInfo(), '/');
+
+        // /clients/endPoint/LWRequest/observe : do LightWeight M2M observe request on a given client.
+        if (path.length >= 4 && "observe".equals(path[path.length - 1])) {
+            try {
+                RequestInfo requestInfo = new RequestInfo((String[]) ArrayUtils.remove(path, path.length - 1));
+                Client client = this.clientRegistry.get(requestInfo.endpoint);
+                if (client != null) {
+                    ClientResponse cResponse = this.observeRequest(client, requestInfo, resp);
+                    processDeviceResponse(resp, cResponse);
+                } else {
+                    resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    resp.getWriter().format("no registered client with id '%s'", requestInfo.endpoint).flush();
+                }
+            } catch (IllegalArgumentException e) {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                resp.getWriter().append(e.getMessage()).flush();
+            } catch (ResourceAccessException e) {
+                LOG.debug(String.format("Error accessing resource %s%s.", req.getServletPath(), req.getPathInfo()), e);
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                resp.getWriter().append(e.getMessage()).flush();
+            }
+            return;
+        }
 
         // /clients/endPoint/LWRequest : do LightWeight M2M execute request on a given client.
-        String[] path = StringUtils.split(req.getPathInfo(), '/');
         try {
             RequestInfo requestInfo = new RequestInfo(path);
-            Client client = this.clientRegistry.get(requestInfo.endpoint);
+            Client client = this.clientRegistry.get(path[1]);
             if (client != null) {
                 ClientResponse cResponse = this.execRequest(client, requestInfo, resp);
                 processDeviceResponse(resp, cResponse);
@@ -226,6 +246,38 @@ public class ApiServlet extends HttpServlet {
             LOG.debug(String.format("Error accessing resource %s%s.", req.getServletPath(), req.getPathInfo()), e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             resp.getWriter().append(e.getMessage()).flush();
+        }
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        if (!checkPath(req, resp)) {
+            return;
+        }
+        String[] path = StringUtils.split(req.getPathInfo(), '/');
+
+        // /clients/endPoint/LWRequest/observe : cancel observation for the given resource.
+        if (path.length >= 4 && "observe".equals(path[path.length - 1])) {
+            try {
+
+                RequestInfo requestInfo = new RequestInfo((String[]) ArrayUtils.remove(path, path.length - 1));
+                Client client = this.clientRegistry.get(requestInfo.endpoint);
+                if (client != null) {
+                    observationRegistry.cancelObservation(client, requestInfo.getResourcePath());
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                } else {
+                    resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    resp.getWriter().format("no registered client with id '%s'", requestInfo.endpoint).flush();
+                }
+            } catch (IllegalArgumentException e) {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                resp.getWriter().append(e.getMessage()).flush();
+            } catch (ResourceAccessException e) {
+                LOG.debug(String.format("Error accessing resource %s%s.", req.getServletPath(), req.getPathInfo()), e);
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                resp.getWriter().append(e.getMessage()).flush();
+            }
+            return;
         }
     }
 
@@ -278,7 +330,7 @@ public class ApiServlet extends HttpServlet {
         Integer objectInstanceId;
         Integer resourceId;
         Integer resourceInstanceId;
-        final String uri;
+        final String resourcepath;
 
         /**
          * Build LW request info from URI path
@@ -289,10 +341,9 @@ public class ApiServlet extends HttpServlet {
                 throw new IllegalArgumentException("invalid lightweight M2M path");
             }
 
-            StringBuffer b = new StringBuffer();
             endpoint = path[1];
-            b.append(endpoint);
 
+            StringBuffer b = new StringBuffer();
             try {
                 this.objectId = Integer.valueOf(path[2]);
                 b.append("/").append(objectId);
@@ -311,12 +362,16 @@ public class ApiServlet extends HttpServlet {
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException("invalid lightweight M2M path", e);
             }
-            uri = b.toString();
+            resourcepath = b.toString();
+        }
+
+        public String getResourcePath() {
+            return resourcepath;
         }
 
         @Override
         public String toString() {
-            return uri;
+            return StringUtils.join(new String[] { "/", endpoint, resourcepath });
         }
     }
 }

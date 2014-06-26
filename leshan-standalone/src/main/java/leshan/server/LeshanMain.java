@@ -31,6 +31,8 @@ package leshan.server;
 
 import leshan.server.lwm2m.LwM2mServer;
 import leshan.server.lwm2m.client.ClientRegistryImpl;
+import leshan.server.lwm2m.observation.ObservationRegistry;
+import leshan.server.lwm2m.observation.ObservationRegistryImpl;
 import leshan.server.servlet.ApiServlet;
 import leshan.server.servlet.EventServlet;
 
@@ -49,9 +51,10 @@ public class LeshanMain {
     public void start() {
 
         ClientRegistryImpl clientRegistry = new ClientRegistryImpl();
+        ObservationRegistry observationRegistry = new ObservationRegistryImpl();
 
         // LWM2M server
-        LwM2mServer lwServer = new LwM2mServer(clientRegistry);
+        LwM2mServer lwServer = new LwM2mServer(clientRegistry, observationRegistry);
         lwServer.start();
         clientRegistry.start();
 
@@ -80,7 +83,7 @@ public class LeshanMain {
         root.addServlet(eventServletHolder, "/event/*");
 
         ServletHolder apiServletHolder = new ServletHolder(new ApiServlet(lwServer.getRequestHandler(), clientRegistry,
-                eventServlet));
+                observationRegistry, eventServlet));
         root.addServlet(apiServletHolder, "/api/*");
 
         server.setHandler(root);

@@ -84,12 +84,11 @@ body {
 }
 
 
-.resource-value-read {
+.resource-value {
 	font-weight: bold;
 }
 
-.resource-value-write {
-	font-weight: bold;
+.resource-value-supposed {
 	color: #AAAAAA;
 }
 

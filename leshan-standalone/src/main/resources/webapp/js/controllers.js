@@ -110,13 +110,13 @@ lwClientControllers.controller('ClientDetailCtrl', [
                     var resourceId = content.res.split("/");
                     var resource = findResource(resourceId, $scope.lwresources);
                     if (resource) {
-                        resource.observe.status = true;
-                    	resource.read.value = content.val;
-                    	resource.read.status = "CONTENT";
-                        resource.read.date = new Date();
-                        var formattedDate = $filter('date')(resource.read.date, 'HH:mm:ss.sss');
-                        resource.read.tooltip = formattedDate + " " + resource.read.status;
-                    	resource.write.value = null;
+                        resource.value = content.val;
+                        resource.valuesupposed = false;
+                        resource.observed = true;
+                        
+                        var formattedDate = $filter('date')(new Date(), 'HH:mm:ss.sss');
+                        resource.tooltip = formattedDate;
+                    
                     }
                 });
             }
