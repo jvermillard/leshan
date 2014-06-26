@@ -35,6 +35,7 @@ import java.net.InetSocketAddress;
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.message.RequestHandler;
 import leshan.server.lwm2m.message.californium.CaliforniumBasedRequestHandler;
+import leshan.server.lwm2m.observation.ObservationRegistry;
 import leshan.server.lwm2m.resource.RegisterResource;
 
 import org.slf4j.Logger;
@@ -71,7 +72,16 @@ public class LwM2mServer {
      * @param clientRegistry the client registry
      */
     public LwM2mServer(ClientRegistry clientRegistry) {
-        this(new InetSocketAddress((InetAddress) null, PORT), clientRegistry);
+        this(new InetSocketAddress((InetAddress) null, PORT), clientRegistry, null);
+    }
+
+    /**
+     * Initialize a server which will bind to default UDP port for CoAP (5684).
+     * 
+     * @param clientRegistry the client registry
+     */
+    public LwM2mServer(ClientRegistry clientRegistry, ObservationRegistry observationRegistry) {
+        this(new InetSocketAddress((InetAddress) null, PORT), clientRegistry, observationRegistry);
     }
 
     /**
@@ -81,6 +91,17 @@ public class LwM2mServer {
      * @param clientRegistry the client registry
      */
     public LwM2mServer(InetSocketAddress localAddress, ClientRegistry clientRegistry) {
+        this(localAddress, clientRegistry, null);
+    }
+
+    /**
+     * Initialize a server which will bind to the specified address and port.
+     * 
+     * @param localAddress the address to bind the CoAP server.
+     * @param clientRegistry the client registry
+     */
+    public LwM2mServer(InetSocketAddress localAddress, ClientRegistry clientRegistry,
+            ObservationRegistry observationRegistry) {
         if (clientRegistry == null) {
             throw new IllegalArgumentException("Client registry must not be null");
         }
@@ -97,7 +118,7 @@ public class LwM2mServer {
         RegisterResource rdResource = new RegisterResource(clientRegistry);
         this.coapServer.add(rdResource);
 
-        CaliforniumBasedRequestHandler handler = new CaliforniumBasedRequestHandler(endpoint);
+        CaliforniumBasedRequestHandler handler = new CaliforniumBasedRequestHandler(endpoint, observationRegistry);
         // register the request handler as listener in order to cancel
         // observations and free up resources when clients unregister
         clientRegistry.addListener(handler);
