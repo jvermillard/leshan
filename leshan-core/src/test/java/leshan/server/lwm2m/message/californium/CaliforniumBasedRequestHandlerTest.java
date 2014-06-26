@@ -30,8 +30,7 @@
 package leshan.server.lwm2m.message.californium;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 import java.net.InetAddress;
 
@@ -67,6 +66,7 @@ public class CaliforniumBasedRequestHandlerTest extends BasicTestSupport {
     private static final String TEXT_PAYLOAD = "payload";
 
     Endpoint coapEndpoint;
+    Endpoint coapEndpointSecure;
     CaliforniumBasedRequestHandler requestHandler;
     ObservationRegistryImpl observationRegistry;
 
@@ -74,8 +74,9 @@ public class CaliforniumBasedRequestHandlerTest extends BasicTestSupport {
     public void setUp() throws Exception {
         this.destination = InetAddress.getLocalHost();
         this.coapEndpoint = mock(Endpoint.class);
+        this.coapEndpointSecure = mock(Endpoint.class);
         this.observationRegistry = new ObservationRegistryImpl();
-        this.requestHandler = new CaliforniumBasedRequestHandler(this.coapEndpoint, this.observationRegistry);
+        this.requestHandler = new CaliforniumBasedRequestHandler(coapEndpoint, coapEndpointSecure, observationRegistry);
         givenASimpleClient();
     }
 

@@ -82,9 +82,19 @@ public class DiscoverRequest extends AbstractLwM2mRequest implements LwM2mReques
         return new DiscoverRequest(new ResourceSpec(client, objectId, objectInstanceId, resourceId));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public ClientResponse send(RequestHandler operations) {
+    public ClientResponse send(RequestHandler handler) {
+        return handler.send(this);
+    }
 
-        return operations.send(this);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void send(RequestHandler handler, ResponseCallback callback) {
+        handler.send(this, callback);
     }
 }

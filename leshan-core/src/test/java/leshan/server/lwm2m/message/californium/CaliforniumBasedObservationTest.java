@@ -70,7 +70,8 @@ public class CaliforniumBasedObservationTest extends BasicTestSupport {
         };
 
         givenAnObserveRequest(this.target);
-        CaliforniumBasedObservation observation = new CaliforniumBasedObservation(this.coapRequest, observer, this.target);
+        CaliforniumBasedObservation observation = new CaliforniumBasedObservation(this.coapRequest, observer,
+                this.target);
 
         Response coapResponse = new Response(ResponseCode.CONTENT);
         coapResponse.setPayload(this.reportedValue, MediaTypeRegistry.TEXT_PLAIN);
@@ -83,7 +84,8 @@ public class CaliforniumBasedObservationTest extends BasicTestSupport {
         ResourceObserver observer = mock(ResourceObserver.class);
         givenAnObserveRequest(this.target);
         Assert.assertFalse(this.coapRequest.isCanceled());
-        CaliforniumBasedObservation observation = new CaliforniumBasedObservation(this.coapRequest, observer, this.target);
+        CaliforniumBasedObservation observation = new CaliforniumBasedObservation(this.coapRequest, observer,
+                this.target);
 
         observation.cancel();
 

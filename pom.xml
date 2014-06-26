@@ -34,7 +34,7 @@
 
     <groupId>org.github.leshan</groupId>
     <artifactId>leshan-server</artifactId>
-    <version>0.1.4-SNAPSHOT</version>
+    <version>0.1.5-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>leshan</name>
@@ -97,9 +97,6 @@
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
-
-    <dependencies>
-    </dependencies>
 
     <profiles>
         <profile>

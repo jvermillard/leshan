@@ -58,6 +58,9 @@ public class LeshanMain {
         lwServer.start();
         clientRegistry.start();
 
+
+        // now prepare and start jetty
+
         String webPort = System.getenv("PORT");
 
         if (webPort == null || webPort.isEmpty()) {

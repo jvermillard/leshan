@@ -13,9 +13,7 @@ public abstract class BasicTestSupport {
     int destinationPort = 5000;
 
     void givenASimpleClient() throws UnknownHostException {
-        this.client = new Client("ID", "urn:client", InetAddress.getLocalHost(), this.destinationPort, "1.0", 10000L,
-                null, null, null, new Date());
+        this.client = new Client("ID", "urn:client", InetAddress.getLocalHost(), 5683, "1.0", 10000L, null, null, null,
+                new Date(), false);
     }
-
-
 }

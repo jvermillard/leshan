@@ -120,7 +120,15 @@ public class ExecRequest extends PayloadRequest implements LwM2mRequest {
      * {@inheritDoc}
      */
     @Override
-    public ClientResponse send(RequestHandler operations) {
-        return operations.send(this);
+    public ClientResponse send(RequestHandler handler) {
+        return handler.send(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void send(RequestHandler handler, ResponseCallback callback) {
+        handler.send(this, callback);
     }
 }

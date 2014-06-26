@@ -92,8 +92,15 @@ public class ReadRequest extends AbstractLwM2mRequest implements LwM2mRequest {
      * {@inheritDoc}
      */
     @Override
-    public ClientResponse send(RequestHandler operations) {
+    public ClientResponse send(RequestHandler handler) {
+        return handler.send(this);
+    }
 
-        return operations.send(this);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void send(RequestHandler handler, ResponseCallback listener) {
+        handler.send(this, listener);
     }
 }

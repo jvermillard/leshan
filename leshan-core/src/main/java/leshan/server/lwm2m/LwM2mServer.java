@@ -29,6 +29,7 @@
  */
 package leshan.server.lwm2m;
 
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
@@ -38,11 +39,14 @@ import leshan.server.lwm2m.message.californium.CaliforniumBasedRequestHandler;
 import leshan.server.lwm2m.observation.ObservationRegistry;
 import leshan.server.lwm2m.resource.RegisterResource;
 
+import org.eclipse.californium.scandium.DTLSConnector;
+import org.eclipse.californium.scandium.dtls.pskstore.InMemoryPskStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 import ch.ethz.inf.vs.californium.network.Endpoint;
+import ch.ethz.inf.vs.californium.network.config.NetworkConfig;
 import ch.ethz.inf.vs.californium.server.Server;
 
 /**
@@ -62,7 +66,10 @@ public class LwM2mServer {
     private static final Logger LOG = LoggerFactory.getLogger(LwM2mServer.class);
 
     /** IANA assigned UDP port for CoAP (so for LWM2M) */
-    public static final int PORT = 5684;
+    public static final int PORT = 5683;
+
+    /** IANA assigned UDP port for CoAP with DTLS (so for LWM2M) */
+    public static final int PORT_DTLS = 5684;
 
     private final RequestHandler requestHandler;
 
@@ -72,7 +79,8 @@ public class LwM2mServer {
      * @param clientRegistry the client registry
      */
     public LwM2mServer(ClientRegistry clientRegistry) {
-        this(new InetSocketAddress((InetAddress) null, PORT), clientRegistry, null);
+        this(new InetSocketAddress((InetAddress) null, PORT), new InetSocketAddress((InetAddress) null, PORT_DTLS),
+                clientRegistry, null);
     }
 
     /**
@@ -81,7 +89,8 @@ public class LwM2mServer {
      * @param clientRegistry the client registry
      */
     public LwM2mServer(ClientRegistry clientRegistry, ObservationRegistry observationRegistry) {
-        this(new InetSocketAddress((InetAddress) null, PORT), clientRegistry, observationRegistry);
+        this(new InetSocketAddress((InetAddress) null, PORT), new InetSocketAddress((InetAddress) null, PORT_DTLS),
+                clientRegistry, observationRegistry);
     }
 
     /**
@@ -90,8 +99,10 @@ public class LwM2mServer {
      * @param localAddress the address to bind the CoAP server.
      * @param clientRegistry the client registry
      */
-    public LwM2mServer(InetSocketAddress localAddress, ClientRegistry clientRegistry) {
-        this(localAddress, clientRegistry, null);
+    public LwM2mServer(InetSocketAddress localAddress, InetSocketAddress localAddressSecure,
+            ClientRegistry clientRegistry) {
+
+        this(localAddress, localAddressSecure, clientRegistry, null);
     }
 
     /**
@@ -100,8 +111,8 @@ public class LwM2mServer {
      * @param localAddress the address to bind the CoAP server.
      * @param clientRegistry the client registry
      */
-    public LwM2mServer(InetSocketAddress localAddress, ClientRegistry clientRegistry,
-            ObservationRegistry observationRegistry) {
+    public LwM2mServer(InetSocketAddress localAddress, InetSocketAddress localAddressSecure,
+            ClientRegistry clientRegistry, ObservationRegistry observationRegistry) {
         if (clientRegistry == null) {
             throw new IllegalArgumentException("Client registry must not be null");
         }
@@ -114,11 +125,26 @@ public class LwM2mServer {
         Endpoint endpoint = new CoAPEndpoint(localAddress);
         this.coapServer.addEndpoint(endpoint);
 
+        // init DTLS server
+
+        InMemoryPskStore pskStore = new InMemoryPskStore();
+        try {
+            // put in the PSK store the default identity/psk for tinydtls tests
+            pskStore.setKey("Client_identity", "secretPSK".getBytes("US-ASCII"));
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalStateException("no US-ASCII codec in your JVM", e);
+        }
+
+        Endpoint endpointSecure = new CoAPEndpoint(new DTLSConnector(localAddressSecure, pskStore),
+                NetworkConfig.getStandard());
+        this.coapServer.addEndpoint(endpointSecure);
+
         // define /rd resource
-        RegisterResource rdResource = new RegisterResource(clientRegistry);
+        RegisterResource rdResource = new RegisterResource(clientRegistry, endpointSecure);
         this.coapServer.add(rdResource);
 
-        CaliforniumBasedRequestHandler handler = new CaliforniumBasedRequestHandler(endpoint, observationRegistry);
+        CaliforniumBasedRequestHandler handler = new CaliforniumBasedRequestHandler(endpoint, endpointSecure,
+                observationRegistry, 0);
         // register the request handler as listener in order to cancel
         // observations and free up resources when clients unregister
         clientRegistry.addListener(handler);

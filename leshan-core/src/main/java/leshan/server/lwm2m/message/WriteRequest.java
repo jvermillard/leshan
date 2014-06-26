@@ -121,8 +121,16 @@ public class WriteRequest extends PayloadRequest implements LwM2mRequest {
      * {@inheritDoc}
      */
     @Override
-    public ClientResponse send(RequestHandler operations) {
-        return operations.send(this);
+    public ClientResponse send(RequestHandler handler) {
+        return handler.send(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void send(RequestHandler handler, ResponseCallback listener) {
+        handler.send(this, listener);
     }
 
     public static WriteRequest newReplaceRequest(Client client, Integer objectId, Integer objectInstanceId,

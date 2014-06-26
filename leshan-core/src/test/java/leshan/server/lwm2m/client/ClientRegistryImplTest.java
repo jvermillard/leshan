@@ -90,6 +90,6 @@ public class ClientRegistryImplTest {
 
     private void givenASimpleClient(Long lifetime) {
         this.client = new Client(this.registrationId, this.ep, this.address, this.port, null, lifetime, this.sms,
-                this.binding, this.objectLinks, null);
+                this.binding, this.objectLinks, null, false);
     }
 }
