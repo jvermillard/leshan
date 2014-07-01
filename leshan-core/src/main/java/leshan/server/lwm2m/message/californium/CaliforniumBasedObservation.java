@@ -56,14 +56,14 @@ public final class CaliforniumBasedObservation extends MessageObserverAdapter im
             throw new NullPointerException("Target must not be null");
         }
         request.addMessageObserver(this);
-        this.coapRequest = request;
+        coapRequest = request;
         this.observer = observer;
         this.target = target;
     }
 
     @Override
     public void cancel() {
-        this.coapRequest.cancel();
+        coapRequest.cancel();
     }
 
     @Override
@@ -73,50 +73,42 @@ public final class CaliforniumBasedObservation extends MessageObserverAdapter im
             if (format == null) {
                 format = ContentFormat.TEXT;
             }
-            this.observer.notify(response.getPayload(), format, this.target);
+            observer.notify(response.getPayload(), format, target);
         }
     }
 
     @Override
     public Client getResourceProvider() {
-        return this.target.getClient();
+        return target.getClient();
     }
 
     @Override
     public Integer getObjectId() {
-        return this.target.getObjectId();
+        return target.getObjectId();
     }
 
     @Override
     public Integer getObjectInstanceId() {
-        return this.target.getObjectInstanceId();
+        return target.getObjectInstanceId();
     }
 
     @Override
     public Integer getResourceId() {
-        return this.target.getResourceId();
+        return target.getResourceId();
     }
 
     @Override
     public ResourceObserver getResourceObserver() {
-        return this.observer;
+        return observer;
     }
 
     @Override
     public String toString() {
-        return String.format("CaliforniumObservation [%s]", this.target);
+        return String.format("CaliforniumObservation [%s]", target);
     }
 
     @Override
     public String getResourceRelativePath() {
-        StringBuffer b = new StringBuffer();
-        b.append("/").append(getObjectId());
-        if (getObjectInstanceId() != null) {
-            b.append("/").append(getObjectInstanceId());
-            if (getResourceId() != null) {
-                b.append("/").append(getResourceId());
-            }
-        }
-        return b.toString();
+        return target.asRelativePath();
     }
 }
