@@ -47,14 +47,14 @@ public class ObservationRegistryImpl implements ObservationRegistry {
     private final Map<String /* registration id */, Map<String /* resource path */, Observation>> observationsByClientAndResource;
 
     public ObservationRegistryImpl() {
-        this.observationsByClientAndResource = new HashMap<String, Map<String, Observation>>();
+        observationsByClientAndResource = new HashMap<String, Map<String, Observation>>();
     }
 
     @Override
     public synchronized void addObservation(Observation observation) {
 
         if (observation != null) {
-            String registrationID = observation.getResourceProvider().getRegistrationId();
+            String registrationID = observation.getResource().getClient().getRegistrationId();
 
             Map<String, Observation> clientObservations = observationsByClientAndResource.get(registrationID);
             if (clientObservations == null) {
@@ -62,11 +62,11 @@ public class ObservationRegistryImpl implements ObservationRegistry {
                 observationsByClientAndResource.put(registrationID, clientObservations);
             }
 
-            Observation oldObservation = clientObservations.get(observation.getResourceRelativePath());
+            Observation oldObservation = clientObservations.get(observation.getResource().asRelativePath());
             if (oldObservation != null) {
                 oldObservation.cancel();
             }
-            clientObservations.put(observation.getResourceRelativePath(), observation);
+            clientObservations.put(observation.getResource().asRelativePath(), observation);
         }
     }
 
@@ -79,8 +79,8 @@ public class ObservationRegistryImpl implements ObservationRegistry {
 
             if (clientObservations != null) {
                 count = clientObservations.size();
-                if (this.LOG.isTraceEnabled()) {
-                    this.LOG.trace("Canceling {} observations of client {}", count, client.getEndpoint());
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("Canceling {} observations of client {}", count, client.getEndpoint());
                 }
                 for (Observation obs : clientObservations.values()) {
                     obs.cancel();
@@ -101,8 +101,8 @@ public class ObservationRegistryImpl implements ObservationRegistry {
             if (clientObservations != null) {
                 Observation observation = clientObservations.get(resourcepath);
                 if (observation != null) {
-                    if (this.LOG.isTraceEnabled()) {
-                        this.LOG.trace("Canceling {} observation of client {}", resourcepath, client.getEndpoint());
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("Canceling {} observation of client {}", resourcepath, client.getEndpoint());
                     }
                     observation.cancel();
                     clientObservations.remove(resourcepath);

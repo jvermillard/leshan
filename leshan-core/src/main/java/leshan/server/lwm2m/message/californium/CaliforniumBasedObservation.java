@@ -77,22 +77,18 @@ public final class CaliforniumBasedObservation extends MessageObserverAdapter im
         }
     }
 
-    @Override
     public Client getResourceProvider() {
         return target.getClient();
     }
 
-    @Override
     public Integer getObjectId() {
         return target.getObjectId();
     }
 
-    @Override
     public Integer getObjectInstanceId() {
         return target.getObjectInstanceId();
     }
 
-    @Override
     public Integer getResourceId() {
         return target.getResourceId();
     }
@@ -108,7 +104,7 @@ public final class CaliforniumBasedObservation extends MessageObserverAdapter im
     }
 
     @Override
-    public String getResourceRelativePath() {
-        return target.asRelativePath();
+    public ResourceSpec getResource() {
+        return target;
     }
 }
