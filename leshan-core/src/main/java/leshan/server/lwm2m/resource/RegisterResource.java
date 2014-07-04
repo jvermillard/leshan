@@ -29,6 +29,7 @@
  */
 package leshan.server.lwm2m.resource;
 
+import java.net.InetSocketAddress;
 import java.util.List;
 
 import leshan.server.lwm2m.client.BindingMode;
@@ -45,7 +46,6 @@ import org.slf4j.LoggerFactory;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.coap.CoAP.Type;
 import ch.ethz.inf.vs.californium.coap.Request;
-import ch.ethz.inf.vs.californium.network.Endpoint;
 import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
 import ch.ethz.inf.vs.californium.server.resources.Resource;
 import ch.ethz.inf.vs.californium.server.resources.ResourceBase;
@@ -75,13 +75,10 @@ public class RegisterResource extends ResourceBase {
 
     private final ClientRegistry registry;
 
-    private final Endpoint endpointSecure;
-
-    public RegisterResource(ClientRegistry registry, Endpoint endpointSecure) {
+    public RegisterResource(ClientRegistry registry) {
         super(RESOURCE_NAME);
 
         this.registry = registry;
-        this.endpointSecure = endpointSecure;
         getAttributes().addResourceType("core.rd");
     }
 
@@ -131,11 +128,11 @@ public class RegisterResource extends ResourceBase {
                     objectLinks = new String(request.getPayload(), Charsets.UTF_8).split(",");
                 }
 
-                // is the registration is coming from the secure endpoint?
-                boolean secure = exchange.advanced().getEndpoint() == endpointSecure;
+                // which end point did the client post this request to?
+                InetSocketAddress registrationEndpoint = exchange.advanced().getEndpoint().getAddress();
 
                 Client client = new Client(registrationId, endpoint, request.getSource(), request.getSourcePort(),
-                        lwVersion, lifetime, smsNumber, binding, objectLinks, secure);
+                        lwVersion, lifetime, smsNumber, binding, objectLinks, registrationEndpoint);
 
                 registry.registerClient(client);
                 LOG.debug("New registered client: {}", client);

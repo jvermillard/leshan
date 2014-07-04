@@ -30,6 +30,7 @@
 package leshan.server.lwm2m.client;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -50,46 +51,48 @@ public class ClientRegistryImplTest {
 
     @Before
     public void setUp() throws Exception {
-        this.address = InetAddress.getLocalHost();
-        this.registry = new ClientRegistryImpl();
+        address = InetAddress.getLocalHost();
+        registry = new ClientRegistryImpl();
 
     }
 
     @Test
     public void testUpdateClientKeepsUnchangedProperties() {
-        givenASimpleClient(this.lifetime);
-        this.registry.registerClient(this.client);
+        givenASimpleClient(lifetime);
+        registry.registerClient(client);
 
-        ClientUpdate clientUpdate = new ClientUpdate(this.registrationId, this.address, this.port);
-        this.registry.updateClient(clientUpdate);
+        ClientUpdate clientUpdate = new ClientUpdate(registrationId, address, port);
+        registry.updateClient(clientUpdate);
 
-        Client registeredClient = this.registry.get(this.ep);
-        Assert.assertEquals((long) this.lifetime, registeredClient.getLifeTimeInSec());
-        Assert.assertSame(this.binding, registeredClient.getBindingMode());
-        Assert.assertEquals(this.sms, registeredClient.getSmsNumber());
+        Client registeredClient = registry.get(ep);
+        Assert.assertEquals((long) lifetime, registeredClient.getLifeTimeInSec());
+        Assert.assertSame(binding, registeredClient.getBindingMode());
+        Assert.assertEquals(sms, registeredClient.getSmsNumber());
     }
 
     @Test
     public void testRegisterClientSetsTimeToLive() {
-        givenASimpleClient(this.lifetime);
-        this.registry.registerClient(this.client);
-        Assert.assertTrue(this.client.isAlive());
+        givenASimpleClient(lifetime);
+        registry.registerClient(client);
+        Assert.assertTrue(client.isAlive());
     }
 
     @Test
     public void testUpdateClientExtendsTimeToLive() {
         givenASimpleClient(0L);
-        this.registry.registerClient(this.client);
-        Assert.assertFalse(this.client.isAlive());
+        registry.registerClient(client);
+        Assert.assertFalse(client.isAlive());
 
-        ClientUpdate clientUpdate = new ClientUpdate(this.registrationId, this.address, this.port, this.lifetime, null,
+        ClientUpdate clientUpdate = new ClientUpdate(registrationId, address, port, lifetime, null,
                 null, null);
-        this.registry.updateClient(clientUpdate);
-        Assert.assertTrue(this.client.isAlive());
+        registry.updateClient(clientUpdate);
+        Assert.assertTrue(client.isAlive());
     }
 
     private void givenASimpleClient(Long lifetime) {
-        this.client = new Client(this.registrationId, this.ep, this.address, this.port, null, lifetime, this.sms,
-                this.binding, this.objectLinks, null, false);
+
+        client = new Client(registrationId, ep, address, port, null, lifetime, sms,
+                binding, objectLinks, null,
+                InetSocketAddress.createUnresolved("localhost", 5683));
     }
 }

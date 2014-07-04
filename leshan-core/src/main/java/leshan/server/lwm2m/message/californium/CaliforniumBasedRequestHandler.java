@@ -29,6 +29,7 @@
  */
 package leshan.server.lwm2m.message.californium;
 
+import java.net.InetSocketAddress;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -80,8 +81,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
     private static final Logger LOG = LoggerFactory.getLogger(CaliforniumBasedRequestHandler.class);
     private static final int COAP_REQUEST_TIMEOUT_MILLIS = 5000;
 
-    private final Endpoint endpoint;
-    private final Endpoint endpointSecure;
+    private final Set<Endpoint> endpoints;
 
     private final int timeoutMillis;
     private final ObservationRegistry observationRegistry;
@@ -89,46 +89,44 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
     /**
      * Sets required collaborators.
      * 
-     * @param endpoint the CoAP endpoint to use for sending requests
+     * @param endpoints the CoAP endpoints to use for sending requests
      */
-    public CaliforniumBasedRequestHandler(Endpoint endpoint, Endpoint endpointSecure) {
-        this(endpoint, endpointSecure, null);
+    public CaliforniumBasedRequestHandler(Set<Endpoint> endpoints) {
+        this(endpoints, null);
     }
 
     /**
      * Sets required collaborators.
      * 
-     * @param endpoint the CoAP endpoint to use for sending requests
-     * @param endpointSecure the CoAP DTLS endpoint to use for sending requests
-     * @param observationRegistry the registry for keeping track of observed resources, if <code>null</code> an instance
-     *        of {@link ObservationRegistryImpl} is used
+     * @param endpoints the CoAP endpoints to use for sending requests
+     * @param observationRegistry the registry for keeping track of observed
+     *            resources, if <code>null</code> an instance of
+     *            {@link ObservationRegistryImpl} is used
      */
-    public CaliforniumBasedRequestHandler(Endpoint endpoint, Endpoint endpointSecure,
-            ObservationRegistry observationRegistry) {
-        this(endpoint, endpointSecure, observationRegistry, COAP_REQUEST_TIMEOUT_MILLIS);
+    public CaliforniumBasedRequestHandler(Set<Endpoint> endpoints,
+                                          ObservationRegistry observationRegistry) {
+        this(endpoints, observationRegistry, COAP_REQUEST_TIMEOUT_MILLIS);
     }
 
     /**
      * Sets required collaborators.
      * 
-     * @param endpoint the CoAP endpoint to use for sending requests
-     * @param endpointSecure the CoAP DTLS endpoint to use for sending requests
-     * @param observationRegistry the registry for keeping track of observed resources, if <code>null</code> an instance
-     *        of {@link ObservationRegistryImpl} is used
+     * @param endpoints the CoAP endpoints to use for sending requests
+     * @param observationRegistry the registry for keeping track of observed
+     *            resources, if <code>null</code> an instance of
+     *            {@link ObservationRegistryImpl} is used
      * @param timeoutMillis timeout for CoAP request
      */
-    public CaliforniumBasedRequestHandler(Endpoint endpoint, Endpoint endpointSecure,
-            ObservationRegistry observationRegistry, int timeoutMillis) {
-        Validate.notNull(endpoint);
-        Validate.notNull(endpointSecure);
+    public CaliforniumBasedRequestHandler(Set<Endpoint> endpoints, ObservationRegistry observationRegistry,
+                                          int timeoutMillis) {
+        Validate.notNull(endpoints);
         if (observationRegistry == null) {
             this.observationRegistry = new ObservationRegistryImpl();
         } else {
             this.observationRegistry = observationRegistry;
         }
         this.timeoutMillis = timeoutMillis;
-        this.endpoint = endpoint;
-        this.endpointSecure = endpointSecure;
+        this.endpoints = endpoints;
     }
 
     // ////// READ request /////////////
@@ -208,7 +206,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
             if (MediaTypeRegistry.APPLICATION_LINK_FORMAT != coapResponse.getOptions().getContentFormat()) {
                 LOG.debug("Expected LWM2M Client [{}] to return application/link-format [{}] content but got [{}]",
                         request.getClient().getEndpoint(), MediaTypeRegistry.APPLICATION_LINK_FORMAT, coapResponse
-                                .getOptions().getContentFormat());
+                        .getOptions().getContentFormat());
             }
             return new DiscoverResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value),
                     coapResponse.getPayload());
@@ -409,7 +407,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
     }
 
     private ClientResponse buildWriteAttributeResponse(WriteAttributesRequest request, Request coapRequest,
-            Response coapResponse) {
+                                                       Response coapResponse) {
         switch (coapResponse.getCode()) {
         case CHANGED:
             return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value),
@@ -555,7 +553,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
         long start = System.currentTimeMillis();
 
         try {
-            coapResponse = coapRequest.waitForResponse(this.timeoutMillis);
+            coapResponse = coapRequest.waitForResponse(timeoutMillis);
         } catch (InterruptedException e) {
             // no idea why some other thread should have interrupted this thread
             // but anyway, go ahead as if the timeout had been reached
@@ -571,11 +569,8 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
     }
 
     private void doSend(LwM2mRequest request, Request coapRequest) {
-        if (request.getClient().isSecure()) {
-            endpointSecure.sendRequest(coapRequest);
-        } else {
-            endpoint.sendRequest(coapRequest);
-        }
+        Endpoint endpoint = getEndpointForClient(request.getClient());
+        endpoint.sendRequest(coapRequest);
     }
 
     protected final Response send(LwM2mRequest request, Request coapRequest, final Set<CoAP.ResponseCode> ignoreCode) {
@@ -609,7 +604,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
                 latch.countDown();
             }
         });
-        this.endpoint.sendRequest(coapRequest);
+        getEndpointForClient(request.getClient()).sendRequest(coapRequest);
 
         try {
             latch.await();
@@ -622,7 +617,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
 
         if (coapResponse == null) {
             request.getClient().markLastRequestFailed();
-            throw new RequestTimeoutException(coapRequest.getURI(), this.timeoutMillis);
+            throw new RequestTimeoutException(coapRequest.getURI(), timeoutMillis);
         } else {
             return coapResponse;
         }
@@ -643,6 +638,26 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
                 coapRequest.getURI(), msg);
     }
 
+    /**
+     * Gets the CoAP endpoint that should be used to communicate with a given
+     * client.
+     * 
+     * @param client the client
+     * @return the CoAP endpoint bound to the same network address and port that
+     *         the client connected to during registration. If no such CoAP
+     *         endpoint is available, the first CoAP endpoint from the list of
+     *         registered endpoints is returned
+     */
+    private Endpoint getEndpointForClient(Client client) {
+        for (Endpoint ep : endpoints) {
+            InetSocketAddress endpointAddress = ep.getAddress();
+            if (endpointAddress.equals(client.getRegistrationEndpointAddress())) {
+                return ep;
+            }
+        }
+        return endpoints.iterator().next();
+    }
+
     @Override
     public void registered(Client client) {
         // nothing to do
@@ -651,7 +666,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
     @Override
     public void unregistered(Client client) {
         // cancel all existing observations
-        this.observationRegistry.cancelObservations(client);
+        observationRegistry.cancelObservations(client);
     }
 
     @Override

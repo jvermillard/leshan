@@ -30,9 +30,13 @@
 package leshan.server.lwm2m.message.californium;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.net.InetAddress;
+import java.util.HashSet;
+import java.util.Set;
 
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ContentFormat;
@@ -66,27 +70,28 @@ public class CaliforniumBasedRequestHandlerTest extends BasicTestSupport {
     private static final String TEXT_PAYLOAD = "payload";
 
     Endpoint coapEndpoint;
-    Endpoint coapEndpointSecure;
     CaliforniumBasedRequestHandler requestHandler;
     ObservationRegistryImpl observationRegistry;
 
     @Before
     public void setUp() throws Exception {
-        this.destination = InetAddress.getLocalHost();
-        this.coapEndpoint = mock(Endpoint.class);
-        this.coapEndpointSecure = mock(Endpoint.class);
-        this.observationRegistry = new ObservationRegistryImpl();
-        this.requestHandler = new CaliforniumBasedRequestHandler(coapEndpoint, coapEndpointSecure, observationRegistry);
         givenASimpleClient();
+        destination = InetAddress.getLocalHost();
+        coapEndpoint = mock(Endpoint.class);
+        when(coapEndpoint.getAddress()).thenReturn(registrationAddress);
+        Set<Endpoint> endpointSet = new HashSet<>();
+        endpointSet.add(coapEndpoint);
+        observationRegistry = new ObservationRegistryImpl();
+        requestHandler = new CaliforniumBasedRequestHandler(endpointSet, observationRegistry);
     }
 
     @Test
     public void testSendReadRequestReturnsContentResponse() throws Exception {
 
-        ReadRequest request = ReadRequest.newRequest(this.client, OBJECT_ID_DEVICE);
+        ReadRequest request = ReadRequest.newRequest(client, OBJECT_ID_DEVICE);
         ifTheClientReturns(newResponse(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT, TEXT_PAYLOAD));
 
-        ClientResponse response = this.requestHandler.send(request);
+        ClientResponse response = requestHandler.send(request);
         Assert.assertTrue(response.getCode() == ResponseCode.CONTENT);
         Assert.assertEquals(TEXT_PAYLOAD, new String(response.getContent()));
     }
@@ -95,12 +100,12 @@ public class CaliforniumBasedRequestHandlerTest extends BasicTestSupport {
     public void testSendDiscoverRequestReturnsDiscoverResponse() throws Exception {
 
         String coreLinkPayload = "/3/0/1;pmin=10";
-        DiscoverRequest request = DiscoverRequest.newRequest(this.client, OBJECT_ID_DEVICE);
+        DiscoverRequest request = DiscoverRequest.newRequest(client, OBJECT_ID_DEVICE);
         Response coapResponse = new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT);
         coapResponse.setPayload(coreLinkPayload, MediaTypeRegistry.APPLICATION_XML);
         ifTheClientReturns(coapResponse);
 
-        ClientResponse response = this.requestHandler.send(request);
+        ClientResponse response = requestHandler.send(request);
         Assert.assertTrue(response instanceof DiscoverResponse);
         Assert.assertArrayEquals(coreLinkPayload.getBytes(), response.getContent());
     }
@@ -108,10 +113,10 @@ public class CaliforniumBasedRequestHandlerTest extends BasicTestSupport {
     @Test
     public void testSendDeleteRequestSucceeds() throws Exception {
 
-        DeleteRequest request = DeleteRequest.newRequest(this.client, 10, 1);
+        DeleteRequest request = DeleteRequest.newRequest(client, 10, 1);
         ifTheClientReturns(new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.DELETED));
 
-        ClientResponse response = this.requestHandler.send(request);
+        ClientResponse response = requestHandler.send(request);
         Assert.assertEquals(ResponseCode.DELETED, response.getCode());
     }
 
@@ -119,67 +124,68 @@ public class CaliforniumBasedRequestHandlerTest extends BasicTestSupport {
     public void testSendWriteAttributesRequestReturnsChangedResponse() throws Exception {
 
         ObserveSpec spec = new ObserveSpec.Builder().maxPeriod(20).minPeriod(10).build();
-        WriteAttributesRequest request = WriteAttributesRequest.newRequest(this.client, OBJECT_ID_DEVICE, spec);
+        WriteAttributesRequest request = WriteAttributesRequest.newRequest(client, OBJECT_ID_DEVICE, spec);
         ifTheClientReturns(new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CHANGED));
 
-        ClientResponse response = this.requestHandler.send(request);
+        ClientResponse response = requestHandler.send(request);
         Assert.assertNull(response.getContent());
     }
 
     @Test
     public void testSendWriteRequestReturnsChangedResponse() throws Exception {
-        WriteRequest request = WriteRequest.newUpdateRequest(this.client, 15, 3, 1, "TEST", ContentFormat.TEXT);
+        WriteRequest request = WriteRequest.newUpdateRequest(client, 15, 3, 1, "TEST", ContentFormat.TEXT);
         ifTheClientReturns(newResponse(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CHANGED, null));
 
-        ClientResponse response = this.requestHandler.send(request);
+        ClientResponse response = requestHandler.send(request);
         Assert.assertEquals(ResponseCode.CHANGED, response.getCode());
     }
 
     @Test
     public void testSendCreateRequestReturnsCreatedResponse() throws Exception {
-        CreateRequest request = CreateRequest.newRequest(this.client, 15, "TEST");
+        CreateRequest request = CreateRequest.newRequest(client, 15, "TEST");
         ifTheClientReturns(newResponse(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CREATED, null));
 
-        ClientResponse response = this.requestHandler.send(request);
+        ClientResponse response = requestHandler.send(request);
         Assert.assertEquals(ResponseCode.CREATED, response.getCode());
     }
 
     @Test
     public void testSendRequestReturnsNotAuthorized() throws Exception {
-        ReadRequest request = ReadRequest.newRequest(this.client, OBJECT_ID_DEVICE);
+        ReadRequest request = ReadRequest.newRequest(client, OBJECT_ID_DEVICE);
         ifTheClientReturns(new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.UNAUTHORIZED));
 
-        ClientResponse response = this.requestHandler.send(request);
+        ClientResponse response = requestHandler.send(request);
         Assert.assertEquals(ResponseCode.UNAUTHORIZED, response.getCode());
     }
 
     @Test
     public void testSendRequestReturnsNotFound() throws Exception {
-        ReadRequest request = ReadRequest.newRequest(this.client, OBJECT_ID_DEVICE);
+        ReadRequest request = ReadRequest.newRequest(client, OBJECT_ID_DEVICE);
         ifTheClientReturns(new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.NOT_FOUND));
 
-        ClientResponse response = this.requestHandler.send(request);
+        ClientResponse response = requestHandler.send(request);
         Assert.assertEquals(ResponseCode.NOT_FOUND, response.getCode());
     }
 
     @Test
     public void testCreateRequestReturnsMethodNotAllowed() throws Exception {
-        CreateRequest request = CreateRequest.newRequest(this.client, OBJECT_ID_DEVICE, "TEST");
+        CreateRequest request = CreateRequest.newRequest(client, OBJECT_ID_DEVICE, "TEST");
         ifTheClientReturns(new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.METHOD_NOT_ALLOWED));
 
-        ClientResponse response = this.requestHandler.send(request);
+        ClientResponse response = requestHandler.send(request);
         Assert.assertEquals(ResponseCode.METHOD_NOT_ALLOWED, response.getCode());
     }
 
     @Test(expected = RequestTimeoutException.class)
     public void testSendRequestThrowsRequestTimeoutException() throws Exception {
-        ReadRequest request = ReadRequest.newRequest(this.client, OBJECT_ID_DEVICE);
-        this.requestHandler.send(request);
+        ReadRequest request = ReadRequest.newRequest(client, OBJECT_ID_DEVICE);
+        requestHandler.send(request);
         Assert.fail("Request should have timed out with exception");
     }
 
     private void ifTheClientReturns(final Response coapResponse) {
         doAnswer(new Answer<Void>() {
+            @Override
             public Void answer(InvocationOnMock invocation) {
                 Object[] args = invocation.getArguments();
                 if (args.length > 0 && args[0] instanceof Request) {
@@ -187,7 +193,7 @@ public class CaliforniumBasedRequestHandlerTest extends BasicTestSupport {
                 }
                 return null;
             }
-        }).when(this.coapEndpoint).sendRequest(any(Request.class));
+        }).when(coapEndpoint).sendRequest(any(Request.class));
     }
 
     private Response newResponse(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode responseCode, String payload) {

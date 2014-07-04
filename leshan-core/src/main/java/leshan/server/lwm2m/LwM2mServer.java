@@ -32,6 +32,8 @@ package leshan.server.lwm2m;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.HashSet;
+import java.util.Set;
 
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.message.RequestHandler;
@@ -39,6 +41,7 @@ import leshan.server.lwm2m.message.californium.CaliforniumBasedRequestHandler;
 import leshan.server.lwm2m.observation.ObservationRegistry;
 import leshan.server.lwm2m.resource.RegisterResource;
 
+import org.apache.commons.lang.Validate;
 import org.eclipse.californium.scandium.DTLSConnector;
 import org.eclipse.californium.scandium.dtls.pskstore.InMemoryPskStore;
 import org.slf4j.Logger;
@@ -100,7 +103,7 @@ public class LwM2mServer {
      * @param clientRegistry the client registry
      */
     public LwM2mServer(InetSocketAddress localAddress, InetSocketAddress localAddressSecure,
-            ClientRegistry clientRegistry) {
+                       ClientRegistry clientRegistry) {
 
         this(localAddress, localAddressSecure, clientRegistry, null);
     }
@@ -112,18 +115,14 @@ public class LwM2mServer {
      * @param clientRegistry the client registry
      */
     public LwM2mServer(InetSocketAddress localAddress, InetSocketAddress localAddressSecure,
-            ClientRegistry clientRegistry, ObservationRegistry observationRegistry) {
-        if (clientRegistry == null) {
-            throw new IllegalArgumentException("Client registry must not be null");
-        }
-        if (localAddress == null) {
-            throw new IllegalArgumentException("IP address cannot be null");
-        }
+                       ClientRegistry clientRegistry, ObservationRegistry observationRegistry) {
+        Validate.notNull(clientRegistry, "Client registry must not be null");
+        Validate.notNull(localAddress, "IP address cannot be null");
 
         // init CoAP server
-        this.coapServer = new Server();
+        coapServer = new Server();
         Endpoint endpoint = new CoAPEndpoint(localAddress);
-        this.coapServer.addEndpoint(endpoint);
+        coapServer.addEndpoint(endpoint);
 
         // init DTLS server
 
@@ -137,25 +136,27 @@ public class LwM2mServer {
 
         Endpoint endpointSecure = new CoAPEndpoint(new DTLSConnector(localAddressSecure, pskStore),
                 NetworkConfig.getStandard());
-        this.coapServer.addEndpoint(endpointSecure);
+        coapServer.addEndpoint(endpointSecure);
 
         // define /rd resource
-        RegisterResource rdResource = new RegisterResource(clientRegistry, endpointSecure);
-        this.coapServer.add(rdResource);
+        RegisterResource rdResource = new RegisterResource(clientRegistry);
+        coapServer.add(rdResource);
 
-        CaliforniumBasedRequestHandler handler = new CaliforniumBasedRequestHandler(endpoint, endpointSecure,
-                observationRegistry, 0);
+        Set<Endpoint> endpoints = new HashSet<>();
+        endpoints.add(endpoint);
+        endpoints.add(endpointSecure);
+        CaliforniumBasedRequestHandler handler = new CaliforniumBasedRequestHandler(endpoints, observationRegistry, 0);
         // register the request handler as listener in order to cancel
         // observations and free up resources when clients unregister
         clientRegistry.addListener(handler);
-        this.requestHandler = handler;
+        requestHandler = handler;
     }
 
     /**
      * Starts the server and binds it to the specified port.
      */
     public void start() {
-        this.coapServer.start();
+        coapServer.start();
         LOG.info("LW-M2M server started");
     }
 
@@ -163,10 +164,10 @@ public class LwM2mServer {
      * Stops the server and unbinds it from assigned port.
      */
     public void stop() {
-        this.coapServer.stop();
+        coapServer.stop();
     }
 
     public RequestHandler getRequestHandler() {
-        return this.requestHandler;
+        return requestHandler;
     }
 }

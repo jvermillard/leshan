@@ -30,6 +30,7 @@
 package leshan.server.lwm2m.client;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.Date;
 
@@ -50,6 +51,13 @@ public class Client {
 
     private int port;
 
+    /*
+     * The address of the LWM2M Server's CoAP end point the client used to
+     * register.
+     * 
+     */
+    private final InetSocketAddress registrationEndpointAddress;
+
     private long lifeTimeInSec;
 
     private String smsNumber;
@@ -58,6 +66,9 @@ public class Client {
 
     private BindingMode bindingMode;
 
+    /**
+     * The LWM2M Client's unique end point name.
+     */
     private final String endpoint;
 
     private final String registrationId;
@@ -66,28 +77,29 @@ public class Client {
 
     private Date lastUpdate;
 
-    private final boolean secure;
-
     // true, if the client failed to answer the last server request
     private boolean failedLastRequest = false;
 
-    public Client(String registrationId, String endpoint, InetAddress address, int port) {
-        this(registrationId, endpoint, address, port, null, null, null, null, null, false);
+    public Client(String registrationId, String endpoint, InetAddress address, int port,
+                  InetSocketAddress registrationEndpoint) {
+        this(registrationId, endpoint, address, port, null, null, null, null, null, registrationEndpoint);
     }
 
     public Client(String registrationId, String endpoint, InetAddress address, int port, String lwM2mVersion,
-            Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks, boolean secure) {
+                  Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks,
+                  InetSocketAddress registrationEndpoint) {
         this(registrationId, endpoint, address, port, lwM2mVersion, lifetime, smsNumber, binding, objectLinks, null,
-                secure);
+                registrationEndpoint);
     }
 
     public Client(String registrationId, String endpoint, InetAddress address, int port, String lwM2mVersion,
-            Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks, Date registrationDate,
-            boolean secure) {
+                  Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks, Date registrationDate,
+                  InetSocketAddress registrationEndpoint) {
 
         Validate.notEmpty(endpoint);
         Validate.notNull(address);
         Validate.notNull(port);
+        Validate.notNull(registrationEndpoint);
 
         this.registrationId = registrationId;
         this.endpoint = endpoint;
@@ -95,12 +107,12 @@ public class Client {
         this.port = port;
         this.objectLinks = objectLinks;
         this.registrationDate = registrationDate == null ? new Date() : registrationDate;
-        this.lifeTimeInSec = lifetime == null ? DEFAULT_LIFETIME_IN_SEC : lifetime;
+        lifeTimeInSec = lifetime == null ? DEFAULT_LIFETIME_IN_SEC : lifetime;
         this.lwM2mVersion = lwM2mVersion == null ? DEFAULT_LWM2M_VERSION : lwM2mVersion;
-        this.bindingMode = binding == null ? BindingMode.U : binding;
+        bindingMode = binding == null ? BindingMode.U : binding;
         this.smsNumber = smsNumber;
-        this.lastUpdate = new Date();
-        this.secure = secure;
+        lastUpdate = new Date();
+        registrationEndpointAddress = registrationEndpoint;
     }
 
     public String getRegistrationId() {
@@ -111,12 +123,43 @@ public class Client {
         return registrationDate;
     }
 
+    /**
+     * Gets the client's network address.
+     * 
+     * @return the source address from the client's most recent CoAP message.
+     */
     public InetAddress getAddress() {
         return address;
     }
 
+    /**
+     * Gets the client's network port number.
+     * 
+     * @return the source port from the client's most recent CoAP message.
+     */
     public int getPort() {
         return port;
+    }
+
+    /**
+     * Gets the network address and port number of LWM2M Server's CoAP endpoint
+     * the client originally registered at.
+     * 
+     * A LWM2M Server may listen on multiple CoAP end points, e.g. a non-secure
+     * and a secure one. Clients are often behind a firewall which will only let
+     * incoming UDP packets pass if they originate from the same address:port
+     * that the client has initiated communication with, e.g. by means of
+     * registering with the LWM2M Server. It is therefore important to know,
+     * which of the server's CoAP end points the client contacted for
+     * registration.
+     * 
+     * This information can be used to uniquely identify the CoAP endpoint that
+     * should be used to access resources on the client.
+     * 
+     * @return the network address and port number
+     */
+    public InetSocketAddress getRegistrationEndpointAddress() {
+        return registrationEndpointAddress;
     }
 
     public String[] getObjectLinks() {
@@ -143,6 +186,11 @@ public class Client {
         return bindingMode;
     }
 
+    /**
+     * Gets the unique name the client has registered with.
+     * 
+     * @return the name
+     */
     public String getEndpoint() {
         return endpoint;
     }
@@ -183,16 +231,13 @@ public class Client {
         return failedLastRequest ? false : lastUpdate.getTime() + lifeTimeInSec * 1000 > System.currentTimeMillis();
     }
 
-    public boolean isSecure() {
-        return secure;
-    }
-
     @Override
     public String toString() {
         return String
-                .format("Client [registrationDate=%s, address=%s, port=%s, lifeTimeInSec=%s, smsNumber=%s, lwM2mVersion=%s, bindingMode=%s, endpoint=%s, registrationId=%s, objectLinks=%s, lastUpdate=%s, secure=%s, failedLastRequest=%s]",
-                        registrationDate, address, port, lifeTimeInSec, smsNumber, lwM2mVersion, bindingMode, endpoint,
-                        registrationId, Arrays.toString(objectLinks), lastUpdate, secure, failedLastRequest);
+                .format("Client [registrationDate=%s, address=%s, port=%s, registrationEndpoint=%s, lifeTimeInSec=%s, smsNumber=%s, lwM2mVersion=%s, bindingMode=%s, endpoint=%s, registrationId=%s, objectLinks=%s, lastUpdate=%s, failedLastRequest=%s]",
+                        registrationDate, address, port, registrationEndpointAddress, lifeTimeInSec, smsNumber,
+                        lwM2mVersion, bindingMode, endpoint, registrationId, Arrays.toString(objectLinks), lastUpdate,
+                        failedLastRequest);
     }
 
     /**
