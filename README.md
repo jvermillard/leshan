@@ -1,4 +1,5 @@
-[![Build Status](https://drone.io/github.com/jvermillard/leshan/status.png)](https://drone.io/github.com/jvermillard/leshan/latest)
+[Build Status on drone.io](https://drone.io/github.com/jvermillard/leshan/latest)
+
 Leshan
 ======
 
@@ -22,12 +23,13 @@ leshan-lwm2m@googlegroups.com
 
 https://groups.google.com/d/forum/leshan-lwm2m
 
+Test Sandbox
+------------
+
+You can try it live on our demo instance: http://54.228.25.31/
+
 Compile & Run
 -------------
-
-Screencast: http://ascii.io/a/4741
-
-Compile with maven, generate a runnable jar:
 
 ```
 mvn install
@@ -38,16 +40,20 @@ mvn assembly:assembly -DdescriptorId=jar-with-dependencies
 Run:
 
 ```
-java -jar target/leshan-standalone-0.1.1-SNAPSHOT-jar-with-dependencies.jar 
+java -jar target/leshan-standalone-*-SNAPSHOT-jar-with-dependencies.jar 
 ```
 
-Now you can register your LWM2M client.
+
+Connect on Leshan UI: http://localhost:8080
+
+Leshan provides a very simple UI  to get the list of connected clients and interact with clients resources.
+
+Now you can register your LWM2M client like [Eclipse Wakaama](http://eclipse.org/wakaama)
 
 The list of the registered clients: http://localhost:8080/api/clients
 
 Get the instace 0 of the object 3 of a registered client: http://localhost:8080/api/clients/{endpoint}/3/0
 
-Leshan also provides a simple UI (http://localhost:8080) to get the list of connected clients and read some values of clients resources.
 
 ![Leshan](https://raw.github.com/msangoi/leshan/master/lw-clients.png)
 
