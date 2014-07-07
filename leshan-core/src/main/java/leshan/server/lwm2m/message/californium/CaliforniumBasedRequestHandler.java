@@ -99,12 +99,10 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
      * Sets required collaborators.
      * 
      * @param endpoints the CoAP endpoints to use for sending requests
-     * @param observationRegistry the registry for keeping track of observed
-     *            resources, if <code>null</code> an instance of
-     *            {@link ObservationRegistryImpl} is used
+     * @param observationRegistry the registry for keeping track of observed resources, if <code>null</code> an instance
+     *        of {@link ObservationRegistryImpl} is used
      */
-    public CaliforniumBasedRequestHandler(Set<Endpoint> endpoints,
-                                          ObservationRegistry observationRegistry) {
+    public CaliforniumBasedRequestHandler(Set<Endpoint> endpoints, ObservationRegistry observationRegistry) {
         this(endpoints, observationRegistry, COAP_REQUEST_TIMEOUT_MILLIS);
     }
 
@@ -112,13 +110,12 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
      * Sets required collaborators.
      * 
      * @param endpoints the CoAP endpoints to use for sending requests
-     * @param observationRegistry the registry for keeping track of observed
-     *            resources, if <code>null</code> an instance of
-     *            {@link ObservationRegistryImpl} is used
+     * @param observationRegistry the registry for keeping track of observed resources, if <code>null</code> an instance
+     *        of {@link ObservationRegistryImpl} is used
      * @param timeoutMillis timeout for CoAP request
      */
     public CaliforniumBasedRequestHandler(Set<Endpoint> endpoints, ObservationRegistry observationRegistry,
-                                          int timeoutMillis) {
+            int timeoutMillis) {
         Validate.notNull(endpoints);
         if (observationRegistry == null) {
             this.observationRegistry = new ObservationRegistryImpl();
@@ -206,7 +203,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
             if (MediaTypeRegistry.APPLICATION_LINK_FORMAT != coapResponse.getOptions().getContentFormat()) {
                 LOG.debug("Expected LWM2M Client [{}] to return application/link-format [{}] content but got [{}]",
                         request.getClient().getEndpoint(), MediaTypeRegistry.APPLICATION_LINK_FORMAT, coapResponse
-                        .getOptions().getContentFormat());
+                                .getOptions().getContentFormat());
             }
             return new DiscoverResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value),
                     coapResponse.getPayload());
@@ -407,7 +404,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
     }
 
     private ClientResponse buildWriteAttributeResponse(WriteAttributesRequest request, Request coapRequest,
-                                                       Response coapResponse) {
+            Response coapResponse) {
         switch (coapResponse.getCode()) {
         case CHANGED:
             return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value),
@@ -639,14 +636,12 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
     }
 
     /**
-     * Gets the CoAP endpoint that should be used to communicate with a given
-     * client.
+     * Gets the CoAP endpoint that should be used to communicate with a given client.
      * 
      * @param client the client
-     * @return the CoAP endpoint bound to the same network address and port that
-     *         the client connected to during registration. If no such CoAP
-     *         endpoint is available, the first CoAP endpoint from the list of
-     *         registered endpoints is returned
+     * @return the CoAP endpoint bound to the same network address and port that the client connected to during
+     *         registration. If no such CoAP endpoint is available, the first CoAP endpoint from the list of registered
+     *         endpoints is returned
      */
     private Endpoint getEndpointForClient(Client client) {
         for (Endpoint ep : endpoints) {
@@ -655,7 +650,8 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
                 return ep;
             }
         }
-        return endpoints.iterator().next();
+        throw new IllegalStateException("can't find the client endpoint for address : "
+                + client.getRegistrationEndpointAddress());
     }
 
     @Override
