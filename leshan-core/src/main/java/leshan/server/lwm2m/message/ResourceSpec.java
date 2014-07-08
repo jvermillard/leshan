@@ -69,6 +69,7 @@ public final class ResourceSpec {
 
     public String asRelativePath() {
         StringBuffer b = new StringBuffer();
+        b.append("/");
         b.append(getObjectId());
         if (getObjectInstanceId() != null) {
             b.append("/").append(getObjectInstanceId());

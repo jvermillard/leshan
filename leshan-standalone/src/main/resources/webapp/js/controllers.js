@@ -108,6 +108,7 @@ lwClientControllers.controller('ClientDetailCtrl', [
                 $scope.$apply(function() {
                     var content = JSON.parse(msg.data);
                     var resourceId = content.res.split("/");
+                    resourceId.shift();
                     var resource = findResource(resourceId, $scope.lwresources);
                     if (resource) {
                         resource.value = content.val;
