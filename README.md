@@ -28,6 +28,14 @@ Test Sandbox
 
 You can try it live on our demo instance: http://54.228.25.31/
 
+Get and run last binary
+-----------------------
+
+```
+wget https://drone.io/github.com/jvermillard/leshan/files/leshan.jar
+java -jar ./leshan.jar
+```
+
 Compile & Run
 -------------
 
