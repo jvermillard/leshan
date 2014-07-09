@@ -29,6 +29,8 @@
  */
 package leshan.server;
 
+import java.net.InetSocketAddress;
+
 import leshan.server.lwm2m.LwM2mServer;
 import leshan.server.lwm2m.client.ClientRegistryImpl;
 import leshan.server.lwm2m.observation.ObservationRegistry;
@@ -53,11 +55,25 @@ public class LeshanMain {
         ClientRegistryImpl clientRegistry = new ClientRegistryImpl();
         ObservationRegistry observationRegistry = new ObservationRegistryImpl();
 
+        // use those ENV variables for specifying the interface to be bound for coap and coaps
+        String iface = System.getenv("COAPIFACE");
+        String ifaces = System.getenv("COAPSIFACE");
+
         // LWM2M server
-        LwM2mServer lwServer = new LwM2mServer(clientRegistry, observationRegistry);
+        LwM2mServer lwServer;
+        if (iface == null || iface.isEmpty() || ifaces == null || ifaces.isEmpty()) {
+            lwServer = new LwM2mServer(clientRegistry, observationRegistry);
+        } else {
+            String[] add = iface.split(":");
+            String[] adds = ifaces.split(":");
+
+            // user specified the iface to be bound
+            lwServer = new LwM2mServer(new InetSocketAddress(add[0], Integer.parseInt(add[1])), new InetSocketAddress(
+                    adds[0], Integer.parseInt(adds[1])), clientRegistry, observationRegistry);
+        }
+
         lwServer.start();
         clientRegistry.start();
-
 
         // now prepare and start jetty
 
