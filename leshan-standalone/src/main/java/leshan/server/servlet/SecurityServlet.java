@@ -49,8 +49,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.JsonParseException;
 
 /**
  * Service HTTP REST API calls for security information.
@@ -97,7 +96,7 @@ public class SecurityServlet extends HttpServlet {
 
             resp.setStatus(HttpServletResponse.SC_OK);
 
-        } catch (JsonSyntaxException | JsonIOException e) {
+        } catch (JsonParseException e) {
             LOG.debug("Could not parse request body", e);
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid request body");
         } catch (RuntimeException e) {
