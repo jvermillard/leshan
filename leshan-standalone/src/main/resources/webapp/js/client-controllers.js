@@ -4,6 +4,11 @@ lwClientControllers.controller('ClientListCtrl', [
     '$scope',
     '$http',
     function ClientListCtrl($scope, $http) {
+    	
+    	// update navbar
+    	angular.element("#navbar").children().removeClass('active');
+    	angular.element("#client-navlink").addClass('active');
+    	    	
         // free resource when controller is destroyed
         $scope.$on('$destroy', function(){
             if ($scope.eventsource){
@@ -201,6 +206,6 @@ lwClientControllers.controller('ClientDetailCtrl', [
                 } else {
                     return node;
                 }
-            	}
+            }
         }
 }]);

@@ -1,35 +1,34 @@
 /* LWM2M app css stylesheet */
 
-body {
-  padding-top: 100px;
-}
-
 .container {
 	max-width: 980px;
 }
 
 .navbar-default {
-	background-color:#2B3033;
-	height:75px;
+	background-color:#525252;
+	border-color: #E6E6E6;
+	border-bottom-width: 10px;
 }
 
-.navbar-default .navbar-brand {
-	color:white;
-	height:80px;
-	line-height:75px;
-	padding-left:50px;
-}
-
-.navbar-default div {
+.navbar div a {
 	height: 80px;
 }
 
-.navbar-default img {
-	margin-top: 12px;
+.navbar-default .navbar-nav>.active>a,
+.navbar-default .navbar-nav>.active>a:hover {
+	background-color:#E6E6E6;
 }
 
-.navbar-default .navbar-brand:hover {
-	color:#2DA0FD;
+.navbar-default .navbar-nav>li>a {
+	line-height: 80px;
+	text-align: center;
+	font-size: 18px;
+	width: 150px;
+	color: #CBCBCB;	
+}
+
+.navbar-default .navbar-nav>li>a:hover {
+	color: #979797;
 }
 
 .client-detail {
@@ -115,6 +114,11 @@ body {
 
 .resource-title-2 {
 	padding-left: 50px;
+}
+
+/* Security info */
+.security-table {
+	margin-top: 20px;
 }
 
 

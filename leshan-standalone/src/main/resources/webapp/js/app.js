@@ -2,14 +2,15 @@
 
 /* App Module */
 
-var lwClientApp = angular.module('lwClientApp', [ 'ngRoute',
-        'lwClientControllers', 'lwResourcesDirective', 'lwResourcesServices', 'uiDialogServices', 'ui.bootstrap']);
+var leshanApp = angular.module('leshanApp', [ 'ngRoute',
+        'lwClientControllers', 'lwResourcesDirective', 'lwResourcesServices', 'securityControllers', 'uiDialogServices', 'ui.bootstrap']);
 
-lwClientApp.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
+leshanApp.config(['$routeProvider', '$locationProvider', function($routeProvider, $locationProvider) {
 
     $routeProvider.
         when('/clients', { templateUrl : 'partials/client-list.html', controller : 'ClientListCtrl' }).
         when('/clients/:clientId', { templateUrl : 'partials/client-detail.html', controller : 'ClientDetailCtrl' }).
+        when('/security', { templateUrl : 'partials/security-list.html', controller : 'SecurityListCtrl' }).
         otherwise({ redirectTo : '/clients' });
 
 } ]);

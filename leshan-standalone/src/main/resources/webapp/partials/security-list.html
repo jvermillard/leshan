@@ -1,0 +1,102 @@
+<div>
+	<button class="btn btn-default center-block" ng-click="newSecurity()">Add
+		new client security configuration</button>
+</div>
+
+
+<table class="table table-striped security-table">
+	<tr>
+		<th>Client endpoint</th>
+		<th>Security mode</th>
+		<th>Identity</th>
+		<th>Key</th>
+	</tr>
+	<tr ng-repeat="(endpoint, security) in securityInfos">
+        <td>{{ endpoint }}</td>
+        <td>Pre-Shared Key</td>
+        <td>{{ security.psk.identity }}</td>
+        <td>{{ security.psk.key }}</td>
+    </tr>
+</table>
+
+<!-- <li ng-repeat="(endpoint, security) in securityInfos"><span>{{endpoint}} : {{security}}</span></li> -->
+
+
+<!-- New security modal -->
+<div class="modal bs-example-modal-sm" id="newSecurityModal"
+	tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-hidden="true">&times;</button>
+				<h4 class="modal-title">New security configuration</h4>
+			</div>
+			<div class="modal-body">
+				<form class="form-horizontal" role="form" name="form">
+					<div class="form-group">
+						<label for="endpointValue" class="col-sm-4 control-label">Client
+							endpoint</label>
+						<div class="col-sm-8">
+							<input class="form-control" id="endpointValue" name="endpoint">
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="securityMode" class="col-sm-4 control-label">Security
+							mode</label>
+						<div class="col-sm-8">
+							<select class="form-control" id="securityMode">
+								<option value="psk">Pre-Shared Key</option>
+								<option value="rpk">Raw Public Key Certificate</option>
+							</select>
+						</div>
+					</div>
+
+					<!-- PSK inputs -->
+					<div class="form-group security-fg psk-fg">
+						<label for="pskIdentityValue" class="col-sm-4 control-label">Identity</label>
+						<div class="col-sm-8">
+							<input class="form-control" id="pskIdentityValue">
+						</div>
+					</div>
+
+					<div class="form-group security-fg psk-fg">
+						<label for="pskValue" class="col-sm-4 control-label">Key</label>
+						<div class="col-sm-8">
+							<textarea class="form-control" rows="3" id="pskValue"></textarea>
+						</div>
+					</div>
+
+					<!-- RPK inputs -->
+					<div class="form-group security-fg rpk-fg hidden">
+						<label for="rpkValue" class="col-sm-4 control-label">Public
+							key</label>
+						<div class="col-sm-8">
+							<input class="form-control" id="rpkValue">
+						</div>
+					</div>
+
+					<!-- TODO -->
+
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				<button type="button" class="btn btn-primary" data-dismiss="modal"
+					id="newSecuritySubmit">Create</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	$(document.body).on('click', '#securityMode', function(event) {
+		$(".security-fg").addClass('hidden');
+		if (securityMode.value == "psk") {
+			$(".psk-fg").removeClass('hidden');
+		} else if (securityMode.value == "rpk") {
+			$(".rpk-fg").removeClass('hidden');
+		}
+		return false;
+	})
+</script>
