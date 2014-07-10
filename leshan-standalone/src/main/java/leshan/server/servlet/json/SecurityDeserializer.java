@@ -56,11 +56,25 @@ public class SecurityDeserializer implements JsonDeserializer<SecurityInfo> {
 
         if (json.isJsonObject()) {
             JsonObject object = (JsonObject) json;
+
+            String endpoint = null;
+            if (object.has("endpoint")) {
+                endpoint = object.get("endpoint").getAsString();
+            } else {
+                throw new JsonParseException("Missing endpoint");
+            }
+
             JsonObject psk = (JsonObject) object.get("psk");
-            if (psk == null) {
+            if (psk == null) { // psk only for now
                 throw new JsonParseException("Invalid security info content");
             }
-            String identity = psk.get("identity").getAsString();
+            String identity  = null;
+            if(psk.has("identity")) {
+            identity = psk.get("identity").getAsString();
+            }
+            else {
+                throw new JsonParseException("Missing PSK identity");
+            }
             byte[] key;
             try {
                 key = Hex.decodeHex(psk.get("key").getAsString().toCharArray());
@@ -68,7 +82,7 @@ public class SecurityDeserializer implements JsonDeserializer<SecurityInfo> {
                 throw new JsonParseException(e);
             }
 
-            info = SecurityInfo.newPreSharedKeyInfo(identity, key);
+            info = SecurityInfo.newPreSharedKeyInfo(endpoint, identity, key);
         }
 
         return info;

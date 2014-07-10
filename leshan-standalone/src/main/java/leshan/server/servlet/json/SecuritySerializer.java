@@ -46,6 +46,8 @@ public class SecuritySerializer implements JsonSerializer<SecurityInfo> {
     public JsonElement serialize(SecurityInfo src, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject element = new JsonObject();
 
+        element.addProperty("endpoint", src.getEndpoint());
+
         if (src.getIdentity() != null) {
             JsonObject psk = new JsonObject();
             psk.addProperty("identity", src.getIdentity());

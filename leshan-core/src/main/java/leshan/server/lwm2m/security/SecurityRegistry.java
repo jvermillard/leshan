@@ -29,7 +29,7 @@
  */
 package leshan.server.lwm2m.security;
 
-import java.util.Map;
+import java.util.Collection;
 
 import org.eclipse.californium.scandium.dtls.pskstore.PskStore;
 
@@ -49,17 +49,18 @@ public interface SecurityRegistry extends PskStore {
     /**
      * Returns the {@link SecurityInfo} for all end-points.
      */
-    Map<String, SecurityInfo> getAll();
+    Collection<SecurityInfo> getAll();
 
     /**
-     * Registers new security information for a given end-point.
+     * Registers new security information for a client end-point.
      * 
-     * @param endpoint the client end-point
      * @param info the new security information
-     * @return the {@link SecurityInfo} previously stored for this end-point or <code>null</code> if there was no
-     *         security information for this end-point.
+     * @return the {@link SecurityInfo} previously stored for the end-point or <code>null</code> if there was no
+     *         security information for the end-point.
+     * @throws NonUniqueSecurityInfoException if some identifiers (PSK identity, RPK public key...) are not unique among
+     *         all end-points.
      */
-    SecurityInfo add(String endpoint, SecurityInfo info);
+    SecurityInfo add(SecurityInfo info) throws NonUniqueSecurityInfoException;
 
     /**
      * Removes the security information for a given end-point.

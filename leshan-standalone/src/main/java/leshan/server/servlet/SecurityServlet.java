@@ -31,13 +31,14 @@ package leshan.server.servlet;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Map;
+import java.util.Collection;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import leshan.server.lwm2m.security.NonUniqueSecurityInfoException;
 import leshan.server.lwm2m.security.SecurityInfo;
 import leshan.server.lwm2m.security.SecurityRegistry;
 import leshan.server.servlet.json.SecurityDeserializer;
@@ -82,20 +83,23 @@ public class SecurityServlet extends HttpServlet {
      */
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String[] path = StringUtils.split(req.getPathInfo(), "/");
-        if (path.length != 1) {
+
+        if (StringUtils.isNotBlank(req.getPathInfo())) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        String endpoint = path[0];
+
         try {
             SecurityInfo info = gsonDes.fromJson(new InputStreamReader(req.getInputStream()), SecurityInfo.class);
-            LOG.debug("New security info for end-point {}: {}", endpoint, info);
+            LOG.debug("New security info for end-point {}: {}", info.getEndpoint(), info);
 
-            registry.add(endpoint, info);
+            registry.add(info);
 
             resp.setStatus(HttpServletResponse.SC_OK);
 
+        } catch (NonUniqueSecurityInfoException e) {
+            LOG.debug("Non unique security info", e);
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Non unique security info");
         } catch (JsonParseException e) {
             LOG.debug("Could not parse request body", e);
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid request body");
@@ -103,7 +107,6 @@ public class SecurityServlet extends HttpServlet {
             LOG.error("unexpected error for request " + req.getPathInfo(), e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
-
     }
 
     /**
@@ -111,7 +114,7 @@ public class SecurityServlet extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Map<String, SecurityInfo> infos = this.registry.getAll();
+        Collection<SecurityInfo> infos = this.registry.getAll();
 
         String json = this.gsonSer.toJson(infos);
         resp.setContentType("application/json");

@@ -14,29 +14,34 @@ lwClientControllers.controller('SecurityListCtrl', [
             $scope.error = "Unable to get the security info list: " + status + " " + data  
             console.error($scope.error)
         }).success(function(data, status, headers, config) {
-            $scope.securityInfos = data;        
+        	$scope.securityInfos = {}
+        	for (var i = 0; i < data.length; i++) {
+        		$scope.securityInfos[data[i].endpoint] = data[i];
+        	}
         });
         
         $scope.newSecurity = function() {
             $('#newSecuritySubmit').unbind();
-            $('#newSecuritySubmit').click(function(e){
+            $('#newSecuritySubmit').click(function(e) {
                 e.preventDefault();
-                 
+                
                 var endpoint = endpointValue.value;
                 if(securityMode.value == "psk") {
-                	var security = {psk : { identity : pskIdentityValue.value , key : pskValue.value}};
+                	var security = {endpoint: endpoint, psk : { identity : pskIdentityValue.value , key : pskValue.value}};
                 }
                 
+                // TODO validation
                 if(endpoint && security) {
                     $('#securityModal').modal('hide');
                     
-                    $http({method: 'PUT', url: "api/security/" + endpoint, data: security, headers:{'Content-Type': 'text/plain'}})
+                    $http({method: 'PUT', url: "api/security", data: security, headers:{'Content-Type': 'text/plain'}})
                     .success(function(data, status, headers, config) {
                     	
                     	$scope.securityInfos[endpoint] = security;
                         
                    }).error(function(data, status, headers, config) {
-                        errormessage = "Unable to add security info for endpoint " + endpoint + " : " + status + " "+ data
+                        errormessage = "Unable to add security info for endpoint " + endpoint + " : " + status + " "+ data;
+                        // TODO dialog ?
                         console.error(errormessage)
                     });
                 }

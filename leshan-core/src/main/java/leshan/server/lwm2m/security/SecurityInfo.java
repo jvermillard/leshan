@@ -29,13 +29,30 @@
  */
 package leshan.server.lwm2m.security;
 
+import org.apache.commons.lang.Validate;
+
+/**
+ * The security info for a client.
+ * <p>
+ * The following security modes are supported:
+ * <ul>
+ * <li>Pre-Shared Key: an identity and a key are needed</li>
+ * <li>Raw Public Key Certificate: a public key is needed</li>
+ * </ul>
+ * </p>
+ */
 public class SecurityInfo {
+
+    // the client end-point
+    private final String endpoint;
 
     // PSK
     private final String identity;
     private final byte[] preSharedKey;
 
-    private SecurityInfo(String identity, byte[] preSharedKey) {
+    private SecurityInfo(String endpoint, String identity, byte[] preSharedKey) {
+        Validate.notEmpty(endpoint);
+        this.endpoint = endpoint;
         this.identity = identity;
         this.preSharedKey = preSharedKey;
     }
@@ -43,8 +60,14 @@ public class SecurityInfo {
     /**
      * Construct a {@link SecurityInfo} when using DTLS with Pre-Shared Keys.
      */
-    public static SecurityInfo newPreSharedKeyInfo(String identity, byte[] preSharedKey) {
-        return new SecurityInfo(identity, preSharedKey);
+    public static SecurityInfo newPreSharedKeyInfo(String endpoint, String identity, byte[] preSharedKey) {
+        Validate.notEmpty(identity);
+        Validate.notNull(preSharedKey);
+        return new SecurityInfo(endpoint, identity, preSharedKey);
+    }
+
+    public String getEndpoint() {
+        return endpoint;
     }
 
     public String getIdentity() {
