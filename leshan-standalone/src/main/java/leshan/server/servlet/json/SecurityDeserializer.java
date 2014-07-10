@@ -31,31 +31,47 @@ package leshan.server.servlet.json;
 
 import java.lang.reflect.Type;
 
-import leshan.server.lwm2m.LwM2mServer;
-import leshan.server.lwm2m.client.Client;
+import leshan.server.lwm2m.security.SecurityInfo;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
+import com.google.gson.JsonParseException;
 
-public class ClientSerializer implements JsonSerializer<Client> {
+public class SecurityDeserializer implements JsonDeserializer<SecurityInfo> {
 
     @Override
-    public JsonElement serialize(Client src, Type typeOfSrc, JsonSerializationContext context) {
-        JsonObject element = new JsonObject();
+    public SecurityInfo deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+            throws JsonParseException {
 
-        element.addProperty("endpoint", src.getEndpoint());
-        element.addProperty("registrationId", src.getRegistrationId());
-        element.add("registrationDate", context.serialize(src.getRegistrationDate()));
-        element.addProperty("address", src.getAddress().toString() + ":" + src.getPort());
-        element.addProperty("smsNumber", src.getSmsNumber());
-        element.addProperty("lwM2MmVersion", src.getLwM2mVersion());
-        element.addProperty("lifetime", src.getLifeTimeInSec());
-        element.add("objectLinks", context.serialize(src.getObjectLinks()));
-        element.add("secure",
-                context.serialize(src.getRegistrationEndpointAddress().getPort() == LwM2mServer.PORT_DTLS));
+        if (json == null) {
+            return null;
+        }
 
-        return element;
+        SecurityInfo info = null;
+
+        if (json.isJsonObject()) {
+            JsonObject object = (JsonObject) json;
+            JsonObject psk = (JsonObject) object.get("psk");
+            if (psk == null) {
+                throw new JsonParseException("Invalid security info content");
+            }
+            String identity = psk.get("identity").getAsString();
+            byte[] key;
+            try {
+                key = Hex.decodeHex(psk.get("key").getAsString().toCharArray());
+            } catch (DecoderException e) {
+                throw new JsonParseException(e);
+            }
+
+            info = SecurityInfo.newPreSharedKeyInfo(identity, key);
+        }
+
+        return info;
     }
+
 }

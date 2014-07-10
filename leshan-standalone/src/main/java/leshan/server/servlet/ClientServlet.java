@@ -69,9 +69,9 @@ import com.google.gson.GsonBuilder;
 /**
  * Service HTTP REST API calls.
  */
-public class ApiServlet extends HttpServlet {
+public class ClientServlet extends HttpServlet {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ApiServlet.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ClientServlet.class);
 
     private static final long serialVersionUID = 1L;
 
@@ -82,7 +82,7 @@ public class ApiServlet extends HttpServlet {
 
     private final Gson gson;
 
-    public ApiServlet(RequestHandler requestHandler, ClientRegistry clientRegistry,
+    public ClientServlet(RequestHandler requestHandler, ClientRegistry clientRegistry,
             ObservationRegistry observationRegistry, ResourceObserver observer) {
         this.requestHandler = requestHandler;
         this.clientRegistry = clientRegistry;
@@ -96,28 +96,14 @@ public class ApiServlet extends HttpServlet {
         this.gson = gsonBuilder.create();
     }
 
-    private boolean checkPath(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String[] path = StringUtils.split(req.getPathInfo(), '/');
-        if (ArrayUtils.isEmpty(path) || (!"clients".equals(path[0]))) {
-            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            resp.getWriter().format("%s%s api does not exist", req.getServletPath(), req.getPathInfo()).flush();
-            return false;
-        }
-        return true;
-    }
-
     /**
      * {@inheritDoc}
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (!checkPath(req, resp)) {
-            return;
-        }
-        String[] path = StringUtils.split(req.getPathInfo(), '/');
 
-        // /clients : all registered clients
-        if (path.length == 1) {
+        // all registered clients
+        if (req.getPathInfo() == null) {
             Collection<Client> clients = this.clientRegistry.allClients();
 
             String json = this.gson.toJson(clients.toArray(new Client[] {}));
@@ -127,9 +113,11 @@ public class ApiServlet extends HttpServlet {
             return;
         }
 
-        // /clients/endPoint : get client
-        if (path.length == 2) {
-            String clientEndpoint = path[1];
+        String[] path = StringUtils.split(req.getPathInfo(), '/');
+
+        // /endPoint : get client
+        if (path.length == 1) {
+            String clientEndpoint = path[0];
             Client client = this.clientRegistry.get(clientEndpoint);
             if (client != null) {
                 resp.setContentType("application/json");
@@ -168,9 +156,6 @@ public class ApiServlet extends HttpServlet {
      */
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (!checkPath(req, resp)) {
-            return;
-        }
         String[] path = StringUtils.split(req.getPathInfo(), '/');
 
         // /clients/endPoint/LWRequest : do LightWeight M2M write request on a given client.
@@ -200,9 +185,6 @@ public class ApiServlet extends HttpServlet {
      */
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (!checkPath(req, resp)) {
-            return;
-        }
         String[] path = StringUtils.split(req.getPathInfo(), '/');
 
         // /clients/endPoint/LWRequest/observe : do LightWeight M2M observe request on a given client.
@@ -251,9 +233,6 @@ public class ApiServlet extends HttpServlet {
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (!checkPath(req, resp)) {
-            return;
-        }
         String[] path = StringUtils.split(req.getPathInfo(), '/');
 
         // /clients/endPoint/LWRequest/observe : cancel observation for the given resource.
@@ -337,27 +316,27 @@ public class ApiServlet extends HttpServlet {
          */
         RequestInfo(String[] path) {
 
-            if (path.length < 3 || path.length > 6) {
+            if (path.length < 2 || path.length > 5) {
                 throw new IllegalArgumentException("invalid lightweight M2M path");
             }
 
-            endpoint = path[1];
+            endpoint = path[0];
 
             StringBuffer b = new StringBuffer();
             try {
-                this.objectId = Integer.valueOf(path[2]);
+                this.objectId = Integer.valueOf(path[1]);
                 b.append("/").append(objectId);
 
-                if (path.length > 3) {
-                    objectInstanceId = Integer.valueOf(path[3]);
+                if (path.length > 2) {
+                    objectInstanceId = Integer.valueOf(path[2]);
                     b.append("/").append(objectInstanceId);
                 }
-                if (path.length > 4) {
-                    resourceId = Integer.valueOf(path[4]);
+                if (path.length > 3) {
+                    resourceId = Integer.valueOf(path[3]);
                     b.append("/").append(resourceId);
                 }
-                if (path.length > 5) {
-                    resourceInstanceId = Integer.valueOf(path[5]);
+                if (path.length > 4) {
+                    resourceInstanceId = Integer.valueOf(path[4]);
                 }
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException("invalid lightweight M2M path", e);

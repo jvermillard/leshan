@@ -35,8 +35,11 @@ import leshan.server.lwm2m.LwM2mServer;
 import leshan.server.lwm2m.client.ClientRegistryImpl;
 import leshan.server.lwm2m.observation.ObservationRegistry;
 import leshan.server.lwm2m.observation.ObservationRegistryImpl;
-import leshan.server.servlet.ApiServlet;
+import leshan.server.lwm2m.security.SecurityRegistry;
+import leshan.server.lwm2m.security.SecurityRegistryImpl;
+import leshan.server.servlet.ClientServlet;
 import leshan.server.servlet.EventServlet;
+import leshan.server.servlet.SecurityServlet;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -54,6 +57,7 @@ public class LeshanMain {
 
         ClientRegistryImpl clientRegistry = new ClientRegistryImpl();
         ObservationRegistry observationRegistry = new ObservationRegistryImpl();
+        SecurityRegistry securityRegistry = new SecurityRegistryImpl();
 
         // use those ENV variables for specifying the interface to be bound for coap and coaps
         String iface = System.getenv("COAPIFACE");
@@ -62,14 +66,14 @@ public class LeshanMain {
         // LWM2M server
         LwM2mServer lwServer;
         if (iface == null || iface.isEmpty() || ifaces == null || ifaces.isEmpty()) {
-            lwServer = new LwM2mServer(clientRegistry, observationRegistry);
+            lwServer = new LwM2mServer(clientRegistry, securityRegistry, observationRegistry);
         } else {
             String[] add = iface.split(":");
             String[] adds = ifaces.split(":");
 
             // user specified the iface to be bound
             lwServer = new LwM2mServer(new InetSocketAddress(add[0], Integer.parseInt(add[1])), new InetSocketAddress(
-                    adds[0], Integer.parseInt(adds[1])), clientRegistry, observationRegistry);
+                    adds[0], Integer.parseInt(adds[1])), clientRegistry, securityRegistry, observationRegistry);
         }
 
         lwServer.start();
@@ -101,9 +105,12 @@ public class LeshanMain {
         ServletHolder eventServletHolder = new ServletHolder(eventServlet);
         root.addServlet(eventServletHolder, "/event/*");
 
-        ServletHolder apiServletHolder = new ServletHolder(new ApiServlet(lwServer.getRequestHandler(), clientRegistry,
-                observationRegistry, eventServlet));
-        root.addServlet(apiServletHolder, "/api/*");
+        ServletHolder clientServletHolder = new ServletHolder(new ClientServlet(lwServer.getRequestHandler(),
+                clientRegistry, observationRegistry, eventServlet));
+        root.addServlet(clientServletHolder, "/api/clients/*");
+
+        ServletHolder securityServletHolder = new ServletHolder(new SecurityServlet(securityRegistry));
+        root.addServlet(securityServletHolder, "/api/security/*");
 
         server.setHandler(root);
 
