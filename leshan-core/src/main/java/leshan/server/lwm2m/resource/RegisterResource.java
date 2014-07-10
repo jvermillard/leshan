@@ -37,6 +37,8 @@ import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.ClientRegistrationException;
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.client.ClientUpdate;
+import leshan.server.lwm2m.security.SecureEndpoint;
+import leshan.server.lwm2m.security.SecurityRegistry;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.lang.RandomStringUtils;
@@ -73,12 +75,15 @@ public class RegisterResource extends ResourceBase {
 
     public static final String RESOURCE_NAME = "rd";
 
-    private final ClientRegistry registry;
+    private final ClientRegistry clientRegistry;
 
-    public RegisterResource(ClientRegistry registry) {
+    private final SecurityRegistry securityRegistry;
+
+    public RegisterResource(ClientRegistry clientRegistry, SecurityRegistry securityRegistry) {
         super(RESOURCE_NAME);
 
-        this.registry = registry;
+        this.clientRegistry = clientRegistry;
+        this.securityRegistry = securityRegistry;
         getAttributes().addResourceType("core.rd");
     }
 
@@ -131,10 +136,24 @@ public class RegisterResource extends ResourceBase {
                 // which end point did the client post this request to?
                 InetSocketAddress registrationEndpoint = exchange.advanced().getEndpoint().getAddress();
 
+                // if this is a secure end-point, we must check that the registering client is using the right identity.
+                if (exchange.advanced().getEndpoint() instanceof SecureEndpoint) {
+                    String pskIdentity = ((SecureEndpoint) exchange.advanced().getEndpoint()).getPskIdentity(request);
+                    LOG.trace("Registration request received using the secure endpoint {} with identity {}",
+                            registrationEndpoint, pskIdentity);
+
+                    String clientIdentity = securityRegistry.get(endpoint).getIdentity();
+                    if (pskIdentity == null || !pskIdentity.equals(clientIdentity)) {
+                        LOG.debug("Invalid identity for client {}: expected '{}'but was '{}'", endpoint,
+                                clientIdentity, pskIdentity);
+                        exchange.respond(ResponseCode.BAD_REQUEST, "Invalid identity");
+                    }
+                }
+
                 Client client = new Client(registrationId, endpoint, request.getSource(), request.getSourcePort(),
                         lwVersion, lifetime, smsNumber, binding, objectLinks, registrationEndpoint);
 
-                registry.registerClient(client);
+                clientRegistry.registerClient(client);
                 LOG.debug("New registered client: {}", client);
 
                 exchange.setLocationPath(RESOURCE_NAME + "/" + client.getRegistrationId());
@@ -194,7 +213,7 @@ public class RegisterResource extends ResourceBase {
                 smsNumber, binding, objectLinks);
 
         try {
-            Client c = registry.updateClient(client);
+            Client c = clientRegistry.updateClient(client);
             if (c == null) {
                 exchange.respond(ResponseCode.NOT_FOUND);
             } else {
@@ -216,7 +235,7 @@ public class RegisterResource extends ResourceBase {
 
         try {
             if (uri != null && uri.size() == 2 && RESOURCE_NAME.equals(uri.get(0))) {
-                unregistered = registry.deregisterClient(uri.get(1));
+                unregistered = clientRegistry.deregisterClient(uri.get(1));
             }
 
             if (unregistered != null) {

@@ -29,7 +29,6 @@
  */
 package leshan.server.lwm2m;
 
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
@@ -40,16 +39,17 @@ import leshan.server.lwm2m.message.RequestHandler;
 import leshan.server.lwm2m.message.californium.CaliforniumBasedRequestHandler;
 import leshan.server.lwm2m.observation.ObservationRegistry;
 import leshan.server.lwm2m.resource.RegisterResource;
+import leshan.server.lwm2m.security.SecureEndpoint;
+import leshan.server.lwm2m.security.SecurityRegistry;
+import leshan.server.lwm2m.security.SecurityRegistryImpl;
 
 import org.apache.commons.lang.Validate;
 import org.eclipse.californium.scandium.DTLSConnector;
-import org.eclipse.californium.scandium.dtls.pskstore.InMemoryPskStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 import ch.ethz.inf.vs.californium.network.Endpoint;
-import ch.ethz.inf.vs.californium.network.config.NetworkConfig;
 import ch.ethz.inf.vs.californium.server.Server;
 
 /**
@@ -83,7 +83,7 @@ public class LwM2mServer {
      */
     public LwM2mServer(ClientRegistry clientRegistry) {
         this(new InetSocketAddress((InetAddress) null, PORT), new InetSocketAddress((InetAddress) null, PORT_DTLS),
-                clientRegistry, null);
+                clientRegistry, null, null);
     }
 
     /**
@@ -91,9 +91,10 @@ public class LwM2mServer {
      * 
      * @param clientRegistry the client registry
      */
-    public LwM2mServer(ClientRegistry clientRegistry, ObservationRegistry observationRegistry) {
+    public LwM2mServer(ClientRegistry clientRegistry, SecurityRegistry securityRegistry,
+            ObservationRegistry observationRegistry) {
         this(new InetSocketAddress((InetAddress) null, PORT), new InetSocketAddress((InetAddress) null, PORT_DTLS),
-                clientRegistry, observationRegistry);
+                clientRegistry, securityRegistry, observationRegistry);
     }
 
     /**
@@ -103,9 +104,9 @@ public class LwM2mServer {
      * @param clientRegistry the client registry
      */
     public LwM2mServer(InetSocketAddress localAddress, InetSocketAddress localAddressSecure,
-                       ClientRegistry clientRegistry) {
+            ClientRegistry clientRegistry) {
 
-        this(localAddress, localAddressSecure, clientRegistry, null);
+        this(localAddress, localAddressSecure, clientRegistry, null, null);
     }
 
     /**
@@ -115,7 +116,7 @@ public class LwM2mServer {
      * @param clientRegistry the client registry
      */
     public LwM2mServer(InetSocketAddress localAddress, InetSocketAddress localAddressSecure,
-                       ClientRegistry clientRegistry, ObservationRegistry observationRegistry) {
+            ClientRegistry clientRegistry, SecurityRegistry securityRegistry, ObservationRegistry observationRegistry) {
         Validate.notNull(clientRegistry, "Client registry must not be null");
         Validate.notNull(localAddress, "IP address cannot be null");
 
@@ -126,25 +127,20 @@ public class LwM2mServer {
 
         // init DTLS server
 
-        InMemoryPskStore pskStore = new InMemoryPskStore();
-        try {
-            // put in the PSK store the default identity/psk for tinydtls tests
-            pskStore.setKey("Client_identity", "secretPSK".getBytes("US-ASCII"));
-        } catch (UnsupportedEncodingException e) {
-            throw new IllegalStateException("no US-ASCII codec in your JVM", e);
+        if (securityRegistry == null) {
+            securityRegistry = new SecurityRegistryImpl();
         }
 
-        Endpoint endpointSecure = new CoAPEndpoint(new DTLSConnector(localAddressSecure, pskStore),
-                NetworkConfig.getStandard());
-        coapServer.addEndpoint(endpointSecure);
+        Endpoint secureEndpoint = new SecureEndpoint(new DTLSConnector(localAddressSecure, securityRegistry));
+        coapServer.addEndpoint(secureEndpoint);
 
         // define /rd resource
-        RegisterResource rdResource = new RegisterResource(clientRegistry);
+        RegisterResource rdResource = new RegisterResource(clientRegistry, securityRegistry);
         coapServer.add(rdResource);
 
         Set<Endpoint> endpoints = new HashSet<>();
         endpoints.add(endpoint);
-        endpoints.add(endpointSecure);
+        endpoints.add(secureEndpoint);
         CaliforniumBasedRequestHandler handler = new CaliforniumBasedRequestHandler(endpoints, observationRegistry, 0);
         // register the request handler as listener in order to cancel
         // observations and free up resources when clients unregister
@@ -170,4 +166,5 @@ public class LwM2mServer {
     public RequestHandler getRequestHandler() {
         return requestHandler;
     }
+
 }

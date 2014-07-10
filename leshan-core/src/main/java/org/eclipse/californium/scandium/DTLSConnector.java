@@ -512,6 +512,19 @@ public class DTLSConnector extends ConnectorBase {
         return null;
     }
 
+    /**
+     * Returns the {@link DTLSSession} related to the given peer address.
+     * 
+     * @param address the peer address
+     * @return the {@link DTLSSession} or <code>null</code> if no session found.
+     */
+    public DTLSSession getSessionByAddress(InetSocketAddress address) {
+        if (address == null) {
+            return null;
+        }
+        return dtlsSessions.get(addressToKey(address));
+    }
+
     private void sendFlight(DTLSFlight flight) {
         byte[] payload = new byte[] {};
 
