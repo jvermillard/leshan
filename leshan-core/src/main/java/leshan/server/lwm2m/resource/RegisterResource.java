@@ -205,7 +205,7 @@ public class RegisterResource extends ResourceBase {
             }
         }
 
-        if (request.getPayload() != null) {
+        if (request.getPayload() != null && request.getPayload().length > 0) {
             objectLinks = new String(request.getPayload(), Charsets.UTF_8).split(",");
         }
 
