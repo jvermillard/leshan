@@ -29,6 +29,8 @@
  */
 package leshan.server.lwm2m.security;
 
+import java.io.Serializable;
+
 import org.apache.commons.lang.Validate;
 
 /**
@@ -41,7 +43,9 @@ import org.apache.commons.lang.Validate;
  * </ul>
  * </p>
  */
-public class SecurityInfo {
+public class SecurityInfo implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     // the client end-point
     private final String endpoint;
