@@ -10,13 +10,16 @@
 		<th>Security mode</th>
 		<th>Identity</th>
 		<th>Key</th>
+		<th></th>
 	</tr>
 	<tr ng-repeat="(endpoint, security) in securityInfos">
         <td>{{ endpoint }}</td>
         <td>Pre-Shared Key</td>
         <td>{{ security.psk.identity }}</td>
         <td>{{ security.psk.key }}</td>
-    </tr>
+		<td><button type="button" class="btn btn-default btn-xs" ng-click="remove(endpoint)">
+				<span class="glyphicon glyphicon-remove"></button></td>
+	</tr>
 </table>
 
 <!-- New security modal -->

@@ -20,6 +20,19 @@ lwClientControllers.controller('SecurityListCtrl', [
         	}
         });
         
+        $scope.remove = function(endpoint) {
+        	$http({method: 'DELETE', url: "api/security/" + endpoint, headers:{'Content-Type': 'text/plain'}})
+            .success(function(data, status, headers, config) {
+            	
+            	delete $scope.securityInfos[endpoint];
+                
+           }).error(function(data, status, headers, config) {
+                errormessage = "Unable to remove security info for endpoint " + endpoint + " : " + status + " "+ data;
+                // TODO dialog ?
+                console.error(errormessage);
+            });
+        }
+        
         $scope.newSecurity = function() {
             $('#newSecuritySubmit').unbind();
             $('#newSecuritySubmit').click(function(e) {

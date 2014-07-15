@@ -121,4 +121,24 @@ public class SecurityServlet extends HttpServlet {
         resp.getOutputStream().write(json.getBytes("UTF-8"));
         resp.setStatus(HttpServletResponse.SC_OK);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String[] path = StringUtils.split(req.getPathInfo(), "/");
+        if (path.length != 1) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+        String endpoint = path[0];
+
+        LOG.debug("Removing security info for end-point {}", endpoint);
+        if (this.registry.remove(endpoint) != null) {
+            resp.sendError(HttpServletResponse.SC_OK);
+        } else {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+        }
+    }
 }
