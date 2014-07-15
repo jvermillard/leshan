@@ -67,10 +67,10 @@ public class SecurityRegistryImpl implements SecurityRegistry {
     private final String filename;
 
     // default location for persistence
-    private static final String PERSISTENCE_FILE = "data/security.ser";
+    private static final String DEFAULT_FILE = "data/security.data";
 
     public SecurityRegistryImpl() {
-        this(PERSISTENCE_FILE);
+        this(DEFAULT_FILE);
     }
 
     /**

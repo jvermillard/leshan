@@ -1,6 +1,7 @@
 *.class
 .*
 target
+leshan-standalone/data
 
 # Package Files #
 *.jar
