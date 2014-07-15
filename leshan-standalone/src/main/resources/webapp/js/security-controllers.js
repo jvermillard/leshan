@@ -3,7 +3,8 @@ var lwClientControllers = angular.module('securityControllers', []);
 lwClientControllers.controller('SecurityListCtrl', [
     '$scope',
     '$http',
-    function SecurityListCtrl($scope, $http) {
+    'dialog',
+    function SecurityListCtrl($scope, $http, dialog) {
     	
     	// update navbar
     	angular.element("#navbar").children().removeClass('active');
@@ -27,8 +28,8 @@ lwClientControllers.controller('SecurityListCtrl', [
             	delete $scope.securityInfos[endpoint];
                 
            }).error(function(data, status, headers, config) {
-                errormessage = "Unable to remove security info for endpoint " + endpoint + " : " + status + " "+ data;
-                // TODO dialog ?
+                errormessage = "Unable to remove security info for endpoint " + endpoint + ": " + status + " - " + data;
+                dialog.open(errormessage);
                 console.error(errormessage);
             });
         }
@@ -53,8 +54,8 @@ lwClientControllers.controller('SecurityListCtrl', [
                     	$scope.securityInfos[endpoint] = security;
                         
                    }).error(function(data, status, headers, config) {
-                        errormessage = "Unable to add security info for endpoint " + endpoint + " : " + status + " "+ data;
-                        // TODO dialog ?
+                        errormessage = "Unable to add security info for endpoint " + endpoint + ": " + status + " - " + data;
+                        dialog.open(errormessage);
                         console.error(errormessage)
                     });
                 }
