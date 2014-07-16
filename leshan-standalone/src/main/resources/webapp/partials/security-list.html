@@ -1,5 +1,5 @@
 <div>
-	<button class="btn btn-default center-block" ng-click="newSecurity()">Add
+	<button class="btn btn-default center-block" ng-click="showModal()" >Add
 		new client security configuration</button>
 </div>
 
@@ -33,19 +33,20 @@
 				<h4 class="modal-title">New security configuration</h4>
 			</div>
 			<div class="modal-body">
-				<form class="form-horizontal" role="form" name="form">
-					<div class="form-group">
+				<form class="form form-horizontal" name="form" novalidate>
+					<div class="form-group" show-errors> 
 						<label for="endpointValue" class="col-sm-4 control-label">Client
 							endpoint</label>
 						<div class="col-sm-8">
-							<input class="form-control" id="endpointValue" name="endpoint">
+							<input class="form-control" id="endpointValue" name="endpoint" ng-model="endpoint" required>
+							<p class="help-block" ng-if="form.endpoint.$error.required">The endpoint is required</p>
 						</div>
 					</div>
 					<div class="form-group">
 						<label for="securityMode" class="col-sm-4 control-label">Security
 							mode</label>
 						<div class="col-sm-8">
-							<select class="form-control" id="securityMode">
+							<select class="form-control" id="securityMode" ng-model="securityMode">
 								<option value="psk">Pre-Shared Key</option>
 								<option value="rpk">Raw Public Key Certificate</option>
 							</select>
@@ -53,26 +54,35 @@
 					</div>
 
 					<!-- PSK inputs -->
-					<div class="form-group security-fg psk-fg">
+					<div class="form-group" ng-class="{'hidden': securityMode!='psk'}" show-errors>
 						<label for="pskIdentityValue" class="col-sm-4 control-label">Identity</label>
 						<div class="col-sm-8">
-							<input class="form-control" id="pskIdentityValue">
+							<textarea class="form-control" style="resize:none" rows="3" id="pskIdentityValue" name="pskIdentity" 
+							ng-model="pskIdentity" ng-required="securityMode=='psk'" ng-maxlength="128" ></textarea>
+							<p class="help-block" ng-if="form.pskIdentity.$error.required">The PSK identity is required</p>
+							<p class="help-block" ng-if="form.pskIdentity.$error.maxlength">The PSK identity is too long</p>
 						</div>
 					</div>
 
-					<div class="form-group security-fg psk-fg">
+					<div class="form-group" ng-class="{'hidden': securityMode!='psk'}" show-errors>
 						<label for="pskValue" class="col-sm-4 control-label">Key</label>
 						<div class="col-sm-8">
-							<textarea class="form-control" rows="3" id="pskValue"></textarea>
+							<textarea class="form-control" style="resize:none" rows="3" id="pskValue" name="pskValue" ng-model="pskValue"
+							ng-required="securityMode=='psk'" ng-pattern="/^[0-9a-fA-F]+$/" ng-maxlength="128"></textarea>
+							<p class="text-right text-muted small" style="margin:0">Hexadecimal format</p>
+							<p class="help-block" ng-if="form.pskValue.$error.required">The pre-shared key is required</p>
+							<p class="help-block" ng-if="form.pskValue.$error.pattern">Hexadecimal format is expected</p>
+							<p class="help-block" ng-if="form.pskValue.$error.maxlength">The pre-shared key is too long</p>
 						</div>
 					</div>
 
 					<!-- RPK inputs -->
-					<div class="form-group security-fg rpk-fg hidden">
+					<div class="form-group" ng-class="{'hidden': securityMode!='rpk'}" show-errors>
 						<label for="rpkValue" class="col-sm-4 control-label">Public
 							key</label>
 						<div class="col-sm-8">
-							<input class="form-control" id="rpkValue">
+							<input class="form-control" id="rpkValue" name="rpkValue" ng-model="rpkValue"
+							ng-required="securityMode=='rpk'">
 						</div>
 					</div>
 
@@ -82,21 +92,19 @@
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-				<button type="button" class="btn btn-primary" data-dismiss="modal"
-					id="newSecuritySubmit">Create</button>
+				<button type="button" class="btn btn-primary" id="newSecuritySubmit" ng-click="save()">Create</button>
 			</div>
 		</div>
 	</div>
 </div>
 
-<script>
-	$(document.body).on('click', '#securityMode', function(event) {
-		$(".security-fg").addClass('hidden');
-		if (securityMode.value == "psk") {
-			$(".psk-fg").removeClass('hidden');
-		} else if (securityMode.value == "rpk") {
-			$(".rpk-fg").removeClass('hidden');
-		}
-		return false;
-	})
-</script>
+
+<style>
+	.form-group .help-block {
+		display: none;
+	}
+	
+	.form-group.has-error .help-block {
+		display: block;
+	}
+</style>
