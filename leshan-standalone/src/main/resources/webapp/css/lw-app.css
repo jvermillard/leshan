@@ -55,10 +55,6 @@
 	border: 1px solid #2DA0FD;
 }
 
-.client-icon {
-	background: url('../img/client-icon.png') center no-repeat;
-}
-
 .client-detail div {
 	height: 100%;
 	line-height: 60px;
