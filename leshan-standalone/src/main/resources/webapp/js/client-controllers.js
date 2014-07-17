@@ -4,11 +4,11 @@ lwClientControllers.controller('ClientListCtrl', [
     '$scope',
     '$http',
     function ClientListCtrl($scope, $http) {
-    	
-    	// update navbar
-    	angular.element("#navbar").children().removeClass('active');
-    	angular.element("#client-navlink").addClass('active');
-    	    	
+
+        // update navbar
+        angular.element("#navbar").children().removeClass('active');
+        angular.element("#client-navlink").addClass('active');
+
         // free resource when controller is destroyed
         $scope.$on('$destroy', function(){
             if ($scope.eventsource){
@@ -22,11 +22,11 @@ lwClientControllers.controller('ClientListCtrl', [
             console.error($scope.error)
         }).success(function(data, status, headers, config) {
             $scope.clients = data;
-            
+
             // HACK : we can not use ng-if="clients"
             // because of https://github.com/angular/angular.js/issues/3969
             $scope.clientslist = true;
-            
+
             // listen for clients registration/deregistration
             $scope.eventsource = new EventSource('event');
 
@@ -72,7 +72,7 @@ lwClientControllers.controller('ClientDetailCtrl', [
                 $scope.eventsource.close()
             }
         });
-        
+
         $scope.clientId = $routeParams.clientId;
 
         // get client details
@@ -119,10 +119,10 @@ lwClientControllers.controller('ClientDetailCtrl', [
                         resource.value = content.val;
                         resource.valuesupposed = false;
                         resource.observed = true;
-                        
+
                         var formattedDate = $filter('date')(new Date(), 'HH:mm:ss.sss');
                         resource.tooltip = formattedDate;
-                    
+
                     }
                 });
             }
@@ -132,7 +132,11 @@ lwClientControllers.controller('ClientDetailCtrl', [
         var buildResourceTree = function(objectLinks, lwResources) {
             var tree = [];
             for (var i = 0; i < objectLinks.length; i++) {
-                var nodeIds = objectLinks[i].replace("</", "").replace(">", "").split("/");
+                var url = objectLinks[i].url;
+                if (url.length > 0 && url.charAt(0) === '/') {
+                    url = url.substr(1);
+                }
+                var nodeIds = url.split("/");
                 addNodes(tree, lwResources, nodeIds);
             }
             return tree;
@@ -196,7 +200,7 @@ lwClientControllers.controller('ClientDetailCtrl', [
                 }
             }
         }
-        
+
         var findResource = function(resourceId, resourceTree) {
             if (resourceId) {
                 var nodeId = resourceId.shift();

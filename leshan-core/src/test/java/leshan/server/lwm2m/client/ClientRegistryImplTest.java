@@ -32,6 +32,9 @@ package leshan.server.lwm2m.client;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
+import leshan.server.lwm2m.linkformat.LinkFormatParser;
+
+import org.apache.commons.io.Charsets;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,7 +48,7 @@ public class ClientRegistryImplTest {
     Long lifetime = 10000L;
     String sms = "0171-32423545";
     BindingMode binding = BindingMode.UQS;
-    String[] objectLinks = new String[] { "</3>" };
+    LinkObject[] objectLinks = LinkFormatParser.parse("</3>".getBytes(Charsets.UTF_8));
     String registrationId = "4711";
     Client client;
 
@@ -83,16 +86,14 @@ public class ClientRegistryImplTest {
         registry.registerClient(client);
         Assert.assertFalse(client.isAlive());
 
-        ClientUpdate clientUpdate = new ClientUpdate(registrationId, address, port, lifetime, null,
-                null, null);
+        ClientUpdate clientUpdate = new ClientUpdate(registrationId, address, port, lifetime, null, null, null);
         registry.updateClient(clientUpdate);
         Assert.assertTrue(client.isAlive());
     }
 
     private void givenASimpleClient(Long lifetime) {
 
-        client = new Client(registrationId, ep, address, port, null, lifetime, sms,
-                binding, objectLinks, null,
+        client = new Client(registrationId, ep, address, port, null, lifetime, sms, binding, objectLinks, null,
                 InetSocketAddress.createUnresolved("localhost", 5683));
     }
 }

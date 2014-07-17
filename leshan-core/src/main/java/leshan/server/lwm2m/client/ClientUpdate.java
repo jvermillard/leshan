@@ -55,14 +55,14 @@ public class ClientUpdate {
 
     private final String registrationId;
 
-    private final String[] objectLinks;
+    private final LinkObject[] objectLinks;
 
     public ClientUpdate(String registrationId, InetAddress address, Integer port) {
         this(registrationId, address, port, null, null, null, null);
     }
 
     public ClientUpdate(String registrationId, InetAddress address, Integer port, Long lifetime, String smsNumber,
-            BindingMode binding, String[] objectLinks) {
+            BindingMode binding, LinkObject[] objectLinks) {
         this(registrationId, address, port, lifetime, smsNumber, binding, objectLinks, null);
     }
 
@@ -80,7 +80,7 @@ public class ClientUpdate {
      * @throws NullPointerException if the registration ID is <code>null</code>
      */
     public ClientUpdate(String registrationId, InetAddress address, Integer port, Long lifetime, String smsNumber,
-            BindingMode binding, String[] objectLinks, Date registrationDate) {
+            BindingMode binding, LinkObject[] objectLinks, Date registrationDate) {
 
         if (registrationId == null) {
             throw new NullPointerException("Registration ID must not be null");
@@ -106,7 +106,7 @@ public class ClientUpdate {
         return port;
     }
 
-    public String[] getObjectLinks() {
+    public LinkObject[] getObjectLinks() {
         return objectLinks;
     }
 

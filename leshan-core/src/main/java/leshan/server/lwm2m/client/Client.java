@@ -52,9 +52,7 @@ public class Client {
     private int port;
 
     /*
-     * The address of the LWM2M Server's CoAP end point the client used to
-     * register.
-     * 
+     * The address of the LWM2M Server's CoAP end point the client used to register.
      */
     private final InetSocketAddress registrationEndpointAddress;
 
@@ -73,7 +71,7 @@ public class Client {
 
     private final String registrationId;
 
-    private String[] objectLinks;
+    private LinkObject[] objectLinks;
 
     private Date lastUpdate;
 
@@ -81,20 +79,20 @@ public class Client {
     private boolean failedLastRequest = false;
 
     public Client(String registrationId, String endpoint, InetAddress address, int port,
-                  InetSocketAddress registrationEndpoint) {
+            InetSocketAddress registrationEndpoint) {
         this(registrationId, endpoint, address, port, null, null, null, null, null, registrationEndpoint);
     }
 
     public Client(String registrationId, String endpoint, InetAddress address, int port, String lwM2mVersion,
-                  Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks,
-                  InetSocketAddress registrationEndpoint) {
+            Long lifetime, String smsNumber, BindingMode binding, LinkObject[] objectLinks,
+            InetSocketAddress registrationEndpoint) {
         this(registrationId, endpoint, address, port, lwM2mVersion, lifetime, smsNumber, binding, objectLinks, null,
                 registrationEndpoint);
     }
 
     public Client(String registrationId, String endpoint, InetAddress address, int port, String lwM2mVersion,
-                  Long lifetime, String smsNumber, BindingMode binding, String[] objectLinks, Date registrationDate,
-                  InetSocketAddress registrationEndpoint) {
+            Long lifetime, String smsNumber, BindingMode binding, LinkObject[] objectLinks, Date registrationDate,
+            InetSocketAddress registrationEndpoint) {
 
         Validate.notEmpty(endpoint);
         Validate.notNull(address);
@@ -142,19 +140,15 @@ public class Client {
     }
 
     /**
-     * Gets the network address and port number of LWM2M Server's CoAP endpoint
-     * the client originally registered at.
+     * Gets the network address and port number of LWM2M Server's CoAP endpoint the client originally registered at.
      * 
-     * A LWM2M Server may listen on multiple CoAP end points, e.g. a non-secure
-     * and a secure one. Clients are often behind a firewall which will only let
-     * incoming UDP packets pass if they originate from the same address:port
-     * that the client has initiated communication with, e.g. by means of
-     * registering with the LWM2M Server. It is therefore important to know,
-     * which of the server's CoAP end points the client contacted for
-     * registration.
+     * A LWM2M Server may listen on multiple CoAP end points, e.g. a non-secure and a secure one. Clients are often
+     * behind a firewall which will only let incoming UDP packets pass if they originate from the same address:port that
+     * the client has initiated communication with, e.g. by means of registering with the LWM2M Server. It is therefore
+     * important to know, which of the server's CoAP end points the client contacted for registration.
      * 
-     * This information can be used to uniquely identify the CoAP endpoint that
-     * should be used to access resources on the client.
+     * This information can be used to uniquely identify the CoAP endpoint that should be used to access resources on
+     * the client.
      * 
      * @return the network address and port number
      */
@@ -162,11 +156,11 @@ public class Client {
         return registrationEndpointAddress;
     }
 
-    public String[] getObjectLinks() {
+    public LinkObject[] getObjectLinks() {
         return objectLinks;
     }
 
-    void setObjectLinks(String[] objectLinks) {
+    void setObjectLinks(LinkObject[] objectLinks) {
         this.objectLinks = objectLinks;
     }
 
@@ -253,8 +247,8 @@ public class Client {
     /**
      * Compares this Client to another object.
      * 
-     * @return <code>true</code> if the other object is a Client instance and
-     *         its <em>endpoint</em> property has the same value as this Client
+     * @return <code>true</code> if the other object is a Client instance and its <em>endpoint</em> property has the
+     *         same value as this Client
      */
     @Override
     public boolean equals(Object obj) {

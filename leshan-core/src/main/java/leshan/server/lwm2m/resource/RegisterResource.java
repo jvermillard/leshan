@@ -37,10 +37,11 @@ import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.ClientRegistrationException;
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.client.ClientUpdate;
+import leshan.server.lwm2m.client.LinkObject;
+import leshan.server.lwm2m.linkformat.LinkFormatParser;
 import leshan.server.lwm2m.security.SecureEndpoint;
 import leshan.server.lwm2m.security.SecurityRegistry;
 
-import org.apache.commons.io.Charsets;
 import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,7 +108,7 @@ public class RegisterResource extends ResourceBase {
         String smsNumber = null;
         String lwVersion = null;
         BindingMode binding = null;
-        String[] objectLinks = null;
+        LinkObject[] objectLinks = null;
         try {
 
             for (String param : request.getOptions().getURIQueries()) {
@@ -130,7 +131,7 @@ public class RegisterResource extends ResourceBase {
                 // register
                 String registrationId = RegisterResource.createRegistrationId();
                 if (request.getPayload() != null) {
-                    objectLinks = new String(request.getPayload(), Charsets.UTF_8).split(",");
+                    objectLinks = LinkFormatParser.parse(request.getPayload());
                 }
 
                 // which end point did the client post this request to?
@@ -193,7 +194,7 @@ public class RegisterResource extends ResourceBase {
         Long lifetime = null;
         String smsNumber = null;
         BindingMode binding = null;
-        String[] objectLinks = null;
+        LinkObject[] objectLinks = null;
 
         for (String param : request.getOptions().getURIQueries()) {
             if (param.startsWith(QUERY_PARAM_LIFETIME)) {
@@ -206,7 +207,7 @@ public class RegisterResource extends ResourceBase {
         }
 
         if (request.getPayload() != null && request.getPayload().length > 0) {
-            objectLinks = new String(request.getPayload(), Charsets.UTF_8).split(",");
+            objectLinks = LinkFormatParser.parse(request.getPayload());
         }
 
         ClientUpdate client = new ClientUpdate(registrationId, request.getSource(), request.getSourcePort(), lifetime,
