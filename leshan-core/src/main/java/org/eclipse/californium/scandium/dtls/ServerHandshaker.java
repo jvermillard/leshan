@@ -578,7 +578,7 @@ public class ServerHandshaker extends Handshaker {
 		String identity = message.getIdentity();
 		session.setPskIdentity(identity);
 
-		byte[] psk = pskStore.getKey(identity);
+		byte[] psk = pskStore.getPsk(identity);
 		
 		if (LOGGER.isLoggable(Level.INFO)) {
 		    LOGGER.info("Client " + endpointAddress.toString() + " used PSK identity: " + identity);

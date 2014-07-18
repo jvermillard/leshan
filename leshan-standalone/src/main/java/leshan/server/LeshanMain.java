@@ -36,7 +36,6 @@ import leshan.server.lwm2m.client.ClientRegistryImpl;
 import leshan.server.lwm2m.observation.ObservationRegistry;
 import leshan.server.lwm2m.observation.ObservationRegistryImpl;
 import leshan.server.lwm2m.security.SecurityRegistry;
-import leshan.server.lwm2m.security.SecurityRegistryImpl;
 import leshan.server.servlet.ClientServlet;
 import leshan.server.servlet.EventServlet;
 import leshan.server.servlet.SecurityServlet;
@@ -57,7 +56,7 @@ public class LeshanMain {
 
         ClientRegistryImpl clientRegistry = new ClientRegistryImpl();
         ObservationRegistry observationRegistry = new ObservationRegistryImpl();
-        SecurityRegistry securityRegistry = new SecurityRegistryImpl();
+        SecurityRegistry securityRegistry = new SecurityRegistry();
 
         // use those ENV variables for specifying the interface to be bound for coap and coaps
         String iface = System.getenv("COAPIFACE");

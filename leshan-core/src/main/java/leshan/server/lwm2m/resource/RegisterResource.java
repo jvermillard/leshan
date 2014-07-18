@@ -40,7 +40,7 @@ import leshan.server.lwm2m.client.ClientUpdate;
 import leshan.server.lwm2m.client.LinkObject;
 import leshan.server.lwm2m.linkformat.LinkFormatParser;
 import leshan.server.lwm2m.security.SecureEndpoint;
-import leshan.server.lwm2m.security.SecurityRegistry;
+import leshan.server.lwm2m.security.SecurityStore;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.slf4j.Logger;
@@ -78,13 +78,13 @@ public class RegisterResource extends ResourceBase {
 
     private final ClientRegistry clientRegistry;
 
-    private final SecurityRegistry securityRegistry;
+    private final SecurityStore securityStore;
 
-    public RegisterResource(ClientRegistry clientRegistry, SecurityRegistry securityRegistry) {
+    public RegisterResource(ClientRegistry clientRegistry, SecurityStore securityStore) {
         super(RESOURCE_NAME);
 
         this.clientRegistry = clientRegistry;
-        this.securityRegistry = securityRegistry;
+        this.securityStore = securityStore;
         getAttributes().addResourceType("core.rd");
     }
 
@@ -143,7 +143,7 @@ public class RegisterResource extends ResourceBase {
                     LOG.trace("Registration request received using the secure endpoint {} with identity {}",
                             registrationEndpoint, pskIdentity);
 
-                    String clientIdentity = securityRegistry.get(endpoint).getIdentity();
+                    String clientIdentity = securityStore.get(endpoint).getIdentity();
                     if (pskIdentity == null || !pskIdentity.equals(clientIdentity)) {
                         LOG.debug("Invalid identity for client {}: expected '{}'but was '{}'", endpoint,
                                 clientIdentity, pskIdentity);

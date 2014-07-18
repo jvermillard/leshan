@@ -29,7 +29,7 @@ public class InMemoryPskStore implements PskStore {
     private Map<String, byte[]> keys = new ConcurrentHashMap<>();
 
     @Override
-    public byte[] getKey(String identity) {
+    public byte[] getPsk(String identity) {
         byte[] key = keys.get(identity);
         if (key == null) {
             return null;
@@ -45,7 +45,7 @@ public class InMemoryPskStore implements PskStore {
      * @param identity the identity associated with the key
      * @param key the key used to authenticate the identity
      */
-    public void setKey(String identity, byte[] key) {
+    public void setPsk(String identity, byte[] key) {
         keys.put(identity, key);
     }
 }

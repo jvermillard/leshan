@@ -45,7 +45,7 @@ public class ExampleDTLSServer {
         InMemoryPskStore pskStore = new InMemoryPskStore();
         try {
             // put in the PSK store the default identity/psk for tinydtls tests
-            pskStore.setKey("Client_identity", "secretPSK".getBytes("US-ASCII"));
+            pskStore.setPsk("Client_identity", "secretPSK".getBytes("US-ASCII"));
         } catch (UnsupportedEncodingException e) {
             throw new IllegalStateException("no US-ASCII codec in your JVM", e);
         }

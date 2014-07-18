@@ -40,8 +40,8 @@ import leshan.server.lwm2m.message.californium.CaliforniumBasedRequestHandler;
 import leshan.server.lwm2m.observation.ObservationRegistry;
 import leshan.server.lwm2m.resource.RegisterResource;
 import leshan.server.lwm2m.security.SecureEndpoint;
+import leshan.server.lwm2m.security.SecurityStore;
 import leshan.server.lwm2m.security.SecurityRegistry;
-import leshan.server.lwm2m.security.SecurityRegistryImpl;
 
 import org.apache.commons.lang.Validate;
 import org.eclipse.californium.scandium.DTLSConnector;
@@ -91,7 +91,7 @@ public class LwM2mServer {
      * 
      * @param clientRegistry the client registry
      */
-    public LwM2mServer(ClientRegistry clientRegistry, SecurityRegistry securityRegistry,
+    public LwM2mServer(ClientRegistry clientRegistry, SecurityStore securityRegistry,
             ObservationRegistry observationRegistry) {
         this(new InetSocketAddress((InetAddress) null, PORT), new InetSocketAddress((InetAddress) null, PORT_DTLS),
                 clientRegistry, securityRegistry, observationRegistry);
@@ -116,7 +116,7 @@ public class LwM2mServer {
      * @param clientRegistry the client registry
      */
     public LwM2mServer(InetSocketAddress localAddress, InetSocketAddress localAddressSecure,
-            ClientRegistry clientRegistry, SecurityRegistry securityRegistry, ObservationRegistry observationRegistry) {
+            ClientRegistry clientRegistry, SecurityStore securityRegistry, ObservationRegistry observationRegistry) {
         Validate.notNull(clientRegistry, "Client registry must not be null");
         Validate.notNull(localAddress, "IP address cannot be null");
 
@@ -128,7 +128,7 @@ public class LwM2mServer {
         // init DTLS server
 
         if (securityRegistry == null) {
-            securityRegistry = new SecurityRegistryImpl();
+            securityRegistry = new SecurityRegistry();
         }
 
         Endpoint secureEndpoint = new SecureEndpoint(new DTLSConnector(localAddressSecure, securityRegistry));

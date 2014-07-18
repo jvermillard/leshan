@@ -416,7 +416,7 @@ public class ClientHandshaker extends Handshaker {
             session.setPskIdentity(identity);
 
             clientKeyExchange = new PSKClientKeyExchange(identity);
-            byte[] psk = pskStore.getKey(identity);
+            byte[] psk = pskStore.getPsk(identity);
             if (psk == null) {
                 AlertMessage alert = new AlertMessage(AlertLevel.FATAL, AlertDescription.HANDSHAKE_FAILURE);
                 throw new HandshakeException("No preshared secret found for identity: " + identity, alert);
