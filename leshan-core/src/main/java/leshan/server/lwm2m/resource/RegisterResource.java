@@ -40,6 +40,7 @@ import leshan.server.lwm2m.client.ClientUpdate;
 import leshan.server.lwm2m.client.LinkObject;
 import leshan.server.lwm2m.linkformat.LinkFormatParser;
 import leshan.server.lwm2m.security.SecureEndpoint;
+import leshan.server.lwm2m.security.SecurityInfo;
 import leshan.server.lwm2m.security.SecurityStore;
 
 import org.apache.commons.lang.RandomStringUtils;
@@ -134,20 +135,29 @@ public class RegisterResource extends ResourceBase {
                     objectLinks = LinkFormatParser.parse(request.getPayload());
                 }
 
+                // do we have security information for this client?
+                SecurityInfo securityInfo = securityStore.get(endpoint);
+
                 // which end point did the client post this request to?
                 InetSocketAddress registrationEndpoint = exchange.advanced().getEndpoint().getAddress();
 
                 // if this is a secure end-point, we must check that the registering client is using the right identity.
                 if (exchange.advanced().getEndpoint() instanceof SecureEndpoint) {
                     String pskIdentity = ((SecureEndpoint) exchange.advanced().getEndpoint()).getPskIdentity(request);
-                    LOG.trace("Registration request received using the secure endpoint {} with identity {}",
+                    LOG.debug("Registration request received using the secure endpoint {} with identity {}",
                             registrationEndpoint, pskIdentity);
 
-                    String clientIdentity = securityStore.get(endpoint).getIdentity();
-                    if (pskIdentity == null || !pskIdentity.equals(clientIdentity)) {
-                        LOG.debug("Invalid identity for client {}: expected '{}'but was '{}'", endpoint,
-                                clientIdentity, pskIdentity);
+                    if (securityInfo == null || pskIdentity == null || !pskIdentity.equals(securityInfo.getIdentity())) {
+                        LOG.warn("Invalid identity for client {}: expected '{}'but was '{}'", endpoint,
+                                securityInfo.getIdentity(), pskIdentity);
                         exchange.respond(ResponseCode.BAD_REQUEST, "Invalid identity");
+                    } else {
+                        LOG.debug("authenticated client {} using DTLS PSK", endpoint);
+                    }
+                } else {
+                    if (securityInfo != null) {
+                        LOG.warn("client {} must connect using DTLS PSK", endpoint);
+                        exchange.respond(ResponseCode.BAD_REQUEST, "Client must connect thru DTLS (port 5684)");
                     }
                 }
 
