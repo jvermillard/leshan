@@ -39,15 +39,45 @@ public class LinkObject {
 
     private final Map<String, String> attributes;
 
-    public LinkObject(String url, Map<String, String> attributes) {
-        this.url = url;
-        this.attributes = Collections.unmodifiableMap(new HashMap<String, String>(attributes));
+    /**
+     * Creates a new link object without attributes.
+     * 
+     * @param url the object link URL
+     */
+    public LinkObject(String url) {
+        this(url, null);
     }
 
+    /**
+     * Creates a new instance from a URL and attributes.
+     * 
+     * @param url the object link URL
+     * @param attributes the object link attributes or <code>null</code> if the
+     *            link has no attributes
+     */
+    public LinkObject(String url, Map<String, String> attributes) {
+        this.url = url;
+        if (attributes != null) {
+            this.attributes = Collections.unmodifiableMap(new HashMap<String, String>(attributes));
+        } else {
+            this.attributes = Collections.unmodifiableMap(new HashMap<String, String>());
+        }
+    }
+
+    /**
+     * Gets the link URL.
+     * 
+     * @return the URL
+     */
     public String getUrl() {
         return url;
     }
 
+    /**
+     * Gets the link attributes
+     * 
+     * @return an unmodifiable map containing the link attributes
+     */
     public Map<String, String> getAttributes() {
         return attributes;
     }
