@@ -213,7 +213,7 @@ public class ClientServlet extends HttpServlet {
         // /clients/endPoint/LWRequest : do LightWeight M2M execute request on a given client.
         try {
             RequestInfo requestInfo = new RequestInfo(path);
-            Client client = this.clientRegistry.get(path[1]);
+            Client client = this.clientRegistry.get(requestInfo.endpoint);
             if (client != null) {
                 ClientResponse cResponse = this.execRequest(client, requestInfo, resp);
                 processDeviceResponse(resp, cResponse);
