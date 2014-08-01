@@ -164,6 +164,7 @@ public class RegisterResource extends ResourceBase {
                     if (securityInfo != null) {
                         LOG.warn("client {} must connect using DTLS PSK", endpoint);
                         exchange.respond(ResponseCode.BAD_REQUEST, "Client must connect thru DTLS (port 5684)");
+                        return;
                     }
                 }
 
