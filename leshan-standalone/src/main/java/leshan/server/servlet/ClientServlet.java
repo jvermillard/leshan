@@ -54,6 +54,7 @@ import leshan.server.lwm2m.observation.ResourceObserver;
 import leshan.server.lwm2m.tlv.Tlv;
 import leshan.server.servlet.json.ClientSerializer;
 import leshan.server.servlet.json.ResponseSerializer;
+import leshan.server.servlet.json.TlvDeserializer;
 import leshan.server.servlet.json.TlvSerializer;
 
 import org.apache.commons.io.IOUtils;
@@ -65,6 +66,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 
 /**
  * Service HTTP REST API calls.
@@ -91,6 +93,7 @@ public class ClientServlet extends HttpServlet {
 
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(Tlv.class, new TlvSerializer());
+        gsonBuilder.registerTypeAdapter(Tlv.class, new TlvDeserializer());
         gsonBuilder.registerTypeHierarchyAdapter(Client.class, new ClientSerializer());
         gsonBuilder.registerTypeHierarchyAdapter(ClientResponse.class, new ResponseSerializer());
         this.gson = gsonBuilder.create();
@@ -170,7 +173,7 @@ public class ClientServlet extends HttpServlet {
                 resp.getWriter().format("no registered client with id '%s'", requestInfo.endpoint).flush();
             }
         } catch (IllegalArgumentException e) {
-            // content encoding other than text/plain is not supported (yet)
+            // content type not supported
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().append(e.getMessage()).flush();
         } catch (ResourceAccessException e) {
@@ -296,6 +299,16 @@ public class ClientServlet extends HttpServlet {
             String content = IOUtils.toString(req.getInputStream(), parameters.get("charset"));
             return WriteRequest.newReplaceRequest(client, requestInfo.objectId, requestInfo.objectInstanceId,
                     requestInfo.resourceId, content, ContentFormat.TEXT).send(this.requestHandler);
+        } else if ("application/json".equals(contentType)) {
+            String content = IOUtils.toString(req.getInputStream(), parameters.get("charset"));
+            Tlv[] tlvs;
+            try {
+                tlvs = gson.fromJson(content, Tlv[].class);
+            } catch (JsonSyntaxException e) {
+                throw new IllegalArgumentException("unable to parse json to tlv:" + e.getMessage(), e);
+            }
+            return WriteRequest.newReplaceRequest(client, requestInfo.objectId, requestInfo.objectInstanceId,
+                    requestInfo.resourceId, tlvs).send(this.requestHandler);
         } else {
             throw new IllegalArgumentException("content type " + req.getContentType()
                     + " not supported for write requests");

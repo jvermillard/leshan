@@ -53,6 +53,7 @@ public class TlvSerializer implements JsonSerializer<Tlv> {
         try {
             JsonObject element = new JsonObject();
             element.addProperty("id", src.getIdentifier());
+            element.addProperty("type", src.getType().toString());
             switch (src.getType()) {
             case RESOURCE_VALUE:
             case RESOURCE_INSTANCE:
