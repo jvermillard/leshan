@@ -16,10 +16,7 @@
  ******************************************************************************/
 package org.eclipse.californium.scandium.dtls;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.net.InetSocketAddress;
-import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
@@ -40,20 +37,17 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.eclipse.californium.scandium.DTLSConnector;
 import org.eclipse.californium.scandium.dtls.cipher.CipherSuite;
 import org.eclipse.californium.scandium.dtls.cipher.CipherSuite.KeyExchangeAlgorithm;
 import org.eclipse.californium.scandium.dtls.cipher.ECDHECryptography;
-import org.eclipse.californium.scandium.dtls.pskstore.PskStore;
 import org.eclipse.californium.scandium.util.ByteArrayUtils;
-import org.eclipse.californium.scandium.util.ScProperties;
 
 import ch.ethz.inf.vs.californium.coap.Message;
 import ch.ethz.inf.vs.elements.RawData;
 
 /**
  * The base class for the handshake protocol logic. Contains all the functionality and fields which is needed by all
- * types of handshakers.
+ * types of hand-shakers.
  */
 public abstract class Handshaker {
 
@@ -76,10 +70,6 @@ public abstract class Handshaker {
     public final static int TEST_LABEL_2 = 6;
 
     public final static int TEST_LABEL_3 = 7;
-
-    public final static String KEY_STORE_PASSWORD = "endPass";
-
-    private static final String TRUST_STORE_PASSWORD = "rootPass";
 
     // Members ////////////////////////////////////////////////////////
 
@@ -153,8 +143,11 @@ public abstract class Handshaker {
     /** The handshaker's certificate chain. */
     protected Certificate[] certificates;
 
-    /** Used to retrive pre-shared-key fro a given identity */
-    protected final PskStore pskStore;
+    /** list of trusted self-signed root certificates */
+    protected final Certificate[] rootCertificates;
+
+    /** the maximum fragment size before DTLS fragmentation must be applied */
+    private int maxFragmentLength = 4096;
 
     // Constructor ////////////////////////////////////////////////////
 
@@ -164,13 +157,13 @@ public abstract class Handshaker {
      * @param isClient indicating whether this instance represents a client or a server.
      * @param session the session belonging to this handshake.
      */
-    public Handshaker(InetSocketAddress peerAddress, boolean isClient, DTLSSession session, PskStore pskStore) {
+    public Handshaker(InetSocketAddress peerAddress, boolean isClient, DTLSSession session,
+            Certificate[] rootCertificates) {
         this.endpointAddress = peerAddress;
         this.isClient = isClient;
         this.session = session;
         this.queuedMessages = new HashSet<Record>();
-        this.pskStore = pskStore;
-        loadKeyStore();
+        this.rootCertificates = rootCertificates;
         try {
             this.md = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
@@ -531,7 +524,6 @@ public abstract class Handshaker {
 
             byte[] messageBytes = handshakeMessage.fragmentToByteArray();
 
-            int maxFragmentLength = ScProperties.std.getInt("MAX_FRAGMENT_LENGTH");
             if (messageBytes.length > maxFragmentLength) {
                 /*
                  * The sender then creates N handshake messages, all with the same message_seq value as the original
@@ -626,34 +618,6 @@ public abstract class Handshaker {
             queuedMessages.add(record);
             return false;
         }
-    }
-
-    /**
-     * Loads the given keyStore (location specified in Californium.properties). The keyStore must contain the private
-     * key and the corresponding certificate (chain). The keyStore alias is expected to be "client".
-     */
-    protected abstract void loadKeyStore();
-
-    /**
-     * Loads the trusted certificates.
-     * 
-     * @return the trusted certificates.
-     */
-    protected Certificate[] loadTrustedCertificates() {
-        Certificate[] trustedCertificates = new Certificate[1];
-
-        try {
-            KeyStore trustStore = KeyStore.getInstance("JKS");
-            InputStream in = new FileInputStream(DTLSConnector.TRUST_STORE_LOCATION);
-            trustStore.load(in, TRUST_STORE_PASSWORD.toCharArray());
-
-            // TODO load multiple certificates?
-            trustedCertificates[0] = trustStore.getCertificate("root");
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Could not load the trusted certificates.", e);
-        }
-
-        return trustedCertificates;
     }
 
     /**
@@ -846,5 +810,13 @@ public abstract class Handshaker {
     public void setCompressionMethod(CompressionMethod compressionMethod) {
         this.compressionMethod = compressionMethod;
         this.session.setCompressionMethod(compressionMethod);
+    }
+
+    public int getMaxFragmentLength() {
+        return maxFragmentLength;
+    }
+
+    public void setMaxFragmentLength(int maxFragmentLength) {
+        this.maxFragmentLength = maxFragmentLength;
     }
 }

@@ -19,10 +19,11 @@ package org.eclipse.californium.scandium.dtls;
 import java.net.InetSocketAddress;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
+import java.security.cert.Certificate;
 
 import org.eclipse.californium.scandium.dtls.AlertMessage.AlertDescription;
 import org.eclipse.californium.scandium.dtls.AlertMessage.AlertLevel;
-import org.eclipse.californium.scandium.dtls.pskstore.PskStore;
+import org.eclipse.californium.scandium.dtls.cfg.ClientConnectorConfig;
 
 import ch.ethz.inf.vs.elements.RawData;
 
@@ -36,8 +37,8 @@ public class ResumingClientHandshaker extends ClientHandshaker {
     // Constructor ////////////////////////////////////////////////////
 
     public ResumingClientHandshaker(InetSocketAddress endpointAddress, RawData message, DTLSSession session,
-            PskStore pskStore) {
-        super(endpointAddress, message, session, pskStore);
+            Certificate[] rootCerts, ClientConnectorConfig config) {
+        super(endpointAddress, message, session, rootCerts, config);
     }
 
     // Methods ////////////////////////////////////////////////////////

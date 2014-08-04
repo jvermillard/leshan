@@ -45,7 +45,7 @@ public class InMemoryPskStore implements PskStore {
      * @param identity the identity associated with the key
      * @param key the key used to authenticate the identity
      */
-    public void setPsk(String identity, byte[] key) {
+    public void setKey(String identity, byte[] key) {
         keys.put(identity, key);
     }
 }

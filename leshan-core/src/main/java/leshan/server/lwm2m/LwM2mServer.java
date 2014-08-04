@@ -40,8 +40,8 @@ import leshan.server.lwm2m.message.californium.CaliforniumBasedRequestHandler;
 import leshan.server.lwm2m.observation.ObservationRegistry;
 import leshan.server.lwm2m.resource.RegisterResource;
 import leshan.server.lwm2m.security.SecureEndpoint;
-import leshan.server.lwm2m.security.SecurityStore;
 import leshan.server.lwm2m.security.SecurityRegistry;
+import leshan.server.lwm2m.security.SecurityStore;
 
 import org.apache.commons.lang.Validate;
 import org.eclipse.californium.scandium.DTLSConnector;
@@ -131,7 +131,10 @@ public class LwM2mServer {
             securityRegistry = new SecurityRegistry();
         }
 
-        Endpoint secureEndpoint = new SecureEndpoint(new DTLSConnector(localAddressSecure, securityRegistry));
+        DTLSConnector connector = new DTLSConnector(localAddressSecure, null);
+        connector.getConfig().setServerPsk(securityRegistry);
+
+        Endpoint secureEndpoint = new SecureEndpoint(connector);
         coapServer.addEndpoint(secureEndpoint);
 
         // define /rd resource
