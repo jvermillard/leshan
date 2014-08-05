@@ -36,11 +36,31 @@ angular.module('lwResourcesDirective', [])
             scope.resource.exec  =  {tooltip : "Execute <br/>"+ scope.resource.path};
             scope.resource.observe  =  {tooltip : "Observe <br/>"+ scope.resource.path};
             
-            scope.readable = function() {
+            scope.arraypath = function (){
+                var path = scope.resource.path;
+                if (typeof path === "string"){
+                    var res = path.split("/");
+                    res.shift();
+                    return res;
+                }
+                return [];
+            }
+
+            scope.observable = function() {
                 if(scope.resource.instances != "multiple") {
                     if(scope.resource.hasOwnProperty("operations")) {
                         return scope.resource.operations.indexOf("R") != -1;
                     }
+                }
+                return false;
+            }
+                        
+            scope.readable = function() {
+                if (scope.arraypath().length == 2){
+                    // read allow for object instance
+                    return true;
+                }else if(scope.observable()){
+                    return true;
                 }
                 return false;
             }
@@ -105,17 +125,28 @@ angular.module('lwResourcesDirective', [])
                 var uri = "api/clients/" + $routeParams.clientId + scope.resource.path;                
                 $http.get(uri)
                 .success(function(data, status, headers, config) {
+                    // manage request information
                     var read = scope.resource.read;
                     read.date = new Date();
                     var formattedDate = $filter('date')(read.date, 'HH:mm:ss.sss');
                     read.status = data.status;
                     read.tooltip = formattedDate + "<br/>" + read.status;
                     
+                    // manage read data
                     if (data.status == "CONTENT") {
-                        scope.resource.value = data.value;
-                        scope.resource.valuesupposed = false;
-                        scope.resource.tooltip = formattedDate;
-                    }                   
+                        if (scope.arraypath().length == 2){
+                            for (var i in data.value) {
+                                var res = data.value[i];
+                                scope.resource.values[res.id].value = res.value;
+                                scope.resource.values[res.id].valuesupposed = false;
+                                scope.resource.values[res.id].tooltip = formattedDate;
+                            }
+                        }else{
+                            scope.resource.value = data.value;
+                            scope.resource.valuesupposed = false;
+                            scope.resource.tooltip = formattedDate;
+                        }
+                    }
                 }).error(function(data, status, headers, config) {
                     if (observe) {
                         scope.resource.observe.status = false;

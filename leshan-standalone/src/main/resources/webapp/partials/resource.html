@@ -6,7 +6,7 @@
 		<div class="col-md-3">
 			<div class="row">
 				<div class="btn-toolbar" role="toolbar">
-					<div ng-show="readable()" class="btn-group">
+					<div ng-show="observable()" class="btn-group">
 						<button type="button" ng-click="resource.observe.status = null; startObserve()"
 								tooltip-html-unsafe={{resource.observe.tooltip}} tooltip-placement="right" tooltip-animation="false" tooltip-append-to-body="true"
 					        	ng-class="{
