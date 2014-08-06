@@ -3,7 +3,8 @@ var lwClientControllers = angular.module('lwClientControllers', []);
 lwClientControllers.controller('ClientListCtrl', [
     '$scope',
     '$http',
-    function ClientListCtrl($scope, $http) {
+    '$location',
+    function ClientListCtrl($scope, $http,$location) {
 
         // update navbar
         angular.element("#navbar").children().removeClass('active');
@@ -16,6 +17,11 @@ lwClientControllers.controller('ClientListCtrl', [
             }
         });
 
+        // add function to show client
+        $scope.showClient = function(client) {
+            $location.path('/clients/' + client.endpoint);
+        };
+        
         // get the list of connected clients
         $http.get('api/clients'). error(function(data, status, headers, config){
             $scope.error = "Unable get client list: " + status + " " + data  

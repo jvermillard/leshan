@@ -118,6 +118,12 @@
 }
 
 
+/* Security info */
+table.table-href > tbody{
+  cursor: pointer;
+}
+
+
 /* Sticky footer styles
 -------------------------------------------------- */
 html {
