@@ -1,6 +1,8 @@
 <div ng-if='client'>
-	<a href="#/clients/">&lt; Back to clients list</a>
-	<h3>Resource tree for client <b>{{ clientId }}</b></h3>
+	<ol class="breadcrumb">
+  		<li><a href="#/clients/">Clients</a></li>
+  		<li class="active">{{ clientId }}</li>
+	</ol>
 	<div class="resource-tree">
 		<resourceslist list='lwresources'></resourceslist>
 	</div>
