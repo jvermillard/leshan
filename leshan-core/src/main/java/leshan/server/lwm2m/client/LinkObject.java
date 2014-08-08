@@ -37,7 +37,7 @@ public class LinkObject {
 
     private final String url;
 
-    private final Map<String, String> attributes;
+    private final Map<String, Object> attributes;
 
     /**
      * Creates a new link object without attributes.
@@ -52,15 +52,14 @@ public class LinkObject {
      * Creates a new instance from a URL and attributes.
      * 
      * @param url the object link URL
-     * @param attributes the object link attributes or <code>null</code> if the
-     *            link has no attributes
+     * @param attributes the object link attributes or <code>null</code> if the link has no attributes
      */
-    public LinkObject(String url, Map<String, String> attributes) {
+    public LinkObject(String url, Map<String, ?> attributes) {
         this.url = url;
         if (attributes != null) {
-            this.attributes = Collections.unmodifiableMap(new HashMap<String, String>(attributes));
+            this.attributes = Collections.unmodifiableMap(new HashMap<String, Object>(attributes));
         } else {
-            this.attributes = Collections.unmodifiableMap(new HashMap<String, String>());
+            this.attributes = Collections.unmodifiableMap(new HashMap<String, Object>());
         }
     }
 
@@ -78,7 +77,7 @@ public class LinkObject {
      * 
      * @return an unmodifiable map containing the link attributes
      */
-    public Map<String, String> getAttributes() {
+    public Map<String, Object> getAttributes() {
         return attributes;
     }
 

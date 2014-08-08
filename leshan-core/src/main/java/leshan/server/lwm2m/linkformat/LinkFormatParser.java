@@ -55,16 +55,22 @@ public class LinkFormatParser {
             url = StringUtils.removeStart(StringUtils.removeEnd(url, ">"), "<");
 
             // parse attributes
-            Map<String, String> attributes = new HashMap<>();
+            Map<String, Object> attributes = new HashMap<>();
 
             if (linkParts.length > 1) {
                 for (int i = 1; i < linkParts.length; i++) {
                     String[] attParts = linkParts[i].split("=");
                     if (attParts.length > 0) {
                         String key = attParts[0];
-                        String value = null;
+                        Object value = null;
                         if (attParts.length > 1) {
-                            value = attParts[1];
+                            String rawvalue = attParts[1];
+                            try {
+                                value = Integer.valueOf(rawvalue);
+                            } catch (NumberFormatException e) {
+
+                                value = rawvalue.replaceFirst("^\"(.*)\"$", "$1");
+                            }
                         }
                         attributes.put(key, value);
                     }
