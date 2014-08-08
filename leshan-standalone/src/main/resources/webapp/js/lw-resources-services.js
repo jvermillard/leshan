@@ -122,9 +122,9 @@ var addObject = function(tree, objectDefs, objectId, attributes) {
         tree.push(object);
     }
     if (attributes != undefined) {
-        if (attributes.title != undefined){
+        if (attributes.title != undefined) {
             object.name = title;
-        }else if (attributes.rt != undefined){
+        } else if (attributes.rt != undefined) {
             object.name = attributes.rt;
         }
     }
@@ -140,7 +140,7 @@ var addInstance = function(object, instanceId, attributes) {
     // create instance if necessary
     if (instance == undefined) {
         instance = {
-            name : instanceId,
+            name : "Instance " + instanceId,
             id : instanceId,
             resources : []
         };
@@ -155,9 +155,9 @@ var addInstance = function(object, instanceId, attributes) {
         object.instances.push(instance);
     }
     if (attributes != undefined) {
-        if (attributes.title != undefined){
+        if (attributes.title != undefined) {
             instance.name = title;
-        }else if (attributes.rt != undefined){
+        } else if (attributes.rt != undefined) {
             instance.name = attributes.rt;
         }
     }
@@ -188,9 +188,9 @@ var addResource = function(object, instance, resourceId, attributes) {
         instance.resources.push(resource);
     }
     if (attributes != undefined) {
-        if (attributes.title != undefined){
+        if (attributes.title != undefined) {
             resource.def.name = title;
-        }else if (attributes.rt != undefined){
+        } else if (attributes.rt != undefined) {
             resource.def.name = attributes.rt;
         }
     }
@@ -207,28 +207,52 @@ var getObjectDefinitions = function() {
         instancetype : "multiple",
         resourcedefs : [ {
             name : "LWM2M Server URI",
-            id : "0"
+            id : "0",
+            operations : "W"
         }, {
             name : "Bootstrap Server",
-            id : "1"
+            id : "1",
+            operations : "W"
         }, {
             name : "Security Mode",
-            id : "2"
+            id : "2",
+            operations : "W"
         }, {
             name : "Public Key or Identity",
-            id : "3"
+            id : "3",
+            operations : "W"
         }, {
             name : "Server Public Key or Identity",
-            id : "4"
+            id : "4",
+            operations : "W"
         }, {
             name : "Secret Key",
-            id : "5"
+            id : "5",
+            operations : "W"
+        }, {
+            name : "SMS Security Mode",
+            id : "6",
+            operations : "W"
+        }, {
+            name : "SMS Binding Key Parameters",
+            id : "7",
+            operations : "W"
+        }, {
+            name : "SMS Binding Secret Keys",
+            id : "8",
+            operations : "W"
+        }, {
+            name : "LWM2M Server SMS Number",
+            id : "9",
+            operations : "W"
         }, {
             name : "Short Server ID",
-            id : "6"
+            id : "10",
+            operations : "W"
         }, {
             name : "Client Hold Off Time",
-            id : "7"
+            id : "11",
+            operations : "W"
         } ]
     }, {
         name : "LWM2M Server",
@@ -274,18 +298,23 @@ var getObjectDefinitions = function() {
     }, {
         name : "Access Control",
         id : "2",
+        instancetype : "multiple",
         resourcedefs : [ {
             name : "Object ID",
-            id : "0"
+            id : "0",
+            operations : "R"
         }, {
             name : "Object Instance ID",
-            id : "1"
+            id : "1",
+            operations : "R"
         }, {
             name : "ACL",
-            id : "2"
+            id : "2",
+            operations : "RW"
         }, {
             name : "Access Control Owner",
-            id : "3"
+            id : "3",
+            operations : "RW"
         } ]
     }, {
         name : "Device",
@@ -381,51 +410,147 @@ var getObjectDefinitions = function() {
     }, {
         name : "Connectivity Monitoring",
         id : "4",
-        resourcedefs : []
+        instancetype : "single",
+        resourcedefs : [ {
+            name : "Network Bearer",
+            id : "0",
+            operations : "R"
+        }, {
+            name : "Available Network Bearer",
+            id : "1",
+            operations : "R"
+        }, {
+            name : "Radio Signal Strength",
+            id : "2",
+            operations : "R"
+        }, {
+            name : "Link Quality",
+            id : "3",
+            operations : "R"
+        }, {
+            name : "IP Addresses",
+            id : "4",
+            operations : "R"
+        }, {
+            name : "Router IP Addresse",
+            id : "5",
+            operations : "R"
+        }, {
+            name : "Link Utilization",
+            id : "6",
+            operations : "R"
+        }, {
+            name : "APN",
+            id : "7",
+            operations : "R"
+        }, {
+            name : "Cell ID",
+            id : "8",
+            operations : "R"
+        }, {
+            name : "SMNC",
+            id : "9",
+            operations : "R"
+        }, {
+            name : "SMCC",
+            id : "10",
+            operations : "R"
+        } ]
     }, {
         name : "Firmware",
         id : "5",
+        instancetype : "single",
         resourcedefs : [ {
-            name : "Instance 0",
+            name : "Package",
             id : "0",
-            values : [ {
-                name : "Package",
-                id : "0",
-                operations : "W",
-                type : "opaque"
-            }, {
-                name : "Package URI",
-                id : "1",
-                operations : "W",
-                type : "string"
-            }, {
-                name : "Update",
-                id : "2",
-                operations : "E"
-            }, {
-                name : "State",
-                id : "3",
-                operations : "R",
-                type : "integer"
-            }, {
-                name : "Update Supported Objects",
-                id : "4",
-                operations : "RW",
-                type : "boolean"
-            }, {
-                name : "Update Result",
-                id : "5",
-                operations : "R",
-                type : "integer"
-            } ]
+            operations : "W",
+            type : "opaque"
+        }, {
+            name : "Package URI",
+            id : "1",
+            operations : "W",
+            type : "string"
+        }, {
+            name : "Update",
+            id : "2",
+            operations : "E"
+        }, {
+            name : "State",
+            id : "3",
+            operations : "R",
+            type : "integer"
+        }, {
+            name : "Update Supported Objects",
+            id : "4",
+            operations : "RW",
+            type : "boolean"
+        }, {
+            name : "Update Result",
+            id : "5",
+            operations : "R",
+            type : "integer"
         } ]
     }, {
         name : "Location",
         id : "6",
-        resourcedefs : []
+        instancetype : "single",
+        resourcedefs : [ {
+            name : "Latitude",
+            id : "0",
+            operations : "R"
+        }, {
+            name : "Longitude",
+            id : "1",
+            operations : "R"
+        }, {
+            name : "Altitude",
+            id : "2",
+            operations : "R"
+        }, {
+            name : "Uncertainty",
+            id : "3",
+            operations : "R"
+        }, {
+            name : "Velocity",
+            id : "4",
+            operations : "R"
+        }, {
+            name : "Timestamp",
+            id : "5",
+            operations : "R"
+        } ]
     }, {
         name : "Connectivity Statistics",
         id : "7",
-        resourcedefs : []
+        instancetype : "single",
+        resourcedefs : [ {
+            name : "SMS Tx Counter",
+            id : "0",
+            operations : "R"
+        }, {
+            name : "SMS Rx Counter",
+            id : "1",
+            operations : "R"
+        }, {
+            name : "Tx Data",
+            id : "2",
+            operations : "R"
+        }, {
+            name : "Rx Data",
+            id : "3",
+            operations : "R"
+        }, {
+            name : "Max Message Size",
+            id : "4",
+            operations : "R"
+        }, {
+            name : "Average Message Size",
+            id : "5",
+            operations : "R"
+        }, {
+            name : "StartOrReset",
+            id : "6",
+            operations : "E"
+        } ]
     } ]
 }
