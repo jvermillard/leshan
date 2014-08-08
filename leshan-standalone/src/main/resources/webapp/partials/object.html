@@ -1,0 +1,7 @@
+<li class="resource">
+	<div class="row resource-0">
+		<div class="col-md-4 resource-title-0">{{object.name}}</div>
+		<div class="col-md-8 text-muted small">{{object.path}}</div>
+	</div>
+	<ul><instance ng-repeat='instance in object.instances' instance='instance' parent='object'></instance></ul>
+</li>

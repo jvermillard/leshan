@@ -1,0 +1,23 @@
+<li class="resource">
+	<div class="row resource-1">
+		<div class="col-md-4 resource-title-1">{{instance.name}}</div>
+		<div class="col-md-2 text-muted small">{{instance.path}}</div>
+		<div class="col-md-6">
+			<div class="row">
+				<div class="btn-toolbar" role="toolbar">
+					<div ng-show="readable()" class="btn-group">
+						<button type="button" ng-click="instance.read.status = null; read()"
+								tooltip-html-unsafe={{instance.read.tooltip}} tooltip-placement="right" tooltip-animation="false" tooltip-append-to-body="true"
+						        ng-class="{
+									'btn': true,
+									'btn-xs': true,
+									'btn-default': instance.read.status == null,
+									'btn-danger': instance.read.status != null && instance.read.status != 'CONTENT',
+									'btn-success': instance.read.status == 'CONTENT' }">Read</button>
+					</div>																		
+				</div>
+			</div> 
+		</div>
+	</div>
+	<ul><resource ng-repeat='resource in instance.resources' resource='resource' parent='instance'></instance></ul>
+</li>

@@ -4,7 +4,7 @@
   		<li class="active">{{ clientId }}</li>
 	</ol>
 	<div class="resource-tree">
-		<resourceslist list='lwresources'></resourceslist>
+		<ul><object ng-repeat='object in objects' object='object' parent='parent'></object></ul>
 	</div>
 </div>
 
