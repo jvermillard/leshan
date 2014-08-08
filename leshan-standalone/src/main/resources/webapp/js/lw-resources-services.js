@@ -3,7 +3,7 @@ var myModule = angular.module('lwResourcesServices', []);
 myModule.factory('lwResources', function() {
     var serviceInstance = {};
     serviceInstance.buildResourceTree = buildResourceTree;
-    serviceInstance.findResource = findResource ;
+    serviceInstance.findResource = findResource;
     return serviceInstance;
 });
 
@@ -35,12 +35,12 @@ var searchById = function(array, id) {
  */
 var findResource = function(tree, url) {
     var resourcepath = url2array(url);
-    
-    if (resourcepath.length == 3){
-        var object = searchById(tree,resourcepath[0]);
-        if (object != undefined){
+
+    if (resourcepath.length == 3) {
+        var object = searchById(tree, resourcepath[0]);
+        if (object != undefined) {
             var instance = searchById(object.instances, resourcepath[1])
-            if (instance != undefined){
+            if (instance != undefined) {
                 return searchById(instance.resources, resourcepath[2])
             }
         }
@@ -71,21 +71,21 @@ var buildResourceTree = function(objectLinks) {
 
             // manage single instance
             if (object.instancetype != "multiple") {
-                addInstance(object, 0, [])
+                addInstance(object, 0, null)
             }
 
             break;
         case 2:
             // intance
-            var object = addObject(tree, objectDefs, resourcepath[0], [])
+            var object = addObject(tree, objectDefs, resourcepath[0], null)
             addInstance(object, resourcepath[1], attributes)
 
             break;
         case 3:
         default:
             // resource
-            var object = addObject(tree, objectDefs, resourcepath[0], [])
-            var instance = addInstance(object, resourcepath[1], [])
+            var object = addObject(tree, objectDefs, resourcepath[0], null)
+            var instance = addInstance(object, resourcepath[1], null)
             addResource(object, instance, resourcepath[2], attributes)
 
             break;
@@ -121,7 +121,13 @@ var addObject = function(tree, objectDefs, objectId, attributes) {
         // add object to tree
         tree.push(object);
     }
-    // TODO Manage attributes
+    if (attributes != undefined) {
+        if (attributes.title != undefined){
+            object.name = title;
+        }else if (attributes.rt != undefined){
+            object.name = attributes.rt;
+        }
+    }
     return object;
 }
 
@@ -148,7 +154,13 @@ var addInstance = function(object, instanceId, attributes) {
         }
         object.instances.push(instance);
     }
-    // TODO Manage attributes
+    if (attributes != undefined) {
+        if (attributes.title != undefined){
+            instance.name = title;
+        }else if (attributes.rt != undefined){
+            instance.name = attributes.rt;
+        }
+    }
     return instance;
 }
 
@@ -171,12 +183,17 @@ var addResource = function(object, instance, resourceId, attributes) {
         // create resource
         resource = {
             def : resourcedef,
-            id : resourceId, 
+            id : resourceId,
         };
         instance.resources.push(resource);
     }
-
-    // TODO Manage attributes
+    if (attributes != undefined) {
+        if (attributes.title != undefined){
+            resource.def.name = title;
+        }else if (attributes.rt != undefined){
+            resource.def.name = attributes.rt;
+        }
+    }
     return resource;
 }
 
