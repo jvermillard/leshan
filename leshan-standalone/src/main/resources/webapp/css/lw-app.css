@@ -124,6 +124,16 @@ table.table-href > tbody{
   cursor: pointer;
 }
 
+/**
+ * HACK for modal  see : http://stackoverflow.com/questions/18347436/anyone-found-a-fix-for-bootstrap-3-0-modal-move-the-nav
+ * Maybe we should try to move modal to top level position in our document : http://getbootstrap.com/javascript/#modals
+ */ 
+body.modal-open,
+.modal-open .navbar-fixed-top,
+.modal-open .navbar-fixed-bottom {
+ margin-right: 12px;
+}
+
 
 /* Sticky footer styles
 -------------------------------------------------- */
