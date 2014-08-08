@@ -3,9 +3,9 @@
   		<li><a href="#/clients/">Clients</a></li>
   		<li class="active">{{ clientId }}</li>
 	</ol>
-	<div class="resource-tree">
-		<ul><object ng-repeat='object in objects' object='object' parent='parent'></object></ul>
-	</div>
+	<accordion close-others=false>
+		<object ng-repeat='object in objects' object='object' parent='parent'></object>
+	</accordion>
 </div>
 
 <div ng-if='error'>

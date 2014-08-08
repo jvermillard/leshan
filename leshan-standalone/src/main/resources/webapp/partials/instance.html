@@ -1,6 +1,6 @@
-<li class="resource">
-	<div class="row resource-1">
-		<div class="col-md-4 resource-title-1">{{instance.name}}</div>
+<div>
+	<div class="row">
+		<div class="col-md-4 instance-name">{{instance.name}}</div>
 		<div class="col-md-2 text-muted small">{{instance.path}}</div>
 		<div class="col-md-6">
 			<div class="row">
@@ -19,5 +19,5 @@
 			</div> 
 		</div>
 	</div>
-	<ul><resource ng-repeat='resource in instance.resources' resource='resource' parent='instance'></instance></ul>
-</li>
+	<resource ng-repeat='resource in instance.resources' resource='resource' parent='instance'></resource>
+</div>

@@ -1,7 +1,14 @@
-<li class="resource">
-	<div class="row resource-0">
-		<div class="col-md-4 resource-title-0">{{object.name}}</div>
-		<div class="col-md-8 text-muted small">{{object.path}}</div>
-	</div>
-	<ul><instance ng-repeat='instance in object.instances' instance='instance' parent='object'></instance></ul>
-</li>
+<div class="object">
+	<accordion-group is-open="status.open">
+		<accordion-heading>
+			<div class="row">
+				<div class="col-md-4 object-name">{{object.name}}</div>
+				<div class="col-md-8 text-muted small">{{object.path}}
+				<i class="pull-right glyphicon"
+					ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+				</div>
+			</div>
+		</accordion-heading>
+		<instance ng-repeat='instance in object.instances' instance='instance' parent='object'></instance>
+	</accordion-group>
+</div>
