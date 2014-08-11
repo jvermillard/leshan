@@ -82,13 +82,14 @@ table.table-href > tbody{
 }
 
 /**
- * HACK for modal  see : http://stackoverflow.com/questions/18347436/anyone-found-a-fix-for-bootstrap-3-0-modal-move-the-nav
+ * HACK for modal  see : http://stackoverflow.com/questions/17726641/bootstrap-how-to-disable-vertical-scrollbar
  * Maybe we should try to move modal to top level position in our document : http://getbootstrap.com/javascript/#modals
  */ 
 body.modal-open,
 .modal-open .navbar-fixed-top,
 .modal-open .navbar-fixed-bottom {
- margin-right: 12px;
+ margin-right: 0;
+ overflow-y: auto;
 }
 
 
