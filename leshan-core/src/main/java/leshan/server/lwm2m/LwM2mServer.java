@@ -34,10 +34,12 @@ import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.Set;
 
+import leshan.server.lwm2m.bootstrap.BootstrapStore;
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.message.RequestHandler;
 import leshan.server.lwm2m.message.californium.CaliforniumBasedRequestHandler;
 import leshan.server.lwm2m.observation.ObservationRegistry;
+import leshan.server.lwm2m.resource.BootstrapResource;
 import leshan.server.lwm2m.resource.RegisterResource;
 import leshan.server.lwm2m.security.SecureEndpoint;
 import leshan.server.lwm2m.security.SecurityRegistry;
@@ -81,20 +83,10 @@ public class LwM2mServer {
      * 
      * @param clientRegistry the client registry
      */
-    public LwM2mServer(ClientRegistry clientRegistry) {
-        this(new InetSocketAddress((InetAddress) null, PORT), new InetSocketAddress((InetAddress) null, PORT_DTLS),
-                clientRegistry, null, null);
-    }
-
-    /**
-     * Initialize a server which will bind to default UDP port for CoAP (5684).
-     * 
-     * @param clientRegistry the client registry
-     */
     public LwM2mServer(ClientRegistry clientRegistry, SecurityStore securityRegistry,
-            ObservationRegistry observationRegistry) {
+            ObservationRegistry observationRegistry, BootstrapStore bsStore) {
         this(new InetSocketAddress((InetAddress) null, PORT), new InetSocketAddress((InetAddress) null, PORT_DTLS),
-                clientRegistry, securityRegistry, observationRegistry);
+                clientRegistry, securityRegistry, observationRegistry, bsStore);
     }
 
     /**
@@ -104,19 +96,8 @@ public class LwM2mServer {
      * @param clientRegistry the client registry
      */
     public LwM2mServer(InetSocketAddress localAddress, InetSocketAddress localAddressSecure,
-            ClientRegistry clientRegistry) {
-
-        this(localAddress, localAddressSecure, clientRegistry, null, null);
-    }
-
-    /**
-     * Initialize a server which will bind to the specified address and port.
-     * 
-     * @param localAddress the address to bind the CoAP server.
-     * @param clientRegistry the client registry
-     */
-    public LwM2mServer(InetSocketAddress localAddress, InetSocketAddress localAddressSecure,
-            ClientRegistry clientRegistry, SecurityStore securityRegistry, ObservationRegistry observationRegistry) {
+            ClientRegistry clientRegistry, SecurityStore securityRegistry, ObservationRegistry observationRegistry,
+            BootstrapStore bsStore) {
         Validate.notNull(clientRegistry, "Client registry must not be null");
         Validate.notNull(localAddress, "IP address cannot be null");
 
@@ -140,6 +121,12 @@ public class LwM2mServer {
         // define /rd resource
         RegisterResource rdResource = new RegisterResource(clientRegistry, securityRegistry);
         coapServer.add(rdResource);
+
+        // define /bs ressource
+        if (bsStore != null) {
+            BootstrapResource bsResource = new BootstrapResource(bsStore);
+            coapServer.add(bsResource);
+        }
 
         Set<Endpoint> endpoints = new HashSet<>();
         endpoints.add(endpoint);
@@ -169,5 +156,4 @@ public class LwM2mServer {
     public RequestHandler getRequestHandler() {
         return requestHandler;
     }
-
 }
