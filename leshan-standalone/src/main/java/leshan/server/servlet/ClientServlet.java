@@ -43,6 +43,7 @@ import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ContentFormat;
+import leshan.server.lwm2m.message.DeleteRequest;
 import leshan.server.lwm2m.message.ExecRequest;
 import leshan.server.lwm2m.message.ObserveRequest;
 import leshan.server.lwm2m.message.ReadRequest;
@@ -261,6 +262,26 @@ public class ClientServlet extends HttpServlet {
             }
             return;
         }
+
+        // /clients/endPoint/LWRequest/ : delete instance
+        try {
+            RequestInfo requestInfo = new RequestInfo(path);
+            Client client = this.clientRegistry.get(requestInfo.endpoint);
+            if (client != null) {
+                ClientResponse cResponse = this.deleteRequest(client, requestInfo, resp);
+                processDeviceResponse(resp, cResponse);
+            } else {
+                resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                resp.getWriter().format("no registered client with id '%s'", requestInfo.endpoint).flush();
+            }
+        } catch (IllegalArgumentException e) {
+            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            resp.getWriter().append(e.getMessage()).flush();
+        } catch (ResourceAccessException e) {
+            LOG.debug(String.format("Error accessing resource %s%s.", req.getServletPath(), req.getPathInfo()), e);
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            resp.getWriter().append(e.getMessage()).flush();
+        }
     }
 
     private void processDeviceResponse(HttpServletResponse resp, ClientResponse cResponse) throws IOException {
@@ -313,6 +334,11 @@ public class ClientServlet extends HttpServlet {
             throw new IllegalArgumentException("content type " + req.getContentType()
                     + " not supported for write requests");
         }
+    }
+
+    private ClientResponse deleteRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp) {
+        return DeleteRequest.newRequest(client, requestInfo.objectId, requestInfo.objectInstanceId).send(
+                this.requestHandler);
     }
 
     class RequestInfo {
