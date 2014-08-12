@@ -4,6 +4,7 @@ myModule.factory('lwResources', function() {
     var serviceInstance = {};
     serviceInstance.buildResourceTree = buildResourceTree;
     serviceInstance.findResource = findResource;
+    serviceInstance.addResource = addResource;
     return serviceInstance;
 });
 
@@ -27,7 +28,7 @@ var searchById = function(array, id) {
             return elem;
         }
     }
-    return undefined;
+    return null;
 }
 
 /**
@@ -168,7 +169,7 @@ var addInstance = function(object, instanceId, attributes) {
  * add resource with the given ID to resource tree if necessary and return it
  */
 var addResource = function(object, instance, resourceId, attributes) {
-    var resource = searchById(instance, resourceId);
+    var resource = searchById(instance.resources, resourceId);
 
     // create resource if necessary
     if (resource == undefined) {

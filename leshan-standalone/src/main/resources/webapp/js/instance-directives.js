@@ -1,6 +1,6 @@
 angular.module('instanceDirectives', [])
 
-.directive('instance', function ($compile, $routeParams, $http, dialog,$filter) {
+.directive('instance', function ($compile, $routeParams, $http, dialog,$filter, lwResources) {
     return {
         restrict: "E",
         replace: true,
@@ -39,10 +39,11 @@ angular.module('instanceDirectives', [])
                     // manage read data
                     if (data.status == "CONTENT") {
                         for (var i in data.value) {
-                            var res = data.value[i];
-                            scope.instance.resources[res.id].value = res.value;
-                            scope.instance.resources[res.id].valuesupposed = false;
-                            scope.instance.resources[res.id].tooltip = formattedDate;
+                            var tlvresource = data.value[i];
+                            resource = lwResources.addResource(scope.parent, scope.instance, tlvresource.id, null)
+                            resource.value = tlvresource.value;
+                            resource.valuesupposed = false;
+                            resource.tooltip = formattedDate;
                         }
                     }
                 }).error(function(data, status, headers, config) {
