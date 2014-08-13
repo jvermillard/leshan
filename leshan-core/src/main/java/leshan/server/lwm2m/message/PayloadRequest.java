@@ -98,8 +98,7 @@ public abstract class PayloadRequest extends AbstractLwM2mRequest {
 
         switch (this.contentFormat) {
         case TLV:
-            TlvEncoder encoder = new TlvEncoder();
-            return encoder.encode(getPayload()).array();
+            return TlvEncoder.encode(getPayload()).array();
         case OPAQUE:
             return this.bytePayload;
         default:
