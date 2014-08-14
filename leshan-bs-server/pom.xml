@@ -36,9 +36,9 @@
         <artifactId>leshan-server</artifactId>
         <version>0.1.7-SNAPSHOT</version>
     </parent>
-    <artifactId>leshan-standalone</artifactId>
-    <name>leshan - standalone server</name>
-    <description>A LWM2M server running an embedded Jetty server</description>
+    <artifactId>leshan-bs-server</artifactId>
+    <name>leshan - standalone bootstrap server</name>
+    <description>A LWM2M bootstrap server running an embedded Jetty server</description>
 
     <properties>
         <internal.repo.path>file://${basedir}/../../leshan-repo</internal.repo.path>
@@ -103,7 +103,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    
+
     <build>
         <plugins>
             <plugin>
