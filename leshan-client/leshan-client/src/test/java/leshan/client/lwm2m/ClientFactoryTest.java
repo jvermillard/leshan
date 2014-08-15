@@ -11,7 +11,7 @@ import org.junit.Test;
 public class ClientFactoryTest {
 
 	@Test
-	public void test() {
+	public void testGoodRegistrationOfDevice() {
 		final BootstrapDownlink fakeDevice = new BootstrapDownlink(){
 
 			public OperationResponse write() {
@@ -29,6 +29,8 @@ public class ClientFactoryTest {
 		final ClientFactory clientFactory = new ClientFactory();
 		final BootstrapUplink uplink = clientFactory.startBootstrap(fakeDevice);
 		uplink.bootstrap();
+		assert true/*Behavior on Californium via PowerMock*/;
+		assert true/*Returned value to FakeDevice*/;
 	}
 
 }
