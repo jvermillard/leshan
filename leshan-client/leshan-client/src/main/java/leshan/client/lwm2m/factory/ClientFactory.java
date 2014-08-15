@@ -1,9 +1,9 @@
 package leshan.client.lwm2m.factory;
 
-import leshan.client.lwm2m.BootstrapDownlink;
-import leshan.client.lwm2m.BootstrapUplink;
-import leshan.client.lwm2m.RegisterDownlink;
-import leshan.client.lwm2m.RegisterUplink;
+import leshan.client.lwm2m.bootstrap.BootstrapDownlink;
+import leshan.client.lwm2m.bootstrap.BootstrapUplink;
+import leshan.client.lwm2m.register.RegisterDownlink;
+import leshan.client.lwm2m.register.RegisterUplink;
 
 public class ClientFactory {
 
