@@ -3,6 +3,7 @@ package leshan.client.lwm2m;
 import java.util.Map;
 
 import ch.ethz.inf.vs.californium.coap.Request;
+import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 import ch.ethz.inf.vs.californium.network.Endpoint;
 import leshan.client.lwm2m.bootstrap.BootstrapDownlink;
 import leshan.client.lwm2m.bootstrap.BootstrapUplink;
@@ -13,7 +14,13 @@ import leshan.client.lwm2m.response.OperationResponse;
  * Contains the mappings Downlink/Uplinks/CoAPEndpoints
  *
  */
-public class LinkMediator implements BootstrapUplink{
+public class LinkMediator extends BootstrapUplink{
+	
+	public LinkMediator(final CoAPEndpoint endpoint) {
+		super(endpoint);
+		// TODO Auto-generated constructor stub
+	}
+
 	//TBD
 	//TODO:  should this actually go in the ClientFactory????
 	Map<Endpoint, BootstrapDownlink> linkEndpointMap;

@@ -11,7 +11,8 @@ import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 public class ClientFactory {
 
 	public BootstrapUplink startBootstrap(final InetSocketAddress destination, final BootstrapDownlink downlink){
-		BootstrapUplink uplink = new BootstrapUplink(new CoAPEndpoint(destination));
+		final BootstrapUplink uplink = new BootstrapUplink(new CoAPEndpoint(destination));
+		return uplink;
 	}
 	
 	public RegisterUplink startRegistration(final InetSocketAddress destination, final RegisterDownlink downlink){
