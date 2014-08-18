@@ -4,6 +4,7 @@ myModule.factory('lwResources', function() {
     var serviceInstance = {};
     serviceInstance.buildResourceTree = buildResourceTree;
     serviceInstance.findResource = findResource;
+    serviceInstance.addInstance = addInstance;
     serviceInstance.addResource = addResource;
     return serviceInstance;
 });

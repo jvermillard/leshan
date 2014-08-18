@@ -13,10 +13,12 @@ angular.module('modalInstanceControllers', [])
             // Update mode
             $scope.title = "Update Instance  " + instanceId + " of " + object.name;
             $scope.oklabel = "Update";
+            $scope.showinstanceid = false;
         } else {
             // Create mode
             $scope.title = "Create New Instance of " + object.name;
             $scope.oklabel = "Create";
+            $scope.showinstanceid = true;
         }
 
         // Create a working object
@@ -37,7 +39,12 @@ angular.module('modalInstanceControllers', [])
         
         // Define button function 
         $scope.submit = function() {
-            $modalInstance.close($scope.instance);
+            $scope.$broadcast('show-errors-check-validity');
+            console.log("submit")
+            if ($scope.form.$valid){
+                console.log("valid")
+                $modalInstance.close($scope.instance);
+            }
         };
         $scope.cancel = function() {
             $modalInstance.dismiss();
