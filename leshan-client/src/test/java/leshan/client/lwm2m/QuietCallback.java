@@ -1,6 +1,5 @@
 package leshan.client.lwm2m;
 
-import leshan.client.lwm2m.bootstrap.Callback;
 import leshan.client.lwm2m.response.OperationResponse;
 
 public class QuietCallback implements Callback<OperationResponse>{

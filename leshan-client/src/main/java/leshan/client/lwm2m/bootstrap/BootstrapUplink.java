@@ -3,6 +3,7 @@ package leshan.client.lwm2m.bootstrap;
 import java.util.Collections;
 
 import leshan.client.lwm2m.BootstrapEndpoint;
+import leshan.client.lwm2m.Callback;
 import leshan.client.lwm2m.response.OperationResponse;
 import ch.ethz.inf.vs.californium.coap.MessageObserver;
 import ch.ethz.inf.vs.californium.coap.Response;
