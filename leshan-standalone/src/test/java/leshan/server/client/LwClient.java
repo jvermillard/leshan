@@ -34,9 +34,11 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import leshan.server.clienttest.TestClient;
+
 import org.apache.commons.lang.StringUtils;
 
-public class LwClient implements Closeable {
+public class LwClient implements Closeable, TestClient {
 
     private Process p;
     private BufferedReader br;
@@ -81,4 +83,22 @@ public class LwClient implements Closeable {
             e.printStackTrace();
         }
     }
+
+	@Override
+	public void start() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void quit() {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void die() {
+		// TODO Auto-generated method stub
+
+	}
 }
