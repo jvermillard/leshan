@@ -4,6 +4,7 @@ target
 leshan-standalone/data
 leshan-bs-server/data
 *.properties
+bin/
 # Package Files #
 *.jar
 *.war
