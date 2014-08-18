@@ -72,6 +72,10 @@ lwClientControllers.controller('ClientDetailCtrl', [
     'lwResources',
     '$filter',
     function($scope, $location, $routeParams, $http, lwResources,$filter) {
+        // update navbar
+        angular.element("#navbar").children().removeClass('active');
+        angular.element("#client-navlink").addClass('active');
+        
         // free resource when controller is destroyed
         $scope.$on('$destroy', function(){
             if ($scope.eventsource){
