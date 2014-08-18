@@ -53,7 +53,6 @@
         <module>leshan-core</module>
         <module>leshan-standalone</module>
         <module>leshan-bs-server</module>
-        <module>leshan-client</module>
     </modules>
 
     <scm>
@@ -351,6 +350,12 @@
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
                 <version>2.5</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>17.0</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

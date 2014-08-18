@@ -1,10 +1,10 @@
 package leshan.server.clienttest;
 
 public class ExampleClient implements TestClient {
+	ExampleClientDataModel dataModel = new ExampleClientDataModel();
 
 	@Override
 	public void start() {
-		new ClientFa
 	}
 
 	@Override
