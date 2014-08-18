@@ -1,4 +1,4 @@
-package leshan.client.lwm2m.bootstrap;
+package leshan.client.lwm2m;
 
 public interface Callback<T> {
 	public void onSuccess(T t);
