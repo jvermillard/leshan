@@ -56,7 +56,7 @@
         <dependency>
             <groupId>org.github.leshan</groupId>
             <artifactId>leshan-client</artifactId>
-            <version>0.0.1-STANDALONE</version>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
         
                 
