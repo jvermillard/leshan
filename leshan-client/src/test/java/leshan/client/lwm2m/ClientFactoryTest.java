@@ -16,15 +16,15 @@ public class ClientFactoryTest {
 	@Before
 	public void setup() {
 		fakeDevice = new BootstrapDownlink(){
-
+			
 			@Override
-			public OperationResponse write() {
+			public OperationResponse delete() {
 				// TODO Auto-generated method stub
 				return null;
 			}
 
 			@Override
-			public OperationResponse delete() {
+			public OperationResponse write(int objectId, int objectInstanceId, int resourceId) {
 				// TODO Auto-generated method stub
 				return null;
 			}

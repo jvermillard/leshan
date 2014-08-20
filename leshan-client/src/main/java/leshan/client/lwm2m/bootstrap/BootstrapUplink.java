@@ -29,6 +29,7 @@ public class BootstrapUplink {
 		} catch (InterruptedException e) {
 			return OperationResponse.failure();
 		}
+		
 	}
 	
 	public void bootstrap(final String endpointName, final Callback<OperationResponse> callback) {
