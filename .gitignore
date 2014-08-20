@@ -1,6 +1,7 @@
 *.class
 .*
 target
+leshan-standalone/Californium.properties
 leshan-standalone/data
 leshan-bs-server/data
 *.properties
