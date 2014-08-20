@@ -7,20 +7,20 @@ public abstract class OperationResponse {
 
 	public abstract boolean isSuccess();
 	public abstract ResponseCode getResponseCode();
-	
-	public static OperationResponse of(final Response response) {
-		return new SuccessfulOperationResponse(response);
+
+	public static OperationResponse of(final ResponseCode responseCode) {
+		return new SuccessfulOperationResponse(responseCode);
 	}
-	
+
 	public static OperationResponse failure(final ResponseCode responseCode) {
 		return new FailedOperationResponse(responseCode);
 	}
 
 	private static class SuccessfulOperationResponse extends OperationResponse {
 		private final Response response;
-		
-		public SuccessfulOperationResponse(Response response) {
-			this.response = response;
+
+		public SuccessfulOperationResponse(final ResponseCode responseCode) {
+			this.response = new Response(responseCode);
 		}
 
 		@Override
@@ -32,13 +32,13 @@ public abstract class OperationResponse {
 		public ResponseCode getResponseCode() {
 			return response.getCode();
 		}
-		
+
 	}
-	
+
 	private static class FailedOperationResponse extends OperationResponse {
 		private final ResponseCode responseCode;
-		
-		public FailedOperationResponse(ResponseCode responseCode) {
+
+		public FailedOperationResponse(final ResponseCode responseCode) {
 			this.responseCode = responseCode;
 		}
 
@@ -51,6 +51,6 @@ public abstract class OperationResponse {
 		public ResponseCode getResponseCode() {
 			return responseCode;
 		}
-		
+
 	}
 }
