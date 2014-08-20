@@ -59,8 +59,6 @@ public class BootstrapDownlinkTest {
 	}
 	
 	private static String constructUri(final int objectId, final int objectInstanceId, final int resourceId) {
-		return Joiner.on("/")
-				.skipNulls()
-				.join(objectId, objectInstanceId, resourceId);
+		return "/" + Joiner.on("/").skipNulls().join(objectId, objectInstanceId, resourceId);
 	}
 }

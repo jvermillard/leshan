@@ -16,13 +16,13 @@ public class BootstrapMessageDeliverer implements MessageDeliverer {
 
 	@Override
 	public void deliverRequest(Exchange exchange) {
+		ResourceSpec lwm2mUri = ResourceSpec.of(exchange.getRequest().getURI());
 		switch(exchange.getRequest().getCode()) {
 			case PUT:
-				ResourceSpec lwm2mUri = new ResourceSpec(exchange.getRequest().getURI());
 				downlink.write(lwm2mUri.getObjectId(), lwm2mUri.getObjectInstanceId(), lwm2mUri.getResourceId());
 				break;
 			case DELETE:
-				
+				downlink.delete(lwm2mUri.getObjectId(), lwm2mUri.getObjectInstanceId());
 				break;
 			default:
 				

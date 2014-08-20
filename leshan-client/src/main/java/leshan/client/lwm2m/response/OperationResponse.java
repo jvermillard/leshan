@@ -1,14 +1,56 @@
 package leshan.client.lwm2m.response;
 
+import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.coap.Response;
 
-public class OperationResponse {
+public abstract class OperationResponse {
 
-	public static OperationResponse of(Response response) {
-		return null;
+	public abstract boolean isSuccess();
+	public abstract ResponseCode getResponseCode();
+	
+	public static OperationResponse of(final Response response) {
+		return new SuccessfulOperationResponse(response);
 	}
 	
-	public static OperationResponse failure() {
-		return null;
+	public static OperationResponse failure(final ResponseCode responseCode) {
+		return new FailedOperationResponse(responseCode);
+	}
+
+	private static class SuccessfulOperationResponse extends OperationResponse {
+		private final Response response;
+		
+		public SuccessfulOperationResponse(Response response) {
+			this.response = response;
+		}
+
+		@Override
+		public boolean isSuccess() {
+			return true;
+		}
+
+		@Override
+		public ResponseCode getResponseCode() {
+			return response.getCode();
+		}
+		
+	}
+	
+	private static class FailedOperationResponse extends OperationResponse {
+		private final ResponseCode responseCode;
+		
+		public FailedOperationResponse(ResponseCode responseCode) {
+			this.responseCode = responseCode;
+		}
+
+		@Override
+		public boolean isSuccess() {
+			return false;
+		}
+
+		@Override
+		public ResponseCode getResponseCode() {
+			return responseCode;
+		}
+		
 	}
 }

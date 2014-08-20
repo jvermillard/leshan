@@ -1,5 +1,7 @@
 package leshan.client.lwm2m;
 
+import static org.junit.Assert.fail;
+
 import java.net.InetSocketAddress;
 
 import leshan.client.lwm2m.bootstrap.BootstrapDownlink;
@@ -16,15 +18,15 @@ public class ClientFactoryTest {
 	@Before
 	public void setup() {
 		fakeDevice = new BootstrapDownlink(){
-			
+
 			@Override
-			public OperationResponse delete() {
+			public OperationResponse write(int objectId, int objectInstanceId, int resourceId) {
 				// TODO Auto-generated method stub
 				return null;
 			}
 
 			@Override
-			public OperationResponse write(int objectId, int objectInstanceId, int resourceId) {
+			public OperationResponse delete(int objectId, int objectInstanceId) {
 				// TODO Auto-generated method stub
 				return null;
 			}
@@ -36,8 +38,8 @@ public class ClientFactoryTest {
 	public void testGoodRegistrationOfDeviceSync() {
 		final ClientFactory clientFactory = new ClientFactory();
 		final BootstrapUplink uplink = clientFactory.startBootstrap(InetSocketAddress.createUnresolved("localhost", 1234), fakeDevice);
-		OperationResponse response = uplink.bootstrap("endpoint-client-name"); // OR
-		
+		OperationResponse response = uplink.bootstrap("endpoint-client-name", 5L);
+		assert response.isSuccess();
 		assert true/*Behavior on Californium via PowerMock*/;
 		assert true/*Returned value to FakeDevice*/;
 	}
@@ -46,18 +48,15 @@ public class ClientFactoryTest {
 	public void testGoodRegistrationOfDeviceAsync() {
 		final ClientFactory clientFactory = new ClientFactory();
 		final BootstrapUplink uplink = clientFactory.startBootstrap(InetSocketAddress.createUnresolved("localhost", 1234), fakeDevice);
-		OperationResponse response = uplink.bootstrap("endpoint-client-name"); // OR
-		uplink.bootstrap("endpoint-client-name", new Callback<OperationResponse>() {
+		uplink.bootstrap("endpoint-client-name", new Callback() {
 			
 			@Override
-			public void onSuccess(OperationResponse t) {
-				// TODO Auto-generated method stub
-				
+			public void onSuccess(OperationResponse response) {
+				fail("Failure!");
 			}
 			
 			@Override
-			public void onFailure(Throwable t) {
-				// TODO Auto-generated method stub
+			public void onFailure(OperationResponse response) {
 				
 			}
 		});
