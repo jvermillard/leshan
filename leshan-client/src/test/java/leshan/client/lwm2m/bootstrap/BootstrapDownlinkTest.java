@@ -20,34 +20,26 @@ import ch.ethz.inf.vs.californium.coap.Request;
 import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BootstrapUplinkTest {
+public class BootstrapDownlinkTest {
+
 	private static final String ENDPOINT_NAME = UUID.randomUUID().toString();
 	private String actualRequest;
 	private Code actualCode;
 
 	@Test
-	public void testGoodPayload() {
-		final CoAPEndpoint endpoint = mock(CoAPEndpoint.class);
-		
-		doAnswer(new Answer<Void>(){
-
-			@Override
-			public Void answer(final InvocationOnMock invocation) throws Throwable {
-				final Request request = (Request) invocation.getArguments()[0];
-				actualRequest = request.getPayloadString();
-				actualCode = request.getCode();
-				
-				return null;
-			}
-		}).when(endpoint).sendRequest(any(Request.class));
-
-		final BootstrapUplink uplink = new BootstrapUplink(endpoint);
-		
-		uplink.bootstrap(ENDPOINT_NAME, new QuietCallback());
-		
-		final String expectedRequest = "/bs?ep=" + ENDPOINT_NAME;
-		
-		assertEquals(expectedRequest, actualRequest);
-		assertEquals(Code.POST, actualCode);
+	public void testWriteNoInstanceGoodPayload() {
+	}
+	
+	@Test
+	public void testWriteRootGoodPayload() {
+	}
+	
+	@Test
+	public void testWriteResourceGoodPayload() {
+	}
+	
+	
+	@Test
+	public void testDeleteGoodPayload() {
 	}
 }

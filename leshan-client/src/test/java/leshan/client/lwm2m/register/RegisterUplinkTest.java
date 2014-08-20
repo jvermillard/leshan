@@ -28,7 +28,7 @@ public class RegisterUplinkTest {
 	private Code actualCode;
 
 	@Test
-	public void testRegisterGoodPayload() {
+	public void testWriteGoodPayload() {
 		final CoAPEndpoint endpoint = mock(CoAPEndpoint.class);
 		
 		doAnswer(new Answer<Void>(){
