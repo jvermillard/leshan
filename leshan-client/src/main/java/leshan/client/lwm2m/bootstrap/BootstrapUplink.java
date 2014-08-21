@@ -23,7 +23,7 @@ public class BootstrapUplink {
 	public OperationResponse bootstrap(final String endpointName, final long timeout) {
 		final ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newPost();
 		final BootstrapEndpoint bootstrapEndpoint = new BootstrapEndpoint(Collections.singletonMap(ENDPOINT, endpointName));
-		request.setPayload(bootstrapEndpoint.toString());
+		request.setURI(bootstrapEndpoint.toString());
 		checkStarted(endpoint);
 		endpoint.sendRequest(request);
 		// WEEEEEEEEEEEEEEHHHHHHHHHH

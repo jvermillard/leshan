@@ -13,6 +13,7 @@ import leshan.client.lwm2m.BootstrapMessageDeliverer.InterfaceTypes;
 import leshan.client.lwm2m.BootstrapMessageDeliverer.OperationTypes;
 import leshan.client.lwm2m.MockedCallback;
 import leshan.client.lwm2m.OperationResponseCode;
+import leshan.client.lwm2m.response.OperationResponse;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +31,7 @@ import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BootstrapUplinkTest {
+	private static final int SYNC_TIMEOUT_MS = 2000;
 	private static final String ENDPOINT_NAME = UUID.randomUUID().toString();
 	private byte[] actualPayload;
 	private String actualRequest;
@@ -68,11 +70,16 @@ public class BootstrapUplinkTest {
 		return uplink;
 	}
 	
-	private void sendBootstrapAndGetResponse(final BootstrapUplink uplink) {
+	private void sendBootstrapAndGetAsyncResponse(final BootstrapUplink uplink) {
 		uplink.bootstrap(ENDPOINT_NAME, callback);
 		
 		await().untilTrue(callback.isCalled());
 		actualPayload = callback.getResponsePayload();
+	}
+	
+	private void sendBootstrapAndGetSyncResponse(final BootstrapUplink uplink) {
+		final OperationResponse operationResponse = uplink.bootstrap(ENDPOINT_NAME, SYNC_TIMEOUT_MS);
+		actualPayload = operationResponse.getPayload();
 	}
 	
 	private void verifyResponse(final String expectedPayload) {
@@ -82,20 +89,38 @@ public class BootstrapUplinkTest {
 	}
 	
 	@Test
-	public void testGoodPayload() {
+	public void testGoodAsyncPayload() {
 		final BootstrapUplink uplink = initializeServerResponse(InterfaceTypes.BOOTSTRAP, OperationTypes.REGISTER, ResponseCode.CHANGED);
 		
-		sendBootstrapAndGetResponse(uplink);
+		sendBootstrapAndGetAsyncResponse(uplink);
 		
 		verifyResponse("Request Bootstrap is completed successfully");
 	}
-
+	
 	
 	@Test
-	public void testBadPayload() {
+	public void testBadAsyncPayload() {
 		final BootstrapUplink uplink = initializeServerResponse(InterfaceTypes.BOOTSTRAP, OperationTypes.REGISTER, ResponseCode.BAD_REQUEST);
 		
-		sendBootstrapAndGetResponse(uplink);
+		sendBootstrapAndGetAsyncResponse(uplink);
+		
+		verifyResponse("Unknown Endpoint Client Name");
+	}
+	
+	@Test
+	public void testGoodSyncPayload(){
+		final BootstrapUplink uplink = initializeServerResponse(InterfaceTypes.BOOTSTRAP, OperationTypes.REGISTER, ResponseCode.CHANGED);
+		
+		sendBootstrapAndGetSyncResponse(uplink);
+		
+		verifyResponse("Request Bootstrap is completed successfully");
+	}
+	
+	@Test
+	public void testBadSyncPayload() {
+		final BootstrapUplink uplink = initializeServerResponse(InterfaceTypes.BOOTSTRAP, OperationTypes.REGISTER, ResponseCode.BAD_REQUEST);
+		
+		sendBootstrapAndGetSyncResponse(uplink);
 		
 		verifyResponse("Unknown Endpoint Client Name");
 	}
