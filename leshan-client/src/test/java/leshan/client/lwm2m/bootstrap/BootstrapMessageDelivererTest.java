@@ -60,7 +60,7 @@ public class BootstrapMessageDelivererTest {
 
 		deliverRequest();
 
-		verifyResponse(OperationResponseCode.BAD_REQUEST, "￼The format of data to be written is different".getBytes());
+		verifyResponse(OperationResponseCode.BAD_REQUEST, "￼The format of data to be written is different");
 	}
 
 	@Test
@@ -133,8 +133,8 @@ public class BootstrapMessageDelivererTest {
 		deliverer.deliverResponse(exchange, new Response(ResponseCode.valueOf(leshanResponseCode.getValue())));
 	}
 
-	private void verifyResponse(final OperationResponseCode responseCode, final byte[] payload) {
-		verify(exchange).sendResponse(Matchers.argThat(new ResponseMatcher(responseCode, payload)));
+	private void verifyResponse(final OperationResponseCode responseCode, final String payload) {
+		verify(exchange).sendResponse(Matchers.argThat(new ResponseMatcher(responseCode, payload.getBytes())));
 	}
 
 	private void verifyResourceWrite() {
