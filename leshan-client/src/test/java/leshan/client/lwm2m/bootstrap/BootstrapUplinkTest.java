@@ -88,7 +88,7 @@ public class BootstrapUplinkTest {
 	}
 	
 	@Test
-	public void testGoodAsyncPayload() {
+	public void testGoodAsyncRequestPayload() {
 		final BootstrapUplink uplink = initializeServerResponse(InterfaceTypes.BOOTSTRAP, OperationTypes.REQUEST, ResponseCode.CHANGED);
 		
 		sendBootstrapAndGetAsyncResponse(uplink);

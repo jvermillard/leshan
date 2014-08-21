@@ -89,10 +89,26 @@ public class BootstrapMessageDelivererTest {
 
 	@Test
 	public void testDeleteGoodPayload() {
+		initializeDeleteWithResponse(new Response(ResponseCode.DELETED));
+		initializeResourceExchange(Code.DELETE);
+
+		deliverRequest();
+
+		verifyResourceDelete();
+		verifyResponse(OperationResponseCode.DELETED, "\"Delete\" operation is completed successfully");
+	}
+	
+	@Test
+	public void testDeleteBadUri() {
+		initializeExchange(Code.DELETE, "/NaN");
+
+		deliverRequest();
+
+		verifyResponse(OperationResponseCode.METHOD_NOT_ALLOWED, "Target is not allowed for \"Delete\" operation");
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
-	public void cannotDeliverResponse() {
+	public void cannotDeliverWriteResponse() {
 		initializeResourceExchange(Code.PUT);
 
 		deliverResponse(OperationResponseCode.CHANGED);
@@ -101,6 +117,11 @@ public class BootstrapMessageDelivererTest {
 	private void initializeWriteWithResponse(final Response response) {
 		final OperationResponse operationResponse = OperationResponse.of(response);
 		when(downlink.write(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID)).thenReturn(operationResponse);
+	}
+	
+	private void initializeDeleteWithResponse(final Response response) {
+		final OperationResponse operationResponse = OperationResponse.of(response);
+		when(downlink.delete(OBJECT_ID, OBJECT_INSTANCE_ID)).thenReturn(operationResponse);
 	}
 
 	private void initializeWriteWithException(final Exception exception) {
@@ -133,13 +154,17 @@ public class BootstrapMessageDelivererTest {
 		deliverer.deliverResponse(exchange, new Response(ResponseCode.valueOf(leshanResponseCode.getValue())));
 	}
 
+	private void verifyResourceWrite() {
+		verify(downlink).write(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID);
+	}
+	
+	private void verifyResourceDelete() {
+		verify(downlink).delete(OBJECT_ID, OBJECT_INSTANCE_ID);
+	}
+
 	private void verifyResponse(final OperationResponseCode responseCode, final String payload) {
 		final byte[] payloadBytes = payload != null ? payload.getBytes() : null;
 		verify(exchange).sendResponse(Matchers.argThat(new ResponseMatcher(responseCode, payloadBytes)));
-	}
-
-	private void verifyResourceWrite() {
-		verify(downlink).write(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID);
 	}
 
 }

@@ -95,14 +95,18 @@ public enum OperationResponseCode {
 					case BAD_REQUEST: 	return "￼The format of data to be written is different";
 					default: 			throwError(code, interfaceType, operationType);
 				}
-			}else if(operationType == OperationTypes.REQUEST) {
+			} else if(operationType == OperationTypes.REQUEST) {
 				switch(code){
 					case CHANGED: 		return "Request Bootstrap is completed successfully";
 					case BAD_REQUEST: 	return "Unknown Endpoint Client Name";
 					default: 			throwError(code, interfaceType, operationType);
 				}
-			} else {
-				
+			} else if(operationType == OperationTypes.DELETE) {
+				switch(code){
+					case DELETED: 				return "\"Delete\" operation is completed successfully";
+					case METHOD_NOT_ALLOWED:	return "Target is not allowed for \"Delete\" operation";
+					default: 					throwError(code, interfaceType, operationType);
+				}
 			}
 		} else {
 			// ...
