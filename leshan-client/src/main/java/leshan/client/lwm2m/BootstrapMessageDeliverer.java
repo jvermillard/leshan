@@ -26,6 +26,7 @@ public class BootstrapMessageDeliverer implements MessageDeliverer {
 		NOTIFY,
 		OBSERVE,
 		READ,
+		REQUEST,
 		REGISTER,
 		UPDATE,
 		WRITE,

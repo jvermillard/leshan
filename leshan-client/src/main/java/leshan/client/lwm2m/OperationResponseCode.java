@@ -95,7 +95,7 @@ public enum OperationResponseCode {
 					case BAD_REQUEST: 	return "￼The format of data to be written is different";
 					default: 			throwError(code, interfaceType, operationType);
 				}
-			}else if(operationType == OperationTypes.REGISTER) {
+			}else if(operationType == OperationTypes.REQUEST) {
 				switch(code){
 					case CHANGED: 		return "Request Bootstrap is completed successfully";
 					case BAD_REQUEST: 	return "Unknown Endpoint Client Name";

@@ -1,11 +1,10 @@
 package leshan.client.lwm2m.bootstrap;
 
-import static com.jayway.awaitility.Awaitility.*;
+import static com.jayway.awaitility.Awaitility.await;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 
 import java.util.UUID;
 
@@ -90,7 +89,7 @@ public class BootstrapUplinkTest {
 	
 	@Test
 	public void testGoodAsyncPayload() {
-		final BootstrapUplink uplink = initializeServerResponse(InterfaceTypes.BOOTSTRAP, OperationTypes.REGISTER, ResponseCode.CHANGED);
+		final BootstrapUplink uplink = initializeServerResponse(InterfaceTypes.BOOTSTRAP, OperationTypes.REQUEST, ResponseCode.CHANGED);
 		
 		sendBootstrapAndGetAsyncResponse(uplink);
 		
@@ -100,7 +99,7 @@ public class BootstrapUplinkTest {
 	
 	@Test
 	public void testBadAsyncPayload() {
-		final BootstrapUplink uplink = initializeServerResponse(InterfaceTypes.BOOTSTRAP, OperationTypes.REGISTER, ResponseCode.BAD_REQUEST);
+		final BootstrapUplink uplink = initializeServerResponse(InterfaceTypes.BOOTSTRAP, OperationTypes.REQUEST, ResponseCode.BAD_REQUEST);
 		
 		sendBootstrapAndGetAsyncResponse(uplink);
 		
@@ -109,7 +108,7 @@ public class BootstrapUplinkTest {
 	
 	@Test
 	public void testGoodSyncPayload(){
-		final BootstrapUplink uplink = initializeServerResponse(InterfaceTypes.BOOTSTRAP, OperationTypes.REGISTER, ResponseCode.CHANGED);
+		final BootstrapUplink uplink = initializeServerResponse(InterfaceTypes.BOOTSTRAP, OperationTypes.REQUEST, ResponseCode.CHANGED);
 		
 		sendBootstrapAndGetSyncResponse(uplink);
 		
@@ -118,7 +117,7 @@ public class BootstrapUplinkTest {
 	
 	@Test
 	public void testBadSyncPayload() {
-		final BootstrapUplink uplink = initializeServerResponse(InterfaceTypes.BOOTSTRAP, OperationTypes.REGISTER, ResponseCode.BAD_REQUEST);
+		final BootstrapUplink uplink = initializeServerResponse(InterfaceTypes.BOOTSTRAP, OperationTypes.REQUEST, ResponseCode.BAD_REQUEST);
 		
 		sendBootstrapAndGetSyncResponse(uplink);
 		
