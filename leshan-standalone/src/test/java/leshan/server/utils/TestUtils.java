@@ -27,31 +27,29 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.clienttest;
+package leshan.server.utils;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
+import static org.junit.Assert.*;
 
-import org.apache.commons.io.IOUtils;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class TestUtils {
 
-    public static String getAPI(String url) {
-        try {
-            URL u = new URL("http://127.0.0.1:8080/" + url);
-            URLConnection uc = u.openConnection();
-
-            try (InputStream is = uc.getInputStream()) {
-                String res = IOUtils.toString(is);
-                System.err.println(url + " => \n'" + res + "'");
-
-                return res;
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    public static Map<String, Object> waitForRegistration(String endpoint) throws InterruptedException {
+        long start = System.currentTimeMillis();
+        List<Map<String, Object>> clients = new ArrayList<>();
+        while (clients.isEmpty() && (System.currentTimeMillis() - start < 10_000)) {
+            Thread.sleep(500);
+            clients = ApiUtils.getRegisteredClients();
         }
 
+        assertFalse("No registererd clients after 10s", clients.isEmpty());
+        assertEquals(1, clients.size());
+        assertEquals(endpoint, clients.get(0).get("endpoint"));
+
+        return clients.get(0);
     }
+
 }

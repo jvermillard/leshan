@@ -52,6 +52,7 @@ public class LeshanMain {
     private static final Logger LOG = LoggerFactory.getLogger(LeshanMain.class);
 
     private Server server;
+    private LwM2mServer lwServer;
 
     public void start() {
 
@@ -85,7 +86,6 @@ public class LeshanMain {
         String ifaces = System.getenv("COAPSIFACE");
 
         // LWM2M server
-        LwM2mServer lwServer;
         if (iface == null || iface.isEmpty() || ifaces == null || ifaces.isEmpty()) {
             lwServer = new LwM2mServer(clientRegistry, securityRegistry, observationRegistry, bsStore);
         } else {
@@ -144,6 +144,7 @@ public class LeshanMain {
 
     public void stop() {
         try {
+            lwServer.destroy();
             server.stop();
         } catch (Exception e) {
             throw new RuntimeException(e);

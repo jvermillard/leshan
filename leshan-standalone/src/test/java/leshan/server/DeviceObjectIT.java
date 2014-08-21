@@ -27,75 +27,69 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.clienttest;
+package leshan.server;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
-import leshan.server.LeshanMain;
+import leshan.server.client.LwClient;
+import leshan.server.utils.ApiUtils;
+import leshan.server.utils.TestUtils;
 
+import org.apache.commons.lang.RandomStringUtils;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
-import com.google.gson.Gson;
+/**
+ * Integration tests for Device object.
+ */
+public class DeviceObjectIT {
 
-public class RegisterIntegrationTest {
+    private LeshanMain server;
 
-
-    @SuppressWarnings("unchecked")
-    @Test
-    public void register_and_deregister() throws IOException, InterruptedException {
-
-        LeshanMain server = new LeshanMain();
+    @Before
+    public void start() {
+        server = new LeshanMain();
         server.start();
+    }
 
-        Gson gson = new Gson();
-
-        // no client
-
-        String json = TestUtils.getAPI("api/clients");
-
-        List<Map<String, Object>> clients = new ArrayList<>();
-
-
-        clients = gson.fromJson(json, clients.getClass());
-        //Assert.assertEquals(0, clients.size());
-
-
-        try (LwClient c = new LwClient()) {
-
-            c.start();
-            // client registered?
-
-            json = TestUtils.getAPI("api/clients");
-            clients = gson.fromJson(json, clients.getClass());
-            assertEquals(1, clients.size());
-
-            Map<String, Object> m = clients.get(0);
-            assertEquals("testlwm2mclient", m.get("endpoint"));
-            assertNotNull(m.get("registrationId"));
-            assertNotNull(m.get("registrationDate"));
-            assertEquals("/0:0:0:0:0:0:0:1:5683", m.get("address"));
-            assertEquals("1.0", m.get("lwM2MmVersion"));
-            assertEquals(86400.0, m.get("lifetime"));
-
-            List<String> links = new ArrayList<>();
-            Collections.addAll(links, "3", " 1024/10", " 1024/11", " 1024/12");
-
-            assertEquals(links, m.get("objectLinks"));
-            c.quit();
-
-            // client de-registered?
-
-            json = TestUtils.getAPI("api/clients");
-            System.err.println(json);
-        }
-
+    @After
+    public void stop() {
         server.stop();
     }
+
+    /**
+     * Interoperability Test Case : LightweightM2M-1.0-int-201 – Querying basic information from the client in Plain
+     * Text format
+     * 
+     * PSK security mode
+     */
+    @Test
+    public void query_basic_info_plain_text() throws IOException, InterruptedException {
+
+        String endpoint = RandomStringUtils.randomNumeric(10);
+        String psk = RandomStringUtils.randomAscii(10);
+
+        // preload security info
+        ApiUtils.createPskSecurityInfo(endpoint, endpoint, psk);
+
+        // start client
+        try (LwClient c = new LwClient()) {
+            c.start(endpoint, "201-device-query-plaintext.lua", endpoint, psk); // params: identity, psk
+
+            TestUtils.waitForRegistration(endpoint);
+
+            // read Manufacturer
+            assertEquals("Open Mobile Alliance", ApiUtils.readResource(endpoint, "3", "0", "0"));
+
+            // read Model number
+            assertEquals("Leshan model", ApiUtils.readResource(endpoint, "3", "0", "1"));
+
+            // read Serial number
+            assertEquals("458662135557", ApiUtils.readResource(endpoint, "3", "0", "2"));
+        }
+    }
+
 }

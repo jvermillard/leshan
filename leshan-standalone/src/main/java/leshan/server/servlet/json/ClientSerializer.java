@@ -52,6 +52,7 @@ public class ClientSerializer implements JsonSerializer<Client> {
         element.addProperty("smsNumber", src.getSmsNumber());
         element.addProperty("lwM2MmVersion", src.getLwM2mVersion());
         element.addProperty("lifetime", src.getLifeTimeInSec());
+        element.addProperty("bindingMode", src.getBindingMode().toString());
         element.add("objectLinks", context.serialize(src.getObjectLinks()));
         element.add("secure",
                 context.serialize(src.getRegistrationEndpointAddress().getPort() == LwM2mServer.PORT_DTLS));

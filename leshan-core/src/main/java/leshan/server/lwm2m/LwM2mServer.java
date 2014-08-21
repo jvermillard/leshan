@@ -147,10 +147,17 @@ public class LwM2mServer {
     }
 
     /**
-     * Stops the server and unbinds it from assigned port.
+     * Stops the server and unbinds it from assigned ports (can be restarted).
      */
     public void stop() {
         coapServer.stop();
+    }
+
+    /**
+     * Stops the server and unbinds it from assigned ports.
+     */
+    public void destroy() {
+        coapServer.destroy();
     }
 
     public RequestHandler getRequestHandler() {

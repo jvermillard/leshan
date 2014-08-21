@@ -1,0 +1,49 @@
+local lwm2m = require 'lwm2m'
+local socket = require 'socket'
+local obj = require 'lwm2mobject'
+
+local udp = socket.udp();
+-- let the system choose an ephemeral port
+-- udp:setsockname('*', 5682)
+
+local server = os.getenv("SERVER_HOST")
+local endpoint = os.getenv("ENDPOINT")
+
+local deviceObj = obj.new(3, {
+  [0]  = "Open Mobile Alliance",                                       -- manufacturer
+  [1]  = "Lightweight M2M Client",                                     -- model number
+  [2]  = "345000123",                                                  -- serial number
+  [3]  = "1.0",                                                        -- firmware version
+  [4]  = {execute = function (obj) print ("Reboot!") end},             -- reboot
+  [5]  = {execute = function (obj) print ("Factory reset!") end},      -- factory reset
+  [13] = {read = function() return os.time() end},                     -- current time
+})
+
+print("endpoint: " .. endpoint .. " - server host: " .. server);
+
+local ll = lwm2m.init(endpoint, {deviceObj},
+  function(data,host,port) udp:sendto(data,host,port) end)
+
+ll:addserver(123, server, 5683)
+ll:register()
+
+local start = os.time()
+udp:settimeout(1)
+
+local finish = false;
+
+-- wait 2 seconds before deregistering
+repeat
+  if os.difftime(os.time(), start) > 2 then
+    finish = true
+  else
+    ll:step()
+    local data, ip, port, msg = udp:receivefrom()
+    if data then
+      ll:handle(data,ip,port)
+    end
+  end
+until finish
+
+print("Deregistering...")
+ll:close()
