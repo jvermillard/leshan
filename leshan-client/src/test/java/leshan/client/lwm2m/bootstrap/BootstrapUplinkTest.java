@@ -1,13 +1,14 @@
 package leshan.client.lwm2m.bootstrap;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 
 import java.util.UUID;
 
 import leshan.client.lwm2m.QuietCallback;
-import leshan.client.lwm2m.response.OperationResponse;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,6 +23,7 @@ import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 @RunWith(MockitoJUnitRunner.class)
 public class BootstrapUplinkTest {
 	private static final String ENDPOINT_NAME = UUID.randomUUID().toString();
+	private byte[] actualPayload;
 	private String actualRequest;
 	private Code actualCode;
 
@@ -34,9 +36,8 @@ public class BootstrapUplinkTest {
 			@Override
 			public Void answer(final InvocationOnMock invocation) throws Throwable {
 				final Request request = (Request) invocation.getArguments()[0];
-				actualRequest = request.getPayloadString();
+				actualRequest = request.getURI();
 				actualCode = request.getCode();
-				
 				return null;
 			}
 		}).when(endpoint).sendRequest(any(Request.class));
@@ -45,9 +46,10 @@ public class BootstrapUplinkTest {
 		
 		uplink.bootstrap(ENDPOINT_NAME, new QuietCallback());
 		
-		final String expectedRequest = "/bs?ep=" + ENDPOINT_NAME;
+		final String expectedRequest = "coap://localhost/bs?ep=" + ENDPOINT_NAME;
 		
 		assertEquals(expectedRequest, actualRequest);
 		assertEquals(Code.POST, actualCode);
+		assertArrayEquals("￼Request Bootstrap is completed successfully".getBytes(), actualPayload);
 	}
 }

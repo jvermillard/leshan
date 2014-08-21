@@ -1,8 +1,11 @@
 package leshan.client.lwm2m;
 
+import leshan.client.lwm2m.BootstrapMessageDeliverer.InterfaceTypes;
+import leshan.client.lwm2m.BootstrapMessageDeliverer.OperationTypes;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 
-public enum LeshanResponseCode {	
+// TODO: Rename me to ResponseCode after CaliforniumResponseCode is purged from client visible layer
+public enum OperationResponseCode {	
 	// Success
 	CREATED(ResponseCode.CREATED),
 	DELETED(ResponseCode.DELETED),
@@ -40,8 +43,17 @@ public enum LeshanResponseCode {
 	 *
 	 * @param value the integer value
 	 */
-	private LeshanResponseCode(ResponseCode responseCode) {
+	private OperationResponseCode(ResponseCode responseCode) {
 		this.responseCode = responseCode;
+	}
+	
+	public int getValue() {
+		return this.responseCode.value;
+	}
+	
+	@Override
+	public String toString() {
+		return this.responseCode.toString();
 	}
 	
 	/**
@@ -51,10 +63,10 @@ public enum LeshanResponseCode {
 	 * @return the response code
 	 * @throws IllegalArgumentException if integer value is not recognized
 	 */
-	public static LeshanResponseCode valueOf(int value) {
+	public static OperationResponseCode valueOf(int value) {
 		ResponseCode responseCode = ResponseCode.valueOf(value);
 		
-		for (LeshanResponseCode code : LeshanResponseCode.values()) {
+		for (OperationResponseCode code : OperationResponseCode.values()) {
 			if (code.responseCode == responseCode) {
 				return code;
 			}
@@ -62,21 +74,38 @@ public enum LeshanResponseCode {
 		
 		throw new IllegalArgumentException("Unknown Leshan response code " + value);
 	}
-	
-	@Override
-	public String toString() {
-		return this.responseCode.toString();
-	}
-	
-	public static boolean isSuccess(LeshanResponseCode code) {
+
+	public static boolean isSuccess(OperationResponseCode code) {
 		return ResponseCode.isSuccess(ResponseCode.valueOf(code.responseCode.value));
 	}
 	
-	public static boolean isClientError(LeshanResponseCode code) {
+	public static boolean isClientError(OperationResponseCode code) {
 		return ResponseCode.isClientError(ResponseCode.valueOf(code.responseCode.value));
 	}
 	
-	public static boolean isServerError(LeshanResponseCode code) {
+	public static boolean isServerError(OperationResponseCode code) {
 		return ResponseCode.isServerError(ResponseCode.valueOf(code.responseCode.value));
+	}
+
+	public static String generateReasonPhrase(OperationResponseCode code, InterfaceTypes interfaceType, OperationTypes operationType) {
+		if(interfaceType == InterfaceTypes.BOOTSTRAP) {
+			if(operationType == OperationTypes.WRITE) {
+				switch(code) {
+					case CHANGED: 		return "\"Write\" operation is completed successfully";
+					case BAD_REQUEST: 	return "￼The format of data to be written is different";
+					default: 			throwError(code, interfaceType, operationType);
+				}
+			} else {
+				
+			}
+		} else {
+			// ...
+		}
+		
+		return "";
+	}
+	
+	private static void throwError(OperationResponseCode code, InterfaceTypes interfaceType, OperationTypes operationType) {
+		throw new IllegalArgumentException("Unsupported response for " + code + "; " + interfaceType + "; " + operationType);
 	}
 }

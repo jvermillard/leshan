@@ -14,78 +14,79 @@ import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 public class BootstrapUplink {
 	private static final String ENDPOINT = "ep";
 	private final CoAPEndpoint endpoint;
-
-	public BootstrapUplink(final CoAPEndpoint endpoint) {
+	
+	public BootstrapUplink(CoAPEndpoint endpoint) {
 		this.endpoint = endpoint;
 	}
-
+	
 	public OperationResponse bootstrap(final String endpointName, final long timeout) {
-		final ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newPost();
-		final BootstrapEndpoint bootstrapEndpoint = new BootstrapEndpoint(Collections.singletonMap(ENDPOINT, endpointName));
+		ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newPost();
+		BootstrapEndpoint bootstrapEndpoint = new BootstrapEndpoint(Collections.singletonMap(ENDPOINT, endpointName));
 		request.setPayload(bootstrapEndpoint.toString());
 		checkStarted(endpoint);
 		endpoint.sendRequest(request);
-
+		// WEEEEEEEEEEEEEEHHHHHHHHHH
 		try {
-			final Response response = request.waitForResponse(timeout);
+			Response response = request.waitForResponse(timeout);
 			return OperationResponse.of(response.getCode());
-		} catch (final InterruptedException e) {
+		} catch (InterruptedException e) {
 			// TODO: Am I an internal server error?
 			return OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR);
 		}
-
+		
 	}
-
+	
 	public void bootstrap(final String endpointName, final Callback callback) {
-		final ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newPost();
-		final BootstrapEndpoint bootstrapEndpoint = new BootstrapEndpoint(Collections.singletonMap(ENDPOINT, endpointName));
-		request.setPayload(bootstrapEndpoint.toString());
+		ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newPost();
+		BootstrapEndpoint bootstrapEndpoint = new BootstrapEndpoint(Collections.singletonMap(ENDPOINT, endpointName));
+		request.setURI(bootstrapEndpoint.toString());
+		
 		request.addMessageObserver(new MessageObserver() {
-
+			
 			@Override
 			public void onTimeout() {
 				// TODO Auto-generated method stub
 				callback.onFailure(OperationResponse.failure(ResponseCode.GATEWAY_TIMEOUT));
 			}
-
+			
 			@Override
 			public void onRetransmission() {
 				// TODO Auto-generated method stub
-
+				
 			}
-
+			
 			@Override
-			public void onResponse(final Response response) {
+			public void onResponse(Response response) {
 				callback.onSuccess(OperationResponse.of(response.getCode()));
 			}
-
+			
 			@Override
 			public void onReject() {
 				// TODO Auto-generated method stub
 				callback.onFailure(OperationResponse.failure(ResponseCode.BAD_GATEWAY));
 			}
-
+			
 			@Override
 			public void onCancel() {
 				// TODO Auto-generated method stub
 				callback.onFailure(OperationResponse.failure(ResponseCode.BAD_GATEWAY));
 			}
-
+			
 			@Override
 			public void onAcknowledgement() {
 				// TODO Auto-generated method stub
 			}
 		});
-
+		
 		checkStarted(endpoint);
 		endpoint.sendRequest(request);
 	}
-
-	private static void checkStarted(final CoAPEndpoint endpoint) {
+	
+	private static void checkStarted(CoAPEndpoint endpoint) {
 		if(!endpoint.isStarted()) {
 			try {
 				endpoint.start();
-			} catch (final IOException e) {
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}

@@ -4,6 +4,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import leshan.client.lwm2m.BootstrapMessageDeliverer;
+import leshan.client.lwm2m.OperationResponseCode;
 import leshan.client.lwm2m.ResponseMatcher;
 import leshan.client.lwm2m.response.OperationResponse;
 
@@ -50,7 +51,7 @@ public class BootstrapMessageDelivererTest {
 		deliverRequest();
 
 		verifyResourceWrite();
-		verifyResponse(ResponseCode.CHANGED);
+		verifyResponse(OperationResponseCode.CHANGED, "\"Write\" operation is completed successfully".getBytes());
 	}
 
 	@Test
@@ -59,7 +60,7 @@ public class BootstrapMessageDelivererTest {
 
 		deliverRequest();
 
-		verifyResponse(ResponseCode.BAD_REQUEST);
+		verifyResponse(OperationResponseCode.BAD_REQUEST, "￼The format of data to be written is different".getBytes());
 	}
 
 	@Test
@@ -71,7 +72,7 @@ public class BootstrapMessageDelivererTest {
 		deliverRequest();
 
 		verifyResourceWrite();
-		verifyResponse(ResponseCode.INTERNAL_SERVER_ERROR);
+		verifyResponse(OperationResponseCode.INTERNAL_SERVER_ERROR, null);
 	}
 
 	@Test
@@ -83,7 +84,7 @@ public class BootstrapMessageDelivererTest {
 		deliverRequest();
 
 		verifyResourceWrite();
-		verifyResponse(ResponseCode.INTERNAL_SERVER_ERROR);
+		verifyResponse(OperationResponseCode.INTERNAL_SERVER_ERROR, null);
 	}
 
 	@Test
@@ -94,7 +95,7 @@ public class BootstrapMessageDelivererTest {
 	public void cannotDeliverResponse() {
 		initializeResourceExchange(Code.PUT);
 
-		deliverResponse(ResponseCode.CHANGED);
+		deliverResponse(OperationResponseCode.CHANGED);
 	}
 
 	private void initializeWriteWithResponse(final ResponseCode responseCode) {
@@ -127,13 +128,13 @@ public class BootstrapMessageDelivererTest {
 		deliverer.deliverRequest(exchange);
 	}
 
-	private void deliverResponse(final ResponseCode responseCode) {
+	private void deliverResponse(final OperationResponseCode leshanResponseCode) {
 		final BootstrapMessageDeliverer deliverer = new BootstrapMessageDeliverer(downlink);
-		deliverer.deliverResponse(exchange, new Response(responseCode));
+		deliverer.deliverResponse(exchange, new Response(ResponseCode.valueOf(leshanResponseCode.getValue())));
 	}
 
-	private void verifyResponse(final ResponseCode responseCode) {
-		verify(exchange).sendResponse(Matchers.argThat(new ResponseMatcher(responseCode, null)));
+	private void verifyResponse(final OperationResponseCode responseCode, byte[] payload) {
+		verify(exchange).sendResponse(Matchers.argThat(new ResponseMatcher(responseCode, payload)));
 	}
 
 	private void verifyResourceWrite() {

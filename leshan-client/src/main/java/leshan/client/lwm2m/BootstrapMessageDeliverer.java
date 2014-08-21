@@ -9,6 +9,28 @@ import ch.ethz.inf.vs.californium.network.Exchange;
 import ch.ethz.inf.vs.californium.server.MessageDeliverer;
 
 public class BootstrapMessageDeliverer implements MessageDeliverer {
+	
+	public enum InterfaceTypes {
+		BOOTSTRAP,
+		REGISTRATION,
+		MANAGEMENT,
+		REPORTING;
+	}
+	
+	public enum OperationTypes {
+		CREATE,
+		DELETE,
+		DEREGISTER,
+		DISCOVER,
+		EXECUTE,
+		NOTIFY,
+		OBSERVE,
+		READ,
+		REGISTER,
+		UPDATE,
+		WRITE,
+		WRITE_ATTRIBUTES;
+	}
 
 	private final BootstrapDownlink downlink;
 
@@ -21,9 +43,13 @@ public class BootstrapMessageDeliverer implements MessageDeliverer {
 		try {
 			final ResourceSpec lwm2mUri = ResourceSpec.of(exchange.getRequest().getURI());
 			downlink.write(lwm2mUri.getObjectId(), lwm2mUri.getObjectInstanceId(), lwm2mUri.getResourceId());
-			exchange.sendResponse(new Response(ResponseCode.CHANGED));
+			Response response = new Response(ResponseCode.CHANGED);
+			response.setPayload(OperationResponseCode.generateReasonPhrase(OperationResponseCode.valueOf(response.getCode().value), InterfaceTypes.BOOTSTRAP, OperationTypes.WRITE));
+			exchange.sendResponse(response);
 		} catch (final InvalidUriException e) {
-			exchange.sendResponse(new Response(ResponseCode.BAD_REQUEST));
+			Response response = new Response(ResponseCode.BAD_REQUEST);
+			response.setPayload(OperationResponseCode.generateReasonPhrase(OperationResponseCode.valueOf(response.getCode().value), InterfaceTypes.BOOTSTRAP, OperationTypes.WRITE));
+			exchange.sendResponse(response);
 		} catch (final Exception e) {
 			exchange.sendResponse(new Response(ResponseCode.INTERNAL_SERVER_ERROR));
 		}
