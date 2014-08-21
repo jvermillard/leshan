@@ -50,6 +50,9 @@ public class RegisterUplinkTest {
 	private String expectedRequestRoot;
 	private Map<String, String> validMap;
 	private OperationResponse operationResponse;
+	private final String VALID_REQUEST_PAYLOAD = "</lwm2m>;rt=\"oma.lwm2m\", </lwm2m/1/101>, </lwm2m/1/102>, </lwm2m/2/0>, </lwm2m/2/1>, </lwm2m/2/2>, </lwm2m/3/0>,</lwm2m/4/0>,</lwm2m/5>";
+	private final String INVALID_REQUEST_PAYLOAD = "";
+	private Object actualRequestPayload;
 
 	@Before
 	public void setUp() {
@@ -71,6 +74,7 @@ public class RegisterUplinkTest {
 				final Request request = (Request) invocation.getArguments()[0];
 				actualRequest = request.getURI();
 				actualCode = request.getCode();
+				actualRequestPayload = request.getPayloadString();
 
 				final Response response = new Response(responseCode);
 				response.setPayload(OperationResponseCode.generateReasonPhrase(OperationResponseCode.valueOf(response.getCode().value), interfaceType, operationType));
@@ -86,23 +90,23 @@ public class RegisterUplinkTest {
 		return uplink;
 	}
 
-	private void sendRegisterAndGetAsyncResponse(final RegisterUplink uplink) {
-		sendRegisterAndGetAsyncResponse(uplink, new HashMap<String, String>());
+	private void sendRegisterAndGetAsyncResponse(final RegisterUplink uplink, final String payload) {
+		sendRegisterAndGetAsyncResponse(uplink, new HashMap<String, String>(), payload);
 	}
 
-	private void sendRegisterAndGetAsyncResponse(final RegisterUplink uplink, final Map<String, String> parameters) {
-		uplink.register(ENDPOINT_NAME, parameters, callback);
+	private void sendRegisterAndGetAsyncResponse(final RegisterUplink uplink, final Map<String, String> parameters, final String payload) {
+		uplink.register(ENDPOINT_NAME, parameters, payload, callback);
 
 		await().untilTrue(callback.isCalled());
 		actualResponsePayload = callback.getResponsePayload();
 	}
 
-	private void sendRegisterAndGetSyncResponse(final RegisterUplink uplink) {
-		sendRegisterAndGetSyncResponse(uplink, new HashMap<String,String>());
+	private void sendRegisterAndGetSyncResponse(final RegisterUplink uplink, final String payload) {
+		sendRegisterAndGetSyncResponse(uplink, new HashMap<String,String>(), payload);
 	}
 
-	private void sendRegisterAndGetSyncResponse(final RegisterUplink uplink, final Map<String, String> parameters) {
-		operationResponse = uplink.register(ENDPOINT_NAME, parameters, SYNC_TIMEOUT_MS);
+	private void sendRegisterAndGetSyncResponse(final RegisterUplink uplink, final Map<String, String> parameters, final String payload) {
+		operationResponse = uplink.register(ENDPOINT_NAME, parameters, payload, SYNC_TIMEOUT_MS);
 		actualResponsePayload = operationResponse.getPayload();
 	}
 
@@ -116,8 +120,9 @@ public class RegisterUplinkTest {
 	public void testAsyncGoodRegistration() {
 		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED);
 
-		sendRegisterAndGetAsyncResponse(uplink);
+		sendRegisterAndGetAsyncResponse(uplink, VALID_REQUEST_PAYLOAD);
 
+		verifyRequest(VALID_REQUEST_PAYLOAD);
 		verifyResponse("\"Register\" operation is completed successfully", expectedRequestRoot);
 	}
 
@@ -126,8 +131,9 @@ public class RegisterUplinkTest {
 	public void testAsyncBadRegistration() {
 		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.BAD_REQUEST);
 
-		sendRegisterAndGetAsyncResponse(uplink);
+		sendRegisterAndGetAsyncResponse(uplink, VALID_REQUEST_PAYLOAD);
 
+		verifyRequest(VALID_REQUEST_PAYLOAD);
 		verifyResponse("The mandatory parameter is not specified or unknown parameter is specified", expectedRequestRoot);
 	}
 
@@ -135,8 +141,9 @@ public class RegisterUplinkTest {
 	public void testSyncGoodRegistration(){
 		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED);
 
-		sendRegisterAndGetSyncResponse(uplink);
+		sendRegisterAndGetSyncResponse(uplink, VALID_REQUEST_PAYLOAD);
 
+		verifyRequest(VALID_REQUEST_PAYLOAD);
 		verifyResponse("\"Register\" operation is completed successfully", expectedRequestRoot);
 	}
 
@@ -144,8 +151,9 @@ public class RegisterUplinkTest {
 	public void testSyncBadRegistration() {
 		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.BAD_REQUEST);
 
-		sendRegisterAndGetSyncResponse(uplink);
+		sendRegisterAndGetSyncResponse(uplink, VALID_REQUEST_PAYLOAD);
 
+		verifyRequest(VALID_REQUEST_PAYLOAD);
 		verifyResponse("The mandatory parameter is not specified or unknown parameter is specified", expectedRequestRoot);
 	}
 
@@ -156,7 +164,7 @@ public class RegisterUplinkTest {
 		boolean noPayload = false;
 
 		try{
-			sendRegisterAndGetSyncResponse(uplink, null);
+			sendRegisterAndGetSyncResponse(uplink, null, INVALID_REQUEST_PAYLOAD);
 		}
 		catch(final UnsupportedOperationException uoe){
 			noPayload = true;
@@ -177,7 +185,7 @@ public class RegisterUplinkTest {
 		boolean noPayload = false;
 
 		try{
-			sendRegisterAndGetSyncResponse(uplink, invalidSmsMap);
+			sendRegisterAndGetSyncResponse(uplink, invalidSmsMap, INVALID_REQUEST_PAYLOAD);
 		}
 		catch(final UnsupportedOperationException uoe){
 			noPayload = true;
@@ -198,7 +206,7 @@ public class RegisterUplinkTest {
 		boolean noPayload = false;
 
 		try{
-			sendRegisterAndGetSyncResponse(uplink, invalidSmsMap);
+			sendRegisterAndGetSyncResponse(uplink, invalidSmsMap, INVALID_REQUEST_PAYLOAD);
 		}
 		catch(final UnsupportedOperationException uoe){
 			noPayload = true;
@@ -219,7 +227,7 @@ public class RegisterUplinkTest {
 		boolean noPayload = false;
 
 		try{
-			sendRegisterAndGetSyncResponse(uplink, invalidQueueMap);
+			sendRegisterAndGetSyncResponse(uplink, invalidQueueMap, INVALID_REQUEST_PAYLOAD);
 		}
 		catch(final UnsupportedOperationException uoe){
 			noPayload = true;
@@ -241,7 +249,7 @@ public class RegisterUplinkTest {
 		boolean noPayload = false;
 
 		try{
-			sendRegisterAndGetSyncResponse(uplink, invalidIllegalMap);
+			sendRegisterAndGetSyncResponse(uplink, invalidIllegalMap, INVALID_REQUEST_PAYLOAD);
 		}
 		catch(final UnsupportedOperationException uoe){
 			noPayload = true;
@@ -258,8 +266,9 @@ public class RegisterUplinkTest {
 
 		final String validQuery = leshan.client.lwm2m.Request.toQueryStringMap(validMap);
 
-		sendRegisterAndGetSyncResponse(uplink, validMap);
+		sendRegisterAndGetSyncResponse(uplink, validMap, VALID_REQUEST_PAYLOAD);
 
+		verifyRequest(VALID_REQUEST_PAYLOAD);
 		verifyResponse("\"Register\" operation is completed successfully", expectedRequestRoot + "&" + validQuery);
 	}
 
@@ -267,8 +276,9 @@ public class RegisterUplinkTest {
 	public void testAsyncGoodParametersRegistration() {
 		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED);
 
-		sendRegisterAndGetAsyncResponse(uplink, validMap);
+		sendRegisterAndGetAsyncResponse(uplink, validMap, VALID_REQUEST_PAYLOAD);
 
+		verifyRequest(VALID_REQUEST_PAYLOAD);
 		verifyResponse("\"Register\" operation is completed successfully", expectedRequestRoot);
 	}
 
@@ -280,11 +290,10 @@ public class RegisterUplinkTest {
 
 		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED);
 
-
 		boolean noPayload = false;
 
 		try{
-			sendRegisterAndGetAsyncResponse(uplink, invalidIllegalMap);
+			sendRegisterAndGetAsyncResponse(uplink, invalidIllegalMap, VALID_REQUEST_PAYLOAD);
 		}
 		catch(final UnsupportedOperationException uoe){
 			noPayload = true;
@@ -301,10 +310,34 @@ public class RegisterUplinkTest {
 
 		final String validQuery = leshan.client.lwm2m.Request.toQueryStringMap(validMap);
 
-		final String validObjectPayload = "</lwm2m>;rt=\"oma.lwm2m\", </lwm2m/1/101>, </lwm2m/1/102>, </lwm2m/2/0>, </lwm2m/2/1>, </lwm2m/2/2>, </lwm2m/3/0>,</lwm2m/4/0>,</lwm2m/5>";
-		
-		sendRegisterAndGetSyncResponse(uplink, validMap, validObjectPayload);
 
+		sendRegisterAndGetSyncResponse(uplink, validMap, VALID_REQUEST_PAYLOAD);
+
+		verifyRequest(VALID_REQUEST_PAYLOAD);
 		verifyResponse("\"Register\" operation is completed successfully", expectedRequestRoot + "&" + validQuery);
+	}
+
+	private void verifyRequest(final String expectedPayload) {
+		assertEquals(expectedPayload, actualRequestPayload);
+	}
+
+	@Test
+	public void testSyncBadPayloadRegistration(){
+		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED);
+
+		final String validQuery = leshan.client.lwm2m.Request.toQueryStringMap(validMap);
+
+		boolean noPayload = false;
+
+		try{
+			sendRegisterAndGetSyncResponse(uplink, validMap, INVALID_REQUEST_PAYLOAD);
+		}
+		catch(final UnsupportedOperationException uoe){
+			noPayload = true;
+		}
+
+		assertTrue(noPayload);
+		assertFalse(callback.isSuccess());
+		assertEquals(callback.getResponseCode(), ResponseCode.BAD_REQUEST);
 	}
 }

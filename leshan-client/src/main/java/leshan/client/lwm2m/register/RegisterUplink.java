@@ -19,7 +19,7 @@ public class RegisterUplink extends Uplink{
 		this.endpoint = endpoint;
 	}
 
-	public OperationResponse register(final String endpointName, final Map<String, String> parameters, final int timeout) {
+	public OperationResponse register(final String endpointName, final Map<String, String> parameters, final String payload, final int timeout) {
 		if(parameters == null || !areParametersValid(parameters)){
 			return OperationResponse.failure(ResponseCode.BAD_REQUEST);
 		}
@@ -28,6 +28,7 @@ public class RegisterUplink extends Uplink{
 		final RegisterEndpoint bootstrapEndpoint = new RegisterEndpoint(Collections.singletonMap(ENDPOINT, endpointName));
 
 		request.setURI(bootstrapEndpoint.toString() + "&" + leshan.client.lwm2m.Request.toQueryStringMap(parameters));
+		request.setPayload(payload);
 		checkStarted(endpoint);
 		endpoint.sendRequest(request);
 
@@ -40,7 +41,7 @@ public class RegisterUplink extends Uplink{
 		}
 	}
 
-	public void register(final String endpointName, final Map<String, String> parameters, final Callback callback) {
+	public void register(final String endpointName, final Map<String, String> parameters, final String payload, final Callback callback) {
 		if(parameters == null || !areParametersValid(parameters)){
 			callback.onFailure(OperationResponse.failure(ResponseCode.BAD_REQUEST));
 			return;
@@ -49,6 +50,7 @@ public class RegisterUplink extends Uplink{
 		final ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newPost();
 		final RegisterEndpoint registerEndpoint = new RegisterEndpoint(Collections.singletonMap(ENDPOINT, endpointName));
 		request.setURI(registerEndpoint.toString());
+		request.setPayload(payload);
 
 		request.addMessageObserver(new MessageObserver() {
 
