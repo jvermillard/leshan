@@ -110,7 +110,7 @@ var addObject = function(tree, objectDefs, objectId, attributes) {
         // manage unknown object
         if (object == undefined) {
             object = {
-                name : objectId,
+                name : "Object " + objectId,
                 id : objectId,
                 instancetype : "multiple",
                 resourcedefs : []
@@ -125,7 +125,7 @@ var addObject = function(tree, objectDefs, objectId, attributes) {
     }
     if (attributes != undefined) {
         if (attributes.title != undefined) {
-            object.name = title;
+            object.name = attributes.title;
         } else if (attributes.rt != undefined) {
             object.name = attributes.rt;
         }
@@ -158,7 +158,7 @@ var addInstance = function(object, instanceId, attributes) {
     }
     if (attributes != undefined) {
         if (attributes.title != undefined) {
-            instance.name = title;
+            instance.name = attributes.title;
         } else if (attributes.rt != undefined) {
             instance.name = attributes.rt;
         }
@@ -176,7 +176,7 @@ var addResource = function(object, instance, resourceId, attributes) {
     if (resource == undefined) {
         // create resource definition
         var resourcedef = {
-            name : resourceId,
+            name : "Resource " + resourceId,
             id : resourceId,
             operations : "RW"
         };
@@ -191,7 +191,7 @@ var addResource = function(object, instance, resourceId, attributes) {
     }
     if (attributes != undefined) {
         if (attributes.title != undefined) {
-            resource.def.name = title;
+            resource.def.name = attributes.title;
         } else if (attributes.rt != undefined) {
             resource.def.name = attributes.rt;
         }
