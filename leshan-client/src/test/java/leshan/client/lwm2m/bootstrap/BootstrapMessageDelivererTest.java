@@ -3,17 +3,14 @@ package leshan.client.lwm2m.bootstrap;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.util.Arrays;
-
 import leshan.client.lwm2m.BootstrapMessageDeliverer;
+import leshan.client.lwm2m.ResponseMatcher;
 import leshan.client.lwm2m.response.OperationResponse;
 
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import ch.ethz.inf.vs.californium.coap.CoAP.Code;
@@ -27,30 +24,15 @@ import com.google.common.base.Joiner;
 @RunWith(MockitoJUnitRunner.class)
 public class BootstrapMessageDelivererTest {
 
-	private final class ResponseMatcher extends BaseMatcher<Response> {
-
-		private final ResponseCode code;
-		private final byte[] payload;
-
-		public ResponseMatcher(final ResponseCode code, final byte[] payload) {
-			this.code = code;
-			this.payload = payload;
-		}
-
-		@Override
-		public boolean matches(final Object arg0) {
-			return ((Response)arg0).getCode() == code &&
-					Arrays.equals(payload, ((Response)arg0).getPayload());
-		}
-
-		@Override
-		public void describeTo(final Description arg0) {
-		}
-	}
-
 	private static final int OBJECT_ID = 3;
 	private static final int OBJECT_INSTANCE_ID = 1;
 	private static final int RESOURCE_ID = 2;
+
+	@Mock
+	private BootstrapDownlink downlink;
+
+	@Mock
+	private Exchange exchange;
 
 	@Test
 	public void testWriteNoInstanceGoodPayload() {
@@ -62,64 +44,46 @@ public class BootstrapMessageDelivererTest {
 
 	@Test
 	public void testWriteResourceGoodPayload() {
-		final BootstrapDownlink downlink = mock(BootstrapDownlink.class);
+		initializeWriteWithResponse(ResponseCode.CHANGED);
+		initializeResourceExchange(Code.PUT);
 
-		final OperationResponse response = OperationResponse.of(ResponseCode.CHANGED);
-		when(downlink.write(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID)).thenReturn(response);
+		deliverRequest();
 
-		final Exchange exchange = createExchange(Code.PUT);
-
-		final BootstrapMessageDeliverer deliverer = new BootstrapMessageDeliverer(downlink);
-		deliverer.deliverRequest(exchange);
-
-		verify(downlink).write(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID);
-		verify(exchange).sendResponse(Matchers.argThat(new ResponseMatcher(ResponseCode.CHANGED, null)));
-	}
-
-	@Test
-	public void testWriteResourceWriteThrowsNpe() {
-		final BootstrapDownlink downlink = mock(BootstrapDownlink.class);
-
-		when(downlink.write(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID)).thenThrow(new NullPointerException("lol NPEs"));
-
-		final Exchange exchange = createExchange(Code.PUT);
-
-		final BootstrapMessageDeliverer deliverer = new BootstrapMessageDeliverer(downlink);
-		deliverer.deliverRequest(exchange);
-
-		verify(downlink).write(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID);
-		verify(exchange).sendResponse(Matchers.argThat(new ResponseMatcher(ResponseCode.INTERNAL_SERVER_ERROR, null)));
-	}
-
-	@Test
-	public void testWriteResourceWriteThrowsNfe() {
-		final BootstrapDownlink downlink = mock(BootstrapDownlink.class);
-
-		when(downlink.write(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID)).thenThrow(new NumberFormatException("lol NFEs"));
-
-		final Exchange exchange = createExchange(Code.PUT);
-
-		final BootstrapMessageDeliverer deliverer = new BootstrapMessageDeliverer(downlink);
-		deliverer.deliverRequest(exchange);
-
-		verify(downlink).write(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID);
-		verify(exchange).sendResponse(Matchers.argThat(new ResponseMatcher(ResponseCode.INTERNAL_SERVER_ERROR, null)));
+		verifyResourceWrite();
+		verifyResponse(ResponseCode.CHANGED);
 	}
 
 	@Test
 	public void testWriteToBadUri() {
-		final BootstrapDownlink downlink = mock(BootstrapDownlink.class);
-		final Request request = mock(Request.class);
-		when(request.getCode()).thenReturn(Code.PUT);
-		when(request.getURI()).thenReturn("/Nan");
+		initializeExchange(Code.PUT, "/NaN");
 
-		final Exchange exchange = mock(Exchange.class);
-		when(exchange.getRequest()).thenReturn(request);
+		deliverRequest();
 
-		final BootstrapMessageDeliverer deliverer = new BootstrapMessageDeliverer(downlink);
-		deliverer.deliverRequest(exchange);
+		verifyResponse(ResponseCode.BAD_REQUEST);
+	}
 
-		verify(exchange).sendResponse(Matchers.argThat(new ResponseMatcher(ResponseCode.BAD_REQUEST, null)));
+	@Test
+	public void testWriteResourceWriteThrowsNpe() {
+		initializeWriteWithException(new NullPointerException("lol NPEs"));
+
+		initializeResourceExchange(Code.PUT);
+
+		deliverRequest();
+
+		verifyResourceWrite();
+		verifyResponse(ResponseCode.INTERNAL_SERVER_ERROR);
+	}
+
+	@Test
+	public void testWriteResourceWriteThrowsNfe() {
+		initializeWriteWithException(new NumberFormatException("lol NFEs"));
+
+		initializeResourceExchange(Code.PUT);
+
+		deliverRequest();
+
+		verifyResourceWrite();
+		verifyResponse(ResponseCode.INTERNAL_SERVER_ERROR);
 	}
 
 	@Test
@@ -128,23 +92,52 @@ public class BootstrapMessageDelivererTest {
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void cannotDeliverResponse() {
-		final BootstrapDownlink downlink = mock(BootstrapDownlink.class);
-		final BootstrapMessageDeliverer deliverer = new BootstrapMessageDeliverer(downlink);
-		final Exchange exchange = createExchange(Code.PUT);
-		deliverer.deliverResponse(exchange, new Response(ResponseCode.CHANGED));
+		initializeResourceExchange(Code.PUT);
+
+		deliverResponse(ResponseCode.CHANGED);
 	}
 
-	private Exchange createExchange(final Code method) {
+	private void initializeWriteWithResponse(final ResponseCode responseCode) {
+		final OperationResponse response = OperationResponse.of(responseCode);
+		when(downlink.write(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID)).thenReturn(response);
+	}
+
+	private void initializeWriteWithException(final Exception exception) {
+		when(downlink.write(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID)).thenThrow(exception);
+	}
+
+	private void initializeResourceExchange(final Code method) {
+		initializeExchange(method, constructUri(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID));
+	}
+
+	private void initializeExchange(final Code method, final String uri) {
 		final Request request = mock(Request.class);
 		when(request.getCode()).thenReturn(method);
-		when(request.getURI()).thenReturn(constructUri(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID));
+		when(request.getURI()).thenReturn(uri);
 
-		final Exchange exchange = mock(Exchange.class);
 		when(exchange.getRequest()).thenReturn(request);
-		return exchange;
 	}
 
 	private static String constructUri(final int objectId, final int objectInstanceId, final int resourceId) {
 		return "/" + Joiner.on("/").skipNulls().join(objectId, objectInstanceId, resourceId);
 	}
+
+	private void deliverRequest() {
+		final BootstrapMessageDeliverer deliverer = new BootstrapMessageDeliverer(downlink);
+		deliverer.deliverRequest(exchange);
+	}
+
+	private void deliverResponse(final ResponseCode responseCode) {
+		final BootstrapMessageDeliverer deliverer = new BootstrapMessageDeliverer(downlink);
+		deliverer.deliverResponse(exchange, new Response(responseCode));
+	}
+
+	private void verifyResponse(final ResponseCode responseCode) {
+		verify(exchange).sendResponse(Matchers.argThat(new ResponseMatcher(responseCode, null)));
+	}
+
+	private void verifyResourceWrite() {
+		verify(downlink).write(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID);
+	}
+
 }
