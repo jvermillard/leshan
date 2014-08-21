@@ -108,8 +108,14 @@ public enum OperationResponseCode {
 					default: 					throwError(code, interfaceType, operationType);
 				}
 			}
-		} else {
-			// ...
+		} else if(interfaceType == InterfaceTypes.REGISTRATION){
+			if(operationType == OperationTypes.REGISTER) {
+				switch(code) {
+					case CHANGED: 		return "\"Register\" operation is completed successfully";
+					case BAD_REQUEST: 	return "The mandatory parameter is not specified or unknown parameter is specified";
+					default: 			throwError(code, interfaceType, operationType);
+				}
+			}
 		}
 		
 		throwError(code, interfaceType, operationType);

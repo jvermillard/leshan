@@ -6,13 +6,14 @@ import java.util.Collections;
 import leshan.client.lwm2m.BootstrapEndpoint;
 import leshan.client.lwm2m.Callback;
 import leshan.client.lwm2m.OperationResponseCode;
+import leshan.client.lwm2m.register.Uplink;
 import leshan.client.lwm2m.response.OperationResponse;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.coap.MessageObserver;
 import ch.ethz.inf.vs.californium.coap.Response;
 import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 
-public class BootstrapUplink {
+public class BootstrapUplink extends Uplink {
 	private static final String ENDPOINT = "ep";
 	private final CoAPEndpoint endpoint;
 	
@@ -26,7 +27,7 @@ public class BootstrapUplink {
 		request.setURI(bootstrapEndpoint.toString());
 		checkStarted(endpoint);
 		endpoint.sendRequest(request);
-		// WEEEEEEEEEEEEEEHHHHHHHHHH
+		
 		try {
 			final Response response = request.waitForResponse(timeout);
 			return OperationResponse.of(response);
@@ -83,13 +84,4 @@ public class BootstrapUplink {
 		endpoint.sendRequest(request);
 	}
 	
-	private static void checkStarted(final CoAPEndpoint endpoint) {
-		if(!endpoint.isStarted()) {
-			try {
-				endpoint.start();
-			} catch (final IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
 }
