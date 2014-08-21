@@ -51,7 +51,7 @@ public class BootstrapMessageDelivererTest {
 		deliverRequest();
 
 		verifyResourceWrite();
-		verifyResponse(OperationResponseCode.CHANGED, "\"Write\" operation is completed successfully".getBytes());
+		verifyResponse(OperationResponseCode.CHANGED, "\"Write\" operation is completed successfully");
 	}
 
 	@Test
@@ -134,7 +134,8 @@ public class BootstrapMessageDelivererTest {
 	}
 
 	private void verifyResponse(final OperationResponseCode responseCode, final String payload) {
-		verify(exchange).sendResponse(Matchers.argThat(new ResponseMatcher(responseCode, payload.getBytes())));
+		final byte[] payloadBytes = payload != null ? payload.getBytes() : null;
+		verify(exchange).sendResponse(Matchers.argThat(new ResponseMatcher(responseCode, payloadBytes)));
 	}
 
 	private void verifyResourceWrite() {
