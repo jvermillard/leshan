@@ -1,6 +1,7 @@
 package leshan.client.lwm2m;
 
 import leshan.client.lwm2m.bootstrap.BootstrapDownlink;
+import leshan.server.lwm2m.exception.InvalidUriException;
 import leshan.server.lwm2m.message.ResourceSpec;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.coap.Response;
@@ -21,7 +22,7 @@ public class BootstrapMessageDeliverer implements MessageDeliverer {
 			final ResourceSpec lwm2mUri = ResourceSpec.of(exchange.getRequest().getURI());
 			downlink.write(lwm2mUri.getObjectId(), lwm2mUri.getObjectInstanceId(), lwm2mUri.getResourceId());
 			exchange.sendResponse(new Response(ResponseCode.CHANGED));
-		} catch (final NumberFormatException e) {
+		} catch (final InvalidUriException e) {
 			exchange.sendResponse(new Response(ResponseCode.BAD_REQUEST));
 		} catch (final Exception e) {
 			exchange.sendResponse(new Response(ResponseCode.INTERNAL_SERVER_ERROR));

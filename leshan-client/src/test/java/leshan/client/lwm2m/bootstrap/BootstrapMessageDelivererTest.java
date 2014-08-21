@@ -5,7 +5,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
-import java.util.UUID;
 
 import leshan.client.lwm2m.BootstrapMessageDeliverer;
 import leshan.client.lwm2m.response.OperationResponse;
@@ -53,10 +52,6 @@ public class BootstrapMessageDelivererTest {
 	private static final int OBJECT_INSTANCE_ID = 1;
 	private static final int RESOURCE_ID = 2;
 
-	private static final String ENDPOINT_NAME = UUID.randomUUID().toString();
-	private String actualRequest;
-	private Code actualCode;
-
 	@Test
 	public void testWriteNoInstanceGoodPayload() {
 	}
@@ -86,6 +81,21 @@ public class BootstrapMessageDelivererTest {
 		final BootstrapDownlink downlink = mock(BootstrapDownlink.class);
 
 		when(downlink.write(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID)).thenThrow(new NullPointerException("lol NPEs"));
+
+		final Exchange exchange = createExchange(Code.PUT);
+
+		final BootstrapMessageDeliverer deliverer = new BootstrapMessageDeliverer(downlink);
+		deliverer.deliverRequest(exchange);
+
+		verify(downlink).write(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID);
+		verify(exchange).sendResponse(Matchers.argThat(new ResponseMatcher(ResponseCode.INTERNAL_SERVER_ERROR, null)));
+	}
+
+	@Test
+	public void testWriteResourceWriteThrowsNfe() {
+		final BootstrapDownlink downlink = mock(BootstrapDownlink.class);
+
+		when(downlink.write(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID)).thenThrow(new NumberFormatException("lol NFEs"));
 
 		final Exchange exchange = createExchange(Code.PUT);
 
