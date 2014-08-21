@@ -7,9 +7,10 @@ public abstract class OperationResponse {
 
 	public abstract boolean isSuccess();
 	public abstract ResponseCode getResponseCode();
+	public abstract byte[] getPayload();
 
-	public static OperationResponse of(final ResponseCode responseCode) {
-		return new SuccessfulOperationResponse(responseCode);
+	public static OperationResponse of(final Response response) {
+		return new SuccessfulOperationResponse(response);
 	}
 
 	public static OperationResponse failure(final ResponseCode responseCode) {
@@ -19,8 +20,8 @@ public abstract class OperationResponse {
 	private static class SuccessfulOperationResponse extends OperationResponse {
 		private final Response response;
 
-		public SuccessfulOperationResponse(final ResponseCode responseCode) {
-			this.response = new Response(responseCode);
+		public SuccessfulOperationResponse(final Response response) {
+			this.response = response;
 		}
 
 		@Override
@@ -31,6 +32,11 @@ public abstract class OperationResponse {
 		@Override
 		public ResponseCode getResponseCode() {
 			return response.getCode();
+		}
+
+		@Override
+		public byte[] getPayload() {
+			return response.getPayload();
 		}
 
 	}
@@ -52,5 +58,11 @@ public abstract class OperationResponse {
 			return responseCode;
 		}
 
+		@Override
+		public byte[] getPayload() {
+			throw new UnsupportedOperationException("Failed Operations Do Not Have Payloads... for NOW...");
+		}
+
 	}
+
 }

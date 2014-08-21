@@ -45,7 +45,7 @@ public class BootstrapMessageDelivererTest {
 
 	@Test
 	public void testWriteResourceGoodPayload() {
-		initializeWriteWithResponse(ResponseCode.CHANGED);
+		initializeWriteWithResponse(new Response(ResponseCode.CHANGED));
 		initializeResourceExchange(Code.PUT);
 
 		deliverRequest();
@@ -98,9 +98,9 @@ public class BootstrapMessageDelivererTest {
 		deliverResponse(OperationResponseCode.CHANGED);
 	}
 
-	private void initializeWriteWithResponse(final ResponseCode responseCode) {
-		final OperationResponse response = OperationResponse.of(responseCode);
-		when(downlink.write(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID)).thenReturn(response);
+	private void initializeWriteWithResponse(final Response response) {
+		final OperationResponse operationResponse = OperationResponse.of(response);
+		when(downlink.write(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID)).thenReturn(operationResponse);
 	}
 
 	private void initializeWriteWithException(final Exception exception) {
@@ -133,7 +133,7 @@ public class BootstrapMessageDelivererTest {
 		deliverer.deliverResponse(exchange, new Response(ResponseCode.valueOf(leshanResponseCode.getValue())));
 	}
 
-	private void verifyResponse(final OperationResponseCode responseCode, byte[] payload) {
+	private void verifyResponse(final OperationResponseCode responseCode, final byte[] payload) {
 		verify(exchange).sendResponse(Matchers.argThat(new ResponseMatcher(responseCode, payload)));
 	}
 

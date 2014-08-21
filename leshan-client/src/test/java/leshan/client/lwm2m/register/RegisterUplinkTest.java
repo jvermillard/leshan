@@ -7,7 +7,7 @@ import static org.mockito.Mockito.mock;
 
 import java.util.UUID;
 
-import leshan.client.lwm2m.QuietCallback;
+import leshan.client.lwm2m.MockedCallback;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -46,7 +46,7 @@ public class RegisterUplinkTest {
 
 		final RegisterUplink uplink = new RegisterUplink(endpoint);
 
-		uplink.register(ENDPOINT_NAME, new QuietCallback());
+		uplink.register(ENDPOINT_NAME, new MockedCallback());
 
 		final String expectedRequest = "/rd?ep=" + ENDPOINT_NAME;
 
@@ -75,7 +75,7 @@ public class RegisterUplinkTest {
 
 		final String location = "/rd/ " + ENDPOINT_NAME;
 
-		uplink.update(location, new QuietCallback());
+		uplink.update(location, new MockedCallback());
 
 		final String expectedRequest = location;
 
@@ -103,7 +103,7 @@ public class RegisterUplinkTest {
 
 		final String location = "/rd/ " + ENDPOINT_NAME;
 
-		uplink.delete(location, new QuietCallback());
+		uplink.delete(location, new MockedCallback());
 
 		final String expectedRequest = "/rd?ep=" + ENDPOINT_NAME;
 

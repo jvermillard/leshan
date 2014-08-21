@@ -43,7 +43,7 @@ public enum OperationResponseCode {
 	 *
 	 * @param value the integer value
 	 */
-	private OperationResponseCode(ResponseCode responseCode) {
+	private OperationResponseCode(final ResponseCode responseCode) {
 		this.responseCode = responseCode;
 	}
 	
@@ -63,10 +63,10 @@ public enum OperationResponseCode {
 	 * @return the response code
 	 * @throws IllegalArgumentException if integer value is not recognized
 	 */
-	public static OperationResponseCode valueOf(int value) {
-		ResponseCode responseCode = ResponseCode.valueOf(value);
+	public static OperationResponseCode valueOf(final int value) {
+		final ResponseCode responseCode = ResponseCode.valueOf(value);
 		
-		for (OperationResponseCode code : OperationResponseCode.values()) {
+		for (final OperationResponseCode code : OperationResponseCode.values()) {
 			if (code.responseCode == responseCode) {
 				return code;
 			}
@@ -75,24 +75,30 @@ public enum OperationResponseCode {
 		throw new IllegalArgumentException("Unknown Leshan response code " + value);
 	}
 
-	public static boolean isSuccess(OperationResponseCode code) {
+	public static boolean isSuccess(final OperationResponseCode code) {
 		return ResponseCode.isSuccess(ResponseCode.valueOf(code.responseCode.value));
 	}
 	
-	public static boolean isClientError(OperationResponseCode code) {
+	public static boolean isClientError(final OperationResponseCode code) {
 		return ResponseCode.isClientError(ResponseCode.valueOf(code.responseCode.value));
 	}
 	
-	public static boolean isServerError(OperationResponseCode code) {
+	public static boolean isServerError(final OperationResponseCode code) {
 		return ResponseCode.isServerError(ResponseCode.valueOf(code.responseCode.value));
 	}
 
-	public static String generateReasonPhrase(OperationResponseCode code, InterfaceTypes interfaceType, OperationTypes operationType) {
+	public static String generateReasonPhrase(final OperationResponseCode code, final InterfaceTypes interfaceType, final OperationTypes operationType) {
 		if(interfaceType == InterfaceTypes.BOOTSTRAP) {
 			if(operationType == OperationTypes.WRITE) {
 				switch(code) {
 					case CHANGED: 		return "\"Write\" operation is completed successfully";
 					case BAD_REQUEST: 	return "￼The format of data to be written is different";
+					default: 			throwError(code, interfaceType, operationType);
+				}
+			}else if(operationType == OperationTypes.REGISTER) {
+				switch(code){
+					case CHANGED: 		return "Request Bootstrap is completed successfully";
+					case BAD_REQUEST: 	return "Unknown Endpoint Client Name";
 					default: 			throwError(code, interfaceType, operationType);
 				}
 			} else {
@@ -102,10 +108,12 @@ public enum OperationResponseCode {
 			// ...
 		}
 		
-		return "";
+		throwError(code, interfaceType, operationType);
+		//TODO remove this in the future
+		return null;
 	}
 	
-	private static void throwError(OperationResponseCode code, InterfaceTypes interfaceType, OperationTypes operationType) {
+	private static void throwError(final OperationResponseCode code, final InterfaceTypes interfaceType, final OperationTypes operationType) {
 		throw new IllegalArgumentException("Unsupported response for " + code + "; " + interfaceType + "; " + operationType);
 	}
 }

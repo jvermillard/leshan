@@ -5,6 +5,7 @@ import java.util.Collections;
 
 import leshan.client.lwm2m.BootstrapEndpoint;
 import leshan.client.lwm2m.Callback;
+import leshan.client.lwm2m.OperationResponseCode;
 import leshan.client.lwm2m.response.OperationResponse;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.coap.MessageObserver;
@@ -15,21 +16,21 @@ public class BootstrapUplink {
 	private static final String ENDPOINT = "ep";
 	private final CoAPEndpoint endpoint;
 	
-	public BootstrapUplink(CoAPEndpoint endpoint) {
+	public BootstrapUplink(final CoAPEndpoint endpoint) {
 		this.endpoint = endpoint;
 	}
 	
 	public OperationResponse bootstrap(final String endpointName, final long timeout) {
-		ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newPost();
-		BootstrapEndpoint bootstrapEndpoint = new BootstrapEndpoint(Collections.singletonMap(ENDPOINT, endpointName));
+		final ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newPost();
+		final BootstrapEndpoint bootstrapEndpoint = new BootstrapEndpoint(Collections.singletonMap(ENDPOINT, endpointName));
 		request.setPayload(bootstrapEndpoint.toString());
 		checkStarted(endpoint);
 		endpoint.sendRequest(request);
 		// WEEEEEEEEEEEEEEHHHHHHHHHH
 		try {
-			Response response = request.waitForResponse(timeout);
-			return OperationResponse.of(response.getCode());
-		} catch (InterruptedException e) {
+			final Response response = request.waitForResponse(timeout);
+			return OperationResponse.of(response);
+		} catch (final InterruptedException e) {
 			// TODO: Am I an internal server error?
 			return OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR);
 		}
@@ -37,8 +38,8 @@ public class BootstrapUplink {
 	}
 	
 	public void bootstrap(final String endpointName, final Callback callback) {
-		ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newPost();
-		BootstrapEndpoint bootstrapEndpoint = new BootstrapEndpoint(Collections.singletonMap(ENDPOINT, endpointName));
+		final ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newPost();
+		final BootstrapEndpoint bootstrapEndpoint = new BootstrapEndpoint(Collections.singletonMap(ENDPOINT, endpointName));
 		request.setURI(bootstrapEndpoint.toString());
 		
 		request.addMessageObserver(new MessageObserver() {
@@ -56,8 +57,8 @@ public class BootstrapUplink {
 			}
 			
 			@Override
-			public void onResponse(Response response) {
-				callback.onSuccess(OperationResponse.of(response.getCode()));
+			public void onResponse(final Response response) {
+				callback.onSuccess(OperationResponse.of(response));
 			}
 			
 			@Override
@@ -82,11 +83,11 @@ public class BootstrapUplink {
 		endpoint.sendRequest(request);
 	}
 	
-	private static void checkStarted(CoAPEndpoint endpoint) {
+	private static void checkStarted(final CoAPEndpoint endpoint) {
 		if(!endpoint.isStarted()) {
 			try {
 				endpoint.start();
-			} catch (IOException e) {
+			} catch (final IOException e) {
 				e.printStackTrace();
 			}
 		}
