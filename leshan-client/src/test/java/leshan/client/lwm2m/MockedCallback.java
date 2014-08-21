@@ -2,6 +2,7 @@ package leshan.client.lwm2m;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.coap.Message;
 import leshan.client.lwm2m.response.OperationResponse;
 
@@ -33,5 +34,13 @@ public class MockedCallback implements Callback {
 
 	public byte[] getResponsePayload() {
 		return response.getPayload();
+	}
+	
+	public ResponseCode getResponseCode(){
+		return response.getResponseCode();
+	}
+	
+	public boolean isSuccess(){
+		return response.isSuccess();
 	}
 }

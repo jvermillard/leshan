@@ -2,6 +2,7 @@ package leshan.client.lwm2m.register;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Map;
 
 import ch.ethz.inf.vs.californium.coap.MessageObserver;
 import ch.ethz.inf.vs.californium.coap.Response;
@@ -17,14 +18,19 @@ public class RegisterUplink extends Uplink{
 	public RegisterUplink(final CoAPEndpoint endpoint) {
 		this.endpoint = endpoint;
 	}
-	
-	public OperationResponse register(final String endpointName, final int timeout) {
+
+	public OperationResponse register(final String endpointName, final Map<String, String> parameters, final int timeout) {
+		if(parameters == null || !areParametersValid(parameters)){
+			return OperationResponse.failure(ResponseCode.BAD_REQUEST);
+		}
+
 		final ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newPost();
 		final RegisterEndpoint bootstrapEndpoint = new RegisterEndpoint(Collections.singletonMap(ENDPOINT, endpointName));
-		request.setURI(bootstrapEndpoint.toString());
+
+		request.setURI(bootstrapEndpoint.toString() + "&" + leshan.client.lwm2m.Request.toQueryStringMap(parameters));
 		checkStarted(endpoint);
 		endpoint.sendRequest(request);
-		
+
 		try {
 			final Response response = request.waitForResponse(timeout);
 			return OperationResponse.of(response);
@@ -33,58 +39,63 @@ public class RegisterUplink extends Uplink{
 			return OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
-	public void register(final String endpointName, final Callback callback) {
+
+	public void register(final String endpointName, final Map<String, String> parameters, final Callback callback) {
+		if(parameters == null || !areParametersValid(parameters)){
+			callback.onFailure(OperationResponse.failure(ResponseCode.BAD_REQUEST));
+			return;
+		}
+		
 		final ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newPost();
 		final RegisterEndpoint registerEndpoint = new RegisterEndpoint(Collections.singletonMap(ENDPOINT, endpointName));
 		request.setURI(registerEndpoint.toString());
-		
+
 		request.addMessageObserver(new MessageObserver() {
-			
+
 			@Override
 			public void onTimeout() {
 				// TODO Auto-generated method stub
 				callback.onFailure(OperationResponse.failure(ResponseCode.GATEWAY_TIMEOUT));
 			}
-			
+
 			@Override
 			public void onRetransmission() {
 				// TODO Auto-generated method stub
-				
+
 			}
-			
+
 			@Override
 			public void onResponse(final Response response) {
 				callback.onSuccess(OperationResponse.of(response));
 			}
-			
+
 			@Override
 			public void onReject() {
 				// TODO Auto-generated method stub
 				callback.onFailure(OperationResponse.failure(ResponseCode.BAD_GATEWAY));
 			}
-			
+
 			@Override
 			public void onCancel() {
 				// TODO Auto-generated method stub
 				callback.onFailure(OperationResponse.failure(ResponseCode.BAD_GATEWAY));
 			}
-			
+
 			@Override
 			public void onAcknowledgement() {
 				// TODO Auto-generated method stub
 			}
 		});
-		
+
 		checkStarted(endpoint);
 		endpoint.sendRequest(request);
 	}
-	
+
 	public void delete(final String location, final Callback callback) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	public OperationResponse update(final String location, final Callback callback) {
 		return null;
 	}
@@ -96,4 +107,33 @@ public class RegisterUplink extends Uplink{
 		return null;
 	}
 
+	private boolean areParametersValid(final Map<String, String> parameters) {
+		for(final Map.Entry<String, String> p : parameters.entrySet()){
+			switch(p.getKey()){
+			case "lt" :
+				break;
+			case "lwm2m" :
+				break;
+			case "sms" :
+				return false;
+			case "b" :
+				if(!isBindingValid(p.getValue())){
+					return false;
+				}
+				break;
+			default:
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private boolean isBindingValid(final String value) {
+		if(value.equals("U")){
+			return true;
+		}
+		
+		return false;
+	}
 }
