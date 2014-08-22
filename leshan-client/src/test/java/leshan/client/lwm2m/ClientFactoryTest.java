@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 import leshan.client.lwm2m.bootstrap.BootstrapDownlink;
 import leshan.client.lwm2m.bootstrap.BootstrapUplink;
 import leshan.client.lwm2m.factory.ClientFactory;
+import leshan.client.lwm2m.response.Callback;
 import leshan.client.lwm2m.response.OperationResponse;
 
 import org.junit.Before;

@@ -9,11 +9,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import leshan.client.lwm2m.MockedCallback;
-import leshan.client.lwm2m.OperationResponseCode;
-import leshan.client.lwm2m.BootstrapMessageDeliverer.InterfaceTypes;
-import leshan.client.lwm2m.BootstrapMessageDeliverer.OperationTypes;
+import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.InterfaceTypes;
+import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.OperationTypes;
+import leshan.client.lwm2m.response.MockedCallback;
 import leshan.client.lwm2m.response.OperationResponse;
+import leshan.client.lwm2m.response.OperationResponseCode;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -115,7 +115,7 @@ public class UpdateUplinkTest {
 	@Test
 	public void testGoodSyncUpdate() {
 		final Map<String, String> validMap = generateValidParameters();
-		final String validQuery = leshan.client.lwm2m.Request.toQueryStringMap(validMap);
+		final String validQuery = leshan.client.lwm2m.request.Request.toQueryStringMap(validMap);
 
 		expectedRequestLocation = "coap://localhost/rd/" + ENDPOINT_LOCATION + "&" + validQuery;
 
@@ -129,7 +129,7 @@ public class UpdateUplinkTest {
 	@Test
 	public void testGoodSyncWithPayloadUpdate() {
 		final Map<String, String> validMap = generateValidParameters();
-		final String validQuery = leshan.client.lwm2m.Request.toQueryStringMap(validMap);
+		final String validQuery = leshan.client.lwm2m.request.Request.toQueryStringMap(validMap);
 
 		expectedRequestLocation = "coap://localhost/rd/" + ENDPOINT_LOCATION + "&" + validQuery;
 
@@ -146,7 +146,7 @@ public class UpdateUplinkTest {
 
 		final Map<String, String> invalidSmsMap = new HashMap<String, String>();
 		invalidSmsMap.put("sms", UUID.randomUUID().toString());
-		final String validQuery = leshan.client.lwm2m.Request.toQueryStringMap(invalidSmsMap);
+		final String validQuery = leshan.client.lwm2m.request.Request.toQueryStringMap(invalidSmsMap);
 
 		final OperationResponse response = uplink.update(ENDPOINT_LOCATION, invalidSmsMap, null, SYNC_TIMEOUT_MS);
 
@@ -158,7 +158,7 @@ public class UpdateUplinkTest {
 		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.BAD_REQUEST);
 
 		final Map<String, String> emptyMap = new HashMap<String, String>();
-		final String validQuery = leshan.client.lwm2m.Request.toQueryStringMap(emptyMap);
+		final String validQuery = leshan.client.lwm2m.request.Request.toQueryStringMap(emptyMap);
 
 		final OperationResponse response = uplink.update(ENDPOINT_LOCATION, emptyMap, null, SYNC_TIMEOUT_MS);
 
@@ -168,7 +168,7 @@ public class UpdateUplinkTest {
 	@Test
 	public void testGoodAsyncWithPayloadUpdate() {
 		final Map<String, String> validMap = generateValidParameters();
-		final String validQuery = leshan.client.lwm2m.Request.toQueryStringMap(validMap);
+		final String validQuery = leshan.client.lwm2m.request.Request.toQueryStringMap(validMap);
 		
 		expectedRequestLocation = "coap://localhost/rd/" + ENDPOINT_LOCATION + "&" + validQuery;
 

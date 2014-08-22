@@ -3,9 +3,9 @@ package leshan.client.lwm2m.manage;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import leshan.client.lwm2m.OperationResponseCode;
-import leshan.client.lwm2m.ResponseMatcher;
 import leshan.client.lwm2m.response.OperationResponse;
+import leshan.client.lwm2m.response.OperationResponseCode;
+import leshan.client.lwm2m.response.ResponseMatcher;
 
 import org.junit.Before;
 import org.junit.Test;

@@ -1,6 +1,6 @@
-package leshan.client.lwm2m;
+package leshan.client.lwm2m.bootstrap;
 
-import leshan.client.lwm2m.bootstrap.BootstrapDownlink;
+import leshan.client.lwm2m.response.OperationResponseCode;
 import leshan.server.lwm2m.exception.InvalidUriException;
 import leshan.server.lwm2m.message.ResourceSpec;
 import ch.ethz.inf.vs.californium.coap.CoAP.Code;

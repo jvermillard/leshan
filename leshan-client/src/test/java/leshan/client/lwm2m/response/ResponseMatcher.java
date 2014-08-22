@@ -1,6 +1,8 @@
-package leshan.client.lwm2m;
+package leshan.client.lwm2m.response;
 
 import java.util.Arrays;
+
+import leshan.client.lwm2m.response.OperationResponseCode;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;

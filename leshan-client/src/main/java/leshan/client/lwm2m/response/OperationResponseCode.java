@@ -1,7 +1,7 @@
-package leshan.client.lwm2m;
+package leshan.client.lwm2m.response;
 
-import leshan.client.lwm2m.BootstrapMessageDeliverer.InterfaceTypes;
-import leshan.client.lwm2m.BootstrapMessageDeliverer.OperationTypes;
+import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.InterfaceTypes;
+import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.OperationTypes;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 
 // TODO: Rename me to ResponseCode after CaliforniumResponseCode is purged from client visible layer

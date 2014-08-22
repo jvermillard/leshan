@@ -1,6 +1,5 @@
-package leshan.client.lwm2m;
+package leshan.client.lwm2m.response;
 
-import leshan.client.lwm2m.response.OperationResponse;
 
 public interface Callback {
 	public void onSuccess(OperationResponse response);

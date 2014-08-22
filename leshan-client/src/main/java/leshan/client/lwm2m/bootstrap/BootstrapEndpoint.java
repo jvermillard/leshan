@@ -1,7 +1,9 @@
-package leshan.client.lwm2m;
+package leshan.client.lwm2m.bootstrap;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import leshan.client.lwm2m.request.Request;
 
 public class BootstrapEndpoint {
 	private final Map<String, String> queryString;

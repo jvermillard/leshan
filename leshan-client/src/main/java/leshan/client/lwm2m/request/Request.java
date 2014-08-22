@@ -1,4 +1,4 @@
-package leshan.client.lwm2m;
+package leshan.client.lwm2m.request;
 
 import java.util.Map;
 

@@ -10,7 +10,8 @@ import ch.ethz.inf.vs.californium.coap.Request;
 import ch.ethz.inf.vs.californium.coap.Response;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
-import leshan.client.lwm2m.Callback;
+import leshan.client.lwm2m.Uplink;
+import leshan.client.lwm2m.response.Callback;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.util.LinkFormatUtils;
 
@@ -32,9 +33,9 @@ public class RegisterUplink extends Uplink{
 		}
 
 		final ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newPost();
-		final RegisterEndpoint bootstrapEndpoint = new RegisterEndpoint(Collections.singletonMap(ENDPOINT, endpointName));
+		final RegisterEndpoint registerEndpoint = new RegisterEndpoint(Collections.singletonMap(ENDPOINT, endpointName));
 
-		request.setURI(bootstrapEndpoint.toString() + "&" + leshan.client.lwm2m.Request.toQueryStringMap(parameters));
+		request.setURI(registerEndpoint.toString() + "&" + leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
 		request.setPayload(payload);
 		
 		return sendSyncRequest(timeout, request);
@@ -77,7 +78,7 @@ public class RegisterUplink extends Uplink{
 		
 		final Request request = Request.newPut();
 		final RegisteredEndpoint registerEndpoint = new RegisteredEndpoint(endpointLocation);
-		request.setURI(registerEndpoint.toString() + "&" + leshan.client.lwm2m.Request.toQueryStringMap(parameters));
+		request.setURI(registerEndpoint.toString() + "&" + leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
 		if(payload != null){
 			request.setPayload(payload);
 		}
@@ -94,7 +95,7 @@ public class RegisterUplink extends Uplink{
 		
 		final Request request = Request.newPut();
 		final RegisteredEndpoint registerEndpoint = new RegisteredEndpoint(endpointLocation);
-		request.setURI(registerEndpoint.toString() + "&" + leshan.client.lwm2m.Request.toQueryStringMap(parameters));
+		request.setURI(registerEndpoint.toString() + "&" + leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
 		if(payload != null){
 			request.setPayload(payload);
 		}

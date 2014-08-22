@@ -4,15 +4,16 @@ import static com.jayway.awaitility.Awaitility.await;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import leshan.client.lwm2m.MockedCallback;
-import leshan.client.lwm2m.OperationResponseCode;
-import leshan.client.lwm2m.BootstrapMessageDeliverer.InterfaceTypes;
-import leshan.client.lwm2m.BootstrapMessageDeliverer.OperationTypes;
+import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.InterfaceTypes;
+import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.OperationTypes;
+import leshan.client.lwm2m.response.MockedCallback;
 import leshan.client.lwm2m.response.OperationResponse;
+import leshan.client.lwm2m.response.OperationResponseCode;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -228,7 +229,7 @@ public class RegisterUplinkTest {
 	public void testSyncGoodAllParametersSyncRegistration(){
 		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED);
 
-		final String validQuery = leshan.client.lwm2m.Request.toQueryStringMap(validMap);
+		final String validQuery = leshan.client.lwm2m.request.Request.toQueryStringMap(validMap);
 
 		sendRegisterAndGetSyncResponse(uplink, validMap, VALID_REQUEST_PAYLOAD);
 
@@ -272,7 +273,7 @@ public class RegisterUplinkTest {
 	public void testSyncGoodPayloadRegistration(){
 		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED);
 
-		final String validQuery = leshan.client.lwm2m.Request.toQueryStringMap(validMap);
+		final String validQuery = leshan.client.lwm2m.request.Request.toQueryStringMap(validMap);
 
 
 		sendRegisterAndGetSyncResponse(uplink, validMap, VALID_REQUEST_PAYLOAD);

@@ -3,11 +3,10 @@ package leshan.client.lwm2m.bootstrap;
 import java.io.IOException;
 import java.util.Collections;
 
-import leshan.client.lwm2m.BootstrapEndpoint;
-import leshan.client.lwm2m.Callback;
-import leshan.client.lwm2m.OperationResponseCode;
-import leshan.client.lwm2m.register.Uplink;
+import leshan.client.lwm2m.Uplink;
+import leshan.client.lwm2m.response.Callback;
 import leshan.client.lwm2m.response.OperationResponse;
+import leshan.client.lwm2m.response.OperationResponseCode;
 import ch.ethz.inf.vs.californium.coap.MessageObserver;
 import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 

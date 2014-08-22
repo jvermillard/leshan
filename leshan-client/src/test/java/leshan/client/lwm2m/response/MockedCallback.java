@@ -1,9 +1,10 @@
-package leshan.client.lwm2m;
+package leshan.client.lwm2m.response;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.coap.Message;
+import leshan.client.lwm2m.response.Callback;
 import leshan.client.lwm2m.response.OperationResponse;
 
 public class MockedCallback implements Callback {
