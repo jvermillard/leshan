@@ -116,6 +116,14 @@ public enum OperationResponseCode {
 					default: 			throwError(code, interfaceType, operationType);
 				}
 			}
+			else if(operationType == OperationTypes.UPDATE) {
+				switch(code) {
+					case CHANGED: 		return "\"Update\" operation is completed successfully";
+					case BAD_REQUEST: 	return "The mandatory parameter is not specified or unknown parameter is specified";
+					default: 			throwError(code, interfaceType, operationType);
+				}
+			}
+			
 		}
 		
 		throwError(code, interfaceType, operationType);

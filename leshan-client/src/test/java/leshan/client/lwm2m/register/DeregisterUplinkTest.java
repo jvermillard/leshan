@@ -22,7 +22,7 @@ import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DeregisterUplinkTest {
-	private static final String ENDPOINT_NAME = UUID.randomUUID().toString();
+	private static final String ENDPOINT_LOCATION = UUID.randomUUID().toString();
 
 	@Mock
 	private CoAPEndpoint endpoint;
@@ -32,7 +32,7 @@ public class DeregisterUplinkTest {
 	
 	@Before
 	public void setUp(){
-		expectedRequestLocation = "coap://localhost/rd/" + ENDPOINT_NAME;
+		expectedRequestLocation = "coap://localhost/rd/" + ENDPOINT_LOCATION;
 	}
 
 	@Test
@@ -50,7 +50,7 @@ public class DeregisterUplinkTest {
 			}
 		}).when(endpoint).sendRequest(any(Request.class));
 		
-		final OperationResponse response = uplink.deregister(ENDPOINT_NAME);
+		final OperationResponse response = uplink.deregister(ENDPOINT_LOCATION);
 		
 		
 		verify(endpoint).stop();

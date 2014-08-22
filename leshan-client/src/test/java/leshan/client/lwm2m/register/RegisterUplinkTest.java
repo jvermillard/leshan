@@ -4,22 +4,17 @@ import static com.jayway.awaitility.Awaitility.await;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import leshan.client.lwm2m.MockedCallback;
 import leshan.client.lwm2m.OperationResponseCode;
 import leshan.client.lwm2m.BootstrapMessageDeliverer.InterfaceTypes;
 import leshan.client.lwm2m.BootstrapMessageDeliverer.OperationTypes;
-import leshan.client.lwm2m.bootstrap.BootstrapUplink;
 import leshan.client.lwm2m.response.OperationResponse;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -27,7 +22,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
-import ch.ethz.inf.vs.californium.WebLink;
 import ch.ethz.inf.vs.californium.coap.CoAP.Code;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.coap.LinkFormat;
@@ -110,7 +104,9 @@ public class RegisterUplinkTest {
 
 	private void sendRegisterAndGetSyncResponse(final RegisterUplink uplink, final Map<String, String> parameters, final String payload) {
 		operationResponse = uplink.register(ENDPOINT_NAME, parameters, LinkFormat.parse(payload), SYNC_TIMEOUT_MS);
-		actualResponsePayload = operationResponse.getPayload();
+		if(operationResponse.isSuccess()){
+			actualResponsePayload = operationResponse.getPayload();
+		}
 	}
 
 	private void verifyResponse(final String expectedResponsePayload, final String expectedRequest) {
@@ -164,16 +160,9 @@ public class RegisterUplinkTest {
 	public void testSyncBadNullParametersRegistration(){
 		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED);
 
-		boolean noPayload = false;
+		sendRegisterAndGetSyncResponse(uplink, null, INVALID_REQUEST_PAYLOAD);
 
-		try{
-			sendRegisterAndGetSyncResponse(uplink, null, INVALID_REQUEST_PAYLOAD);
-		}
-		catch(final UnsupportedOperationException uoe){
-			noPayload = true;
-		}
-
-		assertTrue(noPayload);
+		assertNull(actualResponsePayload);
 		assertFalse(operationResponse.isSuccess());
 		assertEquals(operationResponse.getResponseCode(), ResponseCode.BAD_REQUEST);
 	}
@@ -185,16 +174,9 @@ public class RegisterUplinkTest {
 
 		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED);
 
-		boolean noPayload = false;
+		sendRegisterAndGetSyncResponse(uplink, invalidSmsMap, INVALID_REQUEST_PAYLOAD);
 
-		try{
-			sendRegisterAndGetSyncResponse(uplink, invalidSmsMap, INVALID_REQUEST_PAYLOAD);
-		}
-		catch(final UnsupportedOperationException uoe){
-			noPayload = true;
-		}
-
-		assertTrue(noPayload);
+		assertNull(actualResponsePayload);
 		assertFalse(operationResponse.isSuccess());
 		assertEquals(operationResponse.getResponseCode(), ResponseCode.BAD_REQUEST);
 	}
@@ -206,16 +188,9 @@ public class RegisterUplinkTest {
 
 		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED);
 
-		boolean noPayload = false;
+		sendRegisterAndGetSyncResponse(uplink, invalidSmsMap, INVALID_REQUEST_PAYLOAD);
 
-		try{
-			sendRegisterAndGetSyncResponse(uplink, invalidSmsMap, INVALID_REQUEST_PAYLOAD);
-		}
-		catch(final UnsupportedOperationException uoe){
-			noPayload = true;
-		}
-
-		assertTrue(noPayload);
+		assertNull(actualResponsePayload);
 		assertFalse(operationResponse.isSuccess());
 		assertEquals(operationResponse.getResponseCode(), ResponseCode.BAD_REQUEST);
 	}
@@ -227,16 +202,9 @@ public class RegisterUplinkTest {
 
 		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED);
 
-		boolean noPayload = false;
+		sendRegisterAndGetSyncResponse(uplink, invalidQueueMap, INVALID_REQUEST_PAYLOAD);
 
-		try{
-			sendRegisterAndGetSyncResponse(uplink, invalidQueueMap, INVALID_REQUEST_PAYLOAD);
-		}
-		catch(final UnsupportedOperationException uoe){
-			noPayload = true;
-		}
-
-		assertTrue(noPayload);
+		assertNull(actualResponsePayload);
 		assertFalse(operationResponse.isSuccess());
 		assertEquals(operationResponse.getResponseCode(), ResponseCode.BAD_REQUEST);
 	}
@@ -249,16 +217,9 @@ public class RegisterUplinkTest {
 
 		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED);
 
-		boolean noPayload = false;
+		sendRegisterAndGetSyncResponse(uplink, invalidIllegalMap, INVALID_REQUEST_PAYLOAD);
 
-		try{
-			sendRegisterAndGetSyncResponse(uplink, invalidIllegalMap, INVALID_REQUEST_PAYLOAD);
-		}
-		catch(final UnsupportedOperationException uoe){
-			noPayload = true;
-		}
-
-		assertTrue(noPayload);
+		assertNull(actualResponsePayload);
 		assertFalse(operationResponse.isSuccess());
 		assertEquals(operationResponse.getResponseCode(), ResponseCode.BAD_REQUEST);
 	}
@@ -328,16 +289,9 @@ public class RegisterUplinkTest {
 	public void testSyncBadPayloadRegistration(){
 		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED);
 
-		boolean noPayload = false;
+		sendRegisterAndGetSyncResponse(uplink, validMap, INVALID_REQUEST_PAYLOAD);
 
-		try{
-			sendRegisterAndGetSyncResponse(uplink, validMap, INVALID_REQUEST_PAYLOAD);
-		}
-		catch(final UnsupportedOperationException uoe){
-			noPayload = true;
-		}
-
-		assertTrue(noPayload);
+		assertNull(actualResponsePayload);
 		assertFalse(operationResponse.isSuccess());
 		assertEquals(operationResponse.getResponseCode(), ResponseCode.BAD_REQUEST);
 	}
@@ -347,16 +301,9 @@ public class RegisterUplinkTest {
 	public void testSyncBadNullPayloadRegistration(){
 		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED);
 
-		boolean noPayload = false;
+		sendRegisterAndGetSyncResponse(uplink, validMap, null);
 
-		try{
-			sendRegisterAndGetSyncResponse(uplink, validMap, null);
-		}
-		catch(final UnsupportedOperationException uoe){
-			noPayload = true;
-		}
-
-		assertTrue(noPayload);
+		assertNull(actualResponsePayload);
 		assertFalse(operationResponse.isSuccess());
 		assertEquals(operationResponse.getResponseCode(), ResponseCode.BAD_REQUEST);
 	}
