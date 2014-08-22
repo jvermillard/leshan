@@ -39,22 +39,18 @@ public class ManageMessageDelivererTest {
 
 	@Test
 	public void getOnResourceCallsRead() {
-		when(downlink.read(4, 8, 15)).thenReturn(createResponse(ResponseCode.CONTENT, "hello"));
 		deliverRequestNoPayload(Code.GET, "/4/8/15");
 		verify(downlink).read(4, 8, 15);
 	}
 
-
 	@Test
 	public void getOnObjectInstanceCallsRead() {
-		when(downlink.read(4, 8)).thenReturn(createResponse(ResponseCode.CONTENT, "hello"));
 		deliverRequestNoPayload(Code.GET, "/4/8");
 		verify(downlink).read(4, 8);
 	}
 
 	@Test
 	public void getOnObjectCallsRead() {
-		when(downlink.read(4)).thenReturn(createResponse(ResponseCode.CONTENT, "hello"));
 		deliverRequestNoPayload(Code.GET, "/4");
 		verify(downlink).read(4);
 	}
@@ -74,23 +70,48 @@ public class ManageMessageDelivererTest {
 	}
 
 	@Test
-	public void getOnBadUriReturnsBadRequest() {
+	public void getOnBadUriRespondsWithBadRequest() {
 		deliverRequestNoPayload(Code.GET, "/lolz");
 		verifyResponse(OperationResponseCode.BAD_REQUEST, "Invalid URI");
 	}
 
 	@Test
-	public void getWithExceptionReturnsInternalServerError() {
+	public void getWithExceptionRespondsWithInternalServerError() {
 		when(downlink.read(4, 8, 15)).thenThrow(new NullPointerException("Lol NPEs"));
 		deliverRequestNoPayload(Code.GET, "/4/8/15");
 		verifyResponse(OperationResponseCode.INTERNAL_SERVER_ERROR, "Lol NPEs");
 	}
 
 	@Test
-	public void getThatReturnsNullReturnsInternalServerError() {
+	public void getThatReturnsNullRespondsWithInternalServerError() {
 		when(downlink.read(4, 8, 15)).thenReturn(null);
 		deliverRequestNoPayload(Code.GET, "/4/8/15");
 		verifyResponse(OperationResponseCode.INTERNAL_SERVER_ERROR, "/4/8/15 was null");
+	}
+
+	@Test
+	public void putOnResourceCallsWrite() {
+		deliverRequestWithPayload(Code.PUT, "/86/75/309", "new-value");
+		verify(downlink).write(86, 75, 309, "new-value");
+	}
+
+	@Test
+	public void putOnObjectInstanceCallsWrite() {
+		deliverRequestWithPayload(Code.PUT, "/86/75", "new-value");
+		verify(downlink).write(86, 75, "new-value");
+	}
+
+	@Test
+	public void putOnResourceRespondsWithChanged() {
+		when(downlink.write(86, 75, 309, "new-value")).thenReturn(createResponse(ResponseCode.CHANGED, "Resource has changed"));
+		deliverRequestWithPayload(Code.PUT, "/86/75/309", "new-value");
+		verifyResponse(OperationResponseCode.CHANGED, "Resource has changed");
+	}
+
+	@Test
+	public void putOnObjectRespondsWithMethodNotAllowed() {
+		deliverRequestWithPayload(Code.PUT, "/86", "new-value");
+		verifyResponse(OperationResponseCode.METHOD_NOT_ALLOWED, "Target is not allowed for \"Write\" operation");
 	}
 
 	private OperationResponse createResponse(final ResponseCode responseCode, final String payload) {
@@ -100,9 +121,18 @@ public class ManageMessageDelivererTest {
 	}
 
 	private void deliverRequestNoPayload(final Code code, final String uri) {
+		deliverRequest(code, uri, null);
+	}
+
+	private void deliverRequestWithPayload(final Code code, final String uri, final String payload) {
+		deliverRequest(code, uri, payload.getBytes());
+	}
+
+	private void deliverRequest(final Code code, final String uri, final byte[] payload) {
 		final Request request = mock(Request.class);
 		when(request.getCode()).thenReturn(code);
 		when(request.getURI()).thenReturn(uri);
+		when(request.getPayload()).thenReturn(payload);
 
 		when(exchange.getRequest()).thenReturn(request);
 		deliverer.deliverRequest(exchange);

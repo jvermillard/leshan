@@ -3,7 +3,9 @@ package leshan.client.lwm2m.manage;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.server.lwm2m.exception.InvalidUriException;
 import leshan.server.lwm2m.message.ResourceSpec;
+import ch.ethz.inf.vs.californium.coap.CoAP.Code;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
+import ch.ethz.inf.vs.californium.coap.Request;
 import ch.ethz.inf.vs.californium.coap.Response;
 import ch.ethz.inf.vs.californium.network.Exchange;
 import ch.ethz.inf.vs.californium.server.MessageDeliverer;
@@ -19,10 +21,11 @@ public class ManageMessageDeliverer implements MessageDeliverer {
 	@Override
 	public void deliverRequest(final Exchange exchange) {
 		try {
-			final String uri = exchange.getRequest().getURI();
+			final Request request = exchange.getRequest();
+			final String uri = request.getURI();
 			final ResourceSpec spec = ResourceSpec.of(uri);
 
-			final OperationResponse opResponse = getResponseFromDownlink(spec);
+			final OperationResponse opResponse = getResponseFromDownlink(request.getCode(), spec, request.getPayload());
 			if (opResponse == null) {
 				sendResponse(exchange, ResponseCode.INTERNAL_SERVER_ERROR, uri + " was null");
 			}
@@ -34,13 +37,33 @@ public class ManageMessageDeliverer implements MessageDeliverer {
 		}
 	}
 
-	private OperationResponse getResponseFromDownlink(final ResourceSpec spec) {
+	private OperationResponse getResponseFromDownlink(final Code code, final ResourceSpec spec, final byte[] payload) {
+		switch (code) {
+		case GET: return getFromDownlink(spec);
+		case PUT: return putToDownlink(spec, payload);
+		default: return null;
+		}
+	}
+
+	private OperationResponse getFromDownlink(final ResourceSpec spec) {
 		if (spec.getObjectInstanceId() == ResourceSpec.DOES_NOT_EXIST) {
 			return downlink.read(spec.getObjectId());
 		} else if (spec.getResourceId() == ResourceSpec.DOES_NOT_EXIST) {
 			return downlink.read(spec.getObjectId(), spec.getObjectInstanceId());
 		} else {
 			return downlink.read(spec.getObjectId(), spec.getObjectInstanceId(), spec.getResourceId());
+		}
+	}
+
+	private OperationResponse putToDownlink(final ResourceSpec spec, final byte[] payload) {
+		if (spec.getResourceId() != ResourceSpec.DOES_NOT_EXIST) {
+			return downlink.write(spec.getObjectId(), spec.getObjectInstanceId(), spec.getResourceId(), new String(payload));
+		} else if (spec.getObjectInstanceId() != ResourceSpec.DOES_NOT_EXIST){
+			return downlink.write(spec.getObjectId(), spec.getObjectInstanceId(), new String(payload));
+		} else {
+			final Response response = new Response(ResponseCode.METHOD_NOT_ALLOWED);
+			response.setPayload("Target is not allowed for \"Write\" operation");
+			return OperationResponse.of(response );
 		}
 	}
 
