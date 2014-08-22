@@ -116,8 +116,19 @@ public class RegisterUplink extends Uplink{
 	public OperationResponse update(final String location, final Callback callback) {
 		return null;
 	}
-	public OperationResponse deregister() {
-		return null;
+	public OperationResponse deregister(final String endpointName) {
+		if(endpointName == null){
+			return OperationResponse.failure(ResponseCode.NOT_FOUND);
+		}
+		
+		final ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newDelete();
+		final DeregisterEndpoint deregisterEndpoint = new DeregisterEndpoint(endpointName);
+		request.setURI(deregisterEndpoint.toString());
+		
+		endpoint.sendRequest(request);
+		endpoint.stop();
+		
+		return OperationResponse.of(new Response(ResponseCode.DELETED));
 	}
 	//...
 	public OperationResponse notify(final String todo) {
