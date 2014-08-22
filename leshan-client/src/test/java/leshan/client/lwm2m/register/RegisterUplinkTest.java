@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import leshan.client.lwm2m.MockedCallback;
@@ -26,8 +27,10 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
+import ch.ethz.inf.vs.californium.WebLink;
 import ch.ethz.inf.vs.californium.coap.CoAP.Code;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
+import ch.ethz.inf.vs.californium.coap.LinkFormat;
 import ch.ethz.inf.vs.californium.coap.Request;
 import ch.ethz.inf.vs.californium.coap.Response;
 import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
@@ -50,7 +53,7 @@ public class RegisterUplinkTest {
 	private String expectedRequestRoot;
 	private Map<String, String> validMap;
 	private OperationResponse operationResponse;
-	private final String VALID_REQUEST_PAYLOAD = "</lwm2m>;rt=\"oma.lwm2m\", </lwm2m/1/101>, </lwm2m/1/102>, </lwm2m/2/0>, </lwm2m/2/1>, </lwm2m/2/2>, </lwm2m/3/0>,</lwm2m/4/0>,</lwm2m/5>";
+	private final String VALID_REQUEST_PAYLOAD = "</lwm2m>;rt=\"oma.lwm2m\", </lwm2m/1/101>, </lwm2m/1/102>, </lwm2m/2/0>, </lwm2m/2/1>, </lwm2m/2/2>, </lwm2m/3/0>, </lwm2m/4/0>, </lwm2m/5>";
 	private final String INVALID_REQUEST_PAYLOAD = "";
 	private Object actualRequestPayload;
 
@@ -91,11 +94,11 @@ public class RegisterUplinkTest {
 	}
 
 	private void sendRegisterAndGetAsyncResponse(final RegisterUplink uplink, final String payload) {
-		sendRegisterAndGetAsyncResponse(uplink, new HashMap<String, String>(), payload);
+		sendRegisterAndGetAsyncResponse(uplink, new HashMap<String, String>(),  payload);
 	}
 
 	private void sendRegisterAndGetAsyncResponse(final RegisterUplink uplink, final Map<String, String> parameters, final String payload) {
-		uplink.register(ENDPOINT_NAME, parameters, payload, callback);
+		uplink.register(ENDPOINT_NAME, parameters,  LinkFormat.parse(payload), callback);
 
 		await().untilTrue(callback.isCalled());
 		actualResponsePayload = callback.getResponsePayload();
@@ -106,7 +109,7 @@ public class RegisterUplinkTest {
 	}
 
 	private void sendRegisterAndGetSyncResponse(final RegisterUplink uplink, final Map<String, String> parameters, final String payload) {
-		operationResponse = uplink.register(ENDPOINT_NAME, parameters, payload, SYNC_TIMEOUT_MS);
+		operationResponse = uplink.register(ENDPOINT_NAME, parameters, LinkFormat.parse(payload), SYNC_TIMEOUT_MS);
 		actualResponsePayload = operationResponse.getPayload();
 	}
 
@@ -325,8 +328,6 @@ public class RegisterUplinkTest {
 	public void testSyncBadPayloadRegistration(){
 		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED);
 
-		final String validQuery = leshan.client.lwm2m.Request.toQueryStringMap(validMap);
-
 		boolean noPayload = false;
 
 		try{
@@ -337,7 +338,26 @@ public class RegisterUplinkTest {
 		}
 
 		assertTrue(noPayload);
-		assertFalse(callback.isSuccess());
-		assertEquals(callback.getResponseCode(), ResponseCode.BAD_REQUEST);
+		assertFalse(operationResponse.isSuccess());
+		assertEquals(operationResponse.getResponseCode(), ResponseCode.BAD_REQUEST);
+	}
+	
+
+	@Test
+	public void testSyncBadNullPayloadRegistration(){
+		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED);
+
+		boolean noPayload = false;
+
+		try{
+			sendRegisterAndGetSyncResponse(uplink, validMap, null);
+		}
+		catch(final UnsupportedOperationException uoe){
+			noPayload = true;
+		}
+
+		assertTrue(noPayload);
+		assertFalse(operationResponse.isSuccess());
+		assertEquals(operationResponse.getResponseCode(), ResponseCode.BAD_REQUEST);
 	}
 }
