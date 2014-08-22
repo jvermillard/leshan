@@ -25,6 +25,10 @@ import com.google.common.base.Joiner;
 @RunWith(MockitoJUnitRunner.class)
 public class BootstrapMessageDelivererTest {
 
+	private static final String WRITE_OPERATION_COMPLETED_SUCCESSFULLY = "\"Write\" operation is completed successfully";
+	private static final String BAD_WRITE_REQUEST = "￼The format of data to be written is different";
+	private static final String DELETE_OPERATION_TARGET_NOT_ALLOWED = "Target is not allowed for \"Delete\" operation";
+	private static final String DELETE_OPERATION_COMPLETED_SUCCESSFULLY = "\"Delete\" operation is completed successfully";
 	private static final int OBJECT_ID = 3;
 	private static final int OBJECT_INSTANCE_ID = 1;
 	private static final int RESOURCE_ID = 2;
@@ -37,10 +41,20 @@ public class BootstrapMessageDelivererTest {
 
 	@Test
 	public void testWriteNoInstanceGoodPayload() {
+		initializeExchange(Code.PUT, "/3");
+
+		deliverRequest();
+
+		verifyResponse(OperationResponseCode.CHANGED, WRITE_OPERATION_COMPLETED_SUCCESSFULLY);
 	}
 
 	@Test
 	public void testWriteRootGoodPayload() {
+		initializeExchange(Code.PUT, "/");
+
+		deliverRequest();
+
+		verifyResponse(OperationResponseCode.CHANGED, WRITE_OPERATION_COMPLETED_SUCCESSFULLY);
 	}
 
 	@Test
@@ -51,7 +65,7 @@ public class BootstrapMessageDelivererTest {
 		deliverRequest();
 
 		verifyResourceWrite();
-		verifyResponse(OperationResponseCode.CHANGED, "\"Write\" operation is completed successfully");
+		verifyResponse(OperationResponseCode.CHANGED, WRITE_OPERATION_COMPLETED_SUCCESSFULLY);
 	}
 
 	@Test
@@ -60,12 +74,12 @@ public class BootstrapMessageDelivererTest {
 
 		deliverRequest();
 
-		verifyResponse(OperationResponseCode.BAD_REQUEST, "￼The format of data to be written is different");
+		verifyResponse(OperationResponseCode.BAD_REQUEST, BAD_WRITE_REQUEST);
 	}
 
 	@Test
 	public void testWriteResourceWriteThrowsNpe() {
-		initializeWriteWithException(new NullPointerException("lol NPEs"));
+		initializeWriteWithException(new NullPointerException());
 
 		initializeResourceExchange(Code.PUT);
 
@@ -77,7 +91,7 @@ public class BootstrapMessageDelivererTest {
 
 	@Test
 	public void testWriteResourceWriteThrowsNfe() {
-		initializeWriteWithException(new NumberFormatException("lol NFEs"));
+		initializeWriteWithException(new NumberFormatException());
 
 		initializeResourceExchange(Code.PUT);
 
@@ -95,16 +109,43 @@ public class BootstrapMessageDelivererTest {
 		deliverRequest();
 
 		verifyResourceDelete();
-		verifyResponse(OperationResponseCode.DELETED, "\"Delete\" operation is completed successfully");
+		verifyResponse(OperationResponseCode.DELETED, DELETE_OPERATION_COMPLETED_SUCCESSFULLY);
 	}
-	
+
+	@Test
+	public void testDeleteRoot() {
+		initializeExchange(Code.DELETE, "/");
+
+		deliverRequest();
+
+		verifyResponse(OperationResponseCode.DELETED, DELETE_OPERATION_COMPLETED_SUCCESSFULLY);
+	}
+
+	@Test
+	public void testDeleteObjectId() {
+		initializeExchange(Code.DELETE, "/3");
+
+		deliverRequest();
+
+		verifyResponse(OperationResponseCode.DELETED, DELETE_OPERATION_COMPLETED_SUCCESSFULLY);
+	}
+
+	@Test
+	public void testDeleteObjectIdAndInstanceId() {
+		initializeExchange(Code.DELETE, "/3/1");
+
+		deliverRequest();
+
+		verifyResponse(OperationResponseCode.DELETED, DELETE_OPERATION_COMPLETED_SUCCESSFULLY);
+	}
+
 	@Test
 	public void testDeleteBadUri() {
 		initializeExchange(Code.DELETE, "/NaN");
 
 		deliverRequest();
 
-		verifyResponse(OperationResponseCode.METHOD_NOT_ALLOWED, "Target is not allowed for \"Delete\" operation");
+		verifyResponse(OperationResponseCode.METHOD_NOT_ALLOWED, DELETE_OPERATION_TARGET_NOT_ALLOWED);
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
@@ -118,7 +159,7 @@ public class BootstrapMessageDelivererTest {
 		final OperationResponse operationResponse = OperationResponse.of(response);
 		when(downlink.write(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID)).thenReturn(operationResponse);
 	}
-	
+
 	private void initializeDeleteWithResponse(final Response response) {
 		final OperationResponse operationResponse = OperationResponse.of(response);
 		when(downlink.delete(OBJECT_ID, OBJECT_INSTANCE_ID)).thenReturn(operationResponse);
@@ -140,10 +181,6 @@ public class BootstrapMessageDelivererTest {
 		when(exchange.getRequest()).thenReturn(request);
 	}
 
-	private static String constructUri(final int objectId, final int objectInstanceId, final int resourceId) {
-		return "/" + Joiner.on("/").skipNulls().join(objectId, objectInstanceId, resourceId);
-	}
-
 	private void deliverRequest() {
 		final BootstrapMessageDeliverer deliverer = new BootstrapMessageDeliverer(downlink);
 		deliverer.deliverRequest(exchange);
@@ -157,7 +194,7 @@ public class BootstrapMessageDelivererTest {
 	private void verifyResourceWrite() {
 		verify(downlink).write(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID);
 	}
-	
+
 	private void verifyResourceDelete() {
 		verify(downlink).delete(OBJECT_ID, OBJECT_INSTANCE_ID);
 	}
@@ -167,4 +204,7 @@ public class BootstrapMessageDelivererTest {
 		verify(exchange).sendResponse(Matchers.argThat(new ResponseMatcher(responseCode, payloadBytes)));
 	}
 
+	private static String constructUri(final int objectId, final int objectInstanceId, final int resourceId) {
+		return "/" + Joiner.on("/").skipNulls().join(objectId, objectInstanceId, resourceId);
+	}
 }
