@@ -12,6 +12,7 @@ import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 import leshan.client.lwm2m.Uplink;
 import leshan.client.lwm2m.response.Callback;
+import leshan.client.lwm2m.response.MockedCallback;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.util.LinkFormatUtils;
 
@@ -32,11 +33,9 @@ public class RegisterUplink extends Uplink{
 			return OperationResponse.failure(ResponseCode.BAD_REQUEST);
 		}
 
-		final ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newPost();
-		final RegisterEndpoint registerEndpoint = new RegisterEndpoint(Collections.singletonMap(ENDPOINT, endpointName));
-
-		request.setURI(registerEndpoint.toString() + "&" + leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
-		request.setPayload(payload);
+		final ch.ethz.inf.vs.californium.coap.Request request = createRegisterRequest(
+				endpointName, payload);
+		request.setURI(request.getURI() + "&" + leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
 		
 		return sendSyncRequest(timeout, request);
 	}
@@ -53,10 +52,8 @@ public class RegisterUplink extends Uplink{
 			return;
 		}
 
-		final ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newPost();
-		final RegisterEndpoint registerEndpoint = new RegisterEndpoint(Collections.singletonMap(ENDPOINT, endpointName));
-		request.setURI(registerEndpoint.toString());
-		request.setPayload(payload);
+		final ch.ethz.inf.vs.californium.coap.Request request = createRegisterRequest(
+				endpointName, payload);
 
 		sendAsyncRequest(callback, request);
 	}
@@ -76,9 +73,7 @@ public class RegisterUplink extends Uplink{
 		
 		final String payload = LinkFormatUtils.payloadize(objectsAndInstances);
 		
-		final Request request = Request.newPut();
-		final RegisteredEndpoint registerEndpoint = new RegisteredEndpoint(endpointLocation);
-		request.setURI(registerEndpoint.toString() + "&" + leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
+		final Request request = createUpdateRequest(endpointLocation, parameters);
 		if(payload != null){
 			request.setPayload(payload);
 		}
@@ -93,9 +88,7 @@ public class RegisterUplink extends Uplink{
 		
 		final String payload = LinkFormatUtils.payloadize(objectsAndInstances);
 		
-		final Request request = Request.newPut();
-		final RegisteredEndpoint registerEndpoint = new RegisteredEndpoint(endpointLocation);
-		request.setURI(registerEndpoint.toString() + "&" + leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
+		final Request request = createUpdateRequest(endpointLocation, parameters);
 		if(payload != null){
 			request.setPayload(payload);
 		}
@@ -108,9 +101,7 @@ public class RegisterUplink extends Uplink{
 			return OperationResponse.failure(ResponseCode.NOT_FOUND);
 		}
 		
-		final ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newDelete();
-		final RegisteredEndpoint deregisterEndpoint = new RegisteredEndpoint(endpointLocation);
-		request.setURI(deregisterEndpoint.toString());
+		final ch.ethz.inf.vs.californium.coap.Request request = createDeregisterRequest(endpointLocation);
 		
 		endpoint.sendRequest(request);
 		endpoint.stop();
@@ -118,8 +109,58 @@ public class RegisterUplink extends Uplink{
 		return OperationResponse.of(new Response(ResponseCode.DELETED));
 	}
 	
+	public void deregister(final String endpointLocation, final Callback callback) {
+		if(endpointLocation == null){
+			callback.onFailure(OperationResponse.failure(ResponseCode.NOT_FOUND));
+		}
+		
+		final ch.ethz.inf.vs.californium.coap.Request request = createDeregisterRequest(endpointLocation);
+		
+		sendAsyncRequest(new Callback(){
+			final Callback initializingCallback = callback;
+
+			@Override
+			public void onSuccess(final OperationResponse response) {
+				initializingCallback.onSuccess(response);
+				endpoint.stop();
+			}
+
+			@Override
+			public void onFailure(final OperationResponse response) {
+				initializingCallback.onFailure(response);
+				endpoint.stop();
+			}
+			
+		}, request);
+	}
+	
 	public OperationResponse notify(final String todo) {
 		return null;
+	}
+	
+	private ch.ethz.inf.vs.californium.coap.Request createRegisterRequest(
+			final String endpointName, final String payload) {
+		final ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newPost();
+		final RegisterEndpoint registerEndpoint = new RegisterEndpoint(Collections.singletonMap(ENDPOINT, endpointName));
+		request.setURI(registerEndpoint.toString());
+		request.setPayload(payload);
+		return request;
+	}
+	
+	private Request createUpdateRequest(final String endpointLocation,
+			final Map<String, String> parameters) {
+		final Request request = Request.newPut();
+		final RegisteredEndpoint registerEndpoint = new RegisteredEndpoint(endpointLocation);
+		request.setURI(registerEndpoint.toString() + "&" + leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
+		return request;
+	}
+	
+	private ch.ethz.inf.vs.californium.coap.Request createDeregisterRequest(
+			final String endpointLocation) {
+		final ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newDelete();
+		final RegisteredEndpoint deregisterEndpoint = new RegisteredEndpoint(endpointLocation);
+		request.setURI(deregisterEndpoint.toString());
+		return request;
 	}
 
 	private boolean areParametersValid(final Map<String, String> parameters) {
@@ -151,4 +192,5 @@ public class RegisterUplink extends Uplink{
 
 		return false;
 	}
+
 }

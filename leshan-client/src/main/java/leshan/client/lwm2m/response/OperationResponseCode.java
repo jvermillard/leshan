@@ -123,6 +123,13 @@ public enum OperationResponseCode {
 					default: 			throwError(code, interfaceType, operationType);
 				}
 			}
+			else if(operationType == OperationTypes.DEREGISTER) {
+				switch(code) {
+					case DELETED: 		return "\"De-register\" operation is completed successfully";
+					case NOT_FOUND: 	return "URI of \"De-register\" operation is not found";
+					default: 			throwError(code, interfaceType, operationType);
+				}
+			}
 			
 		}
 		
