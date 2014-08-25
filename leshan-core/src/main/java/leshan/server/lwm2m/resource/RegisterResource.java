@@ -148,9 +148,15 @@ public class RegisterResource extends ResourceBase {
                             registrationEndpoint, pskIdentity);
 
                     if (securityInfo == null || pskIdentity == null || !pskIdentity.equals(securityInfo.getIdentity())) {
-                        LOG.warn("Invalid identity for client {}: expected '{}'but was '{}'", endpoint,
-                                securityInfo.getIdentity(), pskIdentity);
+                        LOG.warn("Invalid identity for client {}: expected '{}' but was '{}'", endpoint,
+                                securityInfo == null ? null : securityInfo.getIdentity(), pskIdentity);
                         exchange.respond(ResponseCode.BAD_REQUEST, "Invalid identity");
+
+                        // kill the TLS Session
+                        ((SecureEndpoint) exchange.advanced().getEndpoint()).getDTLSConnector().close(
+                                new InetSocketAddress(request.getSource(), request.getSourcePort()));
+                        return;
+
                     } else {
                         LOG.debug("authenticated client {} using DTLS PSK", endpoint);
                     }
@@ -158,6 +164,7 @@ public class RegisterResource extends ResourceBase {
                     if (securityInfo != null) {
                         LOG.warn("client {} must connect using DTLS PSK", endpoint);
                         exchange.respond(ResponseCode.BAD_REQUEST, "Client must connect thru DTLS (port 5684)");
+                        return;
                     }
                 }
 

@@ -27,72 +27,56 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.clienttest;
+package leshan.server.client;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+
+import org.apache.commons.lang.StringUtils;
 
 public class LwClient implements Closeable {
 
     private Process p;
-
     private BufferedReader br;
 
-    private BufferedWriter bw;
+    public void start(String endpoint, String script, String... params) {
 
-    public void start() {
+        String luaScript = this.getClass().getResource(script).getFile();
+
         try {
-
+            // Run a docker container to simulate a client
             p = Runtime.getRuntime().exec(
-                    "src/test/resources/testclient-" + System.getProperty("os.name").toLowerCase() + "-"
-                            + System.getProperty("os.arch").toLowerCase());
+                    "sudo docker run -t --rm --name=lwm2mClientIT -e ENDPOINT=" + endpoint + " -v " + luaScript
+                            + ":/lwm2m/script.lua jvermillard/lualwm2m script.lua " + StringUtils.join(params, " "));
             br = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            bw = new BufferedWriter(new OutputStreamWriter(p.getOutputStream()));
-            Thread.sleep(500);
-        } catch (IOException | InterruptedException e) {
-            throw new IllegalStateException("Unable to run LW test client", e);
-        }
-    }
 
-    public void quit() {
-        sendCmd("quit");
-    }
-
-    public void die() {
-        sendCmd("die");
-    }
-
-    private void sendCmd(String cmd) {
-        String line;
-        try {
-            while ((line = br.readLine()) != null) {
-                System.err.println("line : " + line);
-                if (line.startsWith("> ")) {
-                    // trigger unregister
-                    bw.write(cmd);
-
-                    bw.newLine();
-                    bw.flush();
-                }
-            }
         } catch (IOException e) {
-            throw new IllegalStateException("IO error", e);
+            throw new IllegalStateException("Unable to run LW test client", e);
         }
     }
 
     @Override
     public void close() throws IOException {
-        System.err.println("wait for termination");
-        p.destroy();
+
+        System.err.println("Stopping LWM2M client");
+
+        StringBuilder builder = new StringBuilder();
+        String current = "";
+        while (br.ready() && (current = br.readLine()) != null) {
+            builder.append(current).append("\n");
+        }
+        System.err.println("---------\nClient logs:\n" + builder.toString() + "\n----------");
+
         try {
-            int code = p.waitFor();
-            System.err.println("CODE : " + code);
+            Process stop = Runtime.getRuntime().exec("sudo docker stop lwm2mClientIT");
+
+            System.err.println("Waiting for docker container to stop");
+            stop.waitFor();
+            p.waitFor();
+
             br.close();
-            bw.close();
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }

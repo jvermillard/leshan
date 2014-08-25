@@ -4,23 +4,29 @@
 </div>
 
 
-<table class="table table-striped security-table">
-	<tr>
-		<th>Client endpoint</th>
-		<th>Security mode</th>
-		<th>Identity</th>
-		<th>Key</th>
-		<th></th>
-	</tr>
-	<tr ng-repeat="(endpoint, security) in securityInfos">
-        <td>{{ endpoint }}</td>
-        <td>Pre-Shared Key</td>
-        <td>{{ security.psk.identity }}</td>
-        <td>{{ security.psk.key }}</td>
-		<td><button type="button" class="btn btn-default btn-xs" ng-click="remove(endpoint)">
-				<span class="glyphicon glyphicon-remove"></button></td>
-	</tr>
-</table>
+<div class="table-responsive">
+	<table class="table table-striped security-table">
+	<thead>
+		<tr>
+			<th>Client Endpoint</th>
+			<th>Security mode</th>
+			<th>Identity</th>
+			<th>Key</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr ng-repeat="(endpoint, security) in securityInfos">
+	        <td>{{ endpoint }}</td>
+	        <td>Pre-Shared Key</td>
+	        <td>{{ security.psk.identity }}</td>
+	        <td>{{ security.psk.key }}</td>
+			<td><button type="button" class="btn btn-default btn-xs" ng-click="remove(endpoint)">
+					<span class="glyphicon glyphicon-remove"></button></td>
+		</tr>
+	<tbody>
+	</table>
+</div>
 
 <!-- New security modal -->
 <div class="modal bs-example-modal-sm" id="newSecurityModal"

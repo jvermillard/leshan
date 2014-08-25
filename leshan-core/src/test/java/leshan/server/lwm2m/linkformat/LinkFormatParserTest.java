@@ -47,9 +47,9 @@ public class LinkFormatParserTest {
         Assert.assertEquals(5, parse.length);
         Assert.assertEquals("/", parse[0].getUrl());
 
-        Map<String, String> attResult = new HashMap<>();
-        attResult.put("rt", "\"oma.lwm2m\"");
-        attResult.put("ct", "100");
+        Map<String, Object> attResult = new HashMap<>();
+        attResult.put("rt", "oma.lwm2m");
+        attResult.put("ct", 100);
         Assert.assertEquals(attResult, parse[0].getAttributes());
 
         Assert.assertEquals("/1/101", parse[1].getUrl());
@@ -63,5 +63,20 @@ public class LinkFormatParserTest {
         attResult = new HashMap<>();
         attResult.put("empty", null);
         Assert.assertEquals(attResult, parse[4].getAttributes());
+    }
+
+    @Test
+    public void parse_with_quoted_attributes() {
+        LinkObject[] parse = LinkFormatParser
+                .parse("</>;k1=\"quotes\"inside\";k2=endwithquotes\";k3=noquotes;k4=\"startwithquotes".getBytes());
+        Assert.assertEquals(1, parse.length);
+        Assert.assertEquals("/", parse[0].getUrl());
+
+        Map<String, String> attResult = new HashMap<>();
+        attResult.put("k1", "quotes\"inside");
+        attResult.put("k2", "endwithquotes\"");
+        attResult.put("k3", "noquotes");
+        attResult.put("k4", "\"startwithquotes");
+        Assert.assertEquals(attResult, parse[0].getAttributes());
     }
 }

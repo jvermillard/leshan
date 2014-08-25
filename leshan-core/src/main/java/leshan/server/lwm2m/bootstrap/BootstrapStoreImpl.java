@@ -27,31 +27,24 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.clienttest;
+package leshan.server.lwm2m.bootstrap;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.net.URLConnection;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.io.IOUtils;
+/**
+ * Simple bootstrap store implementation storing bootstrap information in memory
+ */
+public class BootstrapStoreImpl implements BootstrapStore {
 
-public class TestUtils {
+    private Map<String, BootstrapConfig> bootstrapByEndpoint = new ConcurrentHashMap<>();
 
-    public static String getAPI(String url) {
-        try {
-            URL u = new URL("http://127.0.0.1:8080/" + url);
-            URLConnection uc = u.openConnection();
+    @Override
+    public BootstrapConfig getBootstrap(String endpoint) {
+        return bootstrapByEndpoint.get(endpoint);
+    }
 
-            try (InputStream is = uc.getInputStream()) {
-                String res = IOUtils.toString(is);
-                System.err.println(url + " => \n'" + res + "'");
-
-                return res;
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
+    public void addConfig(String endpoint, BootstrapConfig config) {
+        bootstrapByEndpoint.put(endpoint, config);
     }
 }

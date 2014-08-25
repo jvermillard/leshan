@@ -19,13 +19,12 @@ package org.eclipse.californium.scandium.dtls.pskstore;
  * A storage for pre-shared-key identity.
  */
 public interface PskStore {
-
+    
     /**
-     * Get the pre-shared key for a given identity.
-     * 
+     * Get the key for a given identity.
      * @param identity the identity to authenticate
      * @return the key or <code>null</code> if not found
      */
     byte[] getPsk(String identity);
-
+    
 }

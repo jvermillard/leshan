@@ -60,6 +60,10 @@ public class SecureEndpoint extends CoAPEndpoint {
         return this.getSession(request).getPskIdentity();
     }
 
+    public DTLSConnector getDTLSConnector() {
+        return connector;
+    }
+
     private DTLSSession getSession(Request request) {
         return connector.getSessionByAddress(new InetSocketAddress(request.getSource(), request.getSourcePort()));
     }

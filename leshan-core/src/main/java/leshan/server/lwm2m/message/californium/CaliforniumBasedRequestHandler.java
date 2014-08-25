@@ -546,8 +546,8 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
             LOG.trace("Sending {}", request);
         }
 
-        doSend(request, coapRequest);
         Response coapResponse = null;
+        doSend(request, coapRequest);
         long start = System.currentTimeMillis();
 
         try {

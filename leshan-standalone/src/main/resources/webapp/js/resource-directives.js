@@ -1,16 +1,4 @@
-angular.module('lwResourcesDirective', [])
-
-.directive('resourceslist', function () {
-    return {
-        restrict: "E",
-        replace: true,
-        scope: {
-            list: '=',
-            parent: '='
-        },
-        template: "<ul'><resource ng-repeat='resource in list' resource='resource' parent='parent'></resource></ul>"
-    }
-})
+angular.module('resourceDirectives', [])
 
 .directive('resource', function ($compile, $routeParams, $http, dialog,$filter) {
     return {
@@ -22,42 +10,34 @@ angular.module('lwResourcesDirective', [])
         },
         templateUrl: "partials/resource.html",
         link: function (scope, element, attrs) {
-            // compute path and tree depth
-            var parentPath = "";
-            var treeDepth = 0;
-            if(scope.parent) {
-                parentPath = scope.parent.path;
-                treeDepth = scope.parent.treeDepth + 1;
-            }
-            scope.resource.path = parentPath + "/" + scope.resource.id;
-            scope.resource.treeDepth = treeDepth;
+            scope.resource.path = scope.parent.path + "/" + scope.resource.def.id;
             scope.resource.read  =  {tooltip : "Read <br/>"   + scope.resource.path};
             scope.resource.write =  {tooltip : "Write <br/>"  + scope.resource.path};
             scope.resource.exec  =  {tooltip : "Execute <br/>"+ scope.resource.path};
             scope.resource.observe  =  {tooltip : "Observe <br/>"+ scope.resource.path};
             
             scope.readable = function() {
-                if(scope.resource.instances != "multiple") {
-                    if(scope.resource.hasOwnProperty("operations")) {
-                        return scope.resource.operations.indexOf("R") != -1;
+                if(scope.resource.def.instances != "multiple") {
+                    if(scope.resource.def.hasOwnProperty("operations")) {
+                        return scope.resource.def.operations.indexOf("R") != -1;
                     }
                 }
                 return false;
             }
-
+           
             scope.writable = function() {
-                if(scope.resource.instances != "multiple") {
-                    if(scope.resource.hasOwnProperty("operations")) {
-                        return scope.resource.operations.indexOf("W") != -1;
+                if(scope.resource.def.instances != "multiple") {
+                    if(scope.resource.def.hasOwnProperty("operations")) {
+                        return scope.resource.def.operations.indexOf("W") != -1;
                     }
                 }
                 return false;
             }
 
             scope.executable = function() {
-                if(scope.resource.instances != "multiple") {
-                    if(scope.resource.hasOwnProperty("operations")) {
-                        return scope.resource.operations.indexOf("E") != -1;
+                if(scope.resource.def.instances != "multiple") {
+                    if(scope.resource.def.hasOwnProperty("operations")) {
+                        return scope.resource.def.operations.indexOf("E") != -1;
                     }
                 }
                 return false;
@@ -105,17 +85,19 @@ angular.module('lwResourcesDirective', [])
                 var uri = "api/clients/" + $routeParams.clientId + scope.resource.path;                
                 $http.get(uri)
                 .success(function(data, status, headers, config) {
+                    // manage request information
                     var read = scope.resource.read;
                     read.date = new Date();
                     var formattedDate = $filter('date')(read.date, 'HH:mm:ss.sss');
                     read.status = data.status;
                     read.tooltip = formattedDate + "<br/>" + read.status;
                     
+                    // manage read data
                     if (data.status == "CONTENT") {
                         scope.resource.value = data.value;
                         scope.resource.valuesupposed = false;
                         scope.resource.tooltip = formattedDate;
-                    }                   
+                    }
                 }).error(function(data, status, headers, config) {
                     if (observe) {
                         scope.resource.observe.status = false;
@@ -127,7 +109,7 @@ angular.module('lwResourcesDirective', [])
             };
 
             scope.write = function() {
-                $('#writeModalLabel').text(scope.resource.name);
+                $('#writeModalLabel').text(scope.resource.def.name);
                 $('#writeInputValue').val(scope.resource.value);
                 $('#writeSubmit').unbind();
                 $('#writeSubmit').click(function(e){
@@ -173,14 +155,6 @@ angular.module('lwResourcesDirective', [])
                     console.error(errormessage)
                 });;
             };
-
-            // add children
-            var collectionSt = '<resourceslist list="resource.values" parent="resource"></resourceslist>';
-            if (angular.isArray(scope.resource.values)) {
-                $compile(collectionSt)(scope, function(cloned, scope)   {
-                    element.append(cloned);
-                });
-            }
         }
     }
 });

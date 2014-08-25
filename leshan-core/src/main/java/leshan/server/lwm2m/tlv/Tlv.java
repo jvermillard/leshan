@@ -120,7 +120,7 @@ public class Tlv {
      * @param identifier the TLV identifier (resource id, instance id...)
      */
     public static Tlv newStringValue(TlvType type, String value, int identifier) {
-        Validate.notEmpty(value);
+        Validate.notNull(value);
         return new Tlv(type, null, value.getBytes(Charsets.UTF_8), identifier);
     }
 
@@ -151,6 +151,13 @@ public class Tlv {
     public static Tlv newDateValue(TlvType type, Date value, int identifier) {
         // the number of seconds since Jan 1st, 1970 in the UTC time zone.
         return newLongValue(type, value.getTime() / 1000L, identifier);
+    }
+
+    /**
+     * Create a TLV container for an opaque binary value.
+     */
+    public static Tlv newOpaqueValue(TlvType type, byte[] value, int identifier) {
+        return new Tlv(type, null, value, identifier);
     }
 
     public TlvType getType() {

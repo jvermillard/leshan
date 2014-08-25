@@ -37,11 +37,11 @@ import org.slf4j.LoggerFactory;
 
 public class TlvEncoder {
 
-	private static final Logger LOG = LoggerFactory.getLogger(TlvEncoder.class);
-	
-    public ByteBuffer encode(Tlv[] tlvs) {
+    private static final Logger LOG = LoggerFactory.getLogger(TlvEncoder.class);
+
+    public static ByteBuffer encode(Tlv[] tlvs) {
         int size = 0;
-        
+
         LOG.trace("start");
         for (Tlv tlv : tlvs) {
 
@@ -59,7 +59,7 @@ public class TlvEncoder {
         return b;
     }
 
-    private int tlvEncodedSize(Tlv tlv, int length) {
+    private static int tlvEncodedSize(Tlv tlv, int length) {
         int size = 1 /* HEADER */;
         size += (tlv.getIdentifier() < 65_536) ? 1 : 2; /* 8 bits or 16 bits identifiers */
 
@@ -79,7 +79,7 @@ public class TlvEncoder {
         return size;
     }
 
-    private int tlvEncodedLength(Tlv tlv) {
+    private static int tlvEncodedLength(Tlv tlv) {
         int length;
         switch (tlv.getType()) {
         case RESOURCE_VALUE:
@@ -97,7 +97,7 @@ public class TlvEncoder {
         return length;
     }
 
-    private void encode(Tlv tlv, ByteBuffer b) {
+    private static void encode(Tlv tlv, ByteBuffer b) {
         int length;
         length = tlvEncodedLength(tlv);
         int typeByte;

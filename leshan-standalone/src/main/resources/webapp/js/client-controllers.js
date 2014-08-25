@@ -1,9 +1,10 @@
-var lwClientControllers = angular.module('lwClientControllers', []);
+var lwClientControllers = angular.module('clientControllers', []);
 
 lwClientControllers.controller('ClientListCtrl', [
     '$scope',
     '$http',
-    function ClientListCtrl($scope, $http) {
+    '$location',
+    function ClientListCtrl($scope, $http,$location) {
 
         // update navbar
         angular.element("#navbar").children().removeClass('active');
@@ -16,6 +17,11 @@ lwClientControllers.controller('ClientListCtrl', [
             }
         });
 
+        // add function to show client
+        $scope.showClient = function(client) {
+            $location.path('/clients/' + client.endpoint);
+        };
+        
         // get the list of connected clients
         $http.get('api/clients'). error(function(data, status, headers, config){
             $scope.error = "Unable get client list: " + status + " " + data  
@@ -66,6 +72,10 @@ lwClientControllers.controller('ClientDetailCtrl', [
     'lwResources',
     '$filter',
     function($scope, $location, $routeParams, $http, lwResources,$filter) {
+        // update navbar
+        angular.element("#navbar").children().removeClass('active');
+        angular.element("#client-navlink").addClass('active');
+        
         // free resource when controller is destroyed
         $scope.$on('$destroy', function(){
             if ($scope.eventsource){
@@ -85,18 +95,16 @@ lwClientControllers.controller('ClientDetailCtrl', [
             $scope.client = data;
 
             // update resource tree with client details
-            var tree = buildResourceTree($scope.client.objectLinks, lwResources.getModel())
-            $scope.lwresources = tree;
+            $scope.objects = lwResources.buildResourceTree($scope.client.objectLinks);
 
-            // listen for clients registration/deregistration
+            // listen for clients registration/deregistration/observe
             $scope.eventsource = new EventSource('event?ep=' + $routeParams.clientId);
 
             var registerCallback = function(msg) {
                 $scope.$apply(function() {
                     $scope.deregistered = false;
                     $scope.client = JSON.parse(msg.data);
-                    var tree = buildResourceTree($scope.client.objectLinks, lwResources.getModel())
-                    $scope.lwresources = tree;
+                    $scope.objects = lwResources.buildResourceTree($scope.client.objectLinks);
                 });
             }
             $scope.eventsource.addEventListener('REGISTRATION', registerCallback, false);
@@ -112,9 +120,7 @@ lwClientControllers.controller('ClientDetailCtrl', [
             var notificationCallback = function(msg) {
                 $scope.$apply(function() {
                     var content = JSON.parse(msg.data);
-                    var resourceId = content.res.split("/");
-                    resourceId.shift();
-                    var resource = findResource(resourceId, $scope.lwresources);
+                    var resource = lwResources.findResource($scope.objects, content.res);
                     if (resource) {
                         resource.value = content.val;
                         resource.valuesupposed = false;
@@ -122,94 +128,9 @@ lwClientControllers.controller('ClientDetailCtrl', [
 
                         var formattedDate = $filter('date')(new Date(), 'HH:mm:ss.sss');
                         resource.tooltip = formattedDate;
-
                     }
                 });
             }
             $scope.eventsource.addEventListener('NOTIFICATION', notificationCallback, false);
         });
-
-        var buildResourceTree = function(objectLinks, lwResources) {
-            var tree = [];
-            for (var i = 0; i < objectLinks.length; i++) {
-                var url = objectLinks[i].url;
-                if (url.length > 0 && url.charAt(0) === '/') {
-                    url = url.substr(1);
-                }
-                var nodeIds = url.split("/");
-                addNodes(tree, lwResources, nodeIds);
-            }
-            return tree;
-        }
-
-        var addNodes = function(treeNode, lwNodes, nodeIds) {
-            var nodeId  = nodeIds.shift();
-
-            // node in lw resources ?
-            var lwNode = findNode(nodeId, lwNodes);
-
-            // already in tree ?
-            var existing = findNode(nodeId, treeNode);
-            if(existing) {
-                if(nodeIds.length > 0) {
-                    var lwChildNodes;
-                    if(lwNode) {
-                        lwChildNodes = lwNode.values;
-                    }
-                    addNodes(existing.values, lwChildNodes, nodeIds);
-                }
-            }
-            else {
-                if(lwNode) {
-                    // add properties for tracking observations
-                    lwNode.observationId = null;
-                    lwNode.observed = false;
-                    treeNode.push(lwNode);
-                    if(nodeIds.length > 0) {
-                        // this is not a resource, thus
-                        // remove children defined by lw-resources.json
-                        // and add nodes at next level
-                        var newNode = treeNode[treeNode.length - 1];
-                        newNode.values = [];
-                        addNodes(newNode.values, lwNode.values, nodeIds);
-                    }
-                }
-                else {
-                    // add new custom node
-                    var customNode = {};
-                    customNode.name = nodeId;
-                    customNode.id = nodeId;
-                    customNode.operations = "RW";
-
-                    if(nodeIds.length > 0) {
-                        customNode.values = [];
-                        addNodes(customNode.values, null, nodeIds);
-                    }
-
-                    treeNode.push(customNode);
-                }
-            }
-        }
-
-        var findNode = function(id, nodes) {
-            if(nodes) {
-                for (var i = 0; i < nodes.length; i++) {
-                    if(nodes[i].id == id) {
-                        return nodes[i];
-                    }
-                }
-            }
-        }
-
-        var findResource = function(resourceId, resourceTree) {
-            if (resourceId) {
-                var nodeId = resourceId.shift();
-                var node = findNode(nodeId, resourceTree);
-                if (node && resourceId.length > 0) {
-                    return findResource(resourceId, node.values);
-                } else {
-                    return node;
-                }
-            }
-        }
 }]);
