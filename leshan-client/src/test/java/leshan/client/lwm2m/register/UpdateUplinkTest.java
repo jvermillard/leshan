@@ -43,6 +43,8 @@ public class UpdateUplinkTest {
 
 	@Mock
 	private CoAPEndpoint endpoint;
+	@Mock
+	private RegisterDownlink downlink;
 
 	private String actualRequestLocation;
 	private String expectedRequestLocation;
@@ -81,7 +83,7 @@ public class UpdateUplinkTest {
 			}
 		}).when(endpoint).sendRequest(any(Request.class));
 
-		final RegisterUplink uplink = new RegisterUplink(serverAddress, endpoint);
+		final RegisterUplink uplink = new RegisterUplink(serverAddress, endpoint, downlink);
 		return uplink;
 	}
 

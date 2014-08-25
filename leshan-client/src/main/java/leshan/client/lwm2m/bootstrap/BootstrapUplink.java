@@ -13,9 +13,15 @@ import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 
 public class BootstrapUplink extends Uplink {
 	private static final String ENDPOINT = "ep";
+	private final BootstrapDownlink downlink;
 	
-	public BootstrapUplink(final InetSocketAddress destination, final CoAPEndpoint origin) {
+	public BootstrapUplink(final InetSocketAddress destination, final CoAPEndpoint origin, final BootstrapDownlink downlink) {
 		super(destination, origin);
+		if(downlink == null){
+			throw new IllegalArgumentException("BootstrapDownlink must not be null");
+		}
+		
+		this.downlink = downlink;
 	}
 	
 	public OperationResponse bootstrap(final String endpointName, final long timeout) {

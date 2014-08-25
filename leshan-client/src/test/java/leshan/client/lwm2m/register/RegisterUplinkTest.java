@@ -47,6 +47,8 @@ public class RegisterUplinkTest {
 
 	@Mock
 	private CoAPEndpoint endpoint;
+	@Mock
+	private RegisterDownlink downlink;
 
 	private String expectedRequestRoot;
 	private Map<String, String> validMap;
@@ -88,7 +90,7 @@ public class RegisterUplinkTest {
 			}
 		}).when(endpoint).sendRequest(any(Request.class));
 
-		final RegisterUplink uplink = new RegisterUplink(serverAddress, endpoint);
+		final RegisterUplink uplink = new RegisterUplink(serverAddress, endpoint, downlink);
 
 		return uplink;
 	}

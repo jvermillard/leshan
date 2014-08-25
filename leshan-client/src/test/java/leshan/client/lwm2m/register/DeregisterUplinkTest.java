@@ -36,6 +36,8 @@ public class DeregisterUplinkTest {
 
 	@Mock
 	private CoAPEndpoint endpoint;
+	@Mock
+	private RegisterDownlink downlink;
 	
 	private String expectedRequestLocation;
 	private String actualRequestLocation;
@@ -53,7 +55,7 @@ public class DeregisterUplinkTest {
 		callback = new MockedCallback();
 		serverAddress = InetSocketAddress.createUnresolved(SERVER_HOST, SERVER_PORT);
 		expectedRequestLocation = "coap://" + serverAddress.getHostString() + ":" + serverAddress.getPort() + "/rd/" + ENDPOINT_LOCATION;
-		uplink = new RegisterUplink(serverAddress, endpoint);
+		uplink = new RegisterUplink(serverAddress, endpoint, downlink);
 		
 		doAnswer(new Answer<Void>() {
 

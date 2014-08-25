@@ -7,65 +7,51 @@ import java.net.InetSocketAddress;
 import leshan.client.lwm2m.bootstrap.BootstrapDownlink;
 import leshan.client.lwm2m.bootstrap.BootstrapUplink;
 import leshan.client.lwm2m.factory.ClientFactory;
+import leshan.client.lwm2m.register.RegisterDownlink;
+import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.response.Callback;
 import leshan.client.lwm2m.response.OperationResponse;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ClientFactoryTest {
-	private BootstrapDownlink fakeDevice;
+	@Mock
+	private BootstrapDownlink fakeBootstrapListener;
+	@Mock
+	private RegisterDownlink fakeRegisterListener;
 
 	@Before
 	public void setup() {
-		fakeDevice = new BootstrapDownlink(){
-
-			@Override
-			public OperationResponse write(final int objectId, final int objectInstanceId, final int resourceId) {
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-			@Override
-			public OperationResponse delete(final int objectId, final int objectInstanceId) {
-				// TODO Auto-generated method stub
-				return null;
-			}
-
-		};
-	}
-
-	@Ignore
-	@Test
-	public void testGoodRegistrationOfDeviceSync() {
-		final ClientFactory clientFactory = new ClientFactory();
-		final BootstrapUplink uplink = clientFactory.startBootstrap(4321, InetSocketAddress.createUnresolved("localhost", 1234), fakeDevice);
-		final OperationResponse response = uplink.bootstrap("endpoint-client-name", 5L);
-		assert response.isSuccess();
-		assert true/*Behavior on Californium via PowerMock*/;
-		assert true/*Returned value to FakeDevice*/;
 	}
 
 	@Test
-	public void testGoodRegistrationOfDeviceAsync() {
+	public void testLegalBootstrapUplinkCreate() {
 		final ClientFactory clientFactory = new ClientFactory();
-		final BootstrapUplink uplink = clientFactory.startBootstrap(4321, InetSocketAddress.createUnresolved("localhost", 1234), fakeDevice);
-		uplink.bootstrap("endpoint-client-name", new Callback() {
-
-			@Override
-			public void onSuccess(final OperationResponse response) {
-				fail("Failure!");
-			}
-
-			@Override
-			public void onFailure(final OperationResponse response) {
-
-			}
-		});
-
-		assert true/*Behavior on Californium via PowerMock*/;
-		assert true/*Returned value to FakeDevice*/;
+		final BootstrapUplink uplink = clientFactory.startBootstrap(4321, InetSocketAddress.createUnresolved("localhost", 1234), fakeBootstrapListener);
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testIllegalNullBootstrapUplinkCreate() {
+		final ClientFactory clientFactory = new ClientFactory();
+		final BootstrapUplink uplink = clientFactory.startBootstrap(4321, InetSocketAddress.createUnresolved("localhost", 1234), null);
+	}
+	
+	@Test
+	public void testLegalRegisterUplinkCreate() {
+		final ClientFactory clientFactory = new ClientFactory();
+		final RegisterUplink uplink = clientFactory.startRegistration(4321, InetSocketAddress.createUnresolved("localhost", 1234), fakeRegisterListener);
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testIllegalNullRegisterUplinkCreate() {
+		final ClientFactory clientFactory = new ClientFactory();
+		final RegisterUplink uplink = clientFactory.startRegistration(4321, InetSocketAddress.createUnresolved("localhost", 1234), null);
 	}
 
 }

@@ -40,6 +40,8 @@ public class BootstrapUplinkTest {
 	
 	@Mock
 	private CoAPEndpoint endpoint;
+	@Mock
+	private BootstrapDownlink downlink;
 	private String expectedRequest;
 	private InetSocketAddress serverAddress;
 	
@@ -68,7 +70,7 @@ public class BootstrapUplinkTest {
 			}
 		}).when(endpoint).sendRequest(any(Request.class));
 		
-		final BootstrapUplink uplink = new BootstrapUplink(serverAddress, endpoint);
+		final BootstrapUplink uplink = new BootstrapUplink(serverAddress, endpoint, downlink);
 		return uplink;
 	}
 	
