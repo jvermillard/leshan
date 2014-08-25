@@ -6,6 +6,7 @@ import ch.ethz.inf.vs.californium.coap.Response;
 public abstract class OperationResponse {
 
 	public abstract boolean isSuccess();
+	public abstract String getErrorMessage();
 	public abstract ResponseCode getResponseCode();
 	public abstract byte[] getPayload();
 
@@ -13,8 +14,8 @@ public abstract class OperationResponse {
 		return new SuccessfulOperationResponse(response);
 	}
 
-	public static OperationResponse failure(final ResponseCode responseCode) {
-		return new FailedOperationResponse(responseCode);
+	public static OperationResponse failure(final ResponseCode responseCode, final String errorMessage) {
+		return new FailedOperationResponse(responseCode, errorMessage);
 	}
 
 	private static class SuccessfulOperationResponse extends OperationResponse {
@@ -39,13 +40,20 @@ public abstract class OperationResponse {
 			return response.getPayload();
 		}
 
+		@Override
+		public String getErrorMessage() {
+			throw new UnsupportedOperationException("Successful Operations do not have Error Messages.");
+		}
+
 	}
 
 	private static class FailedOperationResponse extends OperationResponse {
 		private final ResponseCode responseCode;
+		private final String errorMessage;
 
-		public FailedOperationResponse(final ResponseCode responseCode) {
+		public FailedOperationResponse(final ResponseCode responseCode, final String errorMessage) {
 			this.responseCode = responseCode;
+			this.errorMessage = errorMessage;
 		}
 
 		@Override
@@ -57,6 +65,11 @@ public abstract class OperationResponse {
 		public ResponseCode getResponseCode() {
 			return responseCode;
 		}
+		
+		@Override
+		public String getErrorMessage() {
+			return errorMessage;
+		}
 
 		@Override
 		public byte[] getPayload() {
@@ -65,4 +78,11 @@ public abstract class OperationResponse {
 
 	}
 
+	@Override
+	public String toString() {
+		final StringBuilder builder = new StringBuilder();
+		builder.append("Response[" + isSuccess() + "|" + getResponseCode() + "]");
+		
+		return builder.toString();
+	}
 }

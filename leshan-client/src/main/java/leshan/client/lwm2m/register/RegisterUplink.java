@@ -18,6 +18,9 @@ import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.util.LinkFormatUtils;
 
 public class RegisterUplink extends Uplink{
+	private static final String MESSAGE_NULL_ENDPOINT = "Provided Endpoint was Null";
+	private static final String MESSAGE_BAD_OBJECTS = "Objects and Instances Passed Were Not in Valid Link Format.";
+	private static final String MESSAGE_BAD_PARAMETERS = "Either the Parameters are Invalid or the Objects and Instances are Null.";
 	private static final String ENDPOINT = "ep";
 	
 	public RegisterUplink(final InetSocketAddress destination, final CoAPEndpoint origin) {
@@ -26,12 +29,13 @@ public class RegisterUplink extends Uplink{
 
 	public OperationResponse register(final String endpointName, final Map<String, String> parameters, final Set<WebLink> objectsAndInstances, final int timeout) {
 		if(parameters == null || !areParametersValid(parameters) || objectsAndInstances == null){
-			return OperationResponse.failure(ResponseCode.BAD_REQUEST);
+			return OperationResponse.failure(ResponseCode.BAD_REQUEST, MESSAGE_BAD_PARAMETERS);
 		}
 
 		final String payload = LinkFormatUtils.payloadize(objectsAndInstances);
 		if(payload == null){
-			return OperationResponse.failure(ResponseCode.BAD_REQUEST);
+			//TODO  This is ambiguous and we need to add more content.
+			return OperationResponse.failure(ResponseCode.BAD_REQUEST, MESSAGE_BAD_OBJECTS);
 		}
 
 		final ch.ethz.inf.vs.californium.coap.Request request = createRegisterRequest(
@@ -43,13 +47,13 @@ public class RegisterUplink extends Uplink{
 
 	public void register(final String endpointName, final Map<String, String> parameters, final Set<WebLink> objectsAndInstances, final Callback callback) {
 		if(parameters == null || !areParametersValid(parameters) || objectsAndInstances == null){
-			callback.onFailure(OperationResponse.failure(ResponseCode.BAD_REQUEST));
+			callback.onFailure(OperationResponse.failure(ResponseCode.BAD_REQUEST, MESSAGE_BAD_PARAMETERS));
 			return;
 		}
 
 		final String payload = LinkFormatUtils.payloadize(objectsAndInstances);
 		if(payload == null){
-			callback.onFailure(OperationResponse.failure(ResponseCode.BAD_REQUEST));
+			callback.onFailure(OperationResponse.failure(ResponseCode.BAD_REQUEST, MESSAGE_BAD_OBJECTS));
 			return;
 		}
 
@@ -68,7 +72,7 @@ public class RegisterUplink extends Uplink{
 			final Map<String, String> parameters, final Set<WebLink> objectsAndInstances,
 			final Callback callback) {
 		if(parameters == null || !areParametersValid(parameters) || parameters.isEmpty()){
-			callback.onFailure(OperationResponse.failure(ResponseCode.BAD_REQUEST));
+			callback.onFailure(OperationResponse.failure(ResponseCode.BAD_REQUEST, MESSAGE_BAD_PARAMETERS));
 			return;
 		}
 		
@@ -84,7 +88,7 @@ public class RegisterUplink extends Uplink{
 
 	public OperationResponse update(final String endpointLocation, final Map<String, String> parameters, final Set<WebLink> objectsAndInstances, final long timeout) {
 		if(parameters == null || !areParametersValid(parameters) || parameters.isEmpty()){
-			return OperationResponse.failure(ResponseCode.BAD_REQUEST);
+			return OperationResponse.failure(ResponseCode.BAD_REQUEST, MESSAGE_BAD_PARAMETERS);
 		}
 		
 		final String payload = LinkFormatUtils.payloadize(objectsAndInstances);
@@ -99,7 +103,7 @@ public class RegisterUplink extends Uplink{
 	
 	public OperationResponse deregister(final String endpointLocation) {
 		if(endpointLocation == null){
-			return OperationResponse.failure(ResponseCode.NOT_FOUND);
+			return OperationResponse.failure(ResponseCode.NOT_FOUND, MESSAGE_NULL_ENDPOINT);
 		}
 		
 		final ch.ethz.inf.vs.californium.coap.Request request = createDeregisterRequest(endpointLocation);
@@ -112,7 +116,7 @@ public class RegisterUplink extends Uplink{
 	
 	public void deregister(final String endpointLocation, final Callback callback) {
 		if(endpointLocation == null){
-			callback.onFailure(OperationResponse.failure(ResponseCode.NOT_FOUND));
+			callback.onFailure(OperationResponse.failure(ResponseCode.NOT_FOUND, MESSAGE_NULL_ENDPOINT));
 		}
 		
 		final ch.ethz.inf.vs.californium.coap.Request request = createDeregisterRequest(endpointLocation);

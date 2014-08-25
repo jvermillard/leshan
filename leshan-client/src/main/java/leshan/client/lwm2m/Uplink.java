@@ -13,6 +13,9 @@ import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 
 public abstract class Uplink {
 
+	private static final String MESSAGE_BAD_GATEWAY = "Bad Gateway on Async Callback";
+	private static final String MESSAGE_GATEWAY_TIMEOUT = "Gateway Timed Out on Asynch Callback";
+	private static final String MESSAGE_INTERRUPTED = "Endpoint Interrupted While Waiting for Sync Response";
 	protected final CoAPEndpoint origin;
 	private final InetSocketAddress destination;
 
@@ -36,7 +39,7 @@ public abstract class Uplink {
 			
 			@Override
 			public void onTimeout() {
-				callback.onFailure(OperationResponse.failure(ResponseCode.GATEWAY_TIMEOUT));
+				callback.onFailure(OperationResponse.failure(ResponseCode.GATEWAY_TIMEOUT, MESSAGE_GATEWAY_TIMEOUT));
 			}
 			
 			@Override
@@ -52,12 +55,12 @@ public abstract class Uplink {
 			
 			@Override
 			public void onReject() {
-				callback.onFailure(OperationResponse.failure(ResponseCode.BAD_GATEWAY));
+				callback.onFailure(OperationResponse.failure(ResponseCode.BAD_GATEWAY, MESSAGE_BAD_GATEWAY));
 			}
 			
 			@Override
 			public void onCancel() {
-				callback.onFailure(OperationResponse.failure(ResponseCode.BAD_GATEWAY));
+				callback.onFailure(OperationResponse.failure(ResponseCode.BAD_GATEWAY, MESSAGE_BAD_GATEWAY));
 			}
 			
 			@Override
@@ -71,6 +74,7 @@ public abstract class Uplink {
 	}
 
 	protected OperationResponse sendSyncRequest(final long timeout, final ch.ethz.inf.vs.californium.coap.Request request) {
+		checkStarted(origin);
 		origin.sendRequest(request);
 		
 		try {
@@ -78,7 +82,7 @@ public abstract class Uplink {
 			return OperationResponse.of(response);
 		} catch (final InterruptedException e) {
 			// TODO: Am I an internal server error?
-			return OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR);
+			return OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR, MESSAGE_INTERRUPTED);
 		}
 	}
 	
