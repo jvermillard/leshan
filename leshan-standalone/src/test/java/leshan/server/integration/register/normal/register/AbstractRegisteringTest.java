@@ -78,13 +78,11 @@ public class AbstractRegisteringTest {
 
 	@After
 	public void tearDown() {
-		System.out.println("TEARDOWN");
 		server.stop();
 	}
 
 	protected void validateResponsesToClient(final OperationResponse registerResponse, final String locationPathOptions,
 			final OperationResponse deregisterResponse) {
-				//As defined in 8.2.3 "The response includes Location-Path Options, which indicate the path to use for updating or deleting the registration. The server MUST return a location under the /rd path segment."
 				assertTrue(locationPathOptions.startsWith("/rd/"));
 				assertTrue(registerResponse.isSuccess());
 				assertEquals(registerResponse.getResponseCode(), ResponseCode.CREATED);

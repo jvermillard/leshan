@@ -12,13 +12,13 @@ import leshan.client.lwm2m.register.RegisterDownlink;
 import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.response.Callback;
 import leshan.client.lwm2m.response.OperationResponse;
-import leshan.server.lwm2m.message.ResponseCode;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.coap.Request;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -40,11 +40,11 @@ public class DeregisterTest extends AbstractRegisteringTest {
 		
 		final OperationResponse deregisterResponseOne = registerUplink.deregister(validNonexistentLocationPathOptions, TIMEOUT_MS);
 		
-		assertFalse(deregisterResponseOne.isSuccess());
 		assertEquals(deregisterResponseOne.getResponseCode(), ResponseCode.NOT_FOUND);
+		assertFalse(deregisterResponseOne.isSuccess());
 
 		final OperationResponse registerResponse = registerUplink.register(clientEndpoint, clientParameters, objectsAndInstances, TIMEOUT_MS);
-		final String locationPathOptions = new String(registerResponse.getPayload());
+		final String locationPathOptions = new String(registerResponse.getLocation());
 		
 		validateRegisteredClientOnServer();
 		
@@ -80,7 +80,7 @@ public class DeregisterTest extends AbstractRegisteringTest {
 		
 		final OperationResponse registerResponse = callback.getResponse();
 		
-		final String locationPathOptions = new String(registerResponse.getPayload());
+		final String locationPathOptions = new String(registerResponse.getLocation());
 		
 		validateRegisteredClientOnServer();
 		

@@ -31,15 +31,16 @@ public class RegisterTest extends AbstractRegisteringTest {
 
 		final OperationResponse registerResponse = registerUplink.register(clientEndpoint, clientParameters, objectsAndInstances, TIMEOUT_MS);
 
-		final String locationPathOptions = new String(registerResponse.getPayload());
+		final String locationPath = new String(registerResponse.getLocation());
+		System.out.println("LOCATION PATH " + locationPath);
 
 		validateRegisteredClientOnServer();
 
-		final OperationResponse deregisterResponse = registerUplink.deregister(locationPathOptions, TIMEOUT_MS);
+		final OperationResponse deregisterResponse = registerUplink.deregister(locationPath, TIMEOUT_MS);
 
 		validateNoRegisteredClientOnServer();
 
-		validateResponsesToClient(registerResponse, locationPathOptions, deregisterResponse);
+		validateResponsesToClient(registerResponse, locationPath, deregisterResponse);
 
 	}
 
@@ -53,13 +54,13 @@ public class RegisterTest extends AbstractRegisteringTest {
 		
 		await().untilTrue(callback.isCalled());
 
-		final String locationPathOptions = new String(callback.getResponsePayload());
+		final String locationPath = new String(callback.getResponse().getLocation());
 		final OperationResponse registerResponse = callback.getResponse();
 
 		validateRegisteredClientOnServer();
 
 		callback.reset();
-		registerUplink.deregister(locationPathOptions, callback);
+		registerUplink.deregister(locationPath, callback);
 		
 		await().untilTrue(callback.isCalled());
 		
@@ -67,7 +68,7 @@ public class RegisterTest extends AbstractRegisteringTest {
 
 		validateNoRegisteredClientOnServer();
 
-		validateResponsesToClient(registerResponse, locationPathOptions, deregisterResponse);
+		validateResponsesToClient(registerResponse, locationPath, deregisterResponse);
 
 	}
 }

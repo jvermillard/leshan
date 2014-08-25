@@ -36,11 +36,12 @@ import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class RegisterUplinkTest {
+	private static final String LOCATION = "/LOCATION";
 	private static final int SYNC_TIMEOUT_MS = 2000;
 	private static final String SERVER_HOST = "leshan.com";
 	private static final int SERVER_PORT = 1234;
 	private static final String ENDPOINT_NAME = UUID.randomUUID().toString();
-	private byte[] actualResponsePayload;
+	private String actualResponseLocation;
 	private String actualRequest;
 	private Code actualCode;
 	private ResponseCallback callback;
@@ -82,7 +83,7 @@ public class RegisterUplinkTest {
 				actualRequestPayload = request.getPayloadString();
 
 				final Response response = new Response(responseCode);
-				response.setPayload(OperationResponseCode.generateReasonPhrase(OperationResponseCode.valueOf(response.getCode().value), interfaceType, operationType));
+				response.getOptions().setLocationPath(LOCATION.substring(1));
 
 				request.setResponse(response);
 
@@ -103,7 +104,9 @@ public class RegisterUplinkTest {
 		uplink.register(ENDPOINT_NAME, parameters,  LinkFormat.parse(payload), callback);
 
 		await().untilTrue(callback.isCalled());
-		actualResponsePayload = callback.getResponsePayload();
+		if(callback.isSuccess()){
+			actualResponseLocation = callback.getResponse().getLocation();
+		}
 	}
 
 	private void sendRegisterAndGetSyncResponse(final RegisterUplink uplink, final String payload) {
@@ -113,14 +116,14 @@ public class RegisterUplinkTest {
 	private void sendRegisterAndGetSyncResponse(final RegisterUplink uplink, final Map<String, String> parameters, final String payload) {
 		operationResponse = uplink.register(ENDPOINT_NAME, parameters, LinkFormat.parse(payload), SYNC_TIMEOUT_MS);
 		if(operationResponse.isSuccess()){
-			actualResponsePayload = operationResponse.getPayload();
+			actualResponseLocation = operationResponse.getLocation();
 		}
 	}
 
-	private void verifyResponse(final String expectedResponsePayload, final String expectedRequest) {
+	private void verifyResponse(final String expectedResponseLocation, final String expectedRequest) {
 		assertEquals(expectedRequest, actualRequest);
 		assertEquals(Code.POST, actualCode);
-		assertArrayEquals(expectedResponsePayload.getBytes(), actualResponsePayload);
+		assertEquals(expectedResponseLocation, actualResponseLocation);
 	}
 
 	@Test
@@ -130,7 +133,7 @@ public class RegisterUplinkTest {
 		sendRegisterAndGetAsyncResponse(uplink, VALID_REQUEST_PAYLOAD);
 
 		verifyRequest(VALID_REQUEST_PAYLOAD);
-		verifyResponse("\"Register\" operation is completed successfully", expectedRequestRoot);
+		verifyResponse(LOCATION, expectedRequestRoot);
 	}
 
 
@@ -141,7 +144,7 @@ public class RegisterUplinkTest {
 		sendRegisterAndGetAsyncResponse(uplink, VALID_REQUEST_PAYLOAD);
 
 		verifyRequest(VALID_REQUEST_PAYLOAD);
-		verifyResponse("The mandatory parameter is not specified or unknown parameter is specified", expectedRequestRoot);
+		verifyResponse(null, expectedRequestRoot);
 	}
 
 	@Test
@@ -151,7 +154,7 @@ public class RegisterUplinkTest {
 		sendRegisterAndGetSyncResponse(uplink, VALID_REQUEST_PAYLOAD);
 
 		verifyRequest(VALID_REQUEST_PAYLOAD);
-		verifyResponse("\"Register\" operation is completed successfully", expectedRequestRoot);
+		verifyResponse(LOCATION, expectedRequestRoot);
 	}
 
 	@Test
@@ -161,7 +164,7 @@ public class RegisterUplinkTest {
 		sendRegisterAndGetSyncResponse(uplink, VALID_REQUEST_PAYLOAD);
 
 		verifyRequest(VALID_REQUEST_PAYLOAD);
-		verifyResponse("The mandatory parameter is not specified or unknown parameter is specified", expectedRequestRoot);
+		verifyResponse(null, expectedRequestRoot);
 	}
 
 	@Test
@@ -170,7 +173,7 @@ public class RegisterUplinkTest {
 
 		sendRegisterAndGetSyncResponse(uplink, null, INVALID_REQUEST_PAYLOAD);
 
-		assertNull(actualResponsePayload);
+		assertNull(actualResponseLocation);
 		assertFalse(operationResponse.isSuccess());
 		assertEquals(operationResponse.getResponseCode(), ResponseCode.BAD_REQUEST);
 	}
@@ -184,7 +187,7 @@ public class RegisterUplinkTest {
 
 		sendRegisterAndGetSyncResponse(uplink, invalidSmsMap, INVALID_REQUEST_PAYLOAD);
 
-		assertNull(actualResponsePayload);
+		assertNull(actualResponseLocation);
 		assertFalse(operationResponse.isSuccess());
 		assertEquals(operationResponse.getResponseCode(), ResponseCode.BAD_REQUEST);
 	}
@@ -198,7 +201,7 @@ public class RegisterUplinkTest {
 
 		sendRegisterAndGetSyncResponse(uplink, invalidSmsMap, INVALID_REQUEST_PAYLOAD);
 
-		assertNull(actualResponsePayload);
+		assertNull(actualResponseLocation);
 		assertFalse(operationResponse.isSuccess());
 		assertEquals(operationResponse.getResponseCode(), ResponseCode.BAD_REQUEST);
 	}
@@ -212,7 +215,7 @@ public class RegisterUplinkTest {
 
 		sendRegisterAndGetSyncResponse(uplink, invalidQueueMap, INVALID_REQUEST_PAYLOAD);
 
-		assertNull(actualResponsePayload);
+		assertNull(actualResponseLocation);
 		assertFalse(operationResponse.isSuccess());
 		assertEquals(operationResponse.getResponseCode(), ResponseCode.BAD_REQUEST);
 	}
@@ -227,7 +230,7 @@ public class RegisterUplinkTest {
 
 		sendRegisterAndGetSyncResponse(uplink, invalidIllegalMap, INVALID_REQUEST_PAYLOAD);
 
-		assertNull(actualResponsePayload);
+		assertNull(actualResponseLocation);
 		assertFalse(operationResponse.isSuccess());
 		assertEquals(operationResponse.getResponseCode(), ResponseCode.BAD_REQUEST);
 	}
@@ -241,7 +244,7 @@ public class RegisterUplinkTest {
 		sendRegisterAndGetSyncResponse(uplink, validMap, VALID_REQUEST_PAYLOAD);
 
 		verifyRequest(VALID_REQUEST_PAYLOAD);
-		verifyResponse("\"Register\" operation is completed successfully", expectedRequestRoot + "&" + validQuery);
+		verifyResponse(LOCATION, expectedRequestRoot + "&" + validQuery);
 	}
 
 	@Test
@@ -251,7 +254,7 @@ public class RegisterUplinkTest {
 		sendRegisterAndGetAsyncResponse(uplink, validMap, VALID_REQUEST_PAYLOAD);
 
 		verifyRequest(VALID_REQUEST_PAYLOAD);
-		verifyResponse("\"Register\" operation is completed successfully", expectedRequestRoot);
+		verifyResponse(LOCATION, expectedRequestRoot);
 	}
 
 	@Test
@@ -262,16 +265,9 @@ public class RegisterUplinkTest {
 
 		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED);
 
-		boolean noPayload = false;
+		sendRegisterAndGetAsyncResponse(uplink, invalidIllegalMap, VALID_REQUEST_PAYLOAD);
 
-		try{
-			sendRegisterAndGetAsyncResponse(uplink, invalidIllegalMap, VALID_REQUEST_PAYLOAD);
-		}
-		catch(final UnsupportedOperationException uoe){
-			noPayload = true;
-		}
-
-		assertTrue(noPayload);
+		assertNull(actualResponseLocation);
 		assertFalse(callback.isSuccess());
 		assertEquals(callback.getResponseCode(), ResponseCode.BAD_REQUEST);
 	}
@@ -286,7 +282,7 @@ public class RegisterUplinkTest {
 		sendRegisterAndGetSyncResponse(uplink, validMap, VALID_REQUEST_PAYLOAD);
 
 		verifyRequest(VALID_REQUEST_PAYLOAD);
-		verifyResponse("\"Register\" operation is completed successfully", expectedRequestRoot + "&" + validQuery);
+		verifyResponse(LOCATION, expectedRequestRoot + "&" + validQuery);
 	}
 
 	private void verifyRequest(final String expectedPayload) {
@@ -299,7 +295,7 @@ public class RegisterUplinkTest {
 
 		sendRegisterAndGetSyncResponse(uplink, validMap, INVALID_REQUEST_PAYLOAD);
 
-		assertNull(actualResponsePayload);
+		assertNull(actualResponseLocation);
 		assertFalse(operationResponse.isSuccess());
 		assertEquals(operationResponse.getResponseCode(), ResponseCode.BAD_REQUEST);
 	}
@@ -311,7 +307,7 @@ public class RegisterUplinkTest {
 
 		sendRegisterAndGetSyncResponse(uplink, validMap, null);
 
-		assertNull(actualResponsePayload);
+		assertNull(actualResponseLocation);
 		assertFalse(operationResponse.isSuccess());
 		assertEquals(operationResponse.getResponseCode(), ResponseCode.BAD_REQUEST);
 	}

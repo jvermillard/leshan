@@ -13,7 +13,7 @@ public class RegisteredEndpoint {
 
 	@Override
 	public String toString() {
-		return destination.getHostString() + ":" + destination.getPort() + "/rd/" + endpointName;
+		return destination.getHostString() + ":" + destination.getPort() + endpointName;
 	}
 
 }

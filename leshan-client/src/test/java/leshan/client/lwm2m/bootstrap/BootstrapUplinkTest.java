@@ -1,8 +1,7 @@
 package leshan.client.lwm2m.bootstrap;
 
 import static com.jayway.awaitility.Awaitility.await;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 
@@ -78,18 +77,27 @@ public class BootstrapUplinkTest {
 		uplink.bootstrap(ENDPOINT_NAME, callback);
 		
 		await().untilTrue(callback.isCalled());
-		actualPayload = callback.getResponsePayload();
+		if(callback.isSuccess()){
+			actualPayload = callback.getResponsePayload();
+		}
 	}
 	
 	private void sendBootstrapAndGetSyncResponse(final BootstrapUplink uplink) {
 		final OperationResponse operationResponse = uplink.bootstrap(ENDPOINT_NAME, SYNC_TIMEOUT_MS);
-		actualPayload = operationResponse.getPayload();
+		if(operationResponse.isSuccess()){
+			actualPayload = operationResponse.getPayload();
+		}
 	}
 	
 	private void verifyResponse(final String expectedPayload) {
 		assertEquals(expectedRequest, actualRequest);
 		assertEquals(Code.POST, actualCode);
-		assertArrayEquals(expectedPayload.getBytes(), actualPayload);
+		if(expectedPayload != null){
+			assertArrayEquals(expectedPayload.getBytes(), actualPayload);
+		}
+		else{
+			assertTrue(actualPayload == null);
+		}
 	}
 	
 	@Test
@@ -108,7 +116,7 @@ public class BootstrapUplinkTest {
 		
 		sendBootstrapAndGetAsyncResponse(uplink);
 		
-		verifyResponse("Unknown Endpoint Client Name");
+		verifyResponse(null);
 	}
 	
 	@Test
@@ -126,6 +134,6 @@ public class BootstrapUplinkTest {
 		
 		sendBootstrapAndGetSyncResponse(uplink);
 		
-		verifyResponse("Unknown Endpoint Client Name");
+		verifyResponse(null);
 	}
 }

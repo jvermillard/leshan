@@ -1,6 +1,7 @@
 package leshan.client.lwm2m.register;
 
 import java.net.InetSocketAddress;
+import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -161,7 +162,8 @@ public class RegisterUplink extends Uplink{
 			final Map<String, String> parameters) {
 		final Request request = Request.newPut();
 		final RegisteredEndpoint registerEndpoint = new RegisteredEndpoint(getDestination(), endpointLocation);
-		request.setURI(registerEndpoint.toString() + "&" + leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
+		final Request request2 = request.setURI(registerEndpoint.toString() + "&" + leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
+		System.out.println("REQUEST: " + request2.getURI());
 		return request;
 	}
 	
@@ -169,7 +171,9 @@ public class RegisterUplink extends Uplink{
 			final String endpointLocation) {
 		final ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newDelete();
 		final RegisteredEndpoint deregisterEndpoint = new RegisteredEndpoint(getDestination(), endpointLocation);
+		request.getOptions().setLocationPath(endpointLocation);
 		request.setURI(deregisterEndpoint.toString());
+		
 		return request;
 	}
 

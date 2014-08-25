@@ -40,7 +40,6 @@ public class DeregisterUplinkTest {
 	@Mock
 	private RegisterDownlink downlink;
 	
-	private String expectedRequestLocation;
 	private String actualRequestLocation;
 
 	private RegisterUplink uplink;
@@ -55,7 +54,6 @@ public class DeregisterUplinkTest {
 	public void setUp(){
 		callback = new ResponseCallback();
 		serverAddress = InetSocketAddress.createUnresolved(SERVER_HOST, SERVER_PORT);
-		expectedRequestLocation = "coap://" + serverAddress.getHostString() + ":" + serverAddress.getPort() + "/rd/" + ENDPOINT_LOCATION;
 		uplink = new RegisterUplink(serverAddress, endpoint, downlink);
 		
 		doAnswer(new Answer<Void>() {
@@ -63,7 +61,7 @@ public class DeregisterUplinkTest {
 			@Override
 			public Void answer(final InvocationOnMock invocation) throws Throwable {
 				final Request request = (Request) invocation.getArguments()[0];
-				actualRequestLocation = request.getURI();
+				actualRequestLocation = request.getOptions().getLocationPathString();
 				
 				final Response response = new Response(ResponseCode.DELETED);
 				response.setPayload(OperationResponseCode.generateReasonPhrase(OperationResponseCode.valueOf(response.getCode().value), 
@@ -87,7 +85,7 @@ public class DeregisterUplinkTest {
 		
 		assertTrue(response.isSuccess());
 		assertEquals(ResponseCode.DELETED, response.getResponseCode());
-		assertEquals(expectedRequestLocation, actualRequestLocation);
+		assertEquals(ENDPOINT_LOCATION, actualRequestLocation);
 	}
 	
 	@Test
@@ -103,7 +101,7 @@ public class DeregisterUplinkTest {
 		
 		assertTrue(callback.isSuccess());
 		assertEquals(ResponseCode.DELETED, callback.getResponseCode());
-		assertEquals(expectedRequestLocation, actualRequestLocation);
+		assertEquals(ENDPOINT_LOCATION, actualRequestLocation);
 	}
 	
 	@Test

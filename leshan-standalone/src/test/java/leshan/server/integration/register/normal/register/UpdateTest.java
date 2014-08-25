@@ -41,14 +41,14 @@ public class UpdateTest extends AbstractRegisteringTest {
 
 		final OperationResponse registerResponse = registerUplink.register(clientEndpoint, clientParameters, objectsAndInstances, TIMEOUT_MS);
 
-		final String locationPathOptions = new String(registerResponse.getPayload());
+		final String locationPath = new String(registerResponse.getLocation());
 
 		final Double newLifetime = 100000.1;
 		clientParameters.put("lt", newLifetime.toString());
 		
-		final OperationResponse updateResponse = registerUplink.update(locationPathOptions, clientParameters, objectsAndInstances, TIMEOUT_MS);
+		final OperationResponse updateResponse = registerUplink.update(locationPath, clientParameters, objectsAndInstances, TIMEOUT_MS);
 		
-		final OperationResponse deregisterResponse = registerUplink.deregister(locationPathOptions, TIMEOUT_MS);
+		registerUplink.deregister(locationPath, TIMEOUT_MS);
 		
 		assertTrue(updateResponse.isSuccess());
 		assertEquals(ResponseCode.CHANGED, updateResponse.getResponseCode());
@@ -67,13 +67,13 @@ public class UpdateTest extends AbstractRegisteringTest {
 		
 		await().untilTrue(callback.isCalled());
 
-		final String locationPathOptions = new String(callback.getResponsePayload());
+		final String locationPath = new String(callback.getResponse().getLocation());
 
 		final Double newLifetime = 100000.1;
 		clientParameters.put("lt", newLifetime.toString());
 
 		callback.reset();
-		registerUplink.update(locationPathOptions, clientParameters, objectsAndInstances, callback);
+		registerUplink.update(locationPath, clientParameters, objectsAndInstances, callback);
 		
 		await().untilTrue(callback.isCalled());
 		
@@ -83,7 +83,7 @@ public class UpdateTest extends AbstractRegisteringTest {
 		validateUpdatedClientOnServer(newLifetime);
 
 		callback.reset();
-		registerUplink.deregister(locationPathOptions, callback);
+		registerUplink.deregister(locationPath, callback);
 		
 		await().untilTrue(callback.isCalled());
 	}

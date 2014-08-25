@@ -9,6 +9,7 @@ public abstract class OperationResponse {
 	public abstract String getErrorMessage();
 	public abstract ResponseCode getResponseCode();
 	public abstract byte[] getPayload();
+	public abstract String getLocation();
 
 	public static OperationResponse of(final Response response) {
 		return new SuccessfulOperationResponse(response);
@@ -45,6 +46,12 @@ public abstract class OperationResponse {
 			throw new UnsupportedOperationException("Successful Operations do not have Error Messages.");
 		}
 
+		@Override
+		public String getLocation() {
+			return response.getOptions().getLocationString();
+		}
+		
+
 	}
 
 	private static class FailedOperationResponse extends OperationResponse {
@@ -76,6 +83,11 @@ public abstract class OperationResponse {
 			throw new UnsupportedOperationException("Failed Operations Do Not Have Payloads... for NOW...");
 		}
 
+		@Override
+		public String getLocation() {
+			throw new UnsupportedOperationException("Failed Operations Do Not Have Location Paths... for NOW...");
+		}
+
 	}
 
 	@Override
@@ -85,4 +97,5 @@ public abstract class OperationResponse {
 		
 		return builder.toString();
 	}
+	
 }

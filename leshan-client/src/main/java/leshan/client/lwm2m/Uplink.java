@@ -50,7 +50,12 @@ public abstract class Uplink {
 			
 			@Override
 			public void onResponse(final Response response) {
-				callback.onSuccess(OperationResponse.of(response));
+				if(ResponseCode.isSuccess(response.getCode())){
+					callback.onSuccess(OperationResponse.of(response));
+				}
+				else{
+					callback.onFailure(OperationResponse.failure(response.getCode(), "Request Failed on Server " + response.getOptions()));
+				}
 			}
 			
 			@Override
@@ -79,7 +84,12 @@ public abstract class Uplink {
 		
 		try {
 			final Response response = request.waitForResponse(timeout);
-			return OperationResponse.of(response);
+			if(ResponseCode.isSuccess(response.getCode())){
+				return OperationResponse.of(response);
+			}
+			else{
+				return OperationResponse.failure(response.getCode(), "Request Failed on Server " + response.getOptions());
+			}
 		} catch (final InterruptedException e) {
 			// TODO: Am I an internal server error?
 			return OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR, MESSAGE_INTERRUPTED);
