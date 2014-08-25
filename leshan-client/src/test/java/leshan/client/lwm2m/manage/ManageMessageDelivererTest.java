@@ -90,20 +90,20 @@ public class ManageMessageDelivererTest {
 	}
 
 	@Test
-	public void putOnResourceCallsWrite() {
+	public void putOnResourceCallsReplace() {
 		deliverRequestWithPayload(Code.PUT, "/86/75/309", "new-value");
-		verify(downlink).write(86, 75, 309, "new-value");
+		verify(downlink).replace(86, 75, 309, "new-value");
 	}
 
 	@Test
-	public void putOnObjectInstanceCallsWrite() {
+	public void putOnObjectInstanceCallsReplace() {
 		deliverRequestWithPayload(Code.PUT, "/86/75", "new-value");
-		verify(downlink).write(86, 75, "new-value");
+		verify(downlink).replace(86, 75, "new-value");
 	}
 
 	@Test
 	public void putOnResourceRespondsWithChanged() {
-		when(downlink.write(86, 75, 309, "new-value")).thenReturn(createResponse(ResponseCode.CHANGED, "Resource has changed"));
+		when(downlink.replace(86, 75, 309, "new-value")).thenReturn(createResponse(ResponseCode.CHANGED, "Resource has changed"));
 		deliverRequestWithPayload(Code.PUT, "/86/75/309", "new-value");
 		verifyResponse(OperationResponseCode.CHANGED, "Resource has changed");
 	}

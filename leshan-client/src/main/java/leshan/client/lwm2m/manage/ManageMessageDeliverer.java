@@ -57,9 +57,9 @@ public class ManageMessageDeliverer implements MessageDeliverer {
 
 	private OperationResponse putToDownlink(final ResourceSpec spec, final byte[] payload) {
 		if (spec.getResourceId() != ResourceSpec.DOES_NOT_EXIST) {
-			return downlink.write(spec.getObjectId(), spec.getObjectInstanceId(), spec.getResourceId(), new String(payload));
+			return downlink.replace(spec.getObjectId(), spec.getObjectInstanceId(), spec.getResourceId(), new String(payload));
 		} else if (spec.getObjectInstanceId() != ResourceSpec.DOES_NOT_EXIST){
-			return downlink.write(spec.getObjectId(), spec.getObjectInstanceId(), new String(payload));
+			return downlink.replace(spec.getObjectId(), spec.getObjectInstanceId(), new String(payload));
 		} else {
 			final Response response = new Response(ResponseCode.METHOD_NOT_ALLOWED);
 			response.setPayload("Target is not allowed for \"Write\" operation");
