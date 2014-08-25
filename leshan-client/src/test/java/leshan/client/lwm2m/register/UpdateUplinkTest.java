@@ -125,7 +125,7 @@ public class UpdateUplinkTest {
 		final Map<String, String> validMap = generateValidParameters();
 		final String validQuery = leshan.client.lwm2m.request.Request.toQueryStringMap(validMap);
 
-		expectedRequestLocation ="coap://" + serverAddress.getHostString() + ":" + serverAddress.getPort() + "/rd/" + ENDPOINT_LOCATION + "&" + validQuery;
+		expectedRequestLocation ="coap://localhost/?" + validQuery;
 
 		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.CHANGED);
 
@@ -139,7 +139,7 @@ public class UpdateUplinkTest {
 		final Map<String, String> validMap = generateValidParameters();
 		final String validQuery = leshan.client.lwm2m.request.Request.toQueryStringMap(validMap);
 
-		expectedRequestLocation = "coap://" + serverAddress.getHostString() + ":" + serverAddress.getPort() + "/rd/" + ENDPOINT_LOCATION + "&" + validQuery;
+		expectedRequestLocation ="coap://localhost/?" + validQuery;
 
 		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.CHANGED);
 
@@ -178,7 +178,7 @@ public class UpdateUplinkTest {
 		final Map<String, String> validMap = generateValidParameters();
 		final String validQuery = leshan.client.lwm2m.request.Request.toQueryStringMap(validMap);
 		
-		expectedRequestLocation = "coap://" + serverAddress.getHostString() + ":" + serverAddress.getPort() + "/rd/" + ENDPOINT_LOCATION + "&" + validQuery;
+		expectedRequestLocation ="coap://localhost/?" + validQuery;
 
 		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.CHANGED);
 
@@ -190,4 +190,14 @@ public class UpdateUplinkTest {
 		verifySuccessfulAsyncUpdate(expectedRequestLocation, validQuery, VALID_REQUEST_PAYLOAD, ResponseCode.CHANGED);
 	}
 
+	
+	@Test
+	public void buildRequest(){
+		final Map<String, String> validMap = generateValidParameters();
+		final String validQuery = leshan.client.lwm2m.request.Request.toQueryStringMap(validMap);
+		
+		final Request request = Request.newPut();
+		request.getOptions().setURIQuery(validQuery);
+		System.out.println(request.toString());
+	}
 }

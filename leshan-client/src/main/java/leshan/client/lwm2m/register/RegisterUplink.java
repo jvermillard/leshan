@@ -162,8 +162,9 @@ public class RegisterUplink extends Uplink{
 			final Map<String, String> parameters) {
 		final Request request = Request.newPut();
 		final RegisteredEndpoint registerEndpoint = new RegisteredEndpoint(getDestination(), endpointLocation);
-		final Request request2 = request.setURI(registerEndpoint.toString() + "&" + leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
-		System.out.println("REQUEST: " + request2.getURI());
+		request.setURI(registerEndpoint.toString());
+		request.getOptions().setURIQuery(leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
+		
 		return request;
 	}
 	

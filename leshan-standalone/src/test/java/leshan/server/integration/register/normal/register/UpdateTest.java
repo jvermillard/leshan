@@ -43,17 +43,18 @@ public class UpdateTest extends AbstractRegisteringTest {
 
 		final String locationPath = new String(registerResponse.getLocation());
 
-		final Double newLifetime = 100000.1;
+		final Long newLifetime = (long) 100001;
 		clientParameters.put("lt", newLifetime.toString());
 		
 		final OperationResponse updateResponse = registerUplink.update(locationPath, clientParameters, objectsAndInstances, TIMEOUT_MS);
+		
+		validateUpdatedClientOnServer(newLifetime, 1);
 		
 		registerUplink.deregister(locationPath, TIMEOUT_MS);
 		
 		assertTrue(updateResponse.isSuccess());
 		assertEquals(ResponseCode.CHANGED, updateResponse.getResponseCode());
 		
-		validateUpdatedClientOnServer(newLifetime);
 
 	}
 
@@ -69,7 +70,7 @@ public class UpdateTest extends AbstractRegisteringTest {
 
 		final String locationPath = new String(callback.getResponse().getLocation());
 
-		final Double newLifetime = 100000.1;
+		final Long newLifetime = (long) 100002;
 		clientParameters.put("lt", newLifetime.toString());
 
 		callback.reset();
@@ -80,7 +81,7 @@ public class UpdateTest extends AbstractRegisteringTest {
 		assertTrue(callback.isSuccess());
 		assertEquals(ResponseCode.CHANGED, callback.getResponseCode());
 		
-		validateUpdatedClientOnServer(newLifetime);
+		validateUpdatedClientOnServer(newLifetime, 1);
 
 		callback.reset();
 		registerUplink.deregister(locationPath, callback);
@@ -88,15 +89,15 @@ public class UpdateTest extends AbstractRegisteringTest {
 		await().untilTrue(callback.isCalled());
 	}
 	
-	private void validateUpdatedClientOnServer(final Double lifetime) {
+	private void validateUpdatedClientOnServer(final Long newLifetime, final int expectedClients) {
 		final Gson gson = new Gson();
 		
 		final String serverKnownClientsJson = TestUtils.getAPI("api/clients");
 		List<Map<String, Object>> serverKnownClients = new ArrayList<>();
 		serverKnownClients = gson.fromJson(serverKnownClientsJson, serverKnownClients.getClass());
-		assertEquals(1, serverKnownClients.size());
+		assertEquals(expectedClients, serverKnownClients.size());
 		
 		final Map<String, Object> clientParameters = serverKnownClients.get(0);
-		assertEquals(lifetime, clientParameters.get("lifetime"));
+		assertEquals(newLifetime.doubleValue(), Double.parseDouble(clientParameters.get("lifetime").toString()), 0.001);
 	}
 }
