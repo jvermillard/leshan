@@ -63,7 +63,7 @@ public class DeviceObjectIT {
     /**
      * Interoperability Test Case : LightweightM2M-1.0-int-201 – Querying basic information from the client in Plain
      * Text format
-     *
+     * 
      * PSK security mode
      */
     @Test
