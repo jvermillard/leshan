@@ -44,35 +44,10 @@ public class ManageMessageDelivererTest {
 	}
 
 	@Test
-	public void getOnObjectInstanceCallsRead() {
-		deliverRequestNoPayload(Code.GET, "/4/8");
-		verify(downlink).read(4, 8);
-	}
-
-	@Test
-	public void getOnObjectCallsRead() {
-		deliverRequestNoPayload(Code.GET, "/4");
-		verify(downlink).read(4);
-	}
-
-	@Test
 	public void getOnResourceRespondsWithContent(){
 		when(downlink.read(16, 23, 42)).thenReturn(createResponse(ResponseCode.CONTENT, "resource of life"));
 		deliverRequestNoPayload(Code.GET, "/16/23/42");
 		verifyResponse(OperationResponseCode.CONTENT, "resource of life");
-	}
-
-	@Test
-	public void getOnObjectRespondsWithContent(){
-		when(downlink.read(16)).thenReturn(createResponse(ResponseCode.CONTENT, "resource of life"));
-		deliverRequestNoPayload(Code.GET, "/16");
-		verifyResponse(OperationResponseCode.CONTENT, "resource of life");
-	}
-
-	@Test
-	public void getOnBadUriRespondsWithBadRequest() {
-		deliverRequestNoPayload(Code.GET, "/lolz");
-		verifyResponse(OperationResponseCode.BAD_REQUEST, "Invalid URI");
 	}
 
 	@Test
@@ -90,15 +65,34 @@ public class ManageMessageDelivererTest {
 	}
 
 	@Test
-	public void putOnResourceCallsReplace() {
-		deliverRequestWithPayload(Code.PUT, "/86/75/309", "new-value");
-		verify(downlink).replace(86, 75, 309, "new-value");
+	public void getOnObjectInstanceCallsRead() {
+		deliverRequestNoPayload(Code.GET, "/4/8");
+		verify(downlink).read(4, 8);
 	}
 
 	@Test
-	public void putOnObjectInstanceCallsReplace() {
-		deliverRequestWithPayload(Code.PUT, "/86/75", "new-value");
-		verify(downlink).replace(86, 75, "new-value");
+	public void getOnObjectCallsRead() {
+		deliverRequestNoPayload(Code.GET, "/4");
+		verify(downlink).read(4);
+	}
+
+	@Test
+	public void getOnObjectRespondsWithContent(){
+		when(downlink.read(16)).thenReturn(createResponse(ResponseCode.CONTENT, "resource of life"));
+		deliverRequestNoPayload(Code.GET, "/16");
+		verifyResponse(OperationResponseCode.CONTENT, "resource of life");
+	}
+
+	@Test
+	public void getOnBadUriRespondsWithBadRequest() {
+		deliverRequestNoPayload(Code.GET, "/lolz");
+		verifyResponse(OperationResponseCode.BAD_REQUEST, "Invalid URI");
+	}
+
+	@Test
+	public void putOnResourceCallsReplace() {
+		deliverRequestWithPayload(Code.PUT, "/86/75/309", "new-value");
+		verify(downlink).replace(86, 75, 309, "new-value");
 	}
 
 	@Test
@@ -106,6 +100,12 @@ public class ManageMessageDelivererTest {
 		when(downlink.replace(86, 75, 309, "new-value")).thenReturn(createResponse(ResponseCode.CHANGED, "Resource has changed"));
 		deliverRequestWithPayload(Code.PUT, "/86/75/309", "new-value");
 		verifyResponse(OperationResponseCode.CHANGED, "Resource has changed");
+	}
+
+	@Test
+	public void putOnObjectInstanceCallsReplace() {
+		deliverRequestWithPayload(Code.PUT, "/86/75", "new-value");
+		verify(downlink).replace(86, 75, "new-value");
 	}
 
 	@Test
