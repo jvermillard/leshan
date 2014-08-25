@@ -17,12 +17,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import leshan.client.lwm2m.response.Callback;
 import leshan.client.lwm2m.response.OperationResponse;
+import leshan.client.lwm2m.util.ResponseCallback;
 import leshan.server.LeshanMain;
 import leshan.server.clienttest.TestUtils;
 
 import org.junit.After;
 import org.junit.Before;
+import org.mockito.Mock;
 
 import ch.ethz.inf.vs.californium.WebLink;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
@@ -53,6 +56,8 @@ public class AbstractRegisteringTest {
 				"/lwm2m/5",
 		};
 	private Set<String> clientDataModelResourceSet;
+	
+	protected ResponseCallback callback;
 
 	public AbstractRegisteringTest() {
 		super();
@@ -68,10 +73,12 @@ public class AbstractRegisteringTest {
 		clientEndpoint = UUID.randomUUID().toString();
 		clientParameters = new HashMap<>();
 		objectsAndInstances = LinkFormat.parse(clientDataModel);
+		callback = new ResponseCallback();
 	}
 
 	@After
 	public void tearDown() {
+		System.out.println("TEARDOWN");
 		server.stop();
 	}
 

@@ -1,4 +1,4 @@
-package leshan.client.lwm2m.response;
+package leshan.client.lwm2m.util;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -7,13 +7,13 @@ import ch.ethz.inf.vs.californium.coap.Message;
 import leshan.client.lwm2m.response.Callback;
 import leshan.client.lwm2m.response.OperationResponse;
 
-public class MockedCallback implements Callback {
+public class ResponseCallback implements Callback {
 	
 
 	private final AtomicBoolean called;
 	private OperationResponse response;
 	
-	public MockedCallback() {
+	public ResponseCallback() {
 		called = new AtomicBoolean(false);
 	}
 
@@ -43,5 +43,13 @@ public class MockedCallback implements Callback {
 	
 	public boolean isSuccess(){
 		return response.isSuccess();
+	}
+
+	public void reset() {
+		called.set(false);
+	}
+
+	public OperationResponse getResponse() {
+		return response;
 	}
 }

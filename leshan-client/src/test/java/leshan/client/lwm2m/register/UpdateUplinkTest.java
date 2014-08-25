@@ -12,9 +12,9 @@ import java.util.UUID;
 
 import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.InterfaceTypes;
 import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.OperationTypes;
-import leshan.client.lwm2m.response.MockedCallback;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.response.OperationResponseCode;
+import leshan.client.lwm2m.util.ResponseCallback;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +50,7 @@ public class UpdateUplinkTest {
 	private String expectedRequestLocation;
 
 	private String actualRequestPayload;
-	private MockedCallback callback;
+	private ResponseCallback callback;
 	private OperationResponse asyncResponse;
 
 	private InetSocketAddress serverAddress;
@@ -60,7 +60,7 @@ public class UpdateUplinkTest {
 	public void setUp(){
 		actualRequestLocation = null;
 		expectedRequestLocation = null;
-		callback = new MockedCallback();
+		callback = new ResponseCallback();
 		serverAddress = InetSocketAddress.createUnresolved(SERVER_HOST, SERVER_PORT);
 	}
 

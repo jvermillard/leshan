@@ -105,17 +105,18 @@ public class RegisterUplink extends Uplink{
 		return sendSyncRequest(timeout, request);
 	}
 	
-	public OperationResponse deregister(final String endpointLocation) {
+	public OperationResponse deregister(final String endpointLocation, final long timeout) {
 		if(endpointLocation == null){
 			return OperationResponse.failure(ResponseCode.NOT_FOUND, MESSAGE_NULL_ENDPOINT);
 		}
 		
 		final ch.ethz.inf.vs.californium.coap.Request request = createDeregisterRequest(endpointLocation);
 		
-		origin.sendRequest(request);
+		final OperationResponse response = sendSyncRequest(timeout, request);
+		
 		origin.stop();
 		
-		return OperationResponse.of(new Response(ResponseCode.DELETED));
+		return response;
 	}
 	
 	public void deregister(final String endpointLocation, final Callback callback) {

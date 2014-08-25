@@ -1,5 +1,6 @@
 package leshan.server.integration.register.normal.register;
 
+import static com.jayway.awaitility.Awaitility.await;
 import static org.junit.Assert.*;
 
 import java.net.UnknownHostException;
@@ -34,7 +35,7 @@ public class RegisterTest extends AbstractRegisteringTest {
 
 		validateRegisteredClientOnServer();
 
-		final OperationResponse deregisterResponse = registerUplink.deregister(clientEndpoint);
+		final OperationResponse deregisterResponse = registerUplink.deregister(locationPathOptions, TIMEOUT_MS);
 
 		validateNoRegisteredClientOnServer();
 
@@ -42,4 +43,31 @@ public class RegisterTest extends AbstractRegisteringTest {
 
 	}
 
+	@Test
+	public void testRegisterAndDeregisterAsync() throws UnknownHostException {
+		final ClientFactory clientFactory = new ClientFactory();
+
+		final RegisterUplink registerUplink = clientFactory.startRegistration(clientPort, serverAddress, downlink);
+
+		registerUplink.register(clientEndpoint, clientParameters, objectsAndInstances, callback);
+		
+		await().untilTrue(callback.isCalled());
+
+		final String locationPathOptions = new String(callback.getResponsePayload());
+		final OperationResponse registerResponse = callback.getResponse();
+
+		validateRegisteredClientOnServer();
+
+		callback.reset();
+		registerUplink.deregister(locationPathOptions, callback);
+		
+		await().untilTrue(callback.isCalled());
+		
+		final OperationResponse deregisterResponse = callback.getResponse();
+
+		validateNoRegisteredClientOnServer();
+
+		validateResponsesToClient(registerResponse, locationPathOptions, deregisterResponse);
+
+	}
 }

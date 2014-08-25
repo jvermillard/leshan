@@ -9,9 +9,9 @@ import java.util.UUID;
 
 import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.InterfaceTypes;
 import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.OperationTypes;
-import leshan.client.lwm2m.response.MockedCallback;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.response.OperationResponseCode;
+import leshan.client.lwm2m.util.ResponseCallback;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,6 +29,7 @@ import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DeregisterUplinkTest {
+	private static final int SYNC_TIMEOUT_MS = 2000;
 	private static final String SERVER_HOST = "leshan.com";
 	private static final int SERVER_PORT = 1234;
 
@@ -44,7 +45,7 @@ public class DeregisterUplinkTest {
 
 	private RegisterUplink uplink;
 
-	private MockedCallback callback;
+	private ResponseCallback callback;
 
 	private byte[] actualResponsePayload;
 
@@ -52,7 +53,7 @@ public class DeregisterUplinkTest {
 	
 	@Before
 	public void setUp(){
-		callback = new MockedCallback();
+		callback = new ResponseCallback();
 		serverAddress = InetSocketAddress.createUnresolved(SERVER_HOST, SERVER_PORT);
 		expectedRequestLocation = "coap://" + serverAddress.getHostString() + ":" + serverAddress.getPort() + "/rd/" + ENDPOINT_LOCATION;
 		uplink = new RegisterUplink(serverAddress, endpoint, downlink);
@@ -78,7 +79,7 @@ public class DeregisterUplinkTest {
 	@Test
 	public void testGoodSyncDeregister() {
 		
-		final OperationResponse response = uplink.deregister(ENDPOINT_LOCATION);
+		final OperationResponse response = uplink.deregister(ENDPOINT_LOCATION, SYNC_TIMEOUT_MS);
 		
 		
 		verify(endpoint).stop();
@@ -107,7 +108,7 @@ public class DeregisterUplinkTest {
 	
 	@Test
 	public void testNullSyncDeregister() {
-		final OperationResponse response = uplink.deregister(null);
+		final OperationResponse response = uplink.deregister(null, SYNC_TIMEOUT_MS);
 		
 		verify(endpoint, never()).stop();
 		verify(endpoint, never()).sendRequest(any(Request.class));
