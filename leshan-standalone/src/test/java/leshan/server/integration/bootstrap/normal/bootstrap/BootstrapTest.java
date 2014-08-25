@@ -1,9 +1,10 @@
-package leshan.server.clienttest.bootstrap.normal.bootstrap;
+package leshan.server.integration.bootstrap.normal.bootstrap;
 
 import leshan.server.LeshanMain;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class BootstrapTest {
@@ -16,6 +17,7 @@ public class BootstrapTest {
         server.start();
 	}
 	
+	@Ignore
 	@Test
 	public void clientInitiatedTest() {
 		// Start client -- possibly in setup()?

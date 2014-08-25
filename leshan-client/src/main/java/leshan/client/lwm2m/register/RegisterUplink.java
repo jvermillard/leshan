@@ -1,5 +1,6 @@
 package leshan.client.lwm2m.register;
 
+import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -19,8 +20,8 @@ import leshan.client.lwm2m.util.LinkFormatUtils;
 public class RegisterUplink extends Uplink{
 	private static final String ENDPOINT = "ep";
 	
-	public RegisterUplink(final CoAPEndpoint endpoint) {
-		super(endpoint);
+	public RegisterUplink(final InetSocketAddress destination, final CoAPEndpoint origin) {
+		super(destination, origin);
 	}
 
 	public OperationResponse register(final String endpointName, final Map<String, String> parameters, final Set<WebLink> objectsAndInstances, final int timeout) {
@@ -103,8 +104,8 @@ public class RegisterUplink extends Uplink{
 		
 		final ch.ethz.inf.vs.californium.coap.Request request = createDeregisterRequest(endpointLocation);
 		
-		endpoint.sendRequest(request);
-		endpoint.stop();
+		origin.sendRequest(request);
+		origin.stop();
 		
 		return OperationResponse.of(new Response(ResponseCode.DELETED));
 	}
@@ -122,13 +123,13 @@ public class RegisterUplink extends Uplink{
 			@Override
 			public void onSuccess(final OperationResponse response) {
 				initializingCallback.onSuccess(response);
-				endpoint.stop();
+				origin.stop();
 			}
 
 			@Override
 			public void onFailure(final OperationResponse response) {
 				initializingCallback.onFailure(response);
-				endpoint.stop();
+				origin.stop();
 			}
 			
 		}, request);
@@ -141,7 +142,7 @@ public class RegisterUplink extends Uplink{
 	private ch.ethz.inf.vs.californium.coap.Request createRegisterRequest(
 			final String endpointName, final String payload) {
 		final ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newPost();
-		final RegisterEndpoint registerEndpoint = new RegisterEndpoint(Collections.singletonMap(ENDPOINT, endpointName));
+		final RegisterEndpoint registerEndpoint = new RegisterEndpoint(getDestination(), Collections.singletonMap(ENDPOINT, endpointName));
 		request.setURI(registerEndpoint.toString());
 		request.setPayload(payload);
 		return request;
@@ -150,7 +151,7 @@ public class RegisterUplink extends Uplink{
 	private Request createUpdateRequest(final String endpointLocation,
 			final Map<String, String> parameters) {
 		final Request request = Request.newPut();
-		final RegisteredEndpoint registerEndpoint = new RegisteredEndpoint(endpointLocation);
+		final RegisteredEndpoint registerEndpoint = new RegisteredEndpoint(getDestination(), endpointLocation);
 		request.setURI(registerEndpoint.toString() + "&" + leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
 		return request;
 	}
@@ -158,7 +159,7 @@ public class RegisterUplink extends Uplink{
 	private ch.ethz.inf.vs.californium.coap.Request createDeregisterRequest(
 			final String endpointLocation) {
 		final ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newDelete();
-		final RegisteredEndpoint deregisterEndpoint = new RegisteredEndpoint(endpointLocation);
+		final RegisteredEndpoint deregisterEndpoint = new RegisteredEndpoint(getDestination(), endpointLocation);
 		request.setURI(deregisterEndpoint.toString());
 		return request;
 	}

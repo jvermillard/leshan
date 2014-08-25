@@ -4,6 +4,7 @@ import static com.jayway.awaitility.Awaitility.await;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.net.InetSocketAddress;
 import java.util.UUID;
 
 import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.InterfaceTypes;
@@ -28,6 +29,9 @@ import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DeregisterUplinkTest {
+	private static final String SERVER_HOST = "leshan.com";
+	private static final int SERVER_PORT = 1234;
+
 	private static final String ENDPOINT_LOCATION = UUID.randomUUID().toString();
 
 	@Mock
@@ -41,12 +45,15 @@ public class DeregisterUplinkTest {
 	private MockedCallback callback;
 
 	private byte[] actualResponsePayload;
+
+	private InetSocketAddress serverAddress;
 	
 	@Before
 	public void setUp(){
 		callback = new MockedCallback();
-		expectedRequestLocation = "coap://localhost/rd/" + ENDPOINT_LOCATION;
-		uplink = new RegisterUplink(endpoint);
+		serverAddress = InetSocketAddress.createUnresolved(SERVER_HOST, SERVER_PORT);
+		expectedRequestLocation = "coap://" + serverAddress.getHostString() + ":" + serverAddress.getPort() + "/rd/" + ENDPOINT_LOCATION;
+		uplink = new RegisterUplink(serverAddress, endpoint);
 		
 		doAnswer(new Answer<Void>() {
 

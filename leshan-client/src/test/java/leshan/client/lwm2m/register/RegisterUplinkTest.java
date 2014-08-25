@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 
+import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -36,6 +37,8 @@ import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 @RunWith(MockitoJUnitRunner.class)
 public class RegisterUplinkTest {
 	private static final int SYNC_TIMEOUT_MS = 2000;
+	private static final String SERVER_HOST = "leshan.com";
+	private static final int SERVER_PORT = 1234;
 	private static final String ENDPOINT_NAME = UUID.randomUUID().toString();
 	private byte[] actualResponsePayload;
 	private String actualRequest;
@@ -51,11 +54,13 @@ public class RegisterUplinkTest {
 	private final String VALID_REQUEST_PAYLOAD = "</lwm2m>;rt=\"oma.lwm2m\", </lwm2m/1/101>, </lwm2m/1/102>, </lwm2m/2/0>, </lwm2m/2/1>, </lwm2m/2/2>, </lwm2m/3/0>, </lwm2m/4/0>, </lwm2m/5>";
 	private final String INVALID_REQUEST_PAYLOAD = "";
 	private Object actualRequestPayload;
+	private InetSocketAddress serverAddress;
 
 	@Before
 	public void setUp() {
 		callback = new MockedCallback();
-		expectedRequestRoot = "coap://localhost/rd?ep=" + ENDPOINT_NAME;
+		serverAddress = InetSocketAddress.createUnresolved(SERVER_HOST, SERVER_PORT);
+		expectedRequestRoot = "coap://" + serverAddress.getHostString() + ":" + serverAddress.getPort() + "/rd?ep=" + ENDPOINT_NAME;
 
 		validMap = new HashMap<String, String>();
 		validMap.put("lt", "1000000");
@@ -83,7 +88,7 @@ public class RegisterUplinkTest {
 			}
 		}).when(endpoint).sendRequest(any(Request.class));
 
-		final RegisterUplink uplink = new RegisterUplink(endpoint);
+		final RegisterUplink uplink = new RegisterUplink(serverAddress, endpoint);
 
 		return uplink;
 	}

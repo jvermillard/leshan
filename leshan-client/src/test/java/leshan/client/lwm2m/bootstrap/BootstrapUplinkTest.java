@@ -6,6 +6,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 
+import java.net.InetSocketAddress;
 import java.util.UUID;
 
 import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.InterfaceTypes;
@@ -40,11 +41,13 @@ public class BootstrapUplinkTest {
 	@Mock
 	private CoAPEndpoint endpoint;
 	private String expectedRequest;
+	private InetSocketAddress serverAddress;
 	
 	@Before
 	public void setUp() {
 		callback = new MockedCallback();
 		expectedRequest = "coap://localhost/bs?ep=" + ENDPOINT_NAME;
+		serverAddress = InetSocketAddress.createUnresolved("localhost", 1234);
 	}
 
 	private BootstrapUplink initializeServerResponse(final InterfaceTypes interfaceType, final OperationTypes operationType, final ResponseCode responseCode) {
@@ -65,7 +68,7 @@ public class BootstrapUplinkTest {
 			}
 		}).when(endpoint).sendRequest(any(Request.class));
 		
-		final BootstrapUplink uplink = new BootstrapUplink(endpoint);
+		final BootstrapUplink uplink = new BootstrapUplink(serverAddress, endpoint);
 		return uplink;
 	}
 	

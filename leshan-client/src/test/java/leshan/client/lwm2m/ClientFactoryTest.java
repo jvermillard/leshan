@@ -40,7 +40,7 @@ public class ClientFactoryTest {
 	@Test
 	public void testGoodRegistrationOfDeviceSync() {
 		final ClientFactory clientFactory = new ClientFactory();
-		final BootstrapUplink uplink = clientFactory.startBootstrap(InetSocketAddress.createUnresolved("localhost", 1234), fakeDevice);
+		final BootstrapUplink uplink = clientFactory.startBootstrap(4321, InetSocketAddress.createUnresolved("localhost", 1234), fakeDevice);
 		final OperationResponse response = uplink.bootstrap("endpoint-client-name", 5L);
 		assert response.isSuccess();
 		assert true/*Behavior on Californium via PowerMock*/;
@@ -50,7 +50,7 @@ public class ClientFactoryTest {
 	@Test
 	public void testGoodRegistrationOfDeviceAsync() {
 		final ClientFactory clientFactory = new ClientFactory();
-		final BootstrapUplink uplink = clientFactory.startBootstrap(InetSocketAddress.createUnresolved("localhost", 1234), fakeDevice);
+		final BootstrapUplink uplink = clientFactory.startBootstrap(4321, InetSocketAddress.createUnresolved("localhost", 1234), fakeDevice);
 		uplink.bootstrap("endpoint-client-name", new Callback() {
 
 			@Override

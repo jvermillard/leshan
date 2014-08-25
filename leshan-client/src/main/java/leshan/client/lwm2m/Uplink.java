@@ -1,6 +1,7 @@
 package leshan.client.lwm2m;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 
 import leshan.client.lwm2m.response.Callback;
 import leshan.client.lwm2m.response.OperationResponse;
@@ -12,13 +13,15 @@ import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 
 public abstract class Uplink {
 
-	protected final CoAPEndpoint endpoint;
+	protected final CoAPEndpoint origin;
+	private final InetSocketAddress destination;
 
-	public Uplink(final CoAPEndpoint endpoint) {
-		this.endpoint = endpoint;
+	public Uplink(final InetSocketAddress destination, final CoAPEndpoint origin) {
+		this.destination = destination;
+		this.origin = origin;
 	}
 
-	public final void checkStarted(final CoAPEndpoint endpoint) {
+	protected final void checkStarted(final CoAPEndpoint endpoint) {
 		if(!endpoint.isStarted()) {
 			try {
 				endpoint.start();
@@ -63,12 +66,12 @@ public abstract class Uplink {
 			}
 		});
 		
-		checkStarted(endpoint);
-		endpoint.sendRequest(request);
+		checkStarted(origin);
+		origin.sendRequest(request);
 	}
 
 	protected OperationResponse sendSyncRequest(final long timeout, final ch.ethz.inf.vs.californium.coap.Request request) {
-		endpoint.sendRequest(request);
+		origin.sendRequest(request);
 		
 		try {
 			final Response response = request.waitForResponse(timeout);
@@ -78,5 +81,8 @@ public abstract class Uplink {
 			return OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR);
 		}
 	}
-
+	
+	protected InetSocketAddress getDestination() {
+		return destination;
+	}
 }
