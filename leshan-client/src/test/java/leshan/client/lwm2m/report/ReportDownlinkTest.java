@@ -102,12 +102,16 @@ public class ReportDownlinkTest {
 		assertEquals(actualResponse.getCode(), ResponseCode.CONTENT);
 		verify(downlink).observe(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID, expectedToken);
 
+		final byte[] localToken = actualResponse.getToken();
+
 		actualResponse = null;
+		actualToken = null;
+
 
 		final int actualMessageId = 0; // TODO
 		final byte[] actualNewValue = "123456".getBytes();
 		final ResponseCallback actualCallback = new ResponseCallback();
-		uplink.notify(actualToken, actualMessageId, actualNewValue, actualCallback);
+		uplink.notify(localToken, actualMessageId, actualNewValue, actualCallback);
 
 		assertEquals(actualResponse.getCode(), ResponseCode.CHANGED);
 		assertEquals(actualResponse.getPayload(), actualNewValue);

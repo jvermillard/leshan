@@ -10,9 +10,9 @@ import org.apache.commons.lang.Validate;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.coap.Response;
 import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
+import ch.ethz.inf.vs.californium.network.Exchange;
 
 public class ReportUplink extends Uplink {
-	private static final String ENDPOINT = "ep";
 
 	public ReportUplink(final InetSocketAddress destination, final CoAPEndpoint endpoint) {
 		super(destination, endpoint);
@@ -24,8 +24,8 @@ public class ReportUplink extends Uplink {
 		Validate.notNull(callback);
 
 		final Response response = createNewNotifyResponse(token, newValue, messageId);
-
-//		sendAsyncRequest(callback, request);
+		final Exchange exchange = Observations.INSTANCE.getExchangesForToken(token);
+		sendAsyncResponse(exchange, response, callback);
 	}
 
 	private Response createNewNotifyResponse(final byte[] token, final byte[] payload, final int messageId) {

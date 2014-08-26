@@ -1,7 +1,9 @@
 package leshan.client.lwm2m.register;
 
 import static com.jayway.awaitility.Awaitility.await;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
@@ -76,17 +78,17 @@ public class RegisterUplinkTest {
 		validMap.put("b", "U");
 
 	}
-	
+
 	@After
 	public void tearDown(){
 		uplink.stop();
-		
+
 		verify(endpoint, times(tearDownEndpointStops)).stop();
 	}
 
 	private void initializeServerResponse(final InterfaceTypes interfaceType, final OperationTypes operationType, final ResponseCode responseCode) {
 		tearDownEndpointStops = 1;
-		
+
 		doAnswer(new Answer<Void>(){
 
 			@Override
@@ -311,7 +313,7 @@ public class RegisterUplinkTest {
 		assertFalse(operationResponse.isSuccess());
 		assertEquals(operationResponse.getResponseCode(), ResponseCode.BAD_REQUEST);
 	}
-	
+
 
 	@Test
 	public void testSyncBadNullPayloadRegistration(){

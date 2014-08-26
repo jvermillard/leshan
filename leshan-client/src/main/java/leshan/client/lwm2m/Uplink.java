@@ -10,6 +10,7 @@ import ch.ethz.inf.vs.californium.coap.MessageObserver;
 import ch.ethz.inf.vs.californium.coap.Request;
 import ch.ethz.inf.vs.californium.coap.Response;
 import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
+import ch.ethz.inf.vs.californium.network.Exchange;
 
 public abstract class Uplink {
 
@@ -39,6 +40,7 @@ public abstract class Uplink {
 
 			@Override
 			public void onTimeout() {
+				request.removeMessageObserver(this);
 				callback.onFailure(OperationResponse.failure(ResponseCode.GATEWAY_TIMEOUT, MESSAGE_GATEWAY_TIMEOUT));
 			}
 
@@ -50,6 +52,7 @@ public abstract class Uplink {
 
 			@Override
 			public void onResponse(final Response response) {
+				request.removeMessageObserver(this);
 				if(ResponseCode.isSuccess(response.getCode())){
 					callback.onSuccess(OperationResponse.of(response));
 				}
@@ -60,17 +63,19 @@ public abstract class Uplink {
 
 			@Override
 			public void onReject() {
+				request.removeMessageObserver(this);
 				callback.onFailure(OperationResponse.failure(ResponseCode.BAD_GATEWAY, MESSAGE_BAD_GATEWAY));
 			}
 
 			@Override
 			public void onCancel() {
+				request.removeMessageObserver(this);
 				callback.onFailure(OperationResponse.failure(ResponseCode.BAD_GATEWAY, MESSAGE_BAD_GATEWAY));
 			}
 
 			@Override
 			public void onAcknowledgement() {
-				// TODO Auto-generated method stub
+				request.removeMessageObserver(this);
 			}
 		});
 
@@ -78,48 +83,43 @@ public abstract class Uplink {
 		origin.sendRequest(request);
 	}
 
-	protected void sendAsyncResponse(final Response response, final Callback callback) {
+	protected void sendAsyncResponse(final Exchange exchange, final Response response, final Callback callback) {
 		response.addMessageObserver(new MessageObserver() {
 
 			@Override
 			public void onTimeout() {
-				// TODO Auto-generated method stub
-
+				response.removeMessageObserver(this);
 			}
 
 			@Override
 			public void onRetransmission() {
-				// TODO Auto-generated method stub
-
+				// TODO: Stuff
 			}
 
 			@Override
 			public void onResponse(final Response response) {
-				// TODO Auto-generated method stub
-
+				response.removeMessageObserver(this);
 			}
 
 			@Override
 			public void onReject() {
-				// TODO Auto-generated method stub
-
+				response.removeMessageObserver(this);
 			}
 
 			@Override
 			public void onCancel() {
-				// TODO Auto-generated method stub
-
+				response.removeMessageObserver(this);
 			}
 
 			@Override
 			public void onAcknowledgement() {
-				// TODO Auto-generated method stub
-
+				response.removeMessageObserver(this);
 			}
+
 		});
 
 		checkStarted(origin);
-	//	origin.sendResponse(exchange, response);
+		exchange.sendResponse(response);
 	}
 
 	protected OperationResponse sendSyncRequest(final long timeout, final ch.ethz.inf.vs.californium.coap.Request request) {
@@ -128,7 +128,7 @@ public abstract class Uplink {
 
 		try {
 			final Response response = request.waitForResponse(timeout);
-			
+
 			if(response == null){
 				return OperationResponse.failure(ResponseCode.GATEWAY_TIMEOUT, "Timed Out Waiting For Response.");
 			}

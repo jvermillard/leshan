@@ -51,7 +51,7 @@ public class ReportMessageDeliverer implements MessageDeliverer {
 			final byte[] token = request.getToken();
 
 			downlink.observe(lwm2mUri.getObjectId(), lwm2mUri.getObjectInstanceId(), lwm2mUri.getResourceId(), token);
-
+			Observations.INSTANCE.addObserverForToken(token, exchange);
 			final Response response = new Response(ResponseCode.CONTENT);
 			response.setToken(token);
 			return response;
