@@ -35,7 +35,7 @@ package leshan.server.lwm2m.message;
 public enum ContentFormat {
 
     // TODO: update media type codes once they have been assigned by IANA
-    LINK("application/link-format", 1540), TEXT("application/vnd.oma.lwm2m+text", 1541), TLV(
+    LINK("application/link-format", 40), TEXT("application/vnd.oma.lwm2m+text", 1541), TLV(
             "application/vnd.oma.lwm2m+tlv", 1542), JSON("application/vnd.oma.lwm2m+json", 1543), OPAQUE(
                     "application/vnd.oma.lwm2m+opaque", 1544);
 
