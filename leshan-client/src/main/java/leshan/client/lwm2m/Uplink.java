@@ -84,7 +84,11 @@ public abstract class Uplink {
 		
 		try {
 			final Response response = request.waitForResponse(timeout);
-			if(ResponseCode.isSuccess(response.getCode())){
+			
+			if(response == null){
+				return OperationResponse.failure(ResponseCode.GATEWAY_TIMEOUT, "Timed Out Waiting For Response.");
+			}
+			else if(ResponseCode.isSuccess(response.getCode())){
 				return OperationResponse.of(response);
 			}
 			else{
