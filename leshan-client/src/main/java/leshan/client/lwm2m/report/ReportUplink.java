@@ -18,21 +18,23 @@ public class ReportUplink extends Uplink {
 		super(destination, endpoint);
 	}
 
-	public void notify(final byte[] token, final int messageId, final byte[] newValue, final Callback callback) {
+	public void notify(final byte[] token, final byte[] newValue, final Callback callback) {
 		Validate.notNull(token);
 		Validate.notNull(newValue);
 		Validate.notNull(callback);
 
-		final Response response = createNewNotifyResponse(token, newValue, messageId);
+		final Response response = createNewNotifyResponse(token, newValue);
 		final Exchange exchange = Observations.INSTANCE.getExchangesForToken(token);
+		if(exchange == null) {
+			throw new IllegalArgumentException("Token " + token + " does is not being observed.");
+		}
 		sendAsyncResponse(exchange, response, callback);
 	}
 
-	private Response createNewNotifyResponse(final byte[] token, final byte[] payload, final int messageId) {
+	private Response createNewNotifyResponse(final byte[] token, final byte[] payload) {
 		final Response response = new Response(ResponseCode.CHANGED);
 		response.setToken(token);
 		response.setPayload(payload);
-		response.setMID(messageId);
 
 		return response;
 	}

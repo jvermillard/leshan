@@ -107,14 +107,47 @@ public class ReportDownlinkTest {
 		actualResponse = null;
 		actualToken = null;
 
-
-		final int actualMessageId = 0; // TODO
 		final byte[] actualNewValue = "123456".getBytes();
 		final ResponseCallback actualCallback = new ResponseCallback();
-		uplink.notify(localToken, actualMessageId, actualNewValue, actualCallback);
+		uplink.notify(localToken, actualNewValue, actualCallback);
 
 		assertEquals(actualResponse.getCode(), ResponseCode.CHANGED);
 		assertEquals(actualResponse.getPayload(), actualNewValue);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testReceiveObservationBadToken() {
+		final byte[] actualNewValue = "123456".getBytes();
+		final ResponseCallback actualCallback = new ResponseCallback();
+
+		uplink = new ReportUplink(serverAddress, endpoint);
+		uplink.notify("llama".getBytes(), actualNewValue, actualCallback);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testReceiveObservationNullToken() {
+		final byte[] actualNewValue = "123456".getBytes();
+		final ResponseCallback actualCallback = new ResponseCallback();
+
+		uplink = new ReportUplink(serverAddress, endpoint);
+		uplink.notify(null, actualNewValue, actualCallback);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testReceiveObservationNullNewValue() {
+		final ResponseCallback actualCallback = new ResponseCallback();
+
+		uplink = new ReportUplink(serverAddress, endpoint);
+		uplink.notify("123".getBytes(), null, actualCallback);
+	}
+
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testReceiveObservationNullCallback() {
+		final byte[] actualNewValue = "123456".getBytes();
+
+		uplink = new ReportUplink(serverAddress, endpoint);
+		uplink.notify("123".getBytes(), actualNewValue, null);
 	}
 
 	@Test
@@ -144,6 +177,13 @@ public class ReportDownlinkTest {
 		verify(downlink, never()).observe(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID, actualToken);
 	}
 
+	@Test
+	public void testCancelObservation() {
+		testReceiveObservationAndNotify();
+
+		verify(downlink).cancelObservation(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID);
+	}
+
 	private void initializeServerResponses(final Code code) {
 		final OptionSet options = mock(OptionSet.class);
 		when(options.hasObserve()).thenReturn(true);
@@ -158,6 +198,20 @@ public class ReportDownlinkTest {
 			@Override
 			public Void answer(final InvocationOnMock invocation) throws Throwable {
 				actualResponse = (Response) invocation.getArguments()[0];
+				return null;
+			}
+		}).when(exchange).sendResponse(any(Response.class));
+
+		uplink = new ReportUplink(serverAddress, endpoint);
+	}
+
+	private void initializeCanceledResponse() {
+		doAnswer(new Answer<Void>(){
+
+			@Override
+			public Void answer(final InvocationOnMock invocation) throws Throwable {
+				actualResponse = (Response) invocation.getArguments()[0];
+				actualResponse.setCanceled(true);
 				return null;
 			}
 		}).when(exchange).sendResponse(any(Response.class));
