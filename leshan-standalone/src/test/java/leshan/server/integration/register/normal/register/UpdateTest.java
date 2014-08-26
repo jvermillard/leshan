@@ -8,18 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import leshan.client.lwm2m.Uplink;
-import leshan.client.lwm2m.factory.ClientFactory;
-import leshan.client.lwm2m.register.RegisterDownlink;
-import leshan.client.lwm2m.register.RegisterUplink;
-import leshan.client.lwm2m.response.Callback;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.server.clienttest.TestUtils;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;

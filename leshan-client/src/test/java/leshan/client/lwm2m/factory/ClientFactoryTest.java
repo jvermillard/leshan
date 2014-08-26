@@ -1,19 +1,13 @@
 package leshan.client.lwm2m.factory;
 
-import static org.junit.Assert.fail;
-
 import java.net.InetSocketAddress;
 
 import leshan.client.lwm2m.bootstrap.BootstrapDownlink;
 import leshan.client.lwm2m.bootstrap.BootstrapUplink;
 import leshan.client.lwm2m.factory.ClientFactory;
-import leshan.client.lwm2m.register.RegisterDownlink;
+import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.register.RegisterUplink;
-import leshan.client.lwm2m.response.Callback;
-import leshan.client.lwm2m.response.OperationResponse;
-
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -24,7 +18,7 @@ public class ClientFactoryTest {
 	@Mock
 	private BootstrapDownlink fakeBootstrapListener;
 	@Mock
-	private RegisterDownlink fakeRegisterListener;
+	private ManageDownlink fakeRegisterListener;
 
 	@Before
 	public void setup() {

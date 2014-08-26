@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.InterfaceTypes;
 import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.OperationTypes;
+import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.response.OperationResponseCode;
 import leshan.client.lwm2m.util.ResponseCallback;
@@ -22,7 +23,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
-import ch.ethz.inf.vs.californium.coap.CoAP.Code;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.coap.Request;
 import ch.ethz.inf.vs.californium.coap.Response;
@@ -39,7 +39,7 @@ public class DeregisterUplinkTest {
 	@Mock
 	private CoAPEndpoint endpoint;
 	@Mock
-	private RegisterDownlink downlink;
+	private ManageDownlink downlink;
 	
 	private String actualRequestLocation;
 

@@ -18,9 +18,8 @@ import java.util.Set;
 import java.util.UUID;
 
 import leshan.client.lwm2m.factory.ClientFactory;
-import leshan.client.lwm2m.register.RegisterDownlink;
+import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.register.RegisterUplink;
-import leshan.client.lwm2m.response.Callback;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.util.ResponseCallback;
 import leshan.server.LeshanMain;
@@ -61,7 +60,7 @@ public class AbstractRegisteringTest {
 	private Set<String> clientDataModelResourceSet;
 	
 	@Mock
-	private RegisterDownlink downlink;
+	protected ManageDownlink downlink;
 	
 	protected ResponseCallback callback;
 	protected RegisterUplink registerUplink;

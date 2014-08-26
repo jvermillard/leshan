@@ -1,18 +1,16 @@
 package leshan.client.lwm2m.register;
 
 import java.net.InetSocketAddress;
-import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
 import ch.ethz.inf.vs.californium.WebLink;
-import ch.ethz.inf.vs.californium.coap.LinkFormat;
 import ch.ethz.inf.vs.californium.coap.Request;
-import ch.ethz.inf.vs.californium.coap.Response;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 import leshan.client.lwm2m.Uplink;
+import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.response.Callback;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.util.LinkFormatUtils;
@@ -22,9 +20,9 @@ public class RegisterUplink extends Uplink{
 	private static final String MESSAGE_BAD_OBJECTS = "Objects and Instances Passed Were Not in Valid Link Format.";
 	private static final String MESSAGE_BAD_PARAMETERS = "Either the Parameters are Invalid or the Objects and Instances are Null.";
 	private static final String ENDPOINT = "ep";
-	private final RegisterDownlink downlink;
+	private final ManageDownlink downlink;
 	
-	public RegisterUplink(final InetSocketAddress destination, final CoAPEndpoint origin, final RegisterDownlink downlink) {
+	public RegisterUplink(final InetSocketAddress destination, final CoAPEndpoint origin, final ManageDownlink downlink) {
 		super(destination, origin);
 		if(downlink == null){
 			throw new IllegalArgumentException("RegisterDownlink must not be null.");
