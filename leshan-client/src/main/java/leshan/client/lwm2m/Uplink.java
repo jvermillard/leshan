@@ -75,7 +75,7 @@ public abstract class Uplink {
 
 			@Override
 			public void onAcknowledgement() {
-				request.removeMessageObserver(this);
+
 			}
 		});
 
@@ -113,7 +113,7 @@ public abstract class Uplink {
 
 			@Override
 			public void onAcknowledgement() {
-				response.removeMessageObserver(this);
+
 			}
 
 		});
