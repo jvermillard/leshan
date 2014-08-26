@@ -1,10 +1,13 @@
 package leshan.client.lwm2m.manage;
 
+import java.util.List;
+
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.server.lwm2m.exception.InvalidUriException;
 import leshan.server.lwm2m.message.ResourceSpec;
-import ch.ethz.inf.vs.californium.coap.CoAP.Code;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
+import ch.ethz.inf.vs.californium.coap.MediaTypeRegistry;
+import ch.ethz.inf.vs.californium.coap.OptionSet;
 import ch.ethz.inf.vs.californium.coap.Request;
 import ch.ethz.inf.vs.californium.coap.Response;
 import ch.ethz.inf.vs.californium.network.Exchange;
@@ -25,7 +28,7 @@ public class ManageMessageDeliverer implements MessageDeliverer {
 			final String uri = request.getURI();
 			final ResourceSpec spec = ResourceSpec.of(uri);
 
-			final OperationResponse opResponse = getResponseFromDownlink(request.getCode(), spec, request.getPayload());
+			final OperationResponse opResponse = getResponseFromDownlink(spec, request);
 			if (opResponse == null) {
 				sendResponse(exchange, ResponseCode.INTERNAL_SERVER_ERROR, uri + " was null");
 			}
@@ -37,15 +40,25 @@ public class ManageMessageDeliverer implements MessageDeliverer {
 		}
 	}
 
-	private OperationResponse getResponseFromDownlink(final Code code, final ResourceSpec spec, final byte[] payload) {
-		switch (code) {
-		case GET: return getFromDownlink(spec);
-		case PUT: return putToDownlink(spec, payload);
+	private OperationResponse getResponseFromDownlink(final ResourceSpec spec, final Request request) {
+		final byte[] payload = request.getPayload();
+		switch (request.getCode()) {
+		case GET: return getFromDownlink(spec, request.getOptions());
+		case PUT: return putToDownlink(spec, payload, request.getOptions());
+		case POST: return postToDownlink(spec, payload);
+		case DELETE: return deleteFromDownlink(spec);
 		default: return null;
 		}
 	}
 
-	private OperationResponse getFromDownlink(final ResourceSpec spec) {
+	private OperationResponse getFromDownlink(final ResourceSpec spec, final OptionSet optionSet) {
+		if (optionSet.hasAccept() && optionSet.getAccept() == MediaTypeRegistry.APPLICATION_LINK_FORMAT) {
+			return discover(spec);
+		}
+		return read(spec);
+	}
+
+	private OperationResponse read(final ResourceSpec spec) {
 		if (spec.getObjectInstanceId() == ResourceSpec.DOES_NOT_EXIST) {
 			return downlink.read(spec.getObjectId());
 		} else if (spec.getResourceId() == ResourceSpec.DOES_NOT_EXIST) {
@@ -55,15 +68,61 @@ public class ManageMessageDeliverer implements MessageDeliverer {
 		}
 	}
 
-	private OperationResponse putToDownlink(final ResourceSpec spec, final byte[] payload) {
+	private OperationResponse discover(final ResourceSpec spec) {
+		if (spec.getObjectInstanceId() == ResourceSpec.DOES_NOT_EXIST) {
+			return downlink.discover(spec.getObjectId());
+		} else if (spec.getResourceId() == ResourceSpec.DOES_NOT_EXIST) {
+			return downlink.discover(spec.getObjectId(), spec.getObjectInstanceId());
+		} else {
+			return downlink.discover(spec.getObjectId(), spec.getObjectInstanceId(), spec.getResourceId());
+		}
+	}
+
+	private OperationResponse putToDownlink(final ResourceSpec spec, final byte[] payload, final OptionSet optionSet) {
+		if (optionSet.getURIQueryCount() > 0) {
+			return writeAttributes(spec, optionSet.getURIQueries());
+		}
+		return replace(spec, payload);
+	}
+
+	private OperationResponse writeAttributes(final ResourceSpec spec, final List<String> queries) {
+		if (spec.getObjectInstanceId() == ResourceSpec.DOES_NOT_EXIST) {
+			return downlink.writeAttributes(spec.getObjectId(), queries);
+		} else if (spec.getResourceId() == ResourceSpec.DOES_NOT_EXIST) {
+			return downlink.writeAttributes(spec.getObjectId(), spec.getObjectInstanceId(),
+					queries);
+		} else {
+			return downlink.writeAttributes(spec.getObjectId(), spec.getObjectInstanceId(),
+					spec.getResourceId(), queries);
+		}
+	}
+
+	private OperationResponse replace(final ResourceSpec spec, final byte[] payload) {
 		if (spec.getResourceId() != ResourceSpec.DOES_NOT_EXIST) {
 			return downlink.replace(spec.getObjectId(), spec.getObjectInstanceId(), spec.getResourceId(), new String(payload));
 		} else if (spec.getObjectInstanceId() != ResourceSpec.DOES_NOT_EXIST){
 			return downlink.replace(spec.getObjectId(), spec.getObjectInstanceId(), new String(payload));
 		} else {
-			final Response response = new Response(ResponseCode.METHOD_NOT_ALLOWED);
-			response.setPayload("Target is not allowed for \"Write\" operation");
-			return OperationResponse.of(response );
+			return disallow("Write");
+		}
+	}
+
+	private OperationResponse postToDownlink(final ResourceSpec spec, final byte[] payload) {
+		if (spec.getResourceId() != ResourceSpec.DOES_NOT_EXIST) {
+			return downlink.partialUpdateOrExecute(spec.getObjectId(), spec.getObjectInstanceId(), spec.getResourceId(), new String(payload));
+		} else if (spec.getObjectInstanceId() != ResourceSpec.DOES_NOT_EXIST) {
+			return downlink.partialUpdateOrCreate(spec.getObjectId(), spec.getObjectInstanceId(), new String(payload));
+		} else {
+			return downlink.create(spec.getObjectId(), new String(payload));
+		}
+	}
+
+	private OperationResponse deleteFromDownlink(final ResourceSpec spec) {
+		if (spec.getResourceId() == ResourceSpec.DOES_NOT_EXIST &&
+				spec.getObjectInstanceId() != ResourceSpec.DOES_NOT_EXIST) {
+			return downlink.delete(spec.getObjectId(), spec.getObjectInstanceId());
+		} else {
+			return disallow("Delete");
 		}
 	}
 
@@ -75,6 +134,12 @@ public class ManageMessageDeliverer implements MessageDeliverer {
 
 	private void sendResponse(final Exchange exchange, final ResponseCode code, final String payload) {
 		sendResponse(exchange, code, payload == null ? new byte[0] : payload.getBytes());
+	}
+
+	private OperationResponse disallow(final String method) {
+		final Response response = new Response(ResponseCode.METHOD_NOT_ALLOWED);
+		response.setPayload("Target is not allowed for \"" + method + "\" operation");
+		return OperationResponse.of(response);
 	}
 
 	@Override
