@@ -42,7 +42,7 @@ public class ReadWriteTest extends AbstractRegisteringTest {
 		when(downlink.read(any(Integer.class), any(Integer.class), any(Integer.class))).
 			thenReturn(OperationResponse.of(readResponse));
 		
-		final boolean operationResult = TestUtils.writeOperation(clientEndpoint, "1", null, "101");
+		final boolean operationResult = TestUtils.readOperation(clientEndpoint, "1", null, "101");
 		
 		assertTrue(operationResult);
 	}
