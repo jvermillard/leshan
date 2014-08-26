@@ -1,13 +1,9 @@
 package leshan.client.lwm2m.report;
 
-import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.InterfaceTypes;
-import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.OperationTypes;
-import leshan.client.lwm2m.response.OperationResponseCode;
 import leshan.server.lwm2m.exception.InvalidUriException;
 import leshan.server.lwm2m.message.ResourceSpec;
 import ch.ethz.inf.vs.californium.coap.CoAP.Code;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
-import ch.ethz.inf.vs.californium.coap.CoAP.Type;
 import ch.ethz.inf.vs.californium.coap.OptionSet;
 import ch.ethz.inf.vs.californium.coap.Request;
 import ch.ethz.inf.vs.californium.coap.Response;
@@ -43,9 +39,9 @@ public class ReportMessageDeliverer implements MessageDeliverer {
 		return requestCode == Code.GET && options.hasObserve();
 	}
 
-	private static boolean isCancelObserveRequest(final Response response) {
-		return response.getType()  == Type.RST;
-	}
+//	private static boolean isCancelObserveRequest(final Response response) {
+//		return response.getType()  == Type.RST;
+//	}
 
 	private Response deliverObserveRequest(final Exchange exchange) {
 		try {
@@ -53,15 +49,14 @@ public class ReportMessageDeliverer implements MessageDeliverer {
 			final ResourceSpec lwm2mUri = ResourceSpec.of(request.getURI());
 
 			final byte[] token = request.getToken();
+
 			downlink.observe(lwm2mUri.getObjectId(), lwm2mUri.getObjectInstanceId(), lwm2mUri.getResourceId(), token);
 
 			final Response response = new Response(ResponseCode.CONTENT);
-			response.setPayload(OperationResponseCode.generateReasonPhrase(OperationResponseCode.valueOf(response.getCode().value), InterfaceTypes.REPORTING, OperationTypes.OBSERVE));
 			return response;
 		} catch (final InvalidUriException e) {
 			// TODO: Should this be BAD_REQUEST?
 			final Response response = new Response(ResponseCode.NOT_FOUND);
-			response.setPayload(OperationResponseCode.generateReasonPhrase(OperationResponseCode.valueOf(response.getCode().value), InterfaceTypes.REPORTING, OperationTypes.OBSERVE));
 			return response;
 		} catch (final Exception e) {
 			// TODO: this should do permissions check for the server in the ACL
@@ -71,11 +66,7 @@ public class ReportMessageDeliverer implements MessageDeliverer {
 
 	@Override
 	public void deliverResponse(final Exchange exchange, final Response response) {
-		if(!isCancelObserveRequest(response)) {
-			throw new UnsupportedOperationException("Cannot deliver response from ReportMessageDeliverer");
-		}
-
-		exchange.sendResponse(response);
+		throw new UnsupportedOperationException("Cannot deliver response from ReportMessageDeliverer");
 	}
 
 }

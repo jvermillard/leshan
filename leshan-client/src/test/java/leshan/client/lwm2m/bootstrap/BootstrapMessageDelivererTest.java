@@ -203,7 +203,7 @@ public class BootstrapMessageDelivererTest {
 		verify(exchange).sendResponse(Matchers.argThat(new ResponseMatcher(responseCode, payloadBytes)));
 	}
 
-	private static String constructUri(final int objectId, final int objectInstanceId, final int resourceId) {
+	public static String constructUri(final int objectId, final int objectInstanceId, final int resourceId) {
 		return "/" + Joiner.on("/").skipNulls().join(objectId, objectInstanceId, resourceId);
 	}
 }
