@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 import java.util.UUID;
 
 import leshan.client.lwm2m.bootstrap.BootstrapMessageDelivererTest;
@@ -66,20 +67,25 @@ public class ReportDownlinkTest {
 	public void setup() {
 		this.serverAddress = InetSocketAddress.createUnresolved(SERVER_HOST, SERVER_PORT);
 		this.messageDeliverer = new ReportMessageDeliverer(downlink);
-		this.expectedToken = UUID.randomUUID().toString().getBytes();
+		this.expectedToken = Arrays.copyOfRange(UUID.randomUUID().toString().getBytes(), 0, 8);
 	}
 
 	@Test
 	public void testReceiveObservation() {
 		final String resourceSpec = BootstrapMessageDelivererTest.constructUri(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID);
 		initializeRequestReturn(resourceSpec, expectedToken);
-		initializeServerResponses(Code.GET);
+
 		initializeResponse();
+		initializeServerResponses(Code.GET);
+
 
 		this.messageDeliverer.deliverRequest(exchange);
 
-		assertEquals(actualResponse.getCode(), ResponseCode.CONTENT);
+		assertEquals(ResponseCode.CONTENT, actualResponse.getCode());
 		verify(downlink).observe(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID, expectedToken);
+
+		actualToken = actualResponse.getToken();
+
 		assertArrayEquals(expectedToken, actualToken);
 	}
 
@@ -87,9 +93,9 @@ public class ReportDownlinkTest {
 	public void testReceiveObservationAndNotify() {
 
 		final String resourceSpec = BootstrapMessageDelivererTest.constructUri(OBJECT_ID, OBJECT_INSTANCE_ID, RESOURCE_ID);
+		initializeResponse();
 		initializeRequestReturn(resourceSpec, expectedToken);
 		initializeServerResponses(Code.GET);
-		initializeResponse();
 
 		this.messageDeliverer.deliverRequest(exchange);
 
@@ -139,7 +145,7 @@ public class ReportDownlinkTest {
 		when(options.hasObserve()).thenReturn(true);
 		when(request.getOptions()).thenReturn(options);
 		when(request.getCode()).thenReturn(code);
-		when(request.getToken()).thenReturn(expectedToken, expectedToken);
+		when(request.getToken()).thenReturn(expectedToken);
 	}
 
 	private void initializeResponse() {
@@ -148,9 +154,6 @@ public class ReportDownlinkTest {
 			@Override
 			public Void answer(final InvocationOnMock invocation) throws Throwable {
 				actualResponse = (Response) invocation.getArguments()[0];
-				if(actualResponse != null) {
-					actualToken = actualResponse.getToken();
-				}
 				return null;
 			}
 		}).when(exchange).sendResponse(any(Response.class));

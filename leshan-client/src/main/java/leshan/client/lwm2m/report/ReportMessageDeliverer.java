@@ -53,6 +53,7 @@ public class ReportMessageDeliverer implements MessageDeliverer {
 			downlink.observe(lwm2mUri.getObjectId(), lwm2mUri.getObjectInstanceId(), lwm2mUri.getResourceId(), token);
 
 			final Response response = new Response(ResponseCode.CONTENT);
+			response.setToken(token);
 			return response;
 		} catch (final InvalidUriException e) {
 			// TODO: Should this be BAD_REQUEST?
