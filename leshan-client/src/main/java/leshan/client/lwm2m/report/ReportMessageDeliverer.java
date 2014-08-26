@@ -34,7 +34,6 @@ public class ReportMessageDeliverer implements MessageDeliverer {
 		}
 
 		exchange.sendResponse(response);
-
 	}
 
 	private static boolean isObserveRequest(final Request request) {
@@ -50,13 +49,17 @@ public class ReportMessageDeliverer implements MessageDeliverer {
 
 	private Response deliverObserveRequest(final Exchange exchange) {
 		try {
-			final ResourceSpec lwm2mUri = ResourceSpec.of(exchange.getRequest().getURI());
-			downlink.observe(lwm2mUri.getObjectId(), lwm2mUri.getObjectInstanceId(), lwm2mUri.getResourceId());
+			final Request request = exchange.getRequest();
+			final ResourceSpec lwm2mUri = ResourceSpec.of(request.getURI());
+
+			final byte[] token = request.getToken();
+			downlink.observe(lwm2mUri.getObjectId(), lwm2mUri.getObjectInstanceId(), lwm2mUri.getResourceId(), token);
 
 			final Response response = new Response(ResponseCode.CONTENT);
 			response.setPayload(OperationResponseCode.generateReasonPhrase(OperationResponseCode.valueOf(response.getCode().value), InterfaceTypes.REPORTING, OperationTypes.OBSERVE));
 			return response;
 		} catch (final InvalidUriException e) {
+			// TODO: Should this be BAD_REQUEST?
 			final Response response = new Response(ResponseCode.NOT_FOUND);
 			response.setPayload(OperationResponseCode.generateReasonPhrase(OperationResponseCode.valueOf(response.getCode().value), InterfaceTypes.REPORTING, OperationTypes.OBSERVE));
 			return response;

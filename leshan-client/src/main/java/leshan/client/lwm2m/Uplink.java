@@ -36,18 +36,18 @@ public abstract class Uplink {
 
 	protected void sendAsyncRequest(final Callback callback, final Request request) {
 		request.addMessageObserver(new MessageObserver() {
-			
+
 			@Override
 			public void onTimeout() {
 				callback.onFailure(OperationResponse.failure(ResponseCode.GATEWAY_TIMEOUT, MESSAGE_GATEWAY_TIMEOUT));
 			}
-			
+
 			@Override
 			public void onRetransmission() {
 				// TODO Auto-generated method stub
-				
+
 			}
-			
+
 			@Override
 			public void onResponse(final Response response) {
 				if(ResponseCode.isSuccess(response.getCode())){
@@ -57,31 +57,75 @@ public abstract class Uplink {
 					callback.onFailure(OperationResponse.failure(response.getCode(), "Request Failed on Server " + response.getOptions()));
 				}
 			}
-			
+
 			@Override
 			public void onReject() {
 				callback.onFailure(OperationResponse.failure(ResponseCode.BAD_GATEWAY, MESSAGE_BAD_GATEWAY));
 			}
-			
+
 			@Override
 			public void onCancel() {
 				callback.onFailure(OperationResponse.failure(ResponseCode.BAD_GATEWAY, MESSAGE_BAD_GATEWAY));
 			}
-			
+
 			@Override
 			public void onAcknowledgement() {
 				// TODO Auto-generated method stub
 			}
 		});
-		
+
 		checkStarted(origin);
 		origin.sendRequest(request);
+	}
+
+	protected void sendAsyncResponse(final Response response, final Callback callback) {
+		response.addMessageObserver(new MessageObserver() {
+
+			@Override
+			public void onTimeout() {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void onRetransmission() {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void onResponse(final Response response) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void onReject() {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void onCancel() {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void onAcknowledgement() {
+				// TODO Auto-generated method stub
+
+			}
+		});
+
+		checkStarted(origin);
+	//	origin.sendResponse(exchange, response);
 	}
 
 	protected OperationResponse sendSyncRequest(final long timeout, final ch.ethz.inf.vs.californium.coap.Request request) {
 		checkStarted(origin);
 		origin.sendRequest(request);
-		
+
 		try {
 			final Response response = request.waitForResponse(timeout);
 			
@@ -99,11 +143,11 @@ public abstract class Uplink {
 			return OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR, MESSAGE_INTERRUPTED);
 		}
 	}
-	
+
 	protected InetSocketAddress getDestination() {
 		return destination;
 	}
-	
+
 	public void stop(){
 		origin.stop();
 	}

@@ -43,7 +43,7 @@ public class BootstrapMessageDeliverer implements MessageDeliverer {
 	@Override
 	public void deliverRequest(final Exchange exchange) {
 		final Code requestCode = exchange.getRequest().getCode();
-		
+
 		final Response response;
 		if(requestCode == Code.DELETE) {
 			response = deliverDeleteRequest(exchange);
@@ -52,7 +52,7 @@ public class BootstrapMessageDeliverer implements MessageDeliverer {
 		} else {
 			response = null;
 		}
-		
+
 		exchange.sendResponse(response);
 
 	}
@@ -62,11 +62,11 @@ public class BootstrapMessageDeliverer implements MessageDeliverer {
 			final ResourceSpec lwm2mUri = ResourceSpec.of(exchange.getRequest().getURI());
 			downlink.write(lwm2mUri.getObjectId(), lwm2mUri.getObjectInstanceId(), lwm2mUri.getResourceId());
 
-			Response response = new Response(ResponseCode.CHANGED);
+			final Response response = new Response(ResponseCode.CHANGED);
 			response.setPayload(OperationResponseCode.generateReasonPhrase(OperationResponseCode.valueOf(response.getCode().value), InterfaceTypes.BOOTSTRAP, OperationTypes.WRITE));
 			return response;
 		} catch (final InvalidUriException e) {
-			Response response = new Response(ResponseCode.BAD_REQUEST);
+			final Response response = new Response(ResponseCode.BAD_REQUEST);
 			response.setPayload(OperationResponseCode.generateReasonPhrase(OperationResponseCode.valueOf(response.getCode().value), InterfaceTypes.BOOTSTRAP, OperationTypes.WRITE));
 			return response;
 		} catch (final Exception e) {
@@ -79,11 +79,11 @@ public class BootstrapMessageDeliverer implements MessageDeliverer {
 			final ResourceSpec lwm2mUri = ResourceSpec.of(exchange.getRequest().getURI());
 			downlink.delete(lwm2mUri.getObjectId(), lwm2mUri.getObjectInstanceId());
 
-			Response response = new Response(ResponseCode.DELETED);
+			final Response response = new Response(ResponseCode.DELETED);
 			response.setPayload(OperationResponseCode.generateReasonPhrase(OperationResponseCode.valueOf(response.getCode().value), InterfaceTypes.BOOTSTRAP, OperationTypes.DELETE));
 			return response;
 		} catch (final InvalidUriException e) {
-			Response response = new Response(ResponseCode.METHOD_NOT_ALLOWED);
+			final Response response = new Response(ResponseCode.METHOD_NOT_ALLOWED);
 			response.setPayload(OperationResponseCode.generateReasonPhrase(OperationResponseCode.valueOf(response.getCode().value), InterfaceTypes.BOOTSTRAP, OperationTypes.DELETE));
 			return response;
 		} catch (final Exception e) {

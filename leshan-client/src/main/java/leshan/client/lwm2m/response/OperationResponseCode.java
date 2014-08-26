@@ -5,7 +5,7 @@ import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.OperationTypes;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 
 // TODO: Rename me to ResponseCode after CaliforniumResponseCode is purged from client visible layer
-public enum OperationResponseCode {	
+public enum OperationResponseCode {
 	// Success
 	CREATED(ResponseCode.CREATED),
 	DELETED(ResponseCode.DELETED),
@@ -24,7 +24,7 @@ public enum OperationResponseCode {
 	NOT_ACCEPTABLE(ResponseCode.NOT_ACCEPTABLE),
 	REQUEST_ENTITY_INCOMPLETE(ResponseCode.REQUEST_ENTITY_INCOMPLETE),
 	PRECONDITION_FAILED(ResponseCode.PRECONDITION_FAILED),
-	REQUEST_ENTITY_TOO_LARGE(ResponseCode.REQUEST_ENTITY_TOO_LARGE), 
+	REQUEST_ENTITY_TOO_LARGE(ResponseCode.REQUEST_ENTITY_TOO_LARGE),
 	UNSUPPORTED_CONTENT_FORMAT(ResponseCode.UNSUPPORTED_CONTENT_FORMAT),
 
 	// Server error
@@ -34,10 +34,10 @@ public enum OperationResponseCode {
 	SERVICE_UNAVAILABLE(ResponseCode.SERVICE_UNAVAILABLE),
 	GATEWAY_TIMEOUT(ResponseCode.GATEWAY_TIMEOUT),
 	PROXY_NOT_SUPPORTED(ResponseCode.PROXY_NOT_SUPPORTED);
-	
+
 	/** The code value. */
 	private final ResponseCode responseCode;
-	
+
 	/**
 	 * Instantiates a new response code with the specified integer value.
 	 *
@@ -46,16 +46,16 @@ public enum OperationResponseCode {
 	private OperationResponseCode(final ResponseCode responseCode) {
 		this.responseCode = responseCode;
 	}
-	
+
 	public int getValue() {
 		return this.responseCode.value;
 	}
-	
+
 	@Override
 	public String toString() {
 		return this.responseCode.toString();
 	}
-	
+
 	/**
 	 * Converts the specified integer value to a response code.
 	 *
@@ -65,24 +65,24 @@ public enum OperationResponseCode {
 	 */
 	public static OperationResponseCode valueOf(final int value) {
 		final ResponseCode responseCode = ResponseCode.valueOf(value);
-		
+
 		for (final OperationResponseCode code : OperationResponseCode.values()) {
 			if (code.responseCode == responseCode) {
 				return code;
 			}
 		}
-		
+
 		throw new IllegalArgumentException("Unknown Leshan response code " + value);
 	}
 
 	public static boolean isSuccess(final OperationResponseCode code) {
 		return ResponseCode.isSuccess(ResponseCode.valueOf(code.responseCode.value));
 	}
-	
+
 	public static boolean isClientError(final OperationResponseCode code) {
 		return ResponseCode.isClientError(ResponseCode.valueOf(code.responseCode.value));
 	}
-	
+
 	public static boolean isServerError(final OperationResponseCode code) {
 		return ResponseCode.isServerError(ResponseCode.valueOf(code.responseCode.value));
 	}
@@ -130,14 +130,29 @@ public enum OperationResponseCode {
 					default: 			throwError(code, interfaceType, operationType);
 				}
 			}
-			
+
+		} else if(interfaceType == InterfaceTypes.REPORTING) {
+			if(operationType ==  OperationTypes.OBSERVE) {
+				switch(code) {
+					case CONTENT: 				return "\"Observe\" operation is completed successfully";
+					case BAD_REQUEST: 			return "Target is not allowed for \"Observe\" operation";
+					case NOT_FOUND:				return "URI of \"Observe\" operation is not found";
+					case METHOD_NOT_ALLOWED:	return "Target is not allowed for \"Observe\" operation";
+					default: 					throwError(code, interfaceType, operationType);
+				}
+			} else if(operationType == OperationTypes.NOTIFY) {
+				switch(code) {
+					case CHANGED: 		return "\"Notify\" operation is completed successfully";
+					default: 			throwError(code, interfaceType, operationType);
+				}
+			}
 		}
-		
+
 		throwError(code, interfaceType, operationType);
 		//TODO remove this in the future
 		return null;
 	}
-	
+
 	private static void throwError(final OperationResponseCode code, final InterfaceTypes interfaceType, final OperationTypes operationType) {
 		throw new IllegalArgumentException("Unsupported response for " + code + "; " + interfaceType + "; " + operationType);
 	}
