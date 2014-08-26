@@ -28,17 +28,9 @@ import com.google.gson.Gson;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UpdateTest extends AbstractRegisteringTest {
-
-	@Mock
-	private RegisterDownlink downlink;
-	
 	
 	@Test
 	public void testRegisterUpdateAndDeregisterSync() throws UnknownHostException {
-		final ClientFactory clientFactory = new ClientFactory();
-
-		final RegisterUplink registerUplink = clientFactory.startRegistration(clientPort, serverAddress, downlink);
-
 		final OperationResponse registerResponse = registerUplink.register(clientEndpoint, clientParameters, objectsAndInstances, TIMEOUT_MS);
 
 		final String locationPath = new String(registerResponse.getLocation());
@@ -60,10 +52,6 @@ public class UpdateTest extends AbstractRegisteringTest {
 
 	@Test
 	public void testRegisterUpdateAndDeregisterAsync() throws UnknownHostException {
-		final ClientFactory clientFactory = new ClientFactory();
-
-		final RegisterUplink registerUplink = clientFactory.startRegistration(clientPort, serverAddress, downlink);
-		
 		registerUplink.register(clientEndpoint, clientParameters, objectsAndInstances, callback);
 		
 		await().untilTrue(callback.isCalled());

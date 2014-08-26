@@ -99,4 +99,8 @@ public abstract class Uplink {
 	protected InetSocketAddress getDestination() {
 		return destination;
 	}
+	
+	public void stop(){
+		origin.stop();
+	}
 }

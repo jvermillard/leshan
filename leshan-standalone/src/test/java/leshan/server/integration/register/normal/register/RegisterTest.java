@@ -19,22 +19,16 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RegisterTest extends AbstractRegisteringTest {
-
-	@Mock
-	private RegisterDownlink downlink;
 	
+	private static final long DEFAULT_LIFETIME = 86400L;
+
 	@Test
 	public void testRegisterAndDeregisterSync() throws UnknownHostException {
-		final ClientFactory clientFactory = new ClientFactory();
-
-		final RegisterUplink registerUplink = clientFactory.startRegistration(clientPort, serverAddress, downlink);
-
 		final OperationResponse registerResponse = registerUplink.register(clientEndpoint, clientParameters, objectsAndInstances, TIMEOUT_MS);
 
 		final String locationPath = new String(registerResponse.getLocation());
-		System.out.println("LOCATION PATH " + locationPath);
 
-		validateRegisteredClientOnServer();
+		validateRegisteredClientOnServer(86400L);
 
 		final OperationResponse deregisterResponse = registerUplink.deregister(locationPath, TIMEOUT_MS);
 
@@ -46,10 +40,6 @@ public class RegisterTest extends AbstractRegisteringTest {
 
 	@Test
 	public void testRegisterAndDeregisterAsync() throws UnknownHostException {
-		final ClientFactory clientFactory = new ClientFactory();
-
-		final RegisterUplink registerUplink = clientFactory.startRegistration(clientPort, serverAddress, downlink);
-
 		registerUplink.register(clientEndpoint, clientParameters, objectsAndInstances, callback);
 		
 		await().untilTrue(callback.isCalled());
@@ -57,7 +47,7 @@ public class RegisterTest extends AbstractRegisteringTest {
 		final String locationPath = new String(callback.getResponse().getLocation());
 		final OperationResponse registerResponse = callback.getResponse();
 
-		validateRegisteredClientOnServer();
+		validateRegisteredClientOnServer(DEFAULT_LIFETIME);
 
 		callback.reset();
 		registerUplink.deregister(locationPath, callback);
@@ -65,6 +55,25 @@ public class RegisterTest extends AbstractRegisteringTest {
 		await().untilTrue(callback.isCalled());
 		
 		final OperationResponse deregisterResponse = callback.getResponse();
+
+		validateNoRegisteredClientOnServer();
+
+		validateResponsesToClient(registerResponse, locationPath, deregisterResponse);
+
+	}
+	
+	@Test
+	public void testRegisterAndDeregisterWithParametersSync() throws UnknownHostException {
+		final Long newLifetime = (long) 100002;
+		clientParameters.put("lt", newLifetime.toString());
+		
+		final OperationResponse registerResponse = registerUplink.register(clientEndpoint, clientParameters, objectsAndInstances, TIMEOUT_MS);
+
+		final String locationPath = new String(registerResponse.getLocation());
+
+		validateRegisteredClientOnServer(newLifetime);
+
+		final OperationResponse deregisterResponse = registerUplink.deregister(locationPath, TIMEOUT_MS);
 
 		validateNoRegisteredClientOnServer();
 

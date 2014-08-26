@@ -13,6 +13,7 @@ import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.response.OperationResponseCode;
 import leshan.client.lwm2m.util.ResponseCallback;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,6 +50,7 @@ public class DeregisterUplinkTest {
 	private byte[] actualResponsePayload;
 
 	private InetSocketAddress serverAddress;
+	private int tearDownEndpointStops;
 	
 	@Before
 	public void setUp(){
@@ -73,9 +75,17 @@ public class DeregisterUplinkTest {
 			}
 		}).when(endpoint).sendRequest(any(Request.class));
 	}
+	
+	@After
+	public void tearDown(){
+		uplink.stop();
+		
+		verify(endpoint, times(tearDownEndpointStops)).stop();
+	}
 
 	@Test
 	public void testGoodSyncDeregister() {
+		tearDownEndpointStops = 2;
 		
 		final OperationResponse response = uplink.deregister(ENDPOINT_LOCATION, SYNC_TIMEOUT_MS);
 		
@@ -90,6 +100,7 @@ public class DeregisterUplinkTest {
 	
 	@Test
 	public void testGoodAsyncDeregister() {
+		tearDownEndpointStops = 2;
 		
 		uplink.deregister(ENDPOINT_LOCATION, callback);
 		
@@ -106,6 +117,8 @@ public class DeregisterUplinkTest {
 	
 	@Test
 	public void testNullSyncDeregister() {
+		tearDownEndpointStops = 1;
+		
 		final OperationResponse response = uplink.deregister(null, SYNC_TIMEOUT_MS);
 		
 		verify(endpoint, never()).stop();

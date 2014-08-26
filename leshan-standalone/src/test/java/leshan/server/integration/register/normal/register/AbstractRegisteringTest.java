@@ -17,6 +17,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import leshan.client.lwm2m.factory.ClientFactory;
+import leshan.client.lwm2m.register.RegisterDownlink;
+import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.response.Callback;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.util.ResponseCallback;
@@ -57,7 +60,11 @@ public class AbstractRegisteringTest {
 		};
 	private Set<String> clientDataModelResourceSet;
 	
+	@Mock
+	private RegisterDownlink downlink;
+	
 	protected ResponseCallback callback;
+	protected RegisterUplink registerUplink;
 
 	public AbstractRegisteringTest() {
 		super();
@@ -74,11 +81,15 @@ public class AbstractRegisteringTest {
 		clientParameters = new HashMap<>();
 		objectsAndInstances = LinkFormat.parse(clientDataModel);
 		callback = new ResponseCallback();
+		
+		final ClientFactory clientFactory = new ClientFactory();
+		registerUplink = clientFactory.startRegistration(clientPort, serverAddress, downlink);
 	}
 
 	@After
 	public void tearDown() {
 		server.stop();
+		registerUplink.stop();
 	}
 
 	protected void validateResponsesToClient(final OperationResponse registerResponse, final String locationPathOptions,
@@ -90,7 +101,7 @@ public class AbstractRegisteringTest {
 				assertEquals(deregisterResponse.getResponseCode(), ResponseCode.DELETED);
 			}
 
-	protected void validateRegisteredClientOnServer()
+	protected void validateRegisteredClientOnServer(final Long lifetime)
 			throws UnknownHostException {
 				final Gson gson = new Gson();
 			
@@ -105,7 +116,7 @@ public class AbstractRegisteringTest {
 				assertNotNull(clientParameters.get("registrationDate"));
 				assertEquals("/" + InetAddress.getLocalHost().getHostAddress() + ":" + clientPort, clientParameters.get("address"));
 				assertEquals("1.0", clientParameters.get("lwM2MmVersion"));
-				assertEquals(86400.0, clientParameters.get("lifetime"));
+				assertEquals(lifetime.doubleValue(), Double.parseDouble(clientParameters.get("lifetime").toString()), 0.001);
 				
 				final Collection<LinkedTreeMap> links = (Collection<LinkedTreeMap>) clientParameters.get("objectLinks");
 				for (final LinkedTreeMap link : links) {

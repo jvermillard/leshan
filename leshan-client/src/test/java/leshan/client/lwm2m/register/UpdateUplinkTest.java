@@ -16,6 +16,7 @@ import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.response.OperationResponseCode;
 import leshan.client.lwm2m.util.ResponseCallback;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,6 +55,8 @@ public class UpdateUplinkTest {
 	private OperationResponse asyncResponse;
 
 	private InetSocketAddress serverAddress;
+	private int tearDownEndpointStops;
+	private RegisterUplink uplink;
 
 
 	@Before
@@ -63,9 +66,18 @@ public class UpdateUplinkTest {
 		callback = new ResponseCallback();
 		serverAddress = InetSocketAddress.createUnresolved(SERVER_HOST, SERVER_PORT);
 	}
+	
+	@After
+	public void tearDown(){
+		uplink.stop();
+		
+		verify(endpoint, times(tearDownEndpointStops)).stop();
+	}
 
 
-	public RegisterUplink initializeServerResponse(final InterfaceTypes interfaceType, final OperationTypes operationType, final ResponseCode responseCode){
+	public void initializeServerResponse(final InterfaceTypes interfaceType, final OperationTypes operationType, final ResponseCode responseCode){
+		tearDownEndpointStops = 1;
+		
 		doAnswer(new Answer<Void>() {
 
 			@Override
@@ -83,8 +95,7 @@ public class UpdateUplinkTest {
 			}
 		}).when(endpoint).sendRequest(any(Request.class));
 
-		final RegisterUplink uplink = new RegisterUplink(serverAddress, endpoint, downlink);
-		return uplink;
+		uplink = new RegisterUplink(serverAddress, endpoint, downlink);
 	}
 
 	private void verifySuccessfulSyncUpdate(final String expectedRequest, final String validQuery,
@@ -127,7 +138,7 @@ public class UpdateUplinkTest {
 
 		expectedRequestLocation ="coap://localhost/?" + validQuery;
 
-		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.CHANGED);
+		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.CHANGED);
 
 		final OperationResponse response = uplink.update(ENDPOINT_LOCATION, validMap, null, SYNC_TIMEOUT_MS);
 
@@ -141,7 +152,7 @@ public class UpdateUplinkTest {
 
 		expectedRequestLocation ="coap://localhost/?" + validQuery;
 
-		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.CHANGED);
+		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.CHANGED);
 
 		final OperationResponse response = uplink.update(ENDPOINT_LOCATION, validMap, LinkFormat.parse(VALID_REQUEST_PAYLOAD), SYNC_TIMEOUT_MS);
 
@@ -150,7 +161,7 @@ public class UpdateUplinkTest {
 
 	@Test
 	public void testBadParametersSyncUpdate() {
-		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.BAD_REQUEST);
+		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.BAD_REQUEST);
 
 		final Map<String, String> invalidSmsMap = new HashMap<String, String>();
 		invalidSmsMap.put("sms", UUID.randomUUID().toString());
@@ -163,7 +174,7 @@ public class UpdateUplinkTest {
 
 	@Test
 	public void testNoParametersSyncUpdate() {
-		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.BAD_REQUEST);
+		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.BAD_REQUEST);
 
 		final Map<String, String> emptyMap = new HashMap<String, String>();
 		final String validQuery = leshan.client.lwm2m.request.Request.toQueryStringMap(emptyMap);
@@ -180,7 +191,7 @@ public class UpdateUplinkTest {
 		
 		expectedRequestLocation ="coap://localhost/?" + validQuery;
 
-		final RegisterUplink uplink = initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.CHANGED);
+		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.CHANGED);
 
 
 		uplink.update(ENDPOINT_LOCATION, validMap, LinkFormat.parse(VALID_REQUEST_PAYLOAD), callback);
@@ -190,14 +201,4 @@ public class UpdateUplinkTest {
 		verifySuccessfulAsyncUpdate(expectedRequestLocation, validQuery, VALID_REQUEST_PAYLOAD, ResponseCode.CHANGED);
 	}
 
-	
-	@Test
-	public void buildRequest(){
-		final Map<String, String> validMap = generateValidParameters();
-		final String validQuery = leshan.client.lwm2m.request.Request.toQueryStringMap(validMap);
-		
-		final Request request = Request.newPut();
-		request.getOptions().setURIQuery(validQuery);
-		System.out.println(request.toString());
-	}
 }

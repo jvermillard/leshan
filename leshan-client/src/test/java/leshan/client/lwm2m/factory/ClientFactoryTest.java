@@ -1,4 +1,4 @@
-package leshan.client.lwm2m;
+package leshan.client.lwm2m.factory;
 
 import static org.junit.Assert.fail;
 

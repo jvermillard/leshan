@@ -25,14 +25,9 @@ import ch.ethz.inf.vs.californium.coap.Request;
 public class DeregisterTest extends AbstractRegisteringTest {
 
 	private static final String REGISTRATION_ENDPOINT = "/rd/";
-	@Mock
-	private RegisterDownlink downlink;
 	
 	@Test
 	public void testCannotDeregisterUnregisteredSync() throws UnknownHostException {
-		final ClientFactory clientFactory = new ClientFactory();
-
-		final RegisterUplink registerUplink = clientFactory.startRegistration(clientPort, serverAddress, downlink);
 		
 		validateNoRegisteredClientOnServer();
 
@@ -46,7 +41,7 @@ public class DeregisterTest extends AbstractRegisteringTest {
 		final OperationResponse registerResponse = registerUplink.register(clientEndpoint, clientParameters, objectsAndInstances, TIMEOUT_MS);
 		final String locationPathOptions = new String(registerResponse.getLocation());
 		
-		validateRegisteredClientOnServer();
+		validateRegisteredClientOnServer(86400L);
 		
 		final OperationResponse deregisterResponseTwo = registerUplink.deregister(locationPathOptions, TIMEOUT_MS);
 		
@@ -56,10 +51,6 @@ public class DeregisterTest extends AbstractRegisteringTest {
 	
 	@Test
 	public void testCannotDeregisterUnregisteredAsync() throws UnknownHostException {
-		final ClientFactory clientFactory = new ClientFactory();
-
-		final RegisterUplink registerUplink = clientFactory.startRegistration(clientPort, serverAddress, downlink);
-		
 		validateNoRegisteredClientOnServer();
 
 		final String validNonexistentLocationPathOptions = REGISTRATION_ENDPOINT + UUID.randomUUID().toString();
@@ -82,7 +73,7 @@ public class DeregisterTest extends AbstractRegisteringTest {
 		
 		final String locationPathOptions = new String(registerResponse.getLocation());
 		
-		validateRegisteredClientOnServer();
+		validateRegisteredClientOnServer(86400L);
 		
 		callback.reset();
 		registerUplink.deregister(locationPathOptions, callback);
