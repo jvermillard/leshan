@@ -61,6 +61,7 @@ public class RegisterUplink extends Uplink{
 
 		final ch.ethz.inf.vs.californium.coap.Request request = createRegisterRequest(
 				endpointName, payload);
+		request.setURI(request.getURI() + "&" + leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
 
 		sendAsyncRequest(callback, request);
 	}

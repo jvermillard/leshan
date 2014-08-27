@@ -13,6 +13,7 @@ import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.response.OperationResponse;
+import leshan.client.lwm2m.util.ResponseCallback;
 import leshan.server.lwm2m.LwM2mServer;
 import leshan.server.lwm2m.bootstrap.BootstrapStoreImpl;
 import leshan.server.lwm2m.client.Client;
@@ -29,6 +30,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import com.jayway.awaitility.Awaitility;
 
 import ch.ethz.inf.vs.californium.WebLink;
 import ch.ethz.inf.vs.californium.coap.LinkFormat;
@@ -86,6 +89,34 @@ public class Stuff {
 		final OperationResponse register = registerUplink.register("device1", clientParameters, objectsAndInstances, TIMEOUT_MS);
 		
 		Assert.assertTrue(register.isSuccess());
+
+		final Client registeredClient = clientRegistry.get("device1");
+		assertNotNull(registeredClient);
+		final ClientResponse response = ReadRequest.newRequest(registeredClient, 1).send(server.getRequestHandler());
+
+		assertEquals(ResponseCode.CONTENT, response.getCode());
+		assertEquals(GOOD_PAYLOAD, new String(response.getContent()));
+
+		client.stop();
+	}
+	
+	@Test
+	public void registeredDeviceCanHaveReadSentToItAsync() {
+		final LwM2mClient client = new LwM2mClient();
+
+		final ManageDownlink downlink = mock(ManageDownlink.class);
+		final Response goodRawResponse = new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT);
+		goodRawResponse.setPayload(GOOD_PAYLOAD);
+		final OperationResponse goodResponse = OperationResponse.of(goodRawResponse);
+		Mockito.when(downlink.read(Mockito.anyInt())).thenReturn(goodResponse);
+		
+		final RegisterUplink registerUplink = client.startRegistration(CLIENT_PORT, serverAddress, downlink);
+		final ResponseCallback callback = new ResponseCallback();
+		registerUplink.register("device1", clientParameters, objectsAndInstances, callback);
+		
+		Awaitility.await().untilTrue(callback.isCalled());
+		
+		Assert.assertTrue(callback.isSuccess());
 
 		final Client registeredClient = clientRegistry.get("device1");
 		assertNotNull(registeredClient);

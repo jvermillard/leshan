@@ -81,8 +81,8 @@ public class AbstractRegisteringTest {
 		objectsAndInstances = LinkFormat.parse(clientDataModel);
 		callback = new ResponseCallback();
 
-		final LwM2mClient clientFactory = new LwM2mClient();
-		registerUplink = clientFactory.startRegistration(clientPort, serverAddress, downlink);
+		final LwM2mClient lwM2mClient = new LwM2mClient();
+		registerUplink = lwM2mClient.startRegistration(clientPort, serverAddress, downlink);
 	}
 
 	@After
