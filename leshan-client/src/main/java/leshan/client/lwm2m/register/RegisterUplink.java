@@ -5,7 +5,10 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import ch.ethz.inf.vs.californium.CoapClient;
+import ch.ethz.inf.vs.californium.CoapResponse;
 import ch.ethz.inf.vs.californium.WebLink;
+import ch.ethz.inf.vs.californium.coap.MediaTypeRegistry;
 import ch.ethz.inf.vs.californium.coap.Request;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
@@ -43,9 +46,27 @@ public class RegisterUplink extends Uplink{
 
 		final ch.ethz.inf.vs.californium.coap.Request request = createRegisterRequest(
 				endpointName, payload);
-		request.setURI(request.getURI() + "&" + leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
+//		request.setURI(request.getURI() + "&" + leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
 		
-		return sendSyncRequest(timeout, request);
+//		final String uri = "coap://" + destination.getHostString() + ":" + destination.getPort() + "/rd?ep=device1";
+		final CoapClient client = new CoapClient(request.getURI() + "&" + leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
+//		System.out.println("URI " + uri);
+		client.setEndpoint(origin);
+		client.setTimeout(timeout);
+		
+		final CoapResponse response = client.post(payload, MediaTypeRegistry.APPLICATION_LINK_FORMAT);	
+		if(response == null){
+			return OperationResponse.failure(ResponseCode.NOT_FOUND, "No Response");
+		}
+		else if(response.isSuccess()){
+			return OperationResponse.of(response.advanced());
+		}
+		else{
+			return OperationResponse.failure(response.getCode(), response.getResponseText());
+		}
+		
+		
+//		return sendSyncRequest(timeout, request);
 	}
 
 	public void register(final String endpointName, final Map<String, String> parameters, final Set<WebLink> objectsAndInstances, final Callback callback) {
