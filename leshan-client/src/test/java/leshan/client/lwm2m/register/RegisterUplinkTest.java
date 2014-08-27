@@ -264,11 +264,13 @@ public class RegisterUplinkTest {
 	@Test
 	public void testAsyncGoodParametersRegistration() {
 		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED);
+		
+		final String validQuery = leshan.client.lwm2m.request.Request.toQueryStringMap(validMap);
 
 		sendRegisterAndGetAsyncResponse(uplink, validMap, VALID_REQUEST_PAYLOAD);
 
 		verifyRequest(VALID_REQUEST_PAYLOAD);
-		verifyResponse(LOCATION, expectedRequestRoot);
+		verifyResponse(LOCATION, expectedRequestRoot + "&" + validQuery);
 	}
 
 	@Test

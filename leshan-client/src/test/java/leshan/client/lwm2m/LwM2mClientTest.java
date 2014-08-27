@@ -14,12 +14,17 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import ch.ethz.inf.vs.californium.server.Server;
+
 @RunWith(MockitoJUnitRunner.class)
 public class LwM2mClientTest {
 	@Mock
-	private BootstrapDownlink fakeBootstrapListener;
+	private BootstrapDownlink fakeBootstrapDownlink;
 	@Mock
-	private ManageDownlink fakeRegisterListener;
+	private ManageDownlink fakeRegisterDownlink;
+	
+	@Mock
+	private Server server;
 
 	@Before
 	public void setup() {
@@ -27,26 +32,27 @@ public class LwM2mClientTest {
 
 	@Test
 	public void testLegalBootstrapUplinkCreate() {
-		final LwM2mClient clientFactory = new LwM2mClient();
-		final BootstrapUplink uplink = clientFactory.startBootstrap(4321, InetSocketAddress.createUnresolved("localhost", 1234), fakeBootstrapListener);
+		final LwM2mClient client = new LwM2mClient();
+		final BootstrapUplink uplink = client.startBootstrap(4321, InetSocketAddress.createUnresolved("localhost", 1234), fakeBootstrapDownlink);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testIllegalNullBootstrapUplinkCreate() {
-		final LwM2mClient clientFactory = new LwM2mClient();
-		final BootstrapUplink uplink = clientFactory.startBootstrap(4321, InetSocketAddress.createUnresolved("localhost", 1234), null);
+		final LwM2mClient client = new LwM2mClient();
+		final BootstrapUplink uplink = client.startBootstrap(4321, InetSocketAddress.createUnresolved("localhost", 1234), null);
 	}
 
 	@Test
 	public void testLegalRegisterUplinkCreate() {
-		final LwM2mClient clientFactory = new LwM2mClient();
-		final RegisterUplink uplink = clientFactory.startRegistration(4321, InetSocketAddress.createUnresolved("localhost", 1234), fakeRegisterListener);
+		final LwM2mClient client = new LwM2mClient(server);
+		final RegisterUplink uplink = client.startRegistration(4321, InetSocketAddress.createUnresolved("localhost", 1234), fakeRegisterDownlink);
+		
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testIllegalNullRegisterUplinkCreate() {
-		final LwM2mClient clientFactory = new LwM2mClient();
-		final RegisterUplink uplink = clientFactory.startRegistration(4321, InetSocketAddress.createUnresolved("localhost", 1234), null);
+		final LwM2mClient client = new LwM2mClient();
+		final RegisterUplink uplink = client.startRegistration(4321, InetSocketAddress.createUnresolved("localhost", 1234), null);
 	}
 
 }

@@ -24,7 +24,11 @@ public class LwM2mClient {
 	private final Resource readResource;
 
 	public LwM2mClient() {
-		clientSideServer = new Server();
+		this(new Server());
+	}
+
+	public LwM2mClient(final Server server) {
+		clientSideServer = server;
 
 		readResource = new ObjectResource(this, 1);
 		clientSideServer.add(readResource);
