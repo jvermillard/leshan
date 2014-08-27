@@ -43,7 +43,7 @@ import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 public class RegisterUplinkTest {
 	private static final String LOCATION = "/LOCATION";
 	private static final int SYNC_TIMEOUT_MS = 2000;
-	private static final String SERVER_HOST = "leshan.com";
+	private static final String SERVER_HOST = "localhost";
 	private static final int SERVER_PORT = 1234;
 	private static final String ENDPOINT_NAME = UUID.randomUUID().toString();
 	private String actualResponseLocation;
