@@ -5,16 +5,11 @@ import java.net.InetSocketAddress;
 import leshan.client.lwm2m.bootstrap.BootstrapDownlink;
 import leshan.client.lwm2m.bootstrap.BootstrapUplink;
 import leshan.client.lwm2m.manage.ManageDownlink;
-import leshan.client.lwm2m.manage.ManageMessageDeliverer;
-import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.response.OperationResponse;
-import ch.ethz.inf.vs.californium.CoapClient;
-import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
-import ch.ethz.inf.vs.californium.server.Server;
-import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
-import ch.ethz.inf.vs.californium.server.resources.Resource;
-import ch.ethz.inf.vs.californium.server.resources.ResourceBase;
+
+import org.eclipse.californium.core.network.CoAPEndpoint;
+import org.eclipse.californium.core.server.resources.CoapExchange;
 
 public class LwM2mClient {
 
@@ -27,7 +22,10 @@ public class LwM2mClient {
 		this(new Server());
 	}
 
-	public LwM2mClient(final Server server) {
+	public LwM2mClient(final Server server, final ClientObject... objs) {
+		if(objs == null || objs.length == 0){
+			throw new IllegalArgumentException("LWM2M Clients must support minimum required Objects defined in the LWM2M Specification.");
+		}
 		clientSideServer = server;
 
 		readResource = new ObjectResource(this, 1);
@@ -52,7 +50,7 @@ public class LwM2mClient {
 		final CoAPEndpoint endpoint = new CoAPEndpoint(port);
 		clientSideServer.addEndpoint(endpoint);
 		clientSideServer.start();
-		
+
 		this.downlink = downlink;
 
 //		final String uri = "coap://" + destination.getHostString() + ":" + destination.getPort() + "/rd?ep=device1";
@@ -60,7 +58,7 @@ public class LwM2mClient {
 //		System.out.println("URI " + uri);
 //		client.setEndpoint(endpoint);
 //		client.post(VALID_REQUEST_PAYLOAD, 1);
-		
+
 		return new RegisterUplink(destination, endpoint, downlink);
 	}
 

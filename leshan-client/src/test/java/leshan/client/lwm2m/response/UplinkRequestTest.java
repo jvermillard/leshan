@@ -85,7 +85,7 @@ public class UplinkRequestTest {
 			}
 		}).when(endpoint).sendRequest(any(Request.class));
 
-		uplink = new RegisterUplink(serverAddress, endpoint, downlink);
+		uplink = new RegisterUplink(serverAddress, endpoint, downlink, LinkFormat.parse(VALID_REQUEST_PAYLOAD));
 	}
 	
 	@Test
@@ -95,7 +95,7 @@ public class UplinkRequestTest {
 		when(request.waitForResponse(any(Long.class))).thenReturn(response);
 		when(response.getCode()).thenReturn(ResponseCode.VALID);
 		
-		final OperationResponse operationResponse = uplink.register(ENDPOINT_NAME, parameters, LinkFormat.parse(VALID_REQUEST_PAYLOAD), SYNC_TIMEOUT_MS);
+		final OperationResponse operationResponse = uplink.register(ENDPOINT_NAME, parameters, SYNC_TIMEOUT_MS);
 		
 		assertTrue(operationResponse.isSuccess());
 	}
@@ -106,7 +106,7 @@ public class UplinkRequestTest {
 		
 		when(request.waitForResponse(any(Long.class))).thenReturn(null);
 		
-		final OperationResponse operationResponse = uplink.register(ENDPOINT_NAME, parameters, LinkFormat.parse(VALID_REQUEST_PAYLOAD), SYNC_TIMEOUT_MS);
+		final OperationResponse operationResponse = uplink.register(ENDPOINT_NAME, parameters, SYNC_TIMEOUT_MS);
 		
 		assertFalse(operationResponse.isSuccess());
 		assertEquals(operationResponse.getResponseCode(), ResponseCode.GATEWAY_TIMEOUT);
