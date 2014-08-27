@@ -24,7 +24,7 @@ public class UpdateTest extends AbstractRegisteringTest {
 	
 	@Test
 	public void testRegisterUpdateAndDeregisterSync() throws UnknownHostException {
-		final OperationResponse registerResponse = registerUplink.register(clientEndpoint, clientParameters, objectsAndInstances, TIMEOUT_MS);
+		final OperationResponse registerResponse = registerUplink.register(clientEndpoint, clientParameters, TIMEOUT_MS);
 
 		final String locationPath = new String(registerResponse.getLocation());
 

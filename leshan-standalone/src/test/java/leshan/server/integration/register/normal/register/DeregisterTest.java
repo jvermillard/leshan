@@ -31,7 +31,7 @@ public class DeregisterTest extends AbstractRegisteringTest {
 		assertEquals(deregisterResponseOne.getResponseCode(), ResponseCode.NOT_FOUND);
 		assertFalse(deregisterResponseOne.isSuccess());
 
-		final OperationResponse registerResponse = registerUplink.register(clientEndpoint, clientParameters, objectsAndInstances, TIMEOUT_MS);
+		final OperationResponse registerResponse = registerUplink.register(clientEndpoint, clientParameters, TIMEOUT_MS);
 		final String locationPathOptions = new String(registerResponse.getLocation());
 		
 		validateRegisteredClientOnServer(86400L);

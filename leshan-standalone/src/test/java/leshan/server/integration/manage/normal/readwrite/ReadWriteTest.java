@@ -25,7 +25,7 @@ public class ReadWriteTest extends AbstractRegisteringTest {
 
 	@Test
 	public void testSuccessfulRead() {
-		final OperationResponse registerResponse = registerUplink.register(clientEndpoint, clientParameters, objectsAndInstances, TIMEOUT_MS);
+		final OperationResponse registerResponse = registerUplink.register(clientEndpoint, clientParameters, TIMEOUT_MS);
 
 		final Gson gson = new Gson();
 		

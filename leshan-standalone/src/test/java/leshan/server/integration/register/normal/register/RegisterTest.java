@@ -16,7 +16,7 @@ public class RegisterTest extends AbstractRegisteringTest {
 
 	@Test
 	public void testRegisterAndDeregisterSync() throws UnknownHostException {
-		final OperationResponse registerResponse = registerUplink.register(clientEndpoint, clientParameters, objectsAndInstances, TIMEOUT_MS);
+		final OperationResponse registerResponse = registerUplink.register(clientEndpoint, clientParameters, TIMEOUT_MS);
 
 		final String locationPath = new String(registerResponse.getLocation());
 
@@ -59,7 +59,7 @@ public class RegisterTest extends AbstractRegisteringTest {
 		final Long newLifetime = (long) 100002;
 		clientParameters.put("lt", newLifetime.toString());
 		
-		final OperationResponse registerResponse = registerUplink.register(clientEndpoint, clientParameters, objectsAndInstances, TIMEOUT_MS);
+		final OperationResponse registerResponse = registerUplink.register(clientEndpoint, clientParameters, TIMEOUT_MS);
 
 		final String locationPath = new String(registerResponse.getLocation());
 
