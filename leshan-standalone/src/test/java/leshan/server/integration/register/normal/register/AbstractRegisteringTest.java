@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import leshan.client.lwm2m.factory.ClientFactory;
+import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.response.OperationResponse;
@@ -58,10 +58,10 @@ public class AbstractRegisteringTest {
 				"/lwm2m/5",
 		};
 	private Set<String> clientDataModelResourceSet;
-	
+
 	@Mock
 	protected ManageDownlink downlink;
-	
+
 	protected ResponseCallback callback;
 	protected RegisterUplink registerUplink;
 
@@ -80,8 +80,8 @@ public class AbstractRegisteringTest {
 		clientParameters = new HashMap<>();
 		objectsAndInstances = LinkFormat.parse(clientDataModel);
 		callback = new ResponseCallback();
-		
-		final ClientFactory clientFactory = new ClientFactory();
+
+		final LwM2mClient clientFactory = new LwM2mClient();
 		registerUplink = clientFactory.startRegistration(clientPort, serverAddress, downlink);
 	}
 
@@ -103,12 +103,12 @@ public class AbstractRegisteringTest {
 	protected void validateRegisteredClientOnServer(final Long lifetime)
 			throws UnknownHostException {
 				final Gson gson = new Gson();
-			
+
 				final String serverKnownClientsJson = TestUtils.getAPI("api/clients");
 				List<Map<String, Object>> serverKnownClients = new ArrayList<>();
 				serverKnownClients = gson.fromJson(serverKnownClientsJson, serverKnownClients.getClass());
 				assertEquals(1, serverKnownClients.size());
-			
+
 				final Map<String, Object> clientParameters = serverKnownClients.get(0);
 				assertEquals(clientEndpoint, clientParameters.get("endpoint"));
 				assertNotNull(clientParameters.get("registrationId"));
@@ -116,17 +116,17 @@ public class AbstractRegisteringTest {
 				assertEquals("/" + InetAddress.getLocalHost().getHostAddress() + ":" + clientPort, clientParameters.get("address"));
 				assertEquals("1.0", clientParameters.get("lwM2MmVersion"));
 				assertEquals(lifetime.doubleValue(), Double.parseDouble(clientParameters.get("lifetime").toString()), 0.001);
-				
+
 				final Collection<LinkedTreeMap> links = (Collection<LinkedTreeMap>) clientParameters.get("objectLinks");
 				for (final LinkedTreeMap link : links) {
 					assertTrue(clientDataModelResourceSet.contains(link.get("url")));
 				}
-			
+
 			}
 
 	protected void validateNoRegisteredClientOnServer() {
 		final Gson gson = new Gson();
-	
+
 		final String serverKnownClientsJson = TestUtils.getAPI("api/clients");
 		List<Map<String, Object>> serverKnownClients = new ArrayList<>();
 		serverKnownClients = gson.fromJson(serverKnownClientsJson, serverKnownClients.getClass());

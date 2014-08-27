@@ -2,9 +2,12 @@ package leshan.server.stuff;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 
 import java.net.InetSocketAddress;
 
+import leshan.client.lwm2m.LwM2mClient;
+import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.server.lwm2m.LwM2mServer;
 import leshan.server.lwm2m.bootstrap.BootstrapStoreImpl;
 import leshan.server.lwm2m.client.Client;
@@ -20,14 +23,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import ch.ethz.inf.vs.californium.CoapClient;
-import ch.ethz.inf.vs.californium.CoapResponse;
-import ch.ethz.inf.vs.californium.network.Endpoint;
-import ch.ethz.inf.vs.californium.server.Server;
-import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
-import ch.ethz.inf.vs.californium.server.resources.Resource;
-import ch.ethz.inf.vs.californium.server.resources.ResourceBase;
-
 public class Stuff {
 
 	private static final String LWM2M_SERVER_ADDRESS = "coap://localhost:5683/rd?ep=device1";
@@ -39,13 +34,13 @@ public class Stuff {
 
 	@Before
 	public void setup() {
-		final InetSocketAddress address = new InetSocketAddress(5683);
-		final InetSocketAddress addressSecure = new InetSocketAddress(5684);
+		final InetSocketAddress serverAddress = new InetSocketAddress(5683);
+		final InetSocketAddress serverAddressSecure = new InetSocketAddress(5684);
 		clientRegistry = new ClientRegistryImpl();
 		final ObservationRegistry observationRegistry = new ObservationRegistryImpl();
 		final SecurityRegistry securityRegistry = new SecurityRegistry();
 		final BootstrapStoreImpl bsStore = new BootstrapStoreImpl();
-		server = new LwM2mServer(address, addressSecure, clientRegistry, securityRegistry, observationRegistry, bsStore);
+		server = new LwM2mServer(serverAddress, serverAddressSecure, clientRegistry, securityRegistry, observationRegistry, bsStore);
 		server.start();
 	}
 
@@ -55,26 +50,10 @@ public class Stuff {
 	}
 
 	@Test
-	public void registrationRespondsWithCreated() {
-		final CoapClient client = new CoapClient(LWM2M_SERVER_ADDRESS);
-		final CoapResponse post = client.post(VALID_REQUEST_PAYLOAD, 1);
-		assertEquals("", post.getResponseText());
-		assertEquals(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CREATED, post.getCode());
-	}
-
-	@Test
 	public void registeredDeviceCanHaveReadSentToIt() {
-		final CoapClient client = new CoapClient(LWM2M_SERVER_ADDRESS);
+		final LwM2mClient client = new LwM2mClient();
 
-		final Server clientSideServer = new Server(44022);
-		final Endpoint endpoint = clientSideServer.getEndpoint(44022);
-		client.setEndpoint(endpoint);
-
-		final Resource readResource = new ObjectResource(1);
-		clientSideServer.add(readResource);
-		clientSideServer.start();
-
-		client.post(VALID_REQUEST_PAYLOAD, 1);
+		client.startRegistration(44022, new InetSocketAddress("localhost", 5683), mock(ManageDownlink.class));
 
 		final Client registeredClient = clientRegistry.get("device1");
 		assertNotNull(registeredClient);
@@ -83,24 +62,7 @@ public class Stuff {
 		assertEquals(ResponseCode.CONTENT, response.getCode());
 		assertEquals("THIS SHOULD HAVE TLV STUFF", new String(response.getContent()));
 
-		clientSideServer.stop();
-	}
-
-}
-
-
-class ObjectResource extends ResourceBase {
-
-	private final String value;
-
-	public ObjectResource(final int objectId) {
-		super(Integer.toString(objectId));
-		value = "THIS SHOULD HAVE TLV STUFF";
-	}
-
-	@Override
-	public void handleGET(final CoapExchange exchange) {
-		exchange.respond(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT, value);
+		client.stop();
 	}
 
 }
