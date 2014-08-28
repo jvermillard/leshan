@@ -30,6 +30,7 @@
 package leshan.server;
 
 import java.net.InetSocketAddress;
+import leshan.server.event.EventDispatcher;
 
 import leshan.server.lwm2m.LwM2mServer;
 import leshan.server.lwm2m.bootstrap.BootstrapStoreImpl;
@@ -122,12 +123,15 @@ public class LeshanMain {
         // root.setResourceBase(webappDirLocation);
         root.setParentLoaderPriority(true);
 
-        EventServlet eventServlet = new EventServlet(clientRegistry);
+        EventDispatcher eventDispatcher = EventDispatcher.getInstance();
+        clientRegistry.addListener(eventDispatcher);
+        
+        EventServlet eventServlet = new EventServlet();
         ServletHolder eventServletHolder = new ServletHolder(eventServlet);
         root.addServlet(eventServletHolder, "/event/*");
 
         ServletHolder clientServletHolder = new ServletHolder(new ClientServlet(lwServer.getRequestHandler(),
-                clientRegistry, observationRegistry, eventServlet));
+                clientRegistry, observationRegistry, eventDispatcher));
         root.addServlet(clientServletHolder, "/api/clients/*");
 
         ServletHolder securityServletHolder = new ServletHolder(new SecurityServlet(securityRegistry));

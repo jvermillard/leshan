@@ -41,12 +41,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import leshan.server.lwm2m.client.Client;
-import leshan.server.lwm2m.client.ClientRegistry;
-import leshan.server.lwm2m.client.RegistryListener;
 import leshan.server.lwm2m.message.ContentFormat;
 import leshan.server.lwm2m.message.ResourceSpec;
-import leshan.server.lwm2m.observation.ResourceObserver;
 import leshan.server.servlet.json.ClientSerializer;
+import leshan.server.event.EventDispatcher;
+import leshan.server.event.EventListener;
 
 import org.eclipse.jetty.continuation.Continuation;
 import org.eclipse.jetty.continuation.ContinuationListener;
@@ -58,21 +57,28 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class EventServlet extends HttpServlet implements ResourceObserver {
+public class EventServlet extends HttpServlet implements EventListener {
 
-    private static final String EVENT_DEREGISTRATION = "DEREGISTRATION";
-
-    private static final String EVENT_UPDATED = "UPDATED";
-
-    private static final String EVENT_REGISTRATION = "REGISTRATION";
-
-    private static final String EVENT_NOTIFICATION = "NOTIFICATION";
-
-    private static final String QUERY_PARAM_ENDPOINT = "ep";
-
+    public enum EventType {
+      EVENT_DEREGISTRATION("DEREGISTRATION"),
+      EVENT_UPDATED("UPDATED"),
+      EVENT_REGISTRATION("REGISTRATION"),
+      EVENT_NOTIFICATION("NOTIFICATION"),
+      ;
+      
+      private EventType( String representation) {
+        this.representation = representation;
+      }
+      
+      public final String representation;
+      
+    }
+    
     private static final long serialVersionUID = 1L;
 
     private static final Logger LOG = LoggerFactory.getLogger(EventServlet.class);
+
+    private static final String QUERY_PARAM_ENDPOINT = "ep";
 
     private final Gson gson;
 
@@ -86,35 +92,31 @@ public class EventServlet extends HttpServlet implements ResourceObserver {
 
     private final Set<Continuation> continuations = new ConcurrentHashSet<>();
 
-    private final RegistryListener listener = new RegistryListener() {
-
-        @Override
-        public void registered(Client client) {
-            String jClient = EventServlet.this.gson.toJson(client);
-
-            sendEvent(EVENT_REGISTRATION, jClient, client.getEndpoint());
-        }
-
-        @Override
-        public void updated(Client clientUpdated) {
-            String jClient = EventServlet.this.gson.toJson(clientUpdated);
-
-            sendEvent(EVENT_UPDATED, jClient, clientUpdated.getEndpoint());
-        };
-
-        @Override
-        public void unregistered(Client client) {
-            String jClient = EventServlet.this.gson.toJson(client);
-            sendEvent(EVENT_DEREGISTRATION, jClient, client.getEndpoint());
-        }
-    };
-
-    public EventServlet(ClientRegistry registry) {
-        registry.addListener(this.listener);
-
+    public EventServlet() {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeHierarchyAdapter(Client.class, new ClientSerializer());
         this.gson = gsonBuilder.create();
+        EventDispatcher.getInstance().addEventListener(this);
+    }
+
+    @Override
+    public void registered(Client client) {
+      String jClient = EventServlet.this.gson.toJson(client);
+
+      sendEvent(EventType.EVENT_REGISTRATION, jClient, client.getEndpoint());
+    }
+
+    @Override
+    public void updated(Client clientUpdated) {
+      String jClient = EventServlet.this.gson.toJson(clientUpdated);
+
+      sendEvent(EventType.EVENT_UPDATED, jClient, clientUpdated.getEndpoint());
+    }
+
+    @Override
+    public void unregistered(Client client) {
+      String jClient = EventServlet.this.gson.toJson(client);
+      sendEvent(EventType.EVENT_DEREGISTRATION, jClient, client.getEndpoint());
     }
 
     @Override
@@ -144,18 +146,19 @@ public class EventServlet extends HttpServlet implements ResourceObserver {
                     .toString();
 
         }
-        sendEvent(EVENT_NOTIFICATION, data, target.getClient().getEndpoint());
+        sendEvent(EventType.EVENT_NOTIFICATION, data, target.getClient().getEndpoint());
     }
 
-    private synchronized void sendEvent(String event, String data, String endpoint) {
+    private synchronized void sendEvent(EventType eventType, String data, String endpoint) {
+        String event = eventType.representation;
+
         if (LOG.isDebugEnabled()) {
             LOG.debug("Dispatching {} event from endpoint {}", event, endpoint);
         }
-
+        
         Collection<Continuation> disconnected = new ArrayList<>();
-
         for (Continuation c : continuations) {
-            if (endpoint.equals(c.getAttribute(QUERY_PARAM_ENDPOINT)) || !EVENT_NOTIFICATION.equals(event)) {
+            if (endpoint.equals(c.getAttribute(QUERY_PARAM_ENDPOINT)) || !EventType.EVENT_NOTIFICATION.equals(eventType)) {
                 try {
                     OutputStream output = c.getServletResponse().getOutputStream();
                     output.write(EVENT);
@@ -173,7 +176,6 @@ public class EventServlet extends HttpServlet implements ResourceObserver {
                 }
             }
         }
-
         continuations.removeAll(disconnected);
     }
 
