@@ -1,6 +1,5 @@
 package leshan.server.client;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -167,13 +166,19 @@ public abstract class LwM2mClientServerIntegrationTest {
 				.send(server.getRequestHandler());
 	}
 
+	protected ClientResponse sendCreate(final Tlv[] values, final int objectID, final int objectInstanceID) {
+		return CreateRequest
+				.newRequest(getClient(), objectID, objectInstanceID, values)
+				.send(server.getRequestHandler());
+	}
+
 	protected Client getClient() {
 		return clientRegistry.get(ENDPOINT);
 	}
 
 	protected void assertResponse(final ClientResponse response, final ResponseCode responseCode, final byte[] payload) {
 		assertEquals(responseCode, response.getCode());
-		assertArrayEquals(payload, response.getContent());
+		assertEquals(new String(payload), new String(response.getContent()));
 	}
 
 	protected void assertEmptyResponse(final ClientResponse response, final ResponseCode responseCode) {

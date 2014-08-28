@@ -17,7 +17,6 @@ import ch.ethz.inf.vs.californium.server.resources.Resource;
 public class LwM2mClient {
 
 	private final Server clientSideServer;
-	private final String VALID_REQUEST_PAYLOAD = "</lwm2m>;rt=\"oma.lwm2m\", </lwm2m/1/101>, </lwm2m/1/102>, </lwm2m/2/0>, </lwm2m/2/1>, </lwm2m/2/2>, </lwm2m/3/0>, </lwm2m/4/0>, </lwm2m/5>";
 	ManageDownlink downlink;
 
 	public LwM2mClient(final ClientObject... objs) {
@@ -28,6 +27,7 @@ public class LwM2mClient {
 		if(objs == null || objs.length == 0){
 			throw new IllegalArgumentException("LWM2M Clients must support minimum required Objects defined in the LWM2M Specification.");
 		}
+		server.setMessageDeliverer(new LwM2mServerMessageDeliverer(server.getRoot()));
 		clientSideServer = server;
 
 		//		readResource = new ObjectResource(this, 1);

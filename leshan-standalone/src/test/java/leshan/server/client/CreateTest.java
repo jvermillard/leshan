@@ -35,6 +35,14 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
 	}
 
 	@Test
+	public void canCreateSpecificInstanceOfObject() {
+		register();
+
+		final ClientResponse response = sendCreate(createResourcesTlv("one", "two"), GOOD_OBJECT_ID, 14);
+		assertResponse(response, ResponseCode.CREATED, ("/" + GOOD_OBJECT_ID + "/14").getBytes());
+	}
+
+	@Test
 	public void canCreateMultipleInstanceOfObject() {
 		register();
 
@@ -50,7 +58,7 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
 		register();
 
 		final ClientResponse response = sendCreate(createResourcesTlv("hello", "goodbye"), BAD_OBJECT_ID);
-		assertResponse(response, ResponseCode.NOT_FOUND, null);
+		assertEmptyResponse(response, ResponseCode.NOT_FOUND);
 	}
 
 }

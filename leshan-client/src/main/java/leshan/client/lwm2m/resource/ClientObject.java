@@ -54,7 +54,7 @@ public class ClientObject extends ResourceBase {
 			resources.put(def.getId(), def.createResource());
 		}
 
-		final ClientObjectInstance instance = new ClientObjectInstance(instanceCounter.getAndIncrement(), resources);
+		final ClientObjectInstance instance = new ClientObjectInstance(getNewInstanceId(exchange), resources);
 		this.add(instance);
 
 		for (final Tlv tlv : tlvs) {
@@ -64,6 +64,13 @@ public class ClientObject extends ResourceBase {
 			resources.get(tlv.getIdentifier()).writeTlv(tlv);
 		}
 		exchange.respond(CREATED, "/" + getName() + "/" + instance.getInstanceId());
+	}
+
+	private int getNewInstanceId(final CoapExchange exchange) {
+		if (exchange.advanced().getRequest().getOptions().getURIPaths().size() > 1) {
+			return Integer.parseInt(exchange.advanced().getRequest().getOptions().getURIPaths().get(1));
+		}
+		return instanceCounter.getAndIncrement();
 	}
 
 }
