@@ -1,8 +1,10 @@
 package leshan.server.stuff;
 
+import static com.jayway.awaitility.Awaitility.await;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.net.InetSocketAddress;
@@ -18,7 +20,6 @@ import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.util.ResponseCallback;
 import leshan.server.lwm2m.LwM2mServer;
 import leshan.server.lwm2m.bootstrap.BootstrapStoreImpl;
-import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.ClientRegistryImpl;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.CreateRequest;
@@ -28,10 +29,10 @@ import leshan.server.lwm2m.observation.ObservationRegistry;
 import leshan.server.lwm2m.observation.ObservationRegistryImpl;
 import leshan.server.lwm2m.security.SecurityRegistry;
 import leshan.server.lwm2m.tlv.Tlv;
+import leshan.server.lwm2m.tlv.TlvEncoder;
 import leshan.server.lwm2m.tlv.TlvType;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -40,10 +41,9 @@ import ch.ethz.inf.vs.californium.WebLink;
 import ch.ethz.inf.vs.californium.coap.LinkFormat;
 import ch.ethz.inf.vs.californium.coap.Response;
 
-import com.jayway.awaitility.Awaitility;
-
 public class Stuff {
 
+	private static final String ENDPOINT = "epflwmtm";
 	private static final int CLIENT_PORT = 44022;
 	private static final String GOOD_PAYLOAD = "1337";
 	protected static final int TIMEOUT_MS = 5000;
@@ -86,47 +86,50 @@ public class Stuff {
 	}
 
 	@Test
-	public void registeredDeviceCanHaveReadSentToIt() {
+	public void registeredDeviceExists() {
 		final RegisterUplink registerUplink = registerAndGetUplink();
-		final OperationResponse register = registerUplink.register("device1", clientParameters, TIMEOUT_MS);
+		final OperationResponse register = registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
 
-		Assert.assertTrue(register.isSuccess());
-
-		final Client registeredClient = clientRegistry.get("device1");
-		assertNotNull(registeredClient);
-		final ClientResponse response = ReadRequest.newRequest(registeredClient, 1).send(server.getRequestHandler());
-
-		assertResponse(response, ResponseCode.CONTENT, new byte[0]);
+		assertTrue(register.isSuccess());
+		assertNotNull(clientRegistry.get(ENDPOINT));
 	}
 
 	@Test
-	public void registeredDeviceCanHaveReadSentToItAsync() {
+	public void registeredDeviceExistsAsync() {
 		final RegisterUplink registerUplink = registerAndGetUplink();
 		final ResponseCallback callback = new ResponseCallback();
-		registerUplink.register("device1", clientParameters, objectsAndInstances, callback);
+		registerUplink.register(ENDPOINT, clientParameters, objectsAndInstances, callback);
 
-		Awaitility.await().untilTrue(callback.isCalled());
+		await().untilTrue(callback.isCalled());
 
-		Assert.assertTrue(callback.isSuccess());
+		assertTrue(callback.isSuccess());
+		assertNotNull(clientRegistry.get(ENDPOINT));
+	}
 
-		final Client registeredClient = clientRegistry.get("device1");
-		assertNotNull(registeredClient);
-		final ClientResponse response = ReadRequest.newRequest(registeredClient, 1).send(server.getRequestHandler());
-
-		assertResponse(response, ResponseCode.CONTENT, new byte[0]);
+	@Test
+	public void canReadObject() {
+		final RegisterUplink registerUplink = registerAndGetUplink();
+		registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
+		assertResponse(sendGet(), ResponseCode.CONTENT, new byte[0]);
 	}
 
 	@Test
 	public void canCreateInstanceOfObject() {
 		final RegisterUplink registerUplink = registerAndGetUplink();
-		registerUplink.register("device1", clientParameters, TIMEOUT_MS);
+		registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
 
-		final Tlv[] values = new Tlv[2];
-		values[0] = new Tlv(TlvType.RESOURCE_VALUE, null, "hello".getBytes(), 0);
-		values[1] = new Tlv(TlvType.RESOURCE_VALUE, null, "goodbye".getBytes(), 1);
-		final ClientResponse response = CreateRequest.newRequest(clientRegistry.get("device1"), 1, values).send(server.getRequestHandler());
+		final ClientResponse response = sendCreate(createObjectInstanceTlv("hello", "goodbye"));
+		assertResponse(response, ResponseCode.CREATED, "/1/0".getBytes());
+	}
 
-		assertEquals(ResponseCode.CREATED, response.getCode());
+	@Test
+	public void objectCreationIsReflectedInObjectRead() {
+		final RegisterUplink registerUplink = registerAndGetUplink();
+		registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
+
+		sendCreate(createObjectInstanceTlv("hello", "goodbye"));
+
+		assertResponse(sendGet(), ResponseCode.CONTENT, TlvEncoder.encode(createObjectInstanceTlv("hello", "goodbye")).array());
 	}
 
 	private RegisterUplink registerAndGetUplink() {
@@ -140,9 +143,30 @@ public class Stuff {
 		return registerUplink;
 	}
 
+	private Tlv[] createObjectInstanceTlv(final String value0, final String value1) {
+		final Tlv[] values = new Tlv[2];
+		values[0] = new Tlv(TlvType.RESOURCE_VALUE, null, value0.getBytes(), 0);
+		values[1] = new Tlv(TlvType.RESOURCE_VALUE, null, value1.getBytes(), 1);
+		return values;
+	}
+
+	private ClientResponse sendGet() {
+		return ReadRequest
+				.newRequest(clientRegistry.get(ENDPOINT), 1)
+				.send(server.getRequestHandler());
+	}
+
+	private ClientResponse sendCreate(final Tlv[] values) {
+		return CreateRequest
+				.newRequest(clientRegistry.get(ENDPOINT), 1, values)
+				.send(server.getRequestHandler());
+	}
+
 	private void assertResponse(final ClientResponse response, final ResponseCode responseCode, final byte[] payload) {
 		assertEquals(responseCode, response.getCode());
-		assertArrayEquals(payload, response.getContent());
+		assertArrayEquals("Expected payload \"" + new String(payload) + "\", " +
+				"actual payload \"" + new String(response.getContent()) + "\"",
+				payload, response.getContent());
 	}
 
 }
