@@ -22,6 +22,7 @@ import leshan.client.lwm2m.resource.ExecuteListener;
 import leshan.client.lwm2m.resource.ReadListener;
 import leshan.client.lwm2m.resource.SingleResourceDefinition;
 import leshan.client.lwm2m.resource.WriteListener;
+import leshan.client.lwm2m.resource.WriteResponse;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.util.ResponseCallback;
 import leshan.server.lwm2m.LwM2mServer;
@@ -59,6 +60,9 @@ public class Stuff {
 	private static final int FIRST_RESOURCE_ID = 4;
 	private static final int SECOND_RESOURCE_ID = 5;
 	private static final int EXECUTABLE_RESOURCE_ID = 6;
+
+	private static final int BROKEN_OBJECT_ID = GOOD_OBJECT_ID + 1;
+	private static final int BROKEN_RESOURCE_ID = 7;
 
 	private static final int BAD_OBJECT_ID = 1000;
 	private static final String ENDPOINT = "epflwmtm";
@@ -102,12 +106,14 @@ public class Stuff {
 		firstResourceListener = new ReadWriteListener();
 		secondResourceListener = new ReadWriteListener();
 
+		final ReadWriteListenerWithBrokenWrite brokenResourceListener = new ReadWriteListenerWithBrokenWrite();
+
 		final ClientObject objectOne = new ClientObject(GOOD_OBJECT_ID,
 				new SingleResourceDefinition(FIRST_RESOURCE_ID, ExecuteListener.DUMMY, firstResourceListener, firstResourceListener),
 				new SingleResourceDefinition(SECOND_RESOURCE_ID, ExecuteListener.DUMMY, secondResourceListener, secondResourceListener),
 				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executeListener, WriteListener.DUMMY, ReadListener.DUMMY));
-		final ClientObject objectTwo = new ClientObject(GOOD_OBJECT_ID + 1,
-				new SingleResourceDefinition(0, ExecuteListener.DUMMY, WriteListener.DUMMY, ReadListener.DUMMY));
+		final ClientObject objectTwo = new ClientObject(BROKEN_OBJECT_ID,
+				new SingleResourceDefinition(BROKEN_RESOURCE_ID, ExecuteListener.DUMMY, brokenResourceListener, brokenResourceListener));
 		client = new LwM2mClient(objectOne, objectTwo);
 	}
 
@@ -235,6 +241,21 @@ public class Stuff {
 		assertArrayEquals(secondResourceListener.read(), "world".getBytes());
 	}
 
+	@Test
+	public void badWriteReplaceToResource() {
+		final RegisterUplink registerUplink = registerAndGetUplink();
+		registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
+
+		sendCreate(createBrokenResourcesTlv("i'm broken!"), BROKEN_OBJECT_ID);
+
+		final ClientResponse response = WriteRequest.newReplaceRequest(getClient(), BROKEN_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, BROKEN_RESOURCE_ID,
+				"fix me!", ContentFormat.TEXT).send(server.getRequestHandler());
+
+		assertEmptyResponse(response, ResponseCode.BAD_REQUEST);
+		assertResponse(sendGet(BROKEN_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, BROKEN_RESOURCE_ID),
+				ResponseCode.CONTENT, "i'm broken!".getBytes());
+	}
+
 	// TODO: This test tests something that is untestable by the LWM2M spec and should
 	// probably be deleted. Ignored until this is confirmed
 	@Ignore
@@ -307,6 +328,12 @@ public class Stuff {
 		return values;
 	}
 
+	private Tlv[] createBrokenResourcesTlv(final String value) {
+		final Tlv[] values = new Tlv[1];
+		values[0] = new Tlv(TlvType.RESOURCE_VALUE, null, value.getBytes(), BROKEN_RESOURCE_ID);
+		return values;
+	}
+
 	private ClientResponse sendGet(final int objectID) {
 		return ReadRequest
 				.newRequest(getClient(), objectID)
@@ -340,14 +367,21 @@ public class Stuff {
 		assertArrayEquals(payload, response.getContent());
 	}
 
+	private void assertEmptyResponse(final ClientResponse response, final ResponseCode responseCode) {
+		assertEquals(responseCode, response.getCode());
+		final byte[] payload = response.getContent();
+		assertTrue(payload == null || payload.length == 0);
+	}
+
 	public class ReadWriteListener implements ReadListener, WriteListener{
 
 		private String value;
 
 		@Override
-		public void write(final int objectId, final int objectInstanceId, final int resourceId,
+		public WriteResponse write(final int objectId, final int objectInstanceId, final int resourceId,
 				final byte[] valueToWrite) {
 			value = new String(valueToWrite);
+			return WriteResponse.success();
 		}
 
 		@Override
@@ -356,4 +390,26 @@ public class Stuff {
 		}
 
 	}
+
+	public class ReadWriteListenerWithBrokenWrite implements ReadListener, WriteListener{
+
+		private String value;
+
+		@Override
+		public WriteResponse write(final int objectId, final int objectInstanceId, final int resourceId,
+				final byte[] valueToWrite) {
+			if (value == null) {
+				value = new String(valueToWrite);
+				return WriteResponse.success();
+			}
+			return WriteResponse.failure();
+		}
+
+		@Override
+		public byte[] read() {
+			return value.getBytes();
+		}
+
+	}
+
 }

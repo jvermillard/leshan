@@ -53,7 +53,7 @@ public class ClientObject extends ResourceBase {
 		for (final ClientResourceDefinition def : definitions) {
 			resources.put(def.getId(), def.createResource());
 		}
-		
+
 		final ClientObjectInstance instance = new ClientObjectInstance(instanceCounter.getAndIncrement(), resources);
 		this.add(instance);
 

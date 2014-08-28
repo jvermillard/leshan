@@ -1,7 +1,5 @@
 package leshan.client.lwm2m.resource;
 
-import java.util.Arrays;
-
 import leshan.server.lwm2m.tlv.Tlv;
 import leshan.server.lwm2m.tlv.TlvType;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
@@ -13,7 +11,7 @@ class ClientResource extends ResourceBase {
 	private final ExecuteListener executeListener;
 	private final WriteListener writeListener;
 	private final ReadListener readListener;
-	
+
 	public ClientResource(final int id, final ExecuteListener executeListener, final WriteListener writeListener, final ReadListener readListener) {
 		super(Integer.toString(id));
 		this.executeListener = executeListener;
@@ -36,8 +34,8 @@ class ClientResource extends ResourceBase {
 
 	@Override
 	public void handlePUT(final CoapExchange exchange) {
-		writeValue(exchange.getRequestPayload());
-		exchange.respond(ResponseCode.CHANGED);
+		final WriteResponse writeResponse = writeValue(exchange.getRequestPayload());
+		exchange.respond(writeResponse.getCode(), new byte[0]);
 	}
 
 	@Override
@@ -47,11 +45,11 @@ class ClientResource extends ResourceBase {
 				Integer.parseInt(getName()));
 		exchange.respond(ResponseCode.CHANGED);
 	}
-	
+
 	public boolean isExecutable() {
 		return executeListener != ExecuteListener.DUMMY;
 	}
-	
+
 	public boolean isWritable() {
 		return writeListener != WriteListener.DUMMY;
 	}
@@ -63,9 +61,9 @@ class ClientResource extends ResourceBase {
 	public void writeTlv(final Tlv tlv) {
 		writeValue(tlv.getValue());
 	}
-	
-	private void writeValue(final byte[] value) {
-		writeListener.write(Integer.parseInt(getParent().getParent().getName()),
+
+	private WriteResponse writeValue(final byte[] value) {
+		return writeListener.write(Integer.parseInt(getParent().getParent().getName()),
 				Integer.parseInt(getParent().getName()),
 				Integer.parseInt(getName()), value);
 	}
