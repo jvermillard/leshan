@@ -179,7 +179,7 @@ public abstract class LwM2mClientServerIntegrationTest {
 				.send(server.getRequestHandler());
 	}
 	
-	protected ClientResponse sendDelete(final Tlv[] values, final int objectID, final int objectInstanceID) {
+	protected ClientResponse sendDelete(final Tlv[] values, final int objectID, final Integer objectInstanceID) {
 		return DeleteRequest
 				.newRequest(getClient(), objectID, objectInstanceID)
 				.send(server.getRequestHandler());

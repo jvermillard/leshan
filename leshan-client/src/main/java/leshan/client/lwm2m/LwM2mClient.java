@@ -82,25 +82,50 @@ public class LwM2mClient {
 
 	public LinkObject[] getObjectLinks(final int objectId) {
 		final Resource clientObject = clientSideServer.getRoot().getChild(Integer.toString(objectId));
-		
+
 		if(clientObject == null){
 			return new LinkObject[]{};
 		}
-		
+
 		return LinkFormatParser.parse(((LinkFormattable) clientObject).asLinkFormat().getBytes());
 	}
 
-	public LinkObject[] getObjectLinks(final int objectId,
-			final int objectInstanceId) {
+	public LinkObject[] getObjectLinks(final int objectId, final int objectInstanceId) {
 		final Resource clientObject = clientSideServer.getRoot().getChild(Integer.toString(objectId));
-		
+
 		if(clientObject == null){
 			return new LinkObject[]{};
 		}
-		
+
 		final Resource clientObjectInstance = clientObject.getChild(Integer.toString(objectInstanceId));
 		
+		if(clientObjectInstance == null){
+			return new LinkObject[]{};
+		}
+
 		return LinkFormatParser.parse(((LinkFormattable) clientObjectInstance).asLinkFormat().getBytes());
+	}
+
+	public LinkObject[] getObjectLinks(final int objectId, final int objectInstanceId, final int resourceId) {
+		final Resource clientObject = clientSideServer.getRoot().getChild(Integer.toString(objectId));
+
+		if(clientObject == null){
+			return new LinkObject[]{};
+		}
+
+		final Resource clientObjectInstance = clientObject.getChild(Integer.toString(objectInstanceId));
+		
+		if(clientObjectInstance == null){
+			return new LinkObject[]{};
+		}
+		
+		final Resource clientResource = clientObjectInstance.getChild(Integer.toString(resourceId));
+		
+		if(clientResource == null){
+			return new LinkObject[]{};
+		}
+		
+		return LinkFormatParser.parse(((LinkFormattable) clientResource).asLinkFormat().getBytes());
 	}
 
 }

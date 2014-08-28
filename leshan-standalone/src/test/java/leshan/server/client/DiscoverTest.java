@@ -2,26 +2,18 @@ package leshan.server.client;
 
 import static org.junit.Assert.*;
 
-import java.util.Set;
-
 import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.resource.ClientObject;
 import leshan.client.lwm2m.resource.ExecuteListener;
 import leshan.client.lwm2m.resource.ReadListener;
 import leshan.client.lwm2m.resource.SingleResourceDefinition;
 import leshan.client.lwm2m.resource.WriteListener;
-import leshan.server.client.LwM2mClientServerIntegrationTest.ReadWriteListenerWithBrokenWrite;
 import leshan.server.lwm2m.client.LinkObject;
 import leshan.server.lwm2m.linkformat.LinkFormatParser;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ResponseCode;
 
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.MatcherAssert;
 import org.junit.Test;
-
-import ch.ethz.inf.vs.californium.WebLink;
 
 public class DiscoverTest extends LwM2mClientServerIntegrationTest {
 	
@@ -55,6 +47,24 @@ public class DiscoverTest extends LwM2mClientServerIntegrationTest {
 		
 		assertLinkFormatResponse(sendDiscover(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.CONTENT, client.getObjectLinks(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID));
 	}
+	
+	@Test
+	public void testDiscoverObjectAndObjectInstanceAndResource() {
+		register();
+		
+		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+		
+		assertLinkFormatResponse(sendDiscover(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, FIRST_RESOURCE_ID), ResponseCode.CONTENT, client.getObjectLinks(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, FIRST_RESOURCE_ID));
+	}
+	
+	@Test
+	public void testCantDiscoverNonExistentObjectAndObjectInstanceAndResource() {
+		register();
+		
+		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+		
+		assertEmptyResponse(sendDiscover(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, 1234231), ResponseCode.NOT_FOUND);
+	}
 
 	private void assertLinkFormatResponse(final ClientResponse response,
 			final ResponseCode responseCode, final LinkObject[] expectedObjects) {
@@ -62,9 +72,9 @@ public class DiscoverTest extends LwM2mClientServerIntegrationTest {
 		
 		final LinkObject[] actualObjects = LinkFormatParser.parse(response.getContent());
 		
-		assertEquals(actualObjects.length, expectedObjects.length);
+		assertEquals(expectedObjects.length, actualObjects.length);
 		for(int i = 0; i < expectedObjects.length; i++){
-			assertEquals(actualObjects[i].toString(), expectedObjects[i].toString());
+			assertEquals(expectedObjects[i].toString(), actualObjects[i].toString());
 		}
 	}
 
