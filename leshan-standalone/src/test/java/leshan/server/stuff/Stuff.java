@@ -18,8 +18,10 @@ import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.resource.ClientObject;
+import leshan.client.lwm2m.resource.ReadListener;
 import leshan.client.lwm2m.resource.SingleResourceDefinition;
 import leshan.client.lwm2m.resource.ExecuteListener;
+import leshan.client.lwm2m.resource.WriteListener;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.util.ResponseCallback;
 import leshan.server.lwm2m.LwM2mServer;
@@ -77,6 +79,7 @@ public class Stuff {
 	private InetSocketAddress serverAddress;
 	private LwM2mClient client;
 	private ExecuteListener executeListener;
+	private WriteListener writeListener;
 
 	@Before
 	public void setup() {
@@ -93,12 +96,13 @@ public class Stuff {
 		server.start();
 
 		executeListener = mock(ExecuteListener.class);
+		writeListener = mock(WriteListener.class);
 		final ClientObject objectOne = new ClientObject(GOOD_OBJECT_ID,
-				new SingleResourceDefinition(FIRST_RESOURCE_ID, null),
-				new SingleResourceDefinition(SECOND_RESOURCE_ID, null),
-				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executeListener));
+				new SingleResourceDefinition(FIRST_RESOURCE_ID, ExecuteListener.DUMMY, WriteListener.DUMMY, ReadListener.DUMMY),
+				new SingleResourceDefinition(SECOND_RESOURCE_ID, ExecuteListener.DUMMY, writeListener, ReadListener.DUMMY),
+				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executeListener, WriteListener.DUMMY, ReadListener.DUMMY));
 		final ClientObject objectTwo = new ClientObject(GOOD_OBJECT_ID + 1,
-				new SingleResourceDefinition(0, null));
+				new SingleResourceDefinition(0, ExecuteListener.DUMMY, WriteListener.DUMMY, ReadListener.DUMMY));
 		client = new LwM2mClient(objectOne, objectTwo);
 	}
 
@@ -223,6 +227,7 @@ public class Stuff {
 		assertResponse(response, ResponseCode.CHANGED, new byte[0]);
 		assertResponse(sendGet(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
 				ResponseCode.CONTENT, "world".getBytes());
+		verify(writeListener).write(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID, "world".getBytes());
 	}
 
 	// TODO: This test tests something that is untestable by the LWM2M spec and should

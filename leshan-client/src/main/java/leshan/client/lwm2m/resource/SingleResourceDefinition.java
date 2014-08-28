@@ -3,11 +3,15 @@ package leshan.client.lwm2m.resource;
 public class SingleResourceDefinition implements ClientResourceDefinition {
 
 	private final int id;
-	private final ExecuteListener listener;
+	private final ExecuteListener executeListener;
+	private final WriteListener writeListener;
+	private final ReadListener readListener;
 
-	public SingleResourceDefinition(final int id, final ExecuteListener listener) {
+	public SingleResourceDefinition(final int id, final ExecuteListener executeListener, final WriteListener writeListener, final ReadListener readListener) {
 		this.id = id;
-		this.listener = listener;
+		this.executeListener = executeListener;
+		this.writeListener = writeListener;
+		this.readListener = readListener;
 	}
 
 	@Override
@@ -17,7 +21,7 @@ public class SingleResourceDefinition implements ClientResourceDefinition {
 
 	@Override
 	public ClientResource createResource() {
-		return new ClientResource(id, listener);
+		return new ClientResource(id, executeListener, writeListener, readListener);
 	}
 
 }

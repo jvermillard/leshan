@@ -53,15 +53,16 @@ public class ClientObject extends ResourceBase {
 		for (final ClientResourceDefinition def : definitions) {
 			resources.put(def.getId(), def.createResource());
 		}
+		
+		final ClientObjectInstance instance = new ClientObjectInstance(instanceCounter.getAndIncrement(), resources);
+		this.add(instance);
 
 		for (final Tlv tlv : tlvs) {
 			if (tlv.getType() != TlvType.RESOURCE_VALUE) {
 				exchange.respond(BAD_REQUEST, "Invalid Object Instance TLV");
 			}
-			resources.put(tlv.getIdentifier(), new ClientResource(tlv.getIdentifier(), tlv.getValue()));
+			resources.get(tlv.getIdentifier()).writeTlv(tlv);
 		}
-		final ClientObjectInstance instance = new ClientObjectInstance(instanceCounter.getAndIncrement(), resources);
-		this.add(instance);
 		exchange.respond(CREATED, "/" + getName() + "/" + instance.getInstanceId());
 	}
 

@@ -10,59 +10,64 @@ import ch.ethz.inf.vs.californium.server.resources.ResourceBase;
 
 class ClientResource extends ResourceBase {
 
-	private byte[] value;
-	private final ExecuteListener listener;
-
-	public ClientResource(final int id, final byte[] value) {
+	private final ExecuteListener executeListener;
+	private final WriteListener writeListener;
+	private final ReadListener readListener;
+	
+	public ClientResource(final int id, final ExecuteListener executeListener, final WriteListener writeListener, final ReadListener readListener) {
 		super(Integer.toString(id));
-		this.value = value;
-		this.listener = ExecuteListener.DUMMY;
-	}
-
-	public ClientResource(final int id, final ExecuteListener listener) {
-		super(Integer.toString(id));
-		this.value = new byte[0];
-		this.listener = listener;
+		this.executeListener = executeListener;
+		this.writeListener = writeListener;
+		this.readListener = readListener;
 	}
 
 	public int getId() {
 		return Integer.parseInt(getName());
 	}
 
-	public byte[] getValue() {
-		return value;
-	}
-
 	public Tlv asTlv() {
-		return new Tlv(TlvType.RESOURCE_VALUE, null, getValue(), getId());
+		return new Tlv(TlvType.RESOURCE_VALUE, null, readListener.read(), getId());
 	}
 
 	@Override
 	public void handleGET(final CoapExchange exchange) {
-		exchange.respond(ResponseCode.CONTENT, value);
+		exchange.respond(ResponseCode.CONTENT, readListener.read());
 	}
 
 	@Override
 	public void handlePUT(final CoapExchange exchange) {
-		write(exchange);
+		writeValue(exchange.getRequestPayload());
+		exchange.respond(ResponseCode.CHANGED);
 	}
 
 	@Override
 	public void handlePOST(final CoapExchange exchange) {
-		listener.execute(Integer.parseInt(getParent().getParent().getName()),
+		executeListener.execute(Integer.parseInt(getParent().getParent().getName()),
 				Integer.parseInt(getParent().getName()),
 				Integer.parseInt(getName()));
 		exchange.respond(ResponseCode.CHANGED);
 	}
-
-	private void write(final CoapExchange exchange) {
-		final byte[] payload = exchange.getRequestPayload();
-		value = Arrays.copyOf(payload, payload.length);
-		exchange.respond(ResponseCode.CHANGED);
+	
+	public boolean isExecutable() {
+		return executeListener != ExecuteListener.DUMMY;
+	}
+	
+	public boolean isWritable() {
+		return writeListener != WriteListener.DUMMY;
 	}
 
 	public boolean isReadable() {
-		return listener == ExecuteListener.DUMMY;
+		return readListener != ReadListener.DUMMY;
+	}
+
+	public void writeTlv(final Tlv tlv) {
+		writeValue(tlv.getValue());
+	}
+	
+	private void writeValue(final byte[] value) {
+		writeListener.write(Integer.parseInt(getParent().getParent().getName()),
+				Integer.parseInt(getParent().getName()),
+				Integer.parseInt(getName()), value);
 	}
 
 }
