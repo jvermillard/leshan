@@ -40,7 +40,7 @@ public class WriteTest extends LwM2mClientServerIntegrationTest {
 				"world", ContentFormat.TEXT).send(server.getRequestHandler());
 
 		assertResponse(response, ResponseCode.CHANGED, new byte[0]);
-		assertResponse(sendGet(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
+		assertResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
 				ResponseCode.CONTENT, "world".getBytes());
 		assertArrayEquals(secondResourceListener.read(), "world".getBytes());
 	}
@@ -55,7 +55,7 @@ public class WriteTest extends LwM2mClientServerIntegrationTest {
 				"fix me!", ContentFormat.TEXT).send(server.getRequestHandler());
 
 		assertEmptyResponse(response, ResponseCode.BAD_REQUEST);
-		assertResponse(sendGet(BROKEN_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, BROKEN_RESOURCE_ID),
+		assertResponse(sendRead(BROKEN_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, BROKEN_RESOURCE_ID),
 				ResponseCode.CONTENT, "i'm broken!".getBytes());
 	}
 
@@ -72,7 +72,7 @@ public class WriteTest extends LwM2mClientServerIntegrationTest {
 				"world", ContentFormat.TEXT).send(server.getRequestHandler());
 
 		assertResponse(response, ResponseCode.CHANGED, new byte[0]);
-		assertResponse(sendGet(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
+		assertResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
 				ResponseCode.CONTENT, "world".getBytes());
 	}
 

@@ -15,11 +15,13 @@ import leshan.server.lwm2m.tlv.Tlv;
 import leshan.server.lwm2m.tlv.TlvDecoder;
 import leshan.server.lwm2m.tlv.TlvEncoder;
 import leshan.server.lwm2m.tlv.TlvType;
+import ch.ethz.inf.vs.californium.coap.LinkFormat;
+import ch.ethz.inf.vs.californium.coap.MediaTypeRegistry;
 import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
 import ch.ethz.inf.vs.californium.server.resources.Resource;
 import ch.ethz.inf.vs.californium.server.resources.ResourceBase;
 
-public class ClientObject extends ResourceBase {
+public class ClientObject extends ResourceBase implements LinkFormattable{
 
 	private final ClientResourceDefinition[] definitions;
 	private final AtomicInteger instanceCounter;
@@ -35,13 +37,27 @@ public class ClientObject extends ResourceBase {
 
 	@Override
 	public void handleGET(final CoapExchange exchange) {
-		final List<Tlv> tlvs = new ArrayList<>();
+		if(exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_LINK_FORMAT){
+			handleDiscover(exchange);
+		}
+		else{
+			handleRead(exchange);
+		}
+	}
 
+	private void handleDiscover(final CoapExchange exchange) {
+		exchange.respond(CONTENT, asLinkFormat());
+	}
+
+
+	private void handleRead(final CoapExchange exchange) {
+		final List<Tlv> tlvs = new ArrayList<>();
+		
 		for (final Resource res : getChildren()) {
 			final ClientObjectInstance instance = (ClientObjectInstance)res;
 			tlvs.add(new Tlv(TlvType.OBJECT_INSTANCE, instance.asTlvArray(), null, instance.getInstanceId()));
 		}
-
+		
 		final byte[] payload = TlvEncoder.encode(tlvs.toArray(new Tlv[0])).array();
 		exchange.respond(CONTENT, payload);
 	}
@@ -73,4 +89,15 @@ public class ClientObject extends ResourceBase {
 		return instanceCounter.getAndIncrement();
 	}
 
+	@Override
+	public String asLinkFormat() {
+		final StringBuilder linkFormat = LinkFormat.serializeResource(this).append(LinkFormat.serializeAttributes(getAttributes()));
+		for(final Resource child : getChildren()){
+			for(final Resource grandchild : child.getChildren()){
+				linkFormat.append(LinkFormat.serializeResource(grandchild));
+			}
+		}
+		linkFormat.deleteCharAt(linkFormat.length() - 1);
+		return linkFormat.toString();
+	}
 }

@@ -25,6 +25,7 @@ import leshan.server.lwm2m.client.ClientRegistryImpl;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.CreateRequest;
 import leshan.server.lwm2m.message.DeleteRequest;
+import leshan.server.lwm2m.message.DiscoverRequest;
 import leshan.server.lwm2m.message.ReadRequest;
 import leshan.server.lwm2m.message.ResponseCode;
 import leshan.server.lwm2m.observation.ObservationRegistry;
@@ -136,20 +137,38 @@ public abstract class LwM2mClientServerIntegrationTest {
 		return values;
 	}
 
-	protected ClientResponse sendGet(final int objectID) {
+	protected ClientResponse sendRead(final int objectID) {
 		return ReadRequest
 				.newRequest(getClient(), objectID)
 				.send(server.getRequestHandler());
 	}
 
-	protected ClientResponse sendGet(final int objectID, final int objectInstanceID) {
+	protected ClientResponse sendRead(final int objectID, final int objectInstanceID) {
 		return ReadRequest
 				.newRequest(getClient(), objectID, objectInstanceID)
 				.send(server.getRequestHandler());
 	}
 
-	protected ClientResponse sendGet(final int objectID, final int objectInstanceID, final int resourceID) {
+	protected ClientResponse sendRead(final int objectID, final int objectInstanceID, final int resourceID) {
 		return ReadRequest
+				.newRequest(getClient(), objectID, objectInstanceID, resourceID)
+				.send(server.getRequestHandler());
+	}
+	
+	protected ClientResponse sendDiscover(final int objectID) {
+		return DiscoverRequest
+				.newRequest(getClient(), objectID)
+				.send(server.getRequestHandler());
+	}
+
+	protected ClientResponse sendDiscover(final int objectID, final int objectInstanceID) {
+		return DiscoverRequest 
+				.newRequest(getClient(), objectID, objectInstanceID)
+				.send(server.getRequestHandler());
+	}
+	
+	protected ClientResponse sendDiscover(final int objectID, final int objectInstanceID, final int resourceID) {
+		return DiscoverRequest
 				.newRequest(getClient(), objectID, objectInstanceID, resourceID)
 				.send(server.getRequestHandler());
 	}

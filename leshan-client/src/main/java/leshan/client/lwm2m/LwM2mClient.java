@@ -1,6 +1,8 @@
 package leshan.client.lwm2m;
 
 import java.net.InetSocketAddress;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -9,7 +11,11 @@ import leshan.client.lwm2m.bootstrap.BootstrapUplink;
 import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.resource.ClientObject;
+import leshan.client.lwm2m.resource.LinkFormattable;
+import leshan.server.lwm2m.client.LinkObject;
+import leshan.server.lwm2m.linkformat.LinkFormatParser;
 import ch.ethz.inf.vs.californium.WebLink;
+import ch.ethz.inf.vs.californium.coap.LinkFormat;
 import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 import ch.ethz.inf.vs.californium.server.Server;
 import ch.ethz.inf.vs.californium.server.resources.Resource;
@@ -72,6 +78,29 @@ public class LwM2mClient {
 			objectsAndInstances.add(new WebLink(resource.getURI()));
 		}
 		return new RegisterUplink(destination, endpoint, downlink, objectsAndInstances );
+	}
+
+	public LinkObject[] getObjectLinks(final int objectId) {
+		final Resource clientObject = clientSideServer.getRoot().getChild(Integer.toString(objectId));
+		
+		if(clientObject == null){
+			return new LinkObject[]{};
+		}
+		
+		return LinkFormatParser.parse(((LinkFormattable) clientObject).asLinkFormat().getBytes());
+	}
+
+	public LinkObject[] getObjectLinks(final int objectId,
+			final int objectInstanceId) {
+		final Resource clientObject = clientSideServer.getRoot().getChild(Integer.toString(objectId));
+		
+		if(clientObject == null){
+			return new LinkObject[]{};
+		}
+		
+		final Resource clientObjectInstance = clientObject.getChild(Integer.toString(objectInstanceId));
+		
+		return LinkFormatParser.parse(((LinkFormattable) clientObjectInstance).asLinkFormat().getBytes());
 	}
 
 }

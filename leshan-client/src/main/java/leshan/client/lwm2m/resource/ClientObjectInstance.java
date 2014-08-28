@@ -9,12 +9,14 @@ import java.util.Map;
 
 import leshan.server.lwm2m.tlv.Tlv;
 import leshan.server.lwm2m.tlv.TlvEncoder;
+import ch.ethz.inf.vs.californium.coap.LinkFormat;
+import ch.ethz.inf.vs.californium.coap.MediaTypeRegistry;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
 import ch.ethz.inf.vs.californium.server.resources.Resource;
 import ch.ethz.inf.vs.californium.server.resources.ResourceBase;
 
-class ClientObjectInstance extends ResourceBase {
+class ClientObjectInstance extends ResourceBase implements LinkFormattable{
 
 	public ClientObjectInstance(final int instanceID, final Map<Integer, ClientResource> resources) {
 		super(Integer.toString(instanceID));
@@ -41,6 +43,19 @@ class ClientObjectInstance extends ResourceBase {
 
 	@Override
 	public void handleGET(final CoapExchange exchange) {
+		if(exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_LINK_FORMAT){
+			handleDiscover(exchange);
+		}
+		else{
+			handleRead(exchange);
+		}
+	}
+
+	private void handleDiscover(final CoapExchange exchange) {
+		exchange.respond(CONTENT, asLinkFormat());
+	}
+
+	private void handleRead(final CoapExchange exchange) {
 		final Tlv[] tlvArray = asTlvArray();
 		exchange.respond(CONTENT, TlvEncoder.encode(tlvArray).array());
 	}
@@ -50,6 +65,17 @@ class ClientObjectInstance extends ResourceBase {
 		getParent().remove(this);
 		
 		exchange.respond(DELETED);
+	}
+
+	@Override
+	public String asLinkFormat() {
+		final StringBuilder linkFormat = LinkFormat.serializeResource(this).append(LinkFormat.serializeAttributes(getAttributes()));
+		for(final Resource child : getChildren()){
+			linkFormat.append(LinkFormat.serializeResource(child));
+		}
+		linkFormat.deleteCharAt(linkFormat.length() - 1);
+		
+		return linkFormat.toString();
 	}
 
 }

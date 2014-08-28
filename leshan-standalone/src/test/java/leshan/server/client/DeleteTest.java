@@ -40,7 +40,7 @@ public class DeleteTest extends LwM2mClientServerIntegrationTest {
 		
 		createAndThenAssertDeleted();
 		
-		assertEmptyResponse(sendGet(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.NOT_FOUND);
+		assertEmptyResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.NOT_FOUND);
 	}
 
 	private void createAndThenAssertDeleted() {
