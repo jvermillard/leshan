@@ -220,6 +220,10 @@ public class Client {
     public synchronized void markLastRequestFailed() {
         failedLastRequest = true;
     }
+    
+    public synchronized boolean isMarkLastRequestFailed(){
+        return failedLastRequest;
+    }
 
     public synchronized boolean isAlive() {
         return failedLastRequest ? false : lastUpdate.getTime() + lifeTimeInSec * 1000 > System.currentTimeMillis();
