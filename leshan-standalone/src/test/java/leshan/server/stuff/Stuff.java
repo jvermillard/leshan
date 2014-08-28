@@ -4,7 +4,6 @@ import static com.jayway.awaitility.Awaitility.await;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -22,6 +21,7 @@ import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.util.ResponseCallback;
 import leshan.server.lwm2m.LwM2mServer;
 import leshan.server.lwm2m.bootstrap.BootstrapStoreImpl;
+import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.ClientRegistryImpl;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.CreateRequest;
@@ -35,7 +35,6 @@ import leshan.server.lwm2m.tlv.TlvEncoder;
 import leshan.server.lwm2m.tlv.TlvType;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -47,6 +46,7 @@ import ch.ethz.inf.vs.californium.coap.Response;
 public class Stuff {
 
 	private static final int GOOD_OBJECT_ID = 1;
+	private static final int GOOD_OBJECT_INSTANCE_ID = 0;
 	private static final int BAD_OBJECT_ID = 1000;
 	private static final String ENDPOINT = "epflwmtm";
 	private static final int CLIENT_PORT = 44022;
@@ -97,7 +97,7 @@ public class Stuff {
 		final OperationResponse register = registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
 
 		assertTrue(register.isSuccess());
-		assertNotNull(clientRegistry.get(ENDPOINT));
+		assertNotNull(getClient());
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
@@ -120,7 +120,7 @@ public class Stuff {
 		await().untilTrue(callback.isCalled());
 
 		assertTrue(callback.isSuccess());
-		assertNotNull(clientRegistry.get(ENDPOINT));
+		assertNotNull(getClient());
 	}
 
 	@Test
@@ -135,16 +135,16 @@ public class Stuff {
 		final RegisterUplink registerUplink = registerAndGetUplink();
 		registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
 
-		final ClientResponse response = sendCreate(createObjectInstanceTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+		final ClientResponse response = sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 		assertResponse(response, ResponseCode.CREATED, ("/" + GOOD_OBJECT_ID + "/0").getBytes());
 	}
-	
+
 	@Test
 	public void canNotCreateInstanceOfObject() {
 		final RegisterUplink registerUplink = registerAndGetUplink();
 		registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
 
-		final ClientResponse response = sendCreate(createObjectInstanceTlv("hello", "goodbye"), BAD_OBJECT_ID);
+		final ClientResponse response = sendCreate(createResourcesTlv("hello", "goodbye"), BAD_OBJECT_ID);
 		assertResponse(response, ResponseCode.NOT_FOUND, null);
 	}
 
@@ -153,9 +153,19 @@ public class Stuff {
 		final RegisterUplink registerUplink = registerAndGetUplink();
 		registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
 
-		sendCreate(createObjectInstanceTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 
-		assertResponse(sendGet(GOOD_OBJECT_ID), ResponseCode.CONTENT, TlvEncoder.encode(createObjectInstanceTlv("hello", "goodbye")).array());
+		assertResponse(sendGet(GOOD_OBJECT_ID), ResponseCode.CONTENT, TlvEncoder.encode(createObjectInstaceTlv("hello", "goodbye")).array());
+	}
+
+	@Test
+	public void canReadObjectInstace() {
+		final RegisterUplink registerUplink = registerAndGetUplink();
+		registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
+
+		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+
+		assertResponse(sendGet(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.CONTENT, TlvEncoder.encode(createResourcesTlv("hello", "goodbye")).array());
 	}
 
 	private RegisterUplink registerAndGetUplink() {
@@ -169,7 +179,13 @@ public class Stuff {
 		return registerUplink;
 	}
 
-	private Tlv[] createObjectInstanceTlv(final String value0, final String value1) {
+	private Tlv[] createObjectInstaceTlv(final String value0, final String value1) {
+		final Tlv[] values = new Tlv[1];
+		values[0] = new Tlv(TlvType.OBJECT_INSTANCE, createResourcesTlv(value0, value1), null, 0);
+		return values;
+	}
+
+	private Tlv[] createResourcesTlv(final String value0, final String value1) {
 		final Tlv[] values = new Tlv[2];
 		values[0] = new Tlv(TlvType.RESOURCE_VALUE, null, value0.getBytes(), 0);
 		values[1] = new Tlv(TlvType.RESOURCE_VALUE, null, value1.getBytes(), 1);
@@ -178,24 +194,29 @@ public class Stuff {
 
 	private ClientResponse sendGet(final int objectID) {
 		return ReadRequest
-				.newRequest(clientRegistry.get(ENDPOINT), objectID)
+				.newRequest(getClient(), objectID)
+				.send(server.getRequestHandler());
+	}
+
+	private ClientResponse sendGet(final int objectID, final int objectInstanceID) {
+		return ReadRequest
+				.newRequest(getClient(), objectID, objectInstanceID)
 				.send(server.getRequestHandler());
 	}
 
 	private ClientResponse sendCreate(final Tlv[] values, final int objectID) {
 		return CreateRequest
-				.newRequest(clientRegistry.get(ENDPOINT), objectID, values)
+				.newRequest(getClient(), objectID, values)
 				.send(server.getRequestHandler());
+	}
+
+	private Client getClient() {
+		return clientRegistry.get(ENDPOINT);
 	}
 
 	private void assertResponse(final ClientResponse response, final ResponseCode responseCode, final byte[] payload) {
 		assertEquals(responseCode, response.getCode());
-		if(payload == null){
-			assertNull(response.getContent());
-		}
-		else{
-			assertEquals(new String(payload), new String(response.getContent()).trim());
-		}
+		assertArrayEquals(payload, response.getContent());
 	}
 
 }

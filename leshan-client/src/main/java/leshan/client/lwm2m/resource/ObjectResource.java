@@ -15,12 +15,12 @@ import leshan.server.lwm2m.tlv.TlvDecoder;
 import leshan.server.lwm2m.tlv.TlvEncoder;
 import leshan.server.lwm2m.tlv.TlvType;
 import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
+import ch.ethz.inf.vs.californium.server.resources.Resource;
 import ch.ethz.inf.vs.californium.server.resources.ResourceBase;
 
 public class ObjectResource extends ResourceBase {
 
 	private final ClientObject obj;
-	private final List<ClientObjectInstance> instances = new ArrayList<ClientObjectInstance>();
 
 	public ObjectResource(final ClientObject obj) {
 		super(Integer.toString(obj.getObjectId()));
@@ -31,7 +31,8 @@ public class ObjectResource extends ResourceBase {
 	public void handleGET(final CoapExchange exchange) {
 		final List<Tlv> tlvs = new ArrayList<>();
 
-		for (final ClientObjectInstance instance : instances) {
+		for (final Resource res : getChildren()) {
+			final ClientObjectInstance instance = (ClientObjectInstance)res;
 			final List<Tlv> resources = new ArrayList<>();
 			for (final ClientResource resource : instance.getResources().values()) {
 				resources.add(new Tlv(TlvType.RESOURCE_VALUE, null, resource.getValue(), resource.getId()));
@@ -54,26 +55,38 @@ public class ObjectResource extends ResourceBase {
 			resources.put(tlv.getIdentifier(), new ClientResource(tlv.getIdentifier(), tlv.getValue()));
 		}
 		final ClientObjectInstance instance = new ClientObjectInstance(resources);
-		instances.add(instance);
+		this.add(instance);
 		exchange.respond(CREATED, "/" + obj.getObjectId() + "/0");
 	}
 
 }
 
-class ClientObjectInstance {
+class ClientObjectInstance extends ResourceBase {
 
+	private static final int INSTANCE_ID = 0;
 	private final Map<Integer, ClientResource> resources;
 
 	public ClientObjectInstance(final Map<Integer, ClientResource> resources) {
+		super(Integer.toString(INSTANCE_ID));
 		this.resources = resources;
 	}
 
 	public int getInstanceId() {
-		return 0;
+		return INSTANCE_ID;
 	}
 
 	public Map<Integer, ClientResource> getResources() {
 		return resources;
+	}
+
+	@Override
+	public void handleGET(final CoapExchange exchange) {
+		final List<Tlv> tlvs = new ArrayList<>();
+		for (final ClientResource resource : resources.values()) {
+			tlvs.add(new Tlv(TlvType.RESOURCE_VALUE, null, resource.getValue(), resource.getId()));
+		}
+		Tlv[] tlvArray = tlvs.toArray(new Tlv[0]);
+		exchange.respond(CONTENT, TlvEncoder.encode(tlvArray).array());
 	}
 
 }
