@@ -34,7 +34,8 @@ public class ObjectResource extends ResourceBase {
 		for (final Resource res : getChildren()) {
 			final ClientObjectInstance instance = (ClientObjectInstance)res;
 			final List<Tlv> resources = new ArrayList<>();
-			for (final ClientResource resource : instance.getResources().values()) {
+			for (final Resource childRes : instance.getChildren()) {
+				final ClientResource resource = (ClientResource) childRes;
 				resources.add(new Tlv(TlvType.RESOURCE_VALUE, null, resource.getValue(), resource.getId()));
 			}
 			tlvs.add(new Tlv(TlvType.OBJECT_INSTANCE, resources.toArray(new Tlv[0]), null, instance.getInstanceId()));
@@ -64,46 +65,43 @@ public class ObjectResource extends ResourceBase {
 class ClientObjectInstance extends ResourceBase {
 
 	private static final int INSTANCE_ID = 0;
-	private final Map<Integer, ClientResource> resources;
 
 	public ClientObjectInstance(final Map<Integer, ClientResource> resources) {
 		super(Integer.toString(INSTANCE_ID));
-		this.resources = resources;
+		for(final Map.Entry<Integer, ClientResource> entry : resources.entrySet()){
+			add(entry.getValue());
+		}
 	}
 
 	public int getInstanceId() {
 		return INSTANCE_ID;
 	}
 
-	public Map<Integer, ClientResource> getResources() {
-		return resources;
-	}
-
 	@Override
 	public void handleGET(final CoapExchange exchange) {
 		final List<Tlv> tlvs = new ArrayList<>();
-		for (final ClientResource resource : resources.values()) {
+		for (final Resource res : getChildren()) {
+			final ClientResource resource = (ClientResource) res;
 			tlvs.add(new Tlv(TlvType.RESOURCE_VALUE, null, resource.getValue(), resource.getId()));
 		}
-		Tlv[] tlvArray = tlvs.toArray(new Tlv[0]);
+		final Tlv[] tlvArray = tlvs.toArray(new Tlv[0]);
 		exchange.respond(CONTENT, TlvEncoder.encode(tlvArray).array());
 	}
 
 }
 
-class ClientResource {
+class ClientResource extends ResourceBase{
 
-	private final int id;
 	private final byte[] value;
 
 
 	public ClientResource(final int id, final byte[] value) {
-		this.id = id;
+		super(Integer.toString(id));
 		this.value = value;
 	}
 
 	public int getId() {
-		return id;
+		return Integer.parseInt(getName());
 	}
 
 	public byte[] getValue() {

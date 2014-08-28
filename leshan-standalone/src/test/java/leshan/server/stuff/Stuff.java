@@ -187,8 +187,8 @@ public class Stuff {
 
 	private Tlv[] createResourcesTlv(final String value0, final String value1) {
 		final Tlv[] values = new Tlv[2];
-		values[0] = new Tlv(TlvType.RESOURCE_VALUE, null, value0.getBytes(), 0);
-		values[1] = new Tlv(TlvType.RESOURCE_VALUE, null, value1.getBytes(), 1);
+		values[1] = new Tlv(TlvType.RESOURCE_VALUE, null, value0.getBytes(), 0);
+		values[0] = new Tlv(TlvType.RESOURCE_VALUE, null, value1.getBytes(), 1);
 		return values;
 	}
 
