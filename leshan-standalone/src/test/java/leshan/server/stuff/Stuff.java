@@ -79,7 +79,9 @@ public class Stuff {
 	private InetSocketAddress serverAddress;
 	private LwM2mClient client;
 	private ExecuteListener executeListener;
-	private WriteListener writeListener;
+	private ReadListener readListener;
+	private ReadWriteListener firstResourceListener;
+	private ReadWriteListener secondResourceListener;
 
 	@Before
 	public void setup() {
@@ -96,10 +98,13 @@ public class Stuff {
 		server.start();
 
 		executeListener = mock(ExecuteListener.class);
-		writeListener = mock(WriteListener.class);
+		
+		firstResourceListener = new ReadWriteListener();
+		secondResourceListener = new ReadWriteListener();
+		
 		final ClientObject objectOne = new ClientObject(GOOD_OBJECT_ID,
-				new SingleResourceDefinition(FIRST_RESOURCE_ID, ExecuteListener.DUMMY, WriteListener.DUMMY, ReadListener.DUMMY),
-				new SingleResourceDefinition(SECOND_RESOURCE_ID, ExecuteListener.DUMMY, writeListener, ReadListener.DUMMY),
+				new SingleResourceDefinition(FIRST_RESOURCE_ID, ExecuteListener.DUMMY, firstResourceListener, firstResourceListener),
+				new SingleResourceDefinition(SECOND_RESOURCE_ID, ExecuteListener.DUMMY, secondResourceListener, secondResourceListener),
 				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executeListener, WriteListener.DUMMY, ReadListener.DUMMY));
 		final ClientObject objectTwo = new ClientObject(GOOD_OBJECT_ID + 1,
 				new SingleResourceDefinition(0, ExecuteListener.DUMMY, WriteListener.DUMMY, ReadListener.DUMMY));
@@ -227,7 +232,7 @@ public class Stuff {
 		assertResponse(response, ResponseCode.CHANGED, new byte[0]);
 		assertResponse(sendGet(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
 				ResponseCode.CONTENT, "world".getBytes());
-		verify(writeListener).write(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID, "world".getBytes());
+		assertArrayEquals(secondResourceListener.read(), "world".getBytes());
 	}
 
 	// TODO: This test tests something that is untestable by the LWM2M spec and should
@@ -335,4 +340,25 @@ public class Stuff {
 		assertArrayEquals(payload, response.getContent());
 	}
 
+	public class ReadWriteListener implements ReadListener, WriteListener{
+
+		private String value;
+		
+		@Override
+		public void write(final int objectId, final int objectInstanceId, final int resourceId,
+				final byte[] valueToWrite) {
+			value = new String(valueToWrite);
+		}
+
+		public Object getValue() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+
+		@Override
+		public byte[] read() {
+			return value.getBytes();
+		}
+		
+	}
 }
