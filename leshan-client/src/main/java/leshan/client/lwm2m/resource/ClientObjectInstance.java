@@ -25,12 +25,6 @@ class ClientObjectInstance extends ResourceBase {
 		return Integer.parseInt(getName());
 	}
 
-	@Override
-	public void handleGET(final CoapExchange exchange) {
-		final Tlv[] tlvArray = asTlvArray();
-		exchange.respond(CONTENT, TlvEncoder.encode(tlvArray).array());
-	}
-
 	public Tlv[] asTlvArray() {
 		final List<Tlv> tlvs = new ArrayList<>();
 		for (final Resource res : getChildren()) {
@@ -38,6 +32,12 @@ class ClientObjectInstance extends ResourceBase {
 		}
 		final Tlv[] tlvArray = tlvs.toArray(new Tlv[0]);
 		return tlvArray;
+	}
+
+	@Override
+	public void handleGET(final CoapExchange exchange) {
+		final Tlv[] tlvArray = asTlvArray();
+		exchange.respond(CONTENT, TlvEncoder.encode(tlvArray).array());
 	}
 
 }

@@ -47,6 +47,9 @@ public class Stuff {
 
 	private static final int GOOD_OBJECT_ID = 1;
 	private static final int GOOD_OBJECT_INSTANCE_ID = 0;
+	private static final int FIRST_RESOURCE_ID = 0;
+	private static final int SECOND_RESOURCE_ID = 1;
+
 	private static final int BAD_OBJECT_ID = 1000;
 	private static final String ENDPOINT = "epflwmtm";
 	private static final int CLIENT_PORT = 44022;
@@ -99,12 +102,12 @@ public class Stuff {
 		assertTrue(register.isSuccess());
 		assertNotNull(getClient());
 	}
-	
+
 	@Test(expected=IllegalArgumentException.class)
 	public void failToCreateClientWithNull(){
 		client = new LwM2mClient(null);
 	}
-	
+
 	@Test(expected=IllegalArgumentException.class)
 	public void failToCreateClientWithSameObjectTwice(){
 		final ClientObject objectOne = new ClientObject(1);
@@ -138,7 +141,7 @@ public class Stuff {
 		final ClientResponse response = sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 		assertResponse(response, ResponseCode.CREATED, ("/" + GOOD_OBJECT_ID + "/0").getBytes());
 	}
-	
+
 	@Test
 	public void canCreateMultipleInstanceOfObject() {
 		final RegisterUplink registerUplink = registerAndGetUplink();
@@ -146,7 +149,7 @@ public class Stuff {
 
 		final ClientResponse response = sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 		assertResponse(response, ResponseCode.CREATED, ("/" + GOOD_OBJECT_ID + "/0").getBytes());
-		
+
 		final ClientResponse responseTwo = sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 		assertResponse(responseTwo, ResponseCode.CREATED, ("/" + GOOD_OBJECT_ID + "/1").getBytes());
 	}
@@ -178,6 +181,19 @@ public class Stuff {
 		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 
 		assertResponse(sendGet(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.CONTENT, TlvEncoder.encode(createResourcesTlv("hello", "goodbye")).array());
+	}
+
+	@Test
+	public void canReadResource() {
+		final RegisterUplink registerUplink = registerAndGetUplink();
+		registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
+
+		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+
+		assertResponse(sendGet(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, FIRST_RESOURCE_ID),
+				ResponseCode.CONTENT, "hello".getBytes());
+		assertResponse(sendGet(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
+				ResponseCode.CONTENT, "goodbye".getBytes());
 	}
 
 	private RegisterUplink registerAndGetUplink() {
@@ -213,6 +229,12 @@ public class Stuff {
 	private ClientResponse sendGet(final int objectID, final int objectInstanceID) {
 		return ReadRequest
 				.newRequest(getClient(), objectID, objectInstanceID)
+				.send(server.getRequestHandler());
+	}
+
+	private ClientResponse sendGet(final int objectID, final int objectInstanceID, final int resourceID) {
+		return ReadRequest
+				.newRequest(getClient(), objectID, objectInstanceID, resourceID)
 				.send(server.getRequestHandler());
 	}
 
