@@ -138,6 +138,18 @@ public class Stuff {
 		final ClientResponse response = sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 		assertResponse(response, ResponseCode.CREATED, ("/" + GOOD_OBJECT_ID + "/0").getBytes());
 	}
+	
+	@Test
+	public void canCreateMultipleInstanceOfObject() {
+		final RegisterUplink registerUplink = registerAndGetUplink();
+		registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
+
+		final ClientResponse response = sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+		assertResponse(response, ResponseCode.CREATED, ("/" + GOOD_OBJECT_ID + "/0").getBytes());
+		
+		final ClientResponse responseTwo = sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+		assertResponse(responseTwo, ResponseCode.CREATED, ("/" + GOOD_OBJECT_ID + "/1").getBytes());
+	}
 
 	@Test
 	public void canNotCreateInstanceOfObject() {

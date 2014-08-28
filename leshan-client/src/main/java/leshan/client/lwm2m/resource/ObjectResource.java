@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import leshan.server.lwm2m.tlv.Tlv;
 import leshan.server.lwm2m.tlv.TlvDecoder;
@@ -21,10 +22,12 @@ import ch.ethz.inf.vs.californium.server.resources.ResourceBase;
 public class ObjectResource extends ResourceBase {
 
 	private final ClientObject obj;
+	private final AtomicInteger instanceCounter;
 
 	public ObjectResource(final ClientObject obj) {
 		super(Integer.toString(obj.getObjectId()));
 		this.obj = obj;
+		instanceCounter = new AtomicInteger(0);
 	}
 
 	@Override
@@ -55,26 +58,24 @@ public class ObjectResource extends ResourceBase {
 			}
 			resources.put(tlv.getIdentifier(), new ClientResource(tlv.getIdentifier(), tlv.getValue()));
 		}
-		final ClientObjectInstance instance = new ClientObjectInstance(resources);
+		final ClientObjectInstance instance = new ClientObjectInstance(instanceCounter.getAndIncrement(), resources);
 		this.add(instance);
-		exchange.respond(CREATED, "/" + obj.getObjectId() + "/0");
+		exchange.respond(CREATED, "/" + obj.getObjectId() + "/" + instance.getInstanceId());
 	}
 
 }
 
 class ClientObjectInstance extends ResourceBase {
 
-	private static final int INSTANCE_ID = 0;
-
-	public ClientObjectInstance(final Map<Integer, ClientResource> resources) {
-		super(Integer.toString(INSTANCE_ID));
+	public ClientObjectInstance(final int instanceID, final Map<Integer, ClientResource> resources) {
+		super(Integer.toString(instanceID));
 		for(final Map.Entry<Integer, ClientResource> entry : resources.entrySet()){
 			add(entry.getValue());
 		}
 	}
 
 	public int getInstanceId() {
-		return INSTANCE_ID;
+		return Integer.parseInt(getName());
 	}
 
 	@Override
