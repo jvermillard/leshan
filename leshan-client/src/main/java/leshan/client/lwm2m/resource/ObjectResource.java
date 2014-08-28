@@ -36,12 +36,7 @@ public class ObjectResource extends ResourceBase {
 
 		for (final Resource res : getChildren()) {
 			final ClientObjectInstance instance = (ClientObjectInstance)res;
-			final List<Tlv> resources = new ArrayList<>();
-			for (final Resource childRes : instance.getChildren()) {
-				final ClientResource resource = (ClientResource) childRes;
-				resources.add(new Tlv(TlvType.RESOURCE_VALUE, null, resource.getValue(), resource.getId()));
-			}
-			tlvs.add(new Tlv(TlvType.OBJECT_INSTANCE, resources.toArray(new Tlv[0]), null, instance.getInstanceId()));
+			tlvs.add(new Tlv(TlvType.OBJECT_INSTANCE, instance.asTlvArray(), null, instance.getInstanceId()));
 		}
 
 		final byte[] payload = TlvEncoder.encode(tlvs.toArray(new Tlv[0])).array();
@@ -80,13 +75,17 @@ class ClientObjectInstance extends ResourceBase {
 
 	@Override
 	public void handleGET(final CoapExchange exchange) {
+		final Tlv[] tlvArray = asTlvArray();
+		exchange.respond(CONTENT, TlvEncoder.encode(tlvArray).array());
+	}
+
+	public Tlv[] asTlvArray() {
 		final List<Tlv> tlvs = new ArrayList<>();
 		for (final Resource res : getChildren()) {
-			final ClientResource resource = (ClientResource) res;
-			tlvs.add(new Tlv(TlvType.RESOURCE_VALUE, null, resource.getValue(), resource.getId()));
+			tlvs.add(((ClientResource) res).asTlv());
 		}
 		final Tlv[] tlvArray = tlvs.toArray(new Tlv[0]);
-		exchange.respond(CONTENT, TlvEncoder.encode(tlvArray).array());
+		return tlvArray;
 	}
 
 }
@@ -107,6 +106,10 @@ class ClientResource extends ResourceBase{
 
 	public byte[] getValue() {
 		return value;
+	}
+
+	public Tlv asTlv() {
+		return new Tlv(TlvType.RESOURCE_VALUE, null, getValue(), getId());
 	}
 
 }
