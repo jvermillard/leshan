@@ -6,6 +6,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -137,7 +138,7 @@ public class Stuff {
 		final Response goodRawResponse = new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT);
 		goodRawResponse.setPayload(GOOD_PAYLOAD);
 		final OperationResponse goodResponse = OperationResponse.of(goodRawResponse);
-		Mockito.when(downlink.read(Mockito.anyInt())).thenReturn(goodResponse);
+		when(downlink.read(Mockito.anyInt())).thenReturn(goodResponse);
 
 		final RegisterUplink registerUplink = client.startRegistration(CLIENT_PORT, serverAddress, downlink);
 		return registerUplink;
@@ -164,9 +165,7 @@ public class Stuff {
 
 	private void assertResponse(final ClientResponse response, final ResponseCode responseCode, final byte[] payload) {
 		assertEquals(responseCode, response.getCode());
-		assertArrayEquals("Expected payload \"" + new String(payload) + "\", " +
-				"actual payload \"" + new String(response.getContent()) + "\"",
-				payload, response.getContent());
+		assertEquals(new String(payload), new String(response.getContent()).trim());
 	}
 
 }
