@@ -32,7 +32,7 @@ public class LWM2MBuilderTest {
 		LWM2M_SERVER_V1_0_XML
 	};
 
-	private static final String LWM2M_MODEL_DIRECTORY = "LWM2M_schemas/";
+	private static final String LWM2M_MODEL_DIRECTORY = "src/main/resources/schemas/";
 	private static final String LWM2M_TEST_MODEL_DIRECTORY = "src/test/resources/catalog/";
 
 	@Test
