@@ -20,6 +20,7 @@ import java.util.UUID;
 import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.register.RegisterUplink;
+import leshan.client.lwm2m.resource.ClientObject;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.util.ResponseCallback;
 import leshan.server.LeshanMain;
@@ -81,7 +82,7 @@ public class AbstractRegisteringTest {
 		objectsAndInstances = LinkFormat.parse(clientDataModel);
 		callback = new ResponseCallback();
 
-		final LwM2mClient lwM2mClient = new LwM2mClient();
+		final LwM2mClient lwM2mClient = new LwM2mClient(new ClientObject(1));
 		registerUplink = lwM2mClient.startRegistration(clientPort, serverAddress, downlink);
 	}
 
