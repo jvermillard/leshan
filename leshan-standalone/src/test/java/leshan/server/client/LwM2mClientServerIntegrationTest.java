@@ -14,10 +14,8 @@ import java.util.Set;
 import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.register.RegisterUplink;
-import leshan.client.lwm2m.resource.ClientObject;
 import leshan.client.lwm2m.resource.ExecuteListener;
 import leshan.client.lwm2m.resource.ReadListener;
-import leshan.client.lwm2m.resource.SingleResourceDefinition;
 import leshan.client.lwm2m.resource.WriteListener;
 import leshan.client.lwm2m.resource.WriteResponse;
 import leshan.client.lwm2m.response.OperationResponse;
@@ -43,7 +41,7 @@ import ch.ethz.inf.vs.californium.WebLink;
 import ch.ethz.inf.vs.californium.coap.LinkFormat;
 import ch.ethz.inf.vs.californium.coap.Response;
 
-public class LwM2mClientServerIntegrationTest {
+public abstract class LwM2mClientServerIntegrationTest {
 
 	protected static final int GOOD_OBJECT_ID = 100;
 	protected static final int GOOD_OBJECT_INSTANCE_ID = 0;
@@ -70,7 +68,7 @@ public class LwM2mClientServerIntegrationTest {
 	private InetSocketAddress serverAddress;
 	protected LwM2mClient client;
 	protected ExecuteListener executeListener;
-	private ReadWriteListener firstResourceListener;
+	protected ReadWriteListener firstResourceListener;
 	protected ReadWriteListener secondResourceListener;
 
 	@Before
@@ -92,16 +90,10 @@ public class LwM2mClientServerIntegrationTest {
 		firstResourceListener = new ReadWriteListener();
 		secondResourceListener = new ReadWriteListener();
 
-		final ReadWriteListenerWithBrokenWrite brokenResourceListener = new ReadWriteListenerWithBrokenWrite();
-
-		final ClientObject objectOne = new ClientObject(GOOD_OBJECT_ID,
-				new SingleResourceDefinition(FIRST_RESOURCE_ID, ExecuteListener.DUMMY, firstResourceListener, firstResourceListener),
-				new SingleResourceDefinition(SECOND_RESOURCE_ID, ExecuteListener.DUMMY, secondResourceListener, secondResourceListener),
-				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executeListener, WriteListener.DUMMY, ReadListener.DUMMY));
-		final ClientObject objectTwo = new ClientObject(BROKEN_OBJECT_ID,
-				new SingleResourceDefinition(BROKEN_RESOURCE_ID, ExecuteListener.DUMMY, brokenResourceListener, brokenResourceListener));
-		client = new LwM2mClient(objectOne, objectTwo);
+		client = createClient();
 	}
+
+	protected abstract LwM2mClient createClient();
 
 	@After
 	public void teardown() {
