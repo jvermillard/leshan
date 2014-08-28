@@ -24,9 +24,11 @@ import leshan.server.lwm2m.bootstrap.BootstrapStoreImpl;
 import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.ClientRegistryImpl;
 import leshan.server.lwm2m.message.ClientResponse;
+import leshan.server.lwm2m.message.ContentFormat;
 import leshan.server.lwm2m.message.CreateRequest;
 import leshan.server.lwm2m.message.ReadRequest;
 import leshan.server.lwm2m.message.ResponseCode;
+import leshan.server.lwm2m.message.WriteRequest;
 import leshan.server.lwm2m.observation.ObservationRegistry;
 import leshan.server.lwm2m.observation.ObservationRegistryImpl;
 import leshan.server.lwm2m.security.SecurityRegistry;
@@ -194,6 +196,19 @@ public class Stuff {
 				ResponseCode.CONTENT, "hello".getBytes());
 		assertResponse(sendGet(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
 				ResponseCode.CONTENT, "goodbye".getBytes());
+	}
+
+	@Test
+	public void canWriteReplaceToResource() {
+		final RegisterUplink registerUplink = registerAndGetUplink();
+		registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
+
+		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+
+		final ClientResponse response = WriteRequest.newReplaceRequest(getClient(), GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID,
+				"world", ContentFormat.TEXT).send(server.getRequestHandler());
+
+		assertResponse(response, ResponseCode.CHANGED, new byte[0]);
 	}
 
 	private RegisterUplink registerAndGetUplink() {
