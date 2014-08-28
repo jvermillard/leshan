@@ -112,7 +112,7 @@ public class Stuff {
 	public void canReadObject() {
 		final RegisterUplink registerUplink = registerAndGetUplink();
 		registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
-		assertResponse(sendGet(1), ResponseCode.CONTENT, new byte[0]);
+		assertResponse(sendGet(OBJECT_ID), ResponseCode.CONTENT, new byte[0]);
 	}
 
 	@Test
@@ -120,7 +120,7 @@ public class Stuff {
 		final RegisterUplink registerUplink = registerAndGetUplink();
 		registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
 
-		final ClientResponse response = sendCreate(createObjectInstanceTlv("hello", "goodbye"), 1);
+		final ClientResponse response = sendCreate(createObjectInstanceTlv("hello", "goodbye"), OBJECT_ID);
 		assertResponse(response, ResponseCode.CREATED, ("/" + OBJECT_ID + "/0").getBytes());
 	}
 
@@ -131,7 +131,7 @@ public class Stuff {
 
 		sendCreate(createObjectInstanceTlv("hello", "goodbye"), OBJECT_ID);
 
-		assertResponse(sendGet(1), ResponseCode.CONTENT, TlvEncoder.encode(createObjectInstanceTlv("hello", "goodbye")).array());
+		assertResponse(sendGet(OBJECT_ID), ResponseCode.CONTENT, TlvEncoder.encode(createObjectInstanceTlv("hello", "goodbye")).array());
 	}
 
 	private RegisterUplink registerAndGetUplink() {
