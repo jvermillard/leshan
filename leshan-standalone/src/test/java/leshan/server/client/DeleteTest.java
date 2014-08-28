@@ -28,19 +28,26 @@ public class DeleteTest extends LwM2mClientServerIntegrationTest {
 	}
 	
 	@Test
-	public void deleteCreatedObject(){
+	public void deleteCreatedObjectInstance(){
 		register();
 		
-		final ClientResponse responseCreate = sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
-		assertResponse(responseCreate, ResponseCode.CREATED, ("/" + GOOD_OBJECT_ID + "/0").getBytes());
+		createAndThenAssertDeleted();
+	}
+	
+	@Test
+	public void deleteAndCantReadObjectInstance(){
+		register();
 		
-		assertResponse(sendGet(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.CONTENT, TlvEncoder.encode(createResourcesTlv("hello", "goodbye")).array());
+		createAndThenAssertDeleted();
+		
+		assertEmptyResponse(sendGet(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.NOT_FOUND);
+	}
+
+	private void createAndThenAssertDeleted() {
+		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 		
 		final ClientResponse responseDelete = sendDelete(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID);
 		assertResponse(responseDelete, ResponseCode.DELETED, new byte[0]);
-		
-		assertEmptyResponse(sendGet(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.NOT_FOUND);
-		
 	}
 
 }
