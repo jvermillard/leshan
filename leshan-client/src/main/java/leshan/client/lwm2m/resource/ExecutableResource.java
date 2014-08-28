@@ -14,7 +14,9 @@ public class ExecutableResource extends ClientResource {
 
 	@Override
 	public void handlePOST(final CoapExchange exchange) {
-		listener.execute();
+		listener.execute(Integer.parseInt(getParent().getParent().getName()),
+				Integer.parseInt(getParent().getName()),
+				Integer.parseInt(getName()));
 		exchange.respond(ResponseCode.CHANGED);
 	}
 

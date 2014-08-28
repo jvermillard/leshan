@@ -266,7 +266,7 @@ public class Stuff {
 				"world", ContentFormat.TEXT).send(server.getRequestHandler());
 
 		assertResponse(response, ResponseCode.CHANGED, new byte[0]);
-		verify(executeListener).execute();
+		verify(executeListener).execute(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, EXECUTABLE_RESOURCE_ID);
 	}
 
 	private RegisterUplink registerAndGetUplink() {
