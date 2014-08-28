@@ -16,7 +16,8 @@ import java.util.Set;
 import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.register.RegisterUplink;
-import leshan.client.lwm2m.resource.ClientObject;
+import leshan.client.lwm2m.resource.ObjectResource;
+import leshan.client.lwm2m.resource.StringResourceDefinition;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.util.ResponseCallback;
 import leshan.server.lwm2m.LwM2mServer;
@@ -47,10 +48,10 @@ import ch.ethz.inf.vs.californium.coap.Response;
 
 public class Stuff {
 
-	private static final int GOOD_OBJECT_ID = 1;
+	private static final int GOOD_OBJECT_ID = 100;
 	private static final int GOOD_OBJECT_INSTANCE_ID = 0;
-	private static final int FIRST_RESOURCE_ID = 0;
-	private static final int SECOND_RESOURCE_ID = 1;
+	private static final int FIRST_RESOURCE_ID = 4;
+	private static final int SECOND_RESOURCE_ID = 5;
 
 	private static final int BAD_OBJECT_ID = 1000;
 	private static final String ENDPOINT = "epflwmtm";
@@ -85,8 +86,11 @@ public class Stuff {
 		server = new LwM2mServer(serverAddress, serverAddressSecure, clientRegistry, securityRegistry, observationRegistry, bsStore);
 		server.start();
 
-		final ClientObject objectOne = new ClientObject(GOOD_OBJECT_ID);
-		final ClientObject objectTwo = new ClientObject(GOOD_OBJECT_ID + 1);
+		final ObjectResource objectOne = new ObjectResource(GOOD_OBJECT_ID,
+				new StringResourceDefinition(FIRST_RESOURCE_ID),
+				new StringResourceDefinition(SECOND_RESOURCE_ID));
+		final ObjectResource objectTwo = new ObjectResource(GOOD_OBJECT_ID + 1,
+				new StringResourceDefinition(0));
 		client = new LwM2mClient(objectOne, objectTwo);
 	}
 
@@ -112,7 +116,7 @@ public class Stuff {
 
 	@Test(expected=IllegalArgumentException.class)
 	public void failToCreateClientWithSameObjectTwice(){
-		final ClientObject objectOne = new ClientObject(1);
+		final ObjectResource objectOne = new ObjectResource(1);
 		client = new LwM2mClient(objectOne, objectOne);
 	}
 

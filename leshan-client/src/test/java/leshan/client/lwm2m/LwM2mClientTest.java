@@ -2,12 +2,11 @@ package leshan.client.lwm2m;
 
 import java.net.InetSocketAddress;
 
-import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.bootstrap.BootstrapDownlink;
 import leshan.client.lwm2m.bootstrap.BootstrapUplink;
 import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.register.RegisterUplink;
-import leshan.client.lwm2m.resource.ClientObject;
+import leshan.client.lwm2m.resource.ObjectResource;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +24,7 @@ public class LwM2mClientTest {
 	private BootstrapDownlink fakeBootstrapDownlink;
 	@Mock
 	private ManageDownlink fakeRegisterDownlink;
-	
+
 	@Mock
 	private Server server;
 
@@ -35,37 +34,37 @@ public class LwM2mClientTest {
 
 	@Test
 	public void testLegalBootstrapUplinkCreate() {
-		final ClientObject object = new ClientObject(1);
+		final ObjectResource object = new ObjectResource(1);
 		final LwM2mClient client = new LwM2mClient(object);
 		final BootstrapUplink uplink = client.startBootstrap(4321, InetSocketAddress.createUnresolved("localhost", 1234), fakeBootstrapDownlink);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testIllegalNullBootstrapUplinkCreate() {
-		final ClientObject object = new ClientObject(1);
+		final ObjectResource object = new ObjectResource(1);
 		final LwM2mClient client = new LwM2mClient(object);
 		final BootstrapUplink uplink = client.startBootstrap(4321, InetSocketAddress.createUnresolved("localhost", 1234), null);
 	}
-	
+
 	@Test(expected=IllegalArgumentException.class)
 	public void testIllegalNoObjectsClientCreate() {
-		final ClientObject object = new ClientObject(1);
+		final ObjectResource object = new ObjectResource(1);
 		final LwM2mClient client = new LwM2mClient();
 	}
 
 	@Test
 	public void testLegalRegisterUplinkCreate() {
-		final ClientObject object = new ClientObject(1);
+		final ObjectResource object = new ObjectResource(1);
 		Mockito.when(server.getRoot()).thenReturn(new ResourceBase("basic"));
 		final LwM2mClient client = new LwM2mClient(server, object);
-		
+
 		final RegisterUplink uplink = client.startRegistration(4321, InetSocketAddress.createUnresolved("localhost", 1234), fakeRegisterDownlink);
-		
+
 	}
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testIllegalNullRegisterUplinkCreate() {
-		final ClientObject object = new ClientObject(1);
+		final ObjectResource object = new ObjectResource(1);
 		final LwM2mClient client = new LwM2mClient(object);
 		final RegisterUplink uplink = client.startRegistration(4321, InetSocketAddress.createUnresolved("localhost", 1234), null);
 	}

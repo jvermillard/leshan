@@ -8,7 +8,6 @@ import leshan.client.lwm2m.bootstrap.BootstrapDownlink;
 import leshan.client.lwm2m.bootstrap.BootstrapUplink;
 import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.register.RegisterUplink;
-import leshan.client.lwm2m.resource.ClientObject;
 import leshan.client.lwm2m.resource.ObjectResource;
 import ch.ethz.inf.vs.californium.WebLink;
 import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
@@ -21,30 +20,24 @@ public class LwM2mClient {
 	private final String VALID_REQUEST_PAYLOAD = "</lwm2m>;rt=\"oma.lwm2m\", </lwm2m/1/101>, </lwm2m/1/102>, </lwm2m/2/0>, </lwm2m/2/1>, </lwm2m/2/2>, </lwm2m/3/0>, </lwm2m/4/0>, </lwm2m/5>";
 	ManageDownlink downlink;
 
-	public LwM2mClient(final ClientObject... objs) {
+	public LwM2mClient(final ObjectResource... objs) {
 		this(new Server(), objs);
 	}
 
-	public LwM2mClient(final Server server, final ClientObject... objs) {
+	public LwM2mClient(final Server server, final ObjectResource... objs) {
 		if(objs == null || objs.length == 0){
 			throw new IllegalArgumentException("LWM2M Clients must support minimum required Objects defined in the LWM2M Specification.");
 		}
 		clientSideServer = server;
 
 		//		readResource = new ObjectResource(this, 1);
-		for (final ClientObject obj : objs) {
-			final Resource newResource = clientObjectToResource(obj);
-			
-			if(clientSideServer.getRoot().getChild(newResource.getName()) != null){
-				throw new IllegalArgumentException("Trying to load Client Object of name '" + newResource.getName() + "' when one was already added.");
+		for (final ObjectResource obj : objs) {
+			if(clientSideServer.getRoot().getChild(obj.getName()) != null){
+				throw new IllegalArgumentException("Trying to load Client Object of name '" + obj.getName() + "' when one was already added.");
 			}
-			
-			clientSideServer.add(newResource);
-		}
-	}
 
-	private Resource clientObjectToResource(final ClientObject obj) {
-		return new ObjectResource(obj);
+			clientSideServer.add(obj);
+		}
 	}
 
 	public void start() {

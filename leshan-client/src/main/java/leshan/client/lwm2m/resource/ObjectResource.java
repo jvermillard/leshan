@@ -21,12 +21,15 @@ import ch.ethz.inf.vs.californium.server.resources.ResourceBase;
 
 public class ObjectResource extends ResourceBase {
 
-	private final ClientObject obj;
+	private final ClientResourceDefinition[] definitions;
 	private final AtomicInteger instanceCounter;
 
-	public ObjectResource(final ClientObject obj) {
-		super(Integer.toString(obj.getObjectId()));
-		this.obj = obj;
+	public ObjectResource(final int objectId, final ClientResourceDefinition... definitions) {
+		super(Integer.toString(objectId));
+		if (definitions == null || definitions.length == 0) {
+			throw new IllegalArgumentException("Must provide at least one resource definition");
+		}
+		this.definitions = definitions;
 		instanceCounter = new AtomicInteger(0);
 	}
 
@@ -55,7 +58,7 @@ public class ObjectResource extends ResourceBase {
 		}
 		final ClientObjectInstance instance = new ClientObjectInstance(instanceCounter.getAndIncrement(), resources);
 		this.add(instance);
-		exchange.respond(CREATED, "/" + obj.getObjectId() + "/" + instance.getInstanceId());
+		exchange.respond(CREATED, "/" + getName() + "/" + instance.getInstanceId());
 	}
 
 }
