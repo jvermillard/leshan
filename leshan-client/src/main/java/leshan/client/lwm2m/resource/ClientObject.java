@@ -50,6 +50,10 @@ public class ClientObject extends ResourceBase {
 	public void handlePOST(final CoapExchange exchange) {
 		final Tlv[] tlvs = TlvDecoder.decode(ByteBuffer.wrap(exchange.getRequestPayload()));
 		final Map<Integer, ClientResource> resources = new TreeMap<>();
+		for (final ClientResourceDefinition def : definitions) {
+			resources.put(def.getId(), def.createResource());
+		}
+
 		for (final Tlv tlv : tlvs) {
 			if (tlv.getType() != TlvType.RESOURCE_VALUE) {
 				exchange.respond(BAD_REQUEST, "Invalid Object Instance TLV");

@@ -50,4 +50,8 @@ class ClientResource extends ResourceBase {
 		exchange.respond(ResponseCode.CHANGED);
 	}
 
+	public boolean isReadable() {
+		return true;
+	}
+
 }

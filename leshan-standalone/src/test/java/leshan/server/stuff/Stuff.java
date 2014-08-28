@@ -6,6 +6,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.net.InetSocketAddress;
@@ -17,6 +18,8 @@ import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.resource.ClientObject;
+import leshan.client.lwm2m.resource.ExecutableResourceDefinition;
+import leshan.client.lwm2m.resource.ExecuteListener;
 import leshan.client.lwm2m.resource.StringResourceDefinition;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.util.ResponseCallback;
@@ -27,6 +30,7 @@ import leshan.server.lwm2m.client.ClientRegistryImpl;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ContentFormat;
 import leshan.server.lwm2m.message.CreateRequest;
+import leshan.server.lwm2m.message.ExecRequest;
 import leshan.server.lwm2m.message.ReadRequest;
 import leshan.server.lwm2m.message.ResponseCode;
 import leshan.server.lwm2m.message.WriteRequest;
@@ -39,6 +43,7 @@ import leshan.server.lwm2m.tlv.TlvType;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -52,6 +57,7 @@ public class Stuff {
 	private static final int GOOD_OBJECT_INSTANCE_ID = 0;
 	private static final int FIRST_RESOURCE_ID = 4;
 	private static final int SECOND_RESOURCE_ID = 5;
+	private static final int EXECUTABLE_RESOURCE_ID = 6;
 
 	private static final int BAD_OBJECT_ID = 1000;
 	private static final String ENDPOINT = "epflwmtm";
@@ -71,6 +77,7 @@ public class Stuff {
 	private Set<WebLink> objectsAndInstances;
 	private InetSocketAddress serverAddress;
 	private LwM2mClient client;
+	private ExecuteListener executeListener;
 
 	@Before
 	public void setup() {
@@ -86,9 +93,11 @@ public class Stuff {
 		server = new LwM2mServer(serverAddress, serverAddressSecure, clientRegistry, securityRegistry, observationRegistry, bsStore);
 		server.start();
 
+		executeListener = mock(ExecuteListener.class);
 		final ClientObject objectOne = new ClientObject(GOOD_OBJECT_ID,
 				new StringResourceDefinition(FIRST_RESOURCE_ID),
-				new StringResourceDefinition(SECOND_RESOURCE_ID));
+				new StringResourceDefinition(SECOND_RESOURCE_ID),
+				new ExecutableResourceDefinition(EXECUTABLE_RESOURCE_ID, executeListener));
 		final ClientObject objectTwo = new ClientObject(GOOD_OBJECT_ID + 1,
 				new StringResourceDefinition(0));
 		client = new LwM2mClient(objectOne, objectTwo);
@@ -111,7 +120,7 @@ public class Stuff {
 
 	@Test(expected=IllegalArgumentException.class)
 	public void failToCreateClientWithNull(){
-		client = new LwM2mClient(null);
+		client = new LwM2mClient((ClientObject[])null);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
@@ -213,6 +222,8 @@ public class Stuff {
 				"world", ContentFormat.TEXT).send(server.getRequestHandler());
 
 		assertResponse(response, ResponseCode.CHANGED, new byte[0]);
+		assertResponse(sendGet(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
+				ResponseCode.CONTENT, "world".getBytes());
 	}
 
 	@Test
@@ -226,6 +237,36 @@ public class Stuff {
 				"world", ContentFormat.TEXT).send(server.getRequestHandler());
 
 		assertResponse(response, ResponseCode.CHANGED, new byte[0]);
+		assertResponse(sendGet(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
+				ResponseCode.CONTENT, "world".getBytes());
+	}
+
+	@Ignore
+	@Test
+	public void canNotExecuteWriteOnlyResource() {
+		final RegisterUplink registerUplink = registerAndGetUplink();
+		registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
+
+		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+
+		final ClientResponse response = ExecRequest.newRequest(getClient(), GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID,
+				"world", ContentFormat.TEXT).send(server.getRequestHandler());
+
+		assertResponse(response, ResponseCode.METHOD_NOT_ALLOWED, new byte[0]);
+	}
+
+	@Test
+	public void canExecuteResource() {
+		final RegisterUplink registerUplink = registerAndGetUplink();
+		registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
+
+		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+
+		final ClientResponse response = ExecRequest.newRequest(getClient(), GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, EXECUTABLE_RESOURCE_ID,
+				"world", ContentFormat.TEXT).send(server.getRequestHandler());
+
+		assertResponse(response, ResponseCode.CHANGED, new byte[0]);
+		verify(executeListener).execute();
 	}
 
 	private RegisterUplink registerAndGetUplink() {
@@ -247,8 +288,8 @@ public class Stuff {
 
 	private Tlv[] createResourcesTlv(final String value0, final String value1) {
 		final Tlv[] values = new Tlv[2];
-		values[1] = new Tlv(TlvType.RESOURCE_VALUE, null, value0.getBytes(), 0);
-		values[0] = new Tlv(TlvType.RESOURCE_VALUE, null, value1.getBytes(), 1);
+		values[1] = new Tlv(TlvType.RESOURCE_VALUE, null, value0.getBytes(), FIRST_RESOURCE_ID);
+		values[0] = new Tlv(TlvType.RESOURCE_VALUE, null, value1.getBytes(), SECOND_RESOURCE_ID);
 		return values;
 	}
 

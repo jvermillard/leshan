@@ -28,7 +28,10 @@ class ClientObjectInstance extends ResourceBase {
 	public Tlv[] asTlvArray() {
 		final List<Tlv> tlvs = new ArrayList<>();
 		for (final Resource res : getChildren()) {
-			tlvs.add(((ClientResource) res).asTlv());
+			final ClientResource resource = (ClientResource) res;
+			if (resource.isReadable()) {
+				tlvs.add(resource.asTlv());
+			}
 		}
 		final Tlv[] tlvArray = tlvs.toArray(new Tlv[0]);
 		return tlvArray;
