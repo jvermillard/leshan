@@ -4,6 +4,7 @@ import static com.jayway.awaitility.Awaitility.await;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -34,6 +35,7 @@ import leshan.server.lwm2m.tlv.TlvEncoder;
 import leshan.server.lwm2m.tlv.TlvType;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -44,7 +46,8 @@ import ch.ethz.inf.vs.californium.coap.Response;
 
 public class Stuff {
 
-	private static final int OBJECT_ID = 1;
+	private static final int GOOD_OBJECT_ID = 1;
+	private static final int BAD_OBJECT_ID = 1000;
 	private static final String ENDPOINT = "epflwmtm";
 	private static final int CLIENT_PORT = 44022;
 	private static final String GOOD_PAYLOAD = "1337";
@@ -112,7 +115,7 @@ public class Stuff {
 	public void canReadObject() {
 		final RegisterUplink registerUplink = registerAndGetUplink();
 		registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
-		assertResponse(sendGet(OBJECT_ID), ResponseCode.CONTENT, new byte[0]);
+		assertResponse(sendGet(GOOD_OBJECT_ID), ResponseCode.CONTENT, new byte[0]);
 	}
 
 	@Test
@@ -120,8 +123,17 @@ public class Stuff {
 		final RegisterUplink registerUplink = registerAndGetUplink();
 		registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
 
-		final ClientResponse response = sendCreate(createObjectInstanceTlv("hello", "goodbye"), OBJECT_ID);
-		assertResponse(response, ResponseCode.CREATED, ("/" + OBJECT_ID + "/0").getBytes());
+		final ClientResponse response = sendCreate(createObjectInstanceTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+		assertResponse(response, ResponseCode.CREATED, ("/" + GOOD_OBJECT_ID + "/0").getBytes());
+	}
+	
+	@Test
+	public void canNotCreateInstanceOfObject() {
+		final RegisterUplink registerUplink = registerAndGetUplink();
+		registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
+
+		final ClientResponse response = sendCreate(createObjectInstanceTlv("hello", "goodbye"), BAD_OBJECT_ID);
+		assertResponse(response, ResponseCode.NOT_FOUND, null);
 	}
 
 	@Test
@@ -129,9 +141,9 @@ public class Stuff {
 		final RegisterUplink registerUplink = registerAndGetUplink();
 		registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
 
-		sendCreate(createObjectInstanceTlv("hello", "goodbye"), OBJECT_ID);
+		sendCreate(createObjectInstanceTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 
-		assertResponse(sendGet(OBJECT_ID), ResponseCode.CONTENT, TlvEncoder.encode(createObjectInstanceTlv("hello", "goodbye")).array());
+		assertResponse(sendGet(GOOD_OBJECT_ID), ResponseCode.CONTENT, TlvEncoder.encode(createObjectInstanceTlv("hello", "goodbye")).array());
 	}
 
 	private RegisterUplink registerAndGetUplink() {
@@ -166,7 +178,12 @@ public class Stuff {
 
 	private void assertResponse(final ClientResponse response, final ResponseCode responseCode, final byte[] payload) {
 		assertEquals(responseCode, response.getCode());
-		assertEquals(new String(payload), new String(response.getContent()).trim());
+		if(payload == null){
+			assertNull(response.getContent());
+		}
+		else{
+			assertEquals(new String(payload), new String(response.getContent()).trim());
+		}
 	}
 
 }
