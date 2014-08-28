@@ -16,7 +16,7 @@ import java.util.Set;
 import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.register.RegisterUplink;
-import leshan.client.lwm2m.resource.ObjectResource;
+import leshan.client.lwm2m.resource.ClientObject;
 import leshan.client.lwm2m.resource.StringResourceDefinition;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.util.ResponseCallback;
@@ -86,10 +86,10 @@ public class Stuff {
 		server = new LwM2mServer(serverAddress, serverAddressSecure, clientRegistry, securityRegistry, observationRegistry, bsStore);
 		server.start();
 
-		final ObjectResource objectOne = new ObjectResource(GOOD_OBJECT_ID,
+		final ClientObject objectOne = new ClientObject(GOOD_OBJECT_ID,
 				new StringResourceDefinition(FIRST_RESOURCE_ID),
 				new StringResourceDefinition(SECOND_RESOURCE_ID));
-		final ObjectResource objectTwo = new ObjectResource(GOOD_OBJECT_ID + 1,
+		final ClientObject objectTwo = new ClientObject(GOOD_OBJECT_ID + 1,
 				new StringResourceDefinition(0));
 		client = new LwM2mClient(objectOne, objectTwo);
 	}
@@ -116,7 +116,7 @@ public class Stuff {
 
 	@Test(expected=IllegalArgumentException.class)
 	public void failToCreateClientWithSameObjectTwice(){
-		final ObjectResource objectOne = new ObjectResource(1);
+		final ClientObject objectOne = new ClientObject(1);
 		client = new LwM2mClient(objectOne, objectOne);
 	}
 

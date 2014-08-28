@@ -19,12 +19,12 @@ import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
 import ch.ethz.inf.vs.californium.server.resources.Resource;
 import ch.ethz.inf.vs.californium.server.resources.ResourceBase;
 
-public class ObjectResource extends ResourceBase {
+public class ClientObject extends ResourceBase {
 
 	private final ClientResourceDefinition[] definitions;
 	private final AtomicInteger instanceCounter;
 
-	public ObjectResource(final int objectId, final ClientResourceDefinition... definitions) {
+	public ClientObject(final int objectId, final ClientResourceDefinition... definitions) {
 		super(Integer.toString(objectId));
 		if (definitions == null || definitions.length == 0) {
 			throw new IllegalArgumentException("Must provide at least one resource definition");
