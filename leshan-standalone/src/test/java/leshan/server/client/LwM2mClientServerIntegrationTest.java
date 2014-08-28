@@ -25,6 +25,7 @@ import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.ClientRegistryImpl;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.CreateRequest;
+import leshan.server.lwm2m.message.DeleteRequest;
 import leshan.server.lwm2m.message.ReadRequest;
 import leshan.server.lwm2m.message.ResponseCode;
 import leshan.server.lwm2m.observation.ObservationRegistry;
@@ -157,6 +158,12 @@ public abstract class LwM2mClientServerIntegrationTest {
 	protected ClientResponse sendCreate(final Tlv[] values, final int objectID) {
 		return CreateRequest
 				.newRequest(getClient(), objectID, values)
+				.send(server.getRequestHandler());
+	}
+	
+	protected ClientResponse sendDelete(final Tlv[] values, final int objectID, final int objectInstanceID) {
+		return DeleteRequest
+				.newRequest(getClient(), objectID, objectInstanceID)
 				.send(server.getRequestHandler());
 	}
 

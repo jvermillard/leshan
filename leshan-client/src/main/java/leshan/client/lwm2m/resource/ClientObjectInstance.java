@@ -1,6 +1,7 @@
 package leshan.client.lwm2m.resource;
 
 import static ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT;
+import static ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.DELETED;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +9,7 @@ import java.util.Map;
 
 import leshan.server.lwm2m.tlv.Tlv;
 import leshan.server.lwm2m.tlv.TlvEncoder;
+import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
 import ch.ethz.inf.vs.californium.server.resources.Resource;
 import ch.ethz.inf.vs.californium.server.resources.ResourceBase;
@@ -41,6 +43,13 @@ class ClientObjectInstance extends ResourceBase {
 	public void handleGET(final CoapExchange exchange) {
 		final Tlv[] tlvArray = asTlvArray();
 		exchange.respond(CONTENT, TlvEncoder.encode(tlvArray).array());
+	}
+	
+	@Override
+	public void handleDELETE(final CoapExchange exchange) {
+		getParent().remove(this);
+		
+		exchange.respond(DELETED);
 	}
 
 }
