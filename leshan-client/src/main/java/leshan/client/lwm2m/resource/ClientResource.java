@@ -36,6 +36,15 @@ class ClientResource extends ResourceBase {
 
 	@Override
 	public void handlePUT(final CoapExchange exchange) {
+		write(exchange);
+	}
+
+	@Override
+	public void handlePOST(final CoapExchange exchange) {
+		write(exchange);
+	}
+
+	private void write(final CoapExchange exchange) {
 		final byte[] payload = exchange.getRequestPayload();
 		value = Arrays.copyOf(payload, payload.length);
 		exchange.respond(ResponseCode.CHANGED);

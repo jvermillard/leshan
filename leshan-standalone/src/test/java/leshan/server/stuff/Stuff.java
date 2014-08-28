@@ -211,6 +211,19 @@ public class Stuff {
 		assertResponse(response, ResponseCode.CHANGED, new byte[0]);
 	}
 
+	@Test
+	public void canWritePartialUpdateToResource() {
+		final RegisterUplink registerUplink = registerAndGetUplink();
+		registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
+
+		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+
+		final ClientResponse response = WriteRequest.newUpdateRequest(getClient(), GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID,
+				"world", ContentFormat.TEXT).send(server.getRequestHandler());
+
+		assertResponse(response, ResponseCode.CHANGED, new byte[0]);
+	}
+
 	private RegisterUplink registerAndGetUplink() {
 		final ManageDownlink downlink = mock(ManageDownlink.class);
 		final Response goodRawResponse = new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT);
