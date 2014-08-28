@@ -18,9 +18,9 @@ import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.resource.ClientObject;
+import leshan.client.lwm2m.resource.ExecuteListener;
 import leshan.client.lwm2m.resource.ReadListener;
 import leshan.client.lwm2m.resource.SingleResourceDefinition;
-import leshan.client.lwm2m.resource.ExecuteListener;
 import leshan.client.lwm2m.resource.WriteListener;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.util.ResponseCallback;
@@ -98,10 +98,10 @@ public class Stuff {
 		server.start();
 
 		executeListener = mock(ExecuteListener.class);
-		
+
 		firstResourceListener = new ReadWriteListener();
 		secondResourceListener = new ReadWriteListener();
-		
+
 		final ClientObject objectOne = new ClientObject(GOOD_OBJECT_ID,
 				new SingleResourceDefinition(FIRST_RESOURCE_ID, ExecuteListener.DUMMY, firstResourceListener, firstResourceListener),
 				new SingleResourceDefinition(SECOND_RESOURCE_ID, ExecuteListener.DUMMY, secondResourceListener, secondResourceListener),
@@ -343,22 +343,17 @@ public class Stuff {
 	public class ReadWriteListener implements ReadListener, WriteListener{
 
 		private String value;
-		
+
 		@Override
 		public void write(final int objectId, final int objectInstanceId, final int resourceId,
 				final byte[] valueToWrite) {
 			value = new String(valueToWrite);
 		}
 
-		public Object getValue() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
 		@Override
 		public byte[] read() {
 			return value.getBytes();
 		}
-		
+
 	}
 }
