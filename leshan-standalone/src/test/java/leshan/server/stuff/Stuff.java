@@ -44,6 +44,7 @@ import ch.ethz.inf.vs.californium.coap.Response;
 
 public class Stuff {
 
+	private static final int OBJECT_ID = 1;
 	private static final String ENDPOINT = "epflwmtm";
 	private static final int CLIENT_PORT = 44022;
 	private static final String GOOD_PAYLOAD = "1337";
@@ -111,7 +112,7 @@ public class Stuff {
 	public void canReadObject() {
 		final RegisterUplink registerUplink = registerAndGetUplink();
 		registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
-		assertResponse(sendGet(), ResponseCode.CONTENT, new byte[0]);
+		assertResponse(sendGet(1), ResponseCode.CONTENT, new byte[0]);
 	}
 
 	@Test
@@ -119,8 +120,8 @@ public class Stuff {
 		final RegisterUplink registerUplink = registerAndGetUplink();
 		registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
 
-		final ClientResponse response = sendCreate(createObjectInstanceTlv("hello", "goodbye"));
-		assertResponse(response, ResponseCode.CREATED, "/1/0".getBytes());
+		final ClientResponse response = sendCreate(createObjectInstanceTlv("hello", "goodbye"), 1);
+		assertResponse(response, ResponseCode.CREATED, ("/" + OBJECT_ID + "/0").getBytes());
 	}
 
 	@Test
@@ -128,9 +129,9 @@ public class Stuff {
 		final RegisterUplink registerUplink = registerAndGetUplink();
 		registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
 
-		sendCreate(createObjectInstanceTlv("hello", "goodbye"));
+		sendCreate(createObjectInstanceTlv("hello", "goodbye"), OBJECT_ID);
 
-		assertResponse(sendGet(), ResponseCode.CONTENT, TlvEncoder.encode(createObjectInstanceTlv("hello", "goodbye")).array());
+		assertResponse(sendGet(1), ResponseCode.CONTENT, TlvEncoder.encode(createObjectInstanceTlv("hello", "goodbye")).array());
 	}
 
 	private RegisterUplink registerAndGetUplink() {
@@ -151,15 +152,15 @@ public class Stuff {
 		return values;
 	}
 
-	private ClientResponse sendGet() {
+	private ClientResponse sendGet(final int objectID) {
 		return ReadRequest
-				.newRequest(clientRegistry.get(ENDPOINT), 1)
+				.newRequest(clientRegistry.get(ENDPOINT), objectID)
 				.send(server.getRequestHandler());
 	}
 
-	private ClientResponse sendCreate(final Tlv[] values) {
+	private ClientResponse sendCreate(final Tlv[] values, final int objectID) {
 		return CreateRequest
-				.newRequest(clientRegistry.get(ENDPOINT), 1, values)
+				.newRequest(clientRegistry.get(ENDPOINT), objectID, values)
 				.send(server.getRequestHandler());
 	}
 
