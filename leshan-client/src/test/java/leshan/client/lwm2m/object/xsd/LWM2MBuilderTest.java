@@ -55,7 +55,8 @@ public class LWM2MBuilderTest {
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testExceptionOnNullFile(){
-		LWM2MBuilder.create(null);
+		final String str = null;
+		LWM2MBuilder.create(str);
 	}
 
 	@Test
