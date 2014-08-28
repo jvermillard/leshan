@@ -33,7 +33,13 @@ public class LwM2mClient {
 
 		//		readResource = new ObjectResource(this, 1);
 		for (final ClientObject obj : objs) {
-			clientSideServer.add(clientObjectToResource(obj));
+			final Resource newResource = clientObjectToResource(obj);
+			
+			if(clientSideServer.getRoot().getChild(newResource.getName()) != null){
+				throw new IllegalArgumentException("Trying to load Client Object of name '" + newResource.getName() + "' when one was already added.");
+			}
+			
+			clientSideServer.add(newResource);
 		}
 	}
 

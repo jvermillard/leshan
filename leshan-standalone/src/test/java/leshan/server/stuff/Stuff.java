@@ -80,8 +80,9 @@ public class Stuff {
 		server = new LwM2mServer(serverAddress, serverAddressSecure, clientRegistry, securityRegistry, observationRegistry, bsStore);
 		server.start();
 
-		final ClientObject obj1 = new ClientObject();
-		client = new LwM2mClient(obj1);
+		final ClientObject objectOne = new ClientObject(GOOD_OBJECT_ID);
+		final ClientObject objectTwo = new ClientObject(GOOD_OBJECT_ID + 1);
+		client = new LwM2mClient(objectOne, objectTwo);
 	}
 
 	@After
@@ -97,6 +98,17 @@ public class Stuff {
 
 		assertTrue(register.isSuccess());
 		assertNotNull(clientRegistry.get(ENDPOINT));
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void failToCreateClientWithNull(){
+		client = new LwM2mClient(null);
+	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void failToCreateClientWithSameObjectTwice(){
+		final ClientObject objectOne = new ClientObject(1);
+		client = new LwM2mClient(objectOne, objectOne);
 	}
 
 	@Test

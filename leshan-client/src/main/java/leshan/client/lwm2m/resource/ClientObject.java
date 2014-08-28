@@ -5,8 +5,18 @@ import java.util.List;
 
 public class ClientObject {
 
+	private int objectId = 1;
+	
+	private ClientObject(){
+		
+	}
+	
+	public ClientObject(final int objectId){
+		this.objectId = objectId;
+	}
+
 	public int getObjectId() {
-		return 1;
+		return objectId;
 	}
 
 	public List<Integer> getResourceIds() {
