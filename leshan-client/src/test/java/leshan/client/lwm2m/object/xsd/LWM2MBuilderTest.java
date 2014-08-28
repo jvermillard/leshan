@@ -8,9 +8,6 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
-import leshan.client.lwm2m.object.xsd.LWM2M.Object;
-import leshan.client.lwm2m.object.xsd.LWM2M.Object.Resources.Item;
-
 import org.junit.Test;
 
 public class LWM2MBuilderTest {
