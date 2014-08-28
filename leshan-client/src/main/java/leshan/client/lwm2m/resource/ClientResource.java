@@ -11,10 +11,18 @@ import ch.ethz.inf.vs.californium.server.resources.ResourceBase;
 class ClientResource extends ResourceBase {
 
 	private byte[] value;
+	private final ExecuteListener listener;
 
 	public ClientResource(final int id, final byte[] value) {
 		super(Integer.toString(id));
 		this.value = value;
+		this.listener = ExecuteListener.DUMMY;
+	}
+
+	public ClientResource(final int id, final ExecuteListener listener) {
+		super(Integer.toString(id));
+		this.value = new byte[0];
+		this.listener = listener;
 	}
 
 	public int getId() {
@@ -41,7 +49,10 @@ class ClientResource extends ResourceBase {
 
 	@Override
 	public void handlePOST(final CoapExchange exchange) {
-		write(exchange);
+		listener.execute(Integer.parseInt(getParent().getParent().getName()),
+				Integer.parseInt(getParent().getName()),
+				Integer.parseInt(getName()));
+		exchange.respond(ResponseCode.CHANGED);
 	}
 
 	private void write(final CoapExchange exchange) {
@@ -51,7 +62,7 @@ class ClientResource extends ResourceBase {
 	}
 
 	public boolean isReadable() {
-		return true;
+		return listener == ExecuteListener.DUMMY;
 	}
 
 }

@@ -1,11 +1,11 @@
 package leshan.client.lwm2m.resource;
 
-public class ExecutableResourceDefinition implements ClientResourceDefinition {
+public class SingleResourceDefinition implements ClientResourceDefinition {
 
 	private final int id;
 	private final ExecuteListener listener;
 
-	public ExecutableResourceDefinition(final int id, final ExecuteListener listener) {
+	public SingleResourceDefinition(final int id, final ExecuteListener listener) {
 		this.id = id;
 		this.listener = listener;
 	}
@@ -17,7 +17,7 @@ public class ExecutableResourceDefinition implements ClientResourceDefinition {
 
 	@Override
 	public ClientResource createResource() {
-		return new ExecutableResource(id, listener);
+		return new ClientResource(id, listener);
 	}
 
 }
