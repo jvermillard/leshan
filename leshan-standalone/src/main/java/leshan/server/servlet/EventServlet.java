@@ -155,7 +155,8 @@ public class EventServlet extends HttpServlet implements ResourceObserver {
         Collection<Continuation> disconnected = new ArrayList<>();
 
         for (Continuation c : continuations) {
-            if (endpoint.equals(c.getAttribute(QUERY_PARAM_ENDPOINT)) || !EVENT_NOTIFICATION.equals(event)) {
+            Object endpointAttribute = c.getAttribute(QUERY_PARAM_ENDPOINT);
+            if (endpointAttribute == null || endpointAttribute.equals(endpoint)) {
                 try {
                     OutputStream output = c.getServletResponse().getOutputStream();
                     output.write(EVENT);
