@@ -6,13 +6,15 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
 import leshan.client.lwm2m.object.xsd.LWM2M;
 import leshan.client.lwm2m.object.xsd.LWM2MBuilder;
+
+import org.eclipse.jetty.util.ConcurrentHashSet;
+
 import ch.ethz.inf.vs.californium.coap.Request;
 
 public final class LWM2MObject {
@@ -21,7 +23,7 @@ public final class LWM2MObject {
 
 	private LWM2MObject(final InputStream stream) {
 		final LWM2M obj = LWM2MBuilder.create(stream);
-		this.createdObjects = new HashSet<>();
+		this.createdObjects = new ConcurrentHashSet<>();
 
 	}
 
@@ -42,13 +44,15 @@ public final class LWM2MObject {
 
 		final Instance instance = new Instance(server, obj, objectInstanceId);
 		// TODO: Check if instance has already been created
+		if(this.createdObjects.contains(instance)) {
 
+		}
 		this.createdObjects.add(instance);
 
 		return instance;
 	}
 
-	static class Instance {
+	public final class Instance {
 		private final int instanceId;
 		private final LWM2MObject obj;
 		private final AccessControlObject aco;
@@ -63,6 +67,10 @@ public final class LWM2MObject {
 
 		public boolean isOperationPermitted(final LWM2MServer server, final Request request) {
 			return false;
+		}
+
+		public int getInstanceId() {
+			return instanceId;
 		}
 
 		@Override
