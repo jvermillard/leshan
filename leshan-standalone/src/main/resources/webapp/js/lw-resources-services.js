@@ -174,13 +174,16 @@ var addResource = function(object, instance, resourceId, attributes) {
 
     // create resource if necessary
     if (resource == undefined) {
-        // create resource definition
-        var resourcedef = {
-            name : "Resource " + resourceId,
-            id : resourceId,
-            operations : "RW"
-        };
-        object.resourcedefs.push(resourcedef)
+        // create resource definition if necessary
+        var resourcedef = searchById(object.resourcedefs, resourceId);
+        if (resourcedef == undefined){
+            var resourcedef = {
+                name : "Resource " + resourceId,
+                id : resourceId,
+                operations : "RW"
+            };
+            object.resourcedefs.push(resourcedef)
+        }
 
         // create resource
         resource = {
