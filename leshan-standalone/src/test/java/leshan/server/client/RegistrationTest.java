@@ -4,12 +4,12 @@ import static com.jayway.awaitility.Awaitility.await;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import leshan.client.lwm2m.LwM2mClient;
+import leshan.client.lwm2m.operation.Executable;
+import leshan.client.lwm2m.operation.Readable;
+import leshan.client.lwm2m.operation.Writable;
 import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.resource.ClientObject;
-import leshan.client.lwm2m.resource.ExecuteListener;
-import leshan.client.lwm2m.resource.ReadListener;
 import leshan.client.lwm2m.resource.SingleResourceDefinition;
-import leshan.client.lwm2m.resource.WriteListener;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.util.ResponseCallback;
 
@@ -22,11 +22,11 @@ public class RegistrationTest extends LwM2mClientServerIntegrationTest {
 		final ReadWriteListenerWithBrokenWrite brokenResourceListener = new ReadWriteListenerWithBrokenWrite();
 
 		final ClientObject objectOne = new ClientObject(GOOD_OBJECT_ID,
-				new SingleResourceDefinition(FIRST_RESOURCE_ID, ExecuteListener.DUMMY, firstResourceListener, firstResourceListener),
-				new SingleResourceDefinition(SECOND_RESOURCE_ID, ExecuteListener.DUMMY, secondResourceListener, secondResourceListener),
-				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executeListener, WriteListener.DUMMY, ReadListener.DUMMY));
+				new SingleResourceDefinition(FIRST_RESOURCE_ID, Executable.NOT_EXECUTABLE, firstResourceListener, firstResourceListener),
+				new SingleResourceDefinition(SECOND_RESOURCE_ID, Executable.NOT_EXECUTABLE, secondResourceListener, secondResourceListener),
+				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executableAlwaysSuccessful, Writable.NOT_WRITABLE, Readable.NOT_READABLE));
 		final ClientObject objectTwo = new ClientObject(BROKEN_OBJECT_ID,
-				new SingleResourceDefinition(BROKEN_RESOURCE_ID, ExecuteListener.DUMMY, brokenResourceListener, brokenResourceListener));
+				new SingleResourceDefinition(BROKEN_RESOURCE_ID, Executable.NOT_EXECUTABLE, brokenResourceListener, brokenResourceListener));
 		return new LwM2mClient(objectOne, objectTwo);
 	}
 

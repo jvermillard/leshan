@@ -12,11 +12,13 @@ import java.util.Set;
 
 import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.manage.ManageDownlink;
+import leshan.client.lwm2m.operation.Executable;
+import leshan.client.lwm2m.operation.ExecuteResponse;
+import leshan.client.lwm2m.operation.ReadResponse;
+import leshan.client.lwm2m.operation.Readable;
+import leshan.client.lwm2m.operation.Writable;
+import leshan.client.lwm2m.operation.WriteResponse;
 import leshan.client.lwm2m.register.RegisterUplink;
-import leshan.client.lwm2m.resource.ExecuteListener;
-import leshan.client.lwm2m.resource.ReadListener;
-import leshan.client.lwm2m.resource.WriteListener;
-import leshan.client.lwm2m.resource.WriteResponse;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.server.lwm2m.LwM2mServer;
 import leshan.server.lwm2m.bootstrap.BootstrapStoreImpl;
@@ -68,7 +70,7 @@ public abstract class LwM2mClientServerIntegrationTest {
 	protected Set<WebLink> objectsAndInstances;
 	private InetSocketAddress serverAddress;
 	protected LwM2mClient client;
-	protected ExecuteListener executeListener;
+	protected Executable executableAlwaysSuccessful;
 	protected ReadWriteListener firstResourceListener;
 	protected ReadWriteListener secondResourceListener;
 
@@ -86,7 +88,8 @@ public abstract class LwM2mClientServerIntegrationTest {
 		server = new LwM2mServer(serverAddress, serverAddressSecure, clientRegistry, securityRegistry, observationRegistry, bsStore);
 		server.start();
 
-		executeListener = mock(ExecuteListener.class);
+		executableAlwaysSuccessful = mock(Executable.class);
+		when(executableAlwaysSuccessful.execute(Mockito.anyInt(), Mockito.anyInt(), Mockito.anyInt())).thenReturn(ExecuteResponse.success());
 
 		firstResourceListener = new ReadWriteListener();
 		secondResourceListener = new ReadWriteListener();
@@ -206,7 +209,7 @@ public abstract class LwM2mClientServerIntegrationTest {
 		assertTrue(payload == null || payload.length == 0);
 	}
 
-	public class ReadWriteListener implements ReadListener, WriteListener{
+	public class ReadWriteListener implements Readable, Writable{
 
 		private String value;
 
@@ -218,13 +221,13 @@ public abstract class LwM2mClientServerIntegrationTest {
 		}
 
 		@Override
-		public byte[] read() {
-			return value.getBytes();
+		public ReadResponse read() {
+			return ReadResponse.success(value.getBytes());
 		}
 
 	}
 
-	public class ReadWriteListenerWithBrokenWrite implements ReadListener, WriteListener{
+	public class ReadWriteListenerWithBrokenWrite implements Readable, Writable{
 
 		private String value;
 
@@ -239,8 +242,8 @@ public abstract class LwM2mClientServerIntegrationTest {
 		}
 
 		@Override
-		public byte[] read() {
-			return value.getBytes();
+		public ReadResponse read() {
+			return ReadResponse.success(value.getBytes());
 		}
 
 	}

@@ -1,6 +1,12 @@
 package leshan.client.lwm2m.resource;
 
 import static ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT;
+import leshan.client.lwm2m.operation.Executable;
+import leshan.client.lwm2m.operation.ExecuteResponse;
+import leshan.client.lwm2m.operation.ReadResponse;
+import leshan.client.lwm2m.operation.Readable;
+import leshan.client.lwm2m.operation.Writable;
+import leshan.client.lwm2m.operation.WriteResponse;
 import leshan.server.lwm2m.tlv.Tlv;
 import leshan.server.lwm2m.tlv.TlvType;
 import ch.ethz.inf.vs.californium.coap.LinkFormat;
@@ -11,15 +17,15 @@ import ch.ethz.inf.vs.californium.server.resources.ResourceBase;
 
 class ClientResource extends ResourceBase implements LinkFormattable{
 
-	private final ExecuteListener executeListener;
-	private final WriteListener writeListener;
-	private final ReadListener readListener;
+	private final Executable executable;
+	private final Writable writable;
+	private final Readable readable;
 
-	public ClientResource(final int id, final ExecuteListener executeListener, final WriteListener writeListener, final ReadListener readListener) {
+	public ClientResource(final int id, final Executable executable, final Writable writable, final Readable readable) {
 		super(Integer.toString(id));
-		this.executeListener = executeListener;
-		this.writeListener = writeListener;
-		this.readListener = readListener;
+		this.executable = executable;
+		this.writable = writable;
+		this.readable = readable;
 	}
 
 	public int getId() {
@@ -27,7 +33,14 @@ class ClientResource extends ResourceBase implements LinkFormattable{
 	}
 
 	public Tlv asTlv() {
-		return new Tlv(TlvType.RESOURCE_VALUE, null, readListener.read(), getId());
+		final ReadResponse response = readable.read();
+		
+		if(ResponseCode.isSuccess(response.getCode())){
+			return new Tlv(TlvType.RESOURCE_VALUE, null, response.getValue(), getId());
+		}
+		else{
+			return new Tlv(TlvType.RESOURCE_VALUE, null, new byte[0], getId());
+		}
 	}
 
 	@Override
@@ -45,7 +58,14 @@ class ClientResource extends ResourceBase implements LinkFormattable{
 	}
 
 	private void handleRead(final CoapExchange exchange) {
-		exchange.respond(ResponseCode.CONTENT, readListener.read());
+		final ReadResponse response = readable.read();
+		
+		if(ResponseCode.isSuccess(response.getCode())){
+			exchange.respond(response.getCode(), response.getValue());
+		}
+		else{
+			exchange.respond(response.getCode());
+		}
 	}
 
 	@Override
@@ -56,22 +76,22 @@ class ClientResource extends ResourceBase implements LinkFormattable{
 
 	@Override
 	public void handlePOST(final CoapExchange exchange) {
-		executeListener.execute(Integer.parseInt(getParent().getParent().getName()),
+		final ExecuteResponse response = executable.execute(Integer.parseInt(getParent().getParent().getName()),
 				Integer.parseInt(getParent().getName()),
 				Integer.parseInt(getName()));
-		exchange.respond(ResponseCode.CHANGED);
+		exchange.respond(response.getCode());
 	}
 
 	public boolean isExecutable() {
-		return executeListener != ExecuteListener.DUMMY;
+		return executable != Executable.NOT_EXECUTABLE;
 	}
 
 	public boolean isWritable() {
-		return writeListener != WriteListener.DUMMY;
+		return writable != Writable.NOT_WRITABLE;
 	}
 
 	public boolean isReadable() {
-		return readListener != ReadListener.DUMMY;
+		return readable != Readable.NOT_READABLE;
 	}
 
 	public void writeTlv(final Tlv tlv) {
@@ -79,7 +99,7 @@ class ClientResource extends ResourceBase implements LinkFormattable{
 	}
 
 	private WriteResponse writeValue(final byte[] value) {
-		return writeListener.write(Integer.parseInt(getParent().getParent().getName()),
+		return writable.write(Integer.parseInt(getParent().getParent().getName()),
 				Integer.parseInt(getParent().getName()),
 				Integer.parseInt(getName()), value);
 	}

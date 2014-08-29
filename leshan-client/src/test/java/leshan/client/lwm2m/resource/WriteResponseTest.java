@@ -1,6 +1,7 @@
 package leshan.client.lwm2m.resource;
 
 import static org.junit.Assert.assertEquals;
+import leshan.client.lwm2m.operation.WriteResponse;
 
 import org.junit.Test;
 
