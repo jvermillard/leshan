@@ -54,7 +54,7 @@ public class RegistrationTest extends LwM2mClientServerIntegrationTest {
 	public void registeredDeviceExistsAsync() {
 		final RegisterUplink registerUplink = registerAndGetUplink();
 		final ResponseCallback callback = new ResponseCallback();
-		registerUplink.register(ENDPOINT, clientParameters, objectsAndInstances, callback);
+		registerUplink.register(ENDPOINT, clientParameters, callback);
 
 		await().untilTrue(callback.isCalled());
 

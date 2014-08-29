@@ -38,14 +38,6 @@ public class DiscoverTest extends LwM2mClientServerIntegrationTest {
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
-	public void testIllegalObjectLinksRequestOne() {
-		register();
-		
-		final ClientResponse response = sendDiscover(GOOD_OBJECT_ID);
-		assertLinkFormatResponse(response, ResponseCode.CONTENT, client.getObjectLinks());
-	}
-	
-	@Test(expected=IllegalArgumentException.class)
 	public void testIllegalObjectLinksRequestTwo() {
 		register();
 		

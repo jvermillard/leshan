@@ -32,7 +32,7 @@ public class RegisterTest extends AbstractRegisteringTest {
 
 	@Test
 	public void testRegisterAndDeregisterAsync() throws UnknownHostException {
-		registerUplink.register(clientEndpoint, clientParameters, objectsAndInstances, callback);
+		registerUplink.register(clientEndpoint, clientParameters, callback);
 		
 		await().untilTrue(callback.isCalled());
 

@@ -58,7 +58,7 @@ public class DeregisterTest extends AbstractRegisteringTest {
 		assertEquals(deregisterResponseOne.getResponseCode(), ResponseCode.NOT_FOUND);
 
 		callback.reset();
-		registerUplink.register(clientEndpoint, clientParameters, objectsAndInstances, callback);
+		registerUplink.register(clientEndpoint, clientParameters, callback);
 		
 		await().untilTrue(callback.isCalled());
 		

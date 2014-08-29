@@ -31,7 +31,7 @@ public class UpdateTest extends AbstractRegisteringTest {
 		final Long newLifetime = (long) 100001;
 		clientParameters.put("lt", newLifetime.toString());
 		
-		final OperationResponse updateResponse = registerUplink.update(locationPath, clientParameters, objectsAndInstances, TIMEOUT_MS);
+		final OperationResponse updateResponse = registerUplink.update(locationPath, clientParameters, TIMEOUT_MS);
 		
 		validateUpdatedClientOnServer(newLifetime, 1);
 		
@@ -45,7 +45,7 @@ public class UpdateTest extends AbstractRegisteringTest {
 
 	@Test
 	public void testRegisterUpdateAndDeregisterAsync() throws UnknownHostException {
-		registerUplink.register(clientEndpoint, clientParameters, objectsAndInstances, callback);
+		registerUplink.register(clientEndpoint, clientParameters, callback);
 		
 		await().untilTrue(callback.isCalled());
 
@@ -55,7 +55,7 @@ public class UpdateTest extends AbstractRegisteringTest {
 		clientParameters.put("lt", newLifetime.toString());
 
 		callback.reset();
-		registerUplink.update(locationPath, clientParameters, objectsAndInstances, callback);
+		registerUplink.update(locationPath, clientParameters, callback);
 		
 		await().untilTrue(callback.isCalled());
 		

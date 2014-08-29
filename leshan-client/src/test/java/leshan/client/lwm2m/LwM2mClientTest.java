@@ -5,8 +5,12 @@ import java.net.InetSocketAddress;
 import leshan.client.lwm2m.bootstrap.BootstrapDownlink;
 import leshan.client.lwm2m.bootstrap.BootstrapUplink;
 import leshan.client.lwm2m.manage.ManageDownlink;
+import leshan.client.lwm2m.operation.Executable;
+import leshan.client.lwm2m.operation.Readable;
+import leshan.client.lwm2m.operation.Writable;
 import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.resource.ClientObject;
+import leshan.client.lwm2m.resource.SingleResourceDefinition;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +38,8 @@ public class LwM2mClientTest {
 
 	@Test
 	public void testLegalBootstrapUplinkCreate() {
-		final ClientObject object = new ClientObject(1);
+		final ClientObject object = new ClientObject(1, 
+				new SingleResourceDefinition(0, Readable.NOT_READABLE, Writable.NOT_WRITABLE, Executable.NOT_EXECUTABLE));
 		final LwM2mClient client = new LwM2mClient(object);
 		final BootstrapUplink uplink = client.startBootstrap(4321, InetSocketAddress.createUnresolved("localhost", 1234), fakeBootstrapDownlink);
 	}
@@ -54,7 +59,8 @@ public class LwM2mClientTest {
 
 	@Test
 	public void testLegalRegisterUplinkCreate() {
-		final ClientObject object = new ClientObject(1);
+		final ClientObject object = new ClientObject(1, 
+				new SingleResourceDefinition(0, Readable.NOT_READABLE, Writable.NOT_WRITABLE, Executable.NOT_EXECUTABLE));
 		Mockito.when(server.getRoot()).thenReturn(new ResourceBase("basic"));
 		final LwM2mClient client = new LwM2mClient(server, object);
 
@@ -64,7 +70,8 @@ public class LwM2mClientTest {
 
 	@Test(expected=IllegalArgumentException.class)
 	public void testIllegalNullRegisterUplinkCreate() {
-		final ClientObject object = new ClientObject(1);
+		final ClientObject object = new ClientObject(1, 
+				new SingleResourceDefinition(0, Readable.NOT_READABLE, Writable.NOT_WRITABLE, Executable.NOT_EXECUTABLE));
 		final LwM2mClient client = new LwM2mClient(object);
 		final RegisterUplink uplink = client.startRegistration(4321, InetSocketAddress.createUnresolved("localhost", 1234), null);
 	}

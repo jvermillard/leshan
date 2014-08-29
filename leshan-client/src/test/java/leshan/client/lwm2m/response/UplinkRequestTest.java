@@ -7,14 +7,17 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.util.ResponseCallback;
+import leshan.server.lwm2m.linkformat.LinkFormatParser;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
@@ -53,6 +56,8 @@ public class UplinkRequestTest {
 	private ManageDownlink downlink;
 	@Mock
 	private Response response;
+	@Mock
+	private LwM2mClient client;
 	private RegisterUplink uplink;
 	private InetSocketAddress serverAddress;
 
@@ -66,6 +71,7 @@ public class UplinkRequestTest {
 		when(Request.newPut()).thenReturn(request);
 		when(Request.newDelete()).thenReturn(request);
 		
+		when(client.getObjectLinks()).thenReturn(LinkFormatParser.parse(VALID_REQUEST_PAYLOAD.getBytes()));
 
 		doAnswer(new Answer<Void>(){
 
@@ -85,7 +91,7 @@ public class UplinkRequestTest {
 			}
 		}).when(endpoint).sendRequest(any(Request.class));
 
-		uplink = new RegisterUplink(serverAddress, endpoint, downlink, LinkFormat.parse(VALID_REQUEST_PAYLOAD));
+		uplink = new RegisterUplink(serverAddress, endpoint, downlink, client);
 	}
 	
 	@Test

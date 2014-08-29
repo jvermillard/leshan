@@ -36,7 +36,6 @@ public class LwM2mClient {
 		server.setMessageDeliverer(new LwM2mServerMessageDeliverer(server.getRoot()));
 		clientSideServer = server;
 
-		//		readResource = new ObjectResource(this, 1);
 		for (final ClientObject obj : objs) {
 			if(clientSideServer.getRoot().getChild(obj.getName()) != null){
 				throw new IllegalArgumentException("Trying to load Client Object of name '" + obj.getName() + "' when one was already added.");
@@ -67,22 +66,25 @@ public class LwM2mClient {
 
 		this.downlink = downlink;
 
-		//		final String uri = "coap://" + destination.getHostString() + ":" + destination.getPort() + "/rd?ep=device1";
-		//		final CoapClient client = new CoapClient(uri);
-		//		System.out.println("URI " + uri);
-		//		client.setEndpoint(endpoint);
-		//		client.post(VALID_REQUEST_PAYLOAD, 1);
-
-		final Set<WebLink> objectsAndInstances = new TreeSet<WebLink>();
-		for (final Resource resource : clientSideServer.getRoot().getChildren()) {
-			objectsAndInstances.add(new WebLink(resource.getURI()));
-		}
-		return new RegisterUplink(destination, endpoint, downlink, objectsAndInstances );
+		return new RegisterUplink(destination, endpoint, downlink, this);
 	}
 	
 	public LinkObject[] getObjectLinks(final Integer...ids){
-		if(ids.length == 0 || ids.length > 3){
+		if(ids.length > 3){
 			throw new IllegalArgumentException("An Object Model Only Goes 3 levels deep:  Object ID/ObjectInstance ID/Resource ID");
+		}
+		
+		if(ids.length == 0){
+			final StringBuilder registrationMasterLinkObject = new StringBuilder();
+			for(final Resource clientObject : clientSideServer.getRoot().getChildren()){
+				if(clientObject instanceof LinkFormattable){
+					registrationMasterLinkObject.append(((LinkFormattable) clientObject).asLinkFormat()).append(",");
+				}
+			}
+			
+			registrationMasterLinkObject.deleteCharAt(registrationMasterLinkObject.length() - 1);
+			
+			return LinkFormatParser.parse(registrationMasterLinkObject.toString().getBytes());
 		}
 		
 		final Resource clientObject = clientSideServer.getRoot().getChild(Integer.toString(ids[0]));

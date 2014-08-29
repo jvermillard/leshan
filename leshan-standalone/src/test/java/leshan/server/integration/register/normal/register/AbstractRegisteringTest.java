@@ -19,12 +19,18 @@ import java.util.UUID;
 
 import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.manage.ManageDownlink;
+import leshan.client.lwm2m.operation.Executable;
+import leshan.client.lwm2m.operation.Readable;
+import leshan.client.lwm2m.operation.Writable;
 import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.resource.ClientObject;
+import leshan.client.lwm2m.resource.SingleResourceDefinition;
 import leshan.client.lwm2m.response.OperationResponse;
+import leshan.client.lwm2m.util.LinkFormatUtils;
 import leshan.client.lwm2m.util.ResponseCallback;
 import leshan.server.LeshanMain;
 import leshan.server.clienttest.TestUtils;
+import leshan.server.lwm2m.client.LinkObject;
 
 import org.junit.After;
 import org.junit.Before;
@@ -46,25 +52,13 @@ public class AbstractRegisteringTest {
 	protected Map<String, String> clientParameters;
 	protected Set<WebLink> objectsAndInstances;
 	protected int clientPort;
-	private final String clientDataModel = "</lwm2m>;rt=\"oma.lwm2m\", </lwm2m/1/101>, </lwm2m/1/102>, </lwm2m/2/0>, </lwm2m/2/1>, </lwm2m/2/2>, </lwm2m/3/0>, </lwm2m/4/0>, </lwm2m/5>";
-	private final String[] clientDataModelResources = new String[]{
-				"/lwm2m",
-				"/lwm2m/1/101",
-				"/lwm2m/1/102",
-				"/lwm2m/2/0",
-				"/lwm2m/2/1",
-				"/lwm2m/2/2",
-				"/lwm2m/3/0",
-				"/lwm2m/4/0",
-				"/lwm2m/5",
-		};
-	private Set<String> clientDataModelResourceSet;
 
 	@Mock
 	protected ManageDownlink downlink;
 
 	protected ResponseCallback callback;
 	protected RegisterUplink registerUplink;
+	private LwM2mClient client;
 
 	public AbstractRegisteringTest() {
 		super();
@@ -72,24 +66,29 @@ public class AbstractRegisteringTest {
 
 	@Before
 	public void setUp() throws UnknownHostException {
-		clientDataModelResourceSet = new HashSet<String>(Arrays.asList(clientDataModelResources));
 		server = new LeshanMain();
 		server.start();
 		serverAddress = new InetSocketAddress(InetAddress.getLocalHost(), 5683);
 		clientPort = 9000;
 		clientEndpoint = UUID.randomUUID().toString();
 		clientParameters = new HashMap<>();
-		objectsAndInstances = LinkFormat.parse(clientDataModel);
 		callback = new ResponseCallback();
 
-		final LwM2mClient lwM2mClient = new LwM2mClient(new ClientObject(1));
-		registerUplink = lwM2mClient.startRegistration(clientPort, serverAddress, downlink);
+		final ClientObject objectOne = new ClientObject(1000,
+				new SingleResourceDefinition(1, Readable.NOT_READABLE, Writable.NOT_WRITABLE, Executable.NOT_EXECUTABLE),
+				new SingleResourceDefinition(2, Readable.NOT_READABLE, Writable.NOT_WRITABLE, Executable.NOT_EXECUTABLE),
+				new SingleResourceDefinition(3, Readable.NOT_READABLE, Writable.NOT_WRITABLE,  Executable.NOT_EXECUTABLE));
+		final ClientObject objectTwo = new ClientObject(2000,
+				new SingleResourceDefinition(1, Readable.NOT_READABLE, Writable.NOT_WRITABLE, Executable.NOT_EXECUTABLE));
+		client = new LwM2mClient(objectOne, objectTwo);
+		registerUplink = client.startRegistration(clientPort, serverAddress, downlink);
 	}
 
 	@After
 	public void tearDown() {
 		server.stop();
 		registerUplink.stop();
+		client.stop();
 	}
 
 	protected void validateResponsesToClient(final OperationResponse registerResponse, final String locationPathOptions,
@@ -118,9 +117,10 @@ public class AbstractRegisteringTest {
 				assertEquals("1.0", clientParameters.get("lwM2MmVersion"));
 				assertEquals(lifetime.doubleValue(), Double.parseDouble(clientParameters.get("lifetime").toString()), 0.001);
 
+				final String actualCurrentLinkObjects = LinkFormatUtils.payloadize(client.getObjectLinks());
 				final Collection<LinkedTreeMap> links = (Collection<LinkedTreeMap>) clientParameters.get("objectLinks");
 				for (final LinkedTreeMap link : links) {
-					assertTrue(clientDataModelResourceSet.contains(link.get("url")));
+					assertTrue(actualCurrentLinkObjects.contains(link.get("url").toString()));
 				}
 
 			}

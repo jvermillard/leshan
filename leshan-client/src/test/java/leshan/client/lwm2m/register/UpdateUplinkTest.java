@@ -11,18 +11,21 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.InterfaceTypes;
 import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.OperationTypes;
 import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.response.OperationResponseCode;
 import leshan.client.lwm2m.util.ResponseCallback;
+import leshan.server.lwm2m.linkformat.LinkFormatParser;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
@@ -47,6 +50,8 @@ public class UpdateUplinkTest {
 	private CoAPEndpoint endpoint;
 	@Mock
 	private ManageDownlink downlink;
+	@Mock
+	private LwM2mClient client;
 
 	private String actualRequestLocation;
 	private String expectedRequestLocation;
@@ -76,8 +81,12 @@ public class UpdateUplinkTest {
 	}
 
 
-	public void initializeServerResponse(final InterfaceTypes interfaceType, final OperationTypes operationType, final ResponseCode responseCode, final Set<WebLink> objectsAndInstances){
+	public void initializeServerResponse(final InterfaceTypes interfaceType, final OperationTypes operationType, final ResponseCode responseCode, final String objectsAndInstances){
 		tearDownEndpointStops = 1;
+
+		if(objectsAndInstances != null){
+			Mockito.when(client.getObjectLinks()).thenReturn(LinkFormatParser.parse(objectsAndInstances.getBytes()));
+		}
 		
 		doAnswer(new Answer<Void>() {
 
@@ -96,7 +105,7 @@ public class UpdateUplinkTest {
 			}
 		}).when(endpoint).sendRequest(any(Request.class));
 
-		uplink = new RegisterUplink(serverAddress, endpoint, downlink, objectsAndInstances);
+		uplink = new RegisterUplink(serverAddress, endpoint, downlink, client);
 	}
 
 	private void verifySuccessfulSyncUpdate(final String expectedRequest, final String validQuery,
@@ -139,11 +148,11 @@ public class UpdateUplinkTest {
 
 		expectedRequestLocation ="coap://localhost/?" + validQuery;
 
-		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.CHANGED, LinkFormat.parse(VALID_REQUEST_PAYLOAD));
+		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.CHANGED, VALID_REQUEST_PAYLOAD);
 
-		final OperationResponse response = uplink.update(ENDPOINT_LOCATION, validMap, null, SYNC_TIMEOUT_MS);
+		final OperationResponse response = uplink.update(ENDPOINT_LOCATION, validMap, SYNC_TIMEOUT_MS);
 
-		verifySuccessfulSyncUpdate(expectedRequestLocation, validQuery, null, response, ResponseCode.CHANGED);
+		verifySuccessfulSyncUpdate(expectedRequestLocation, validQuery, VALID_REQUEST_PAYLOAD, response, ResponseCode.CHANGED);
 	}
 
 	@Test
@@ -153,34 +162,34 @@ public class UpdateUplinkTest {
 
 		expectedRequestLocation ="coap://localhost/?" + validQuery;
 
-		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.CHANGED, LinkFormat.parse(VALID_REQUEST_PAYLOAD));
+		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.CHANGED, VALID_REQUEST_PAYLOAD);
 
-		final OperationResponse response = uplink.update(ENDPOINT_LOCATION, validMap, LinkFormat.parse(VALID_REQUEST_PAYLOAD), SYNC_TIMEOUT_MS);
+		final OperationResponse response = uplink.update(ENDPOINT_LOCATION, validMap, SYNC_TIMEOUT_MS);
 
 		verifySuccessfulSyncUpdate(expectedRequestLocation, validQuery, VALID_REQUEST_PAYLOAD, response, ResponseCode.CHANGED);
 	}
 
 	@Test
 	public void testBadParametersSyncUpdate() {
-		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.BAD_REQUEST, LinkFormat.parse(VALID_REQUEST_PAYLOAD));
+		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.BAD_REQUEST, VALID_REQUEST_PAYLOAD);
 
 		final Map<String, String> invalidSmsMap = new HashMap<String, String>();
 		invalidSmsMap.put("sms", UUID.randomUUID().toString());
 		final String validQuery = leshan.client.lwm2m.request.Request.toQueryStringMap(invalidSmsMap);
 
-		final OperationResponse response = uplink.update(ENDPOINT_LOCATION, invalidSmsMap, null, SYNC_TIMEOUT_MS);
+		final OperationResponse response = uplink.update(ENDPOINT_LOCATION, invalidSmsMap, SYNC_TIMEOUT_MS);
 
 		verifyUnsuccessfulUpdate(expectedRequestLocation, validQuery, response, ResponseCode.BAD_REQUEST);
 	}
 
 	@Test
 	public void testNoParametersSyncUpdate() {
-		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.BAD_REQUEST, LinkFormat.parse(VALID_REQUEST_PAYLOAD));
+		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.BAD_REQUEST, VALID_REQUEST_PAYLOAD);
 
 		final Map<String, String> emptyMap = new HashMap<String, String>();
 		final String validQuery = leshan.client.lwm2m.request.Request.toQueryStringMap(emptyMap);
 
-		final OperationResponse response = uplink.update(ENDPOINT_LOCATION, emptyMap, null, SYNC_TIMEOUT_MS);
+		final OperationResponse response = uplink.update(ENDPOINT_LOCATION, emptyMap, SYNC_TIMEOUT_MS);
 
 		verifyUnsuccessfulUpdate(expectedRequestLocation, validQuery, response, ResponseCode.BAD_REQUEST);
 	}
@@ -192,10 +201,10 @@ public class UpdateUplinkTest {
 		
 		expectedRequestLocation ="coap://localhost/?" + validQuery;
 
-		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.CHANGED, LinkFormat.parse(VALID_REQUEST_PAYLOAD));
+		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.CHANGED, VALID_REQUEST_PAYLOAD);
 
 
-		uplink.update(ENDPOINT_LOCATION, validMap, LinkFormat.parse(VALID_REQUEST_PAYLOAD), callback);
+		uplink.update(ENDPOINT_LOCATION, validMap, callback);
 
 		await().untilTrue(callback.isCalled());
 

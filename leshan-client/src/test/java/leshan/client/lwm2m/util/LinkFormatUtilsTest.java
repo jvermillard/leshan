@@ -4,6 +4,9 @@ import static org.junit.Assert.*;
 
 import java.util.Set;
 
+import leshan.server.lwm2m.client.LinkObject;
+import leshan.server.lwm2m.linkformat.LinkFormatParser;
+
 import org.junit.Test;
 
 import ch.ethz.inf.vs.californium.WebLink;
@@ -26,22 +29,22 @@ public class LinkFormatUtilsTest {
 	
 	@Test
 	public void testInvalid(){
-		final Set<WebLink> links = generateLinksFromPayload(INVALID_REQUEST_PAYLOAD);
+		final LinkObject[] links = generateLinksFromPayload(INVALID_REQUEST_PAYLOAD);
 		final String actualPayload = LinkFormatUtils.payloadize(links);
 		
 		assertEquals(LinkFormatUtils.INVALID_LINK_PAYLOAD, actualPayload);
 	}
 
 	private void validateExpectedPayload(final String expectedPayload) {
-		final Set<WebLink> links = generateLinksFromPayload(expectedPayload);
+		final LinkObject[] links = generateLinksFromPayload(expectedPayload);
 		final String actualPayload = LinkFormatUtils.payloadize(links);
 		
 		assertEquals(expectedPayload, actualPayload);
 	}
 	
 
-	private Set<WebLink> generateLinksFromPayload(final String payload) {
-		return LinkFormat.parse(payload);
+	private LinkObject[] generateLinksFromPayload(final String payload) {
+		return LinkFormatParser.parse(payload.getBytes());
 	}
 
 }

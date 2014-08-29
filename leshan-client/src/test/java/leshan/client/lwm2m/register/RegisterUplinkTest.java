@@ -15,17 +15,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.InterfaceTypes;
 import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.OperationTypes;
 import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.util.ResponseCallback;
+import leshan.server.lwm2m.linkformat.LinkFormatParser;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
@@ -57,11 +60,13 @@ public class RegisterUplinkTest {
 	private CoAPEndpoint endpoint;
 	@Mock
 	private ManageDownlink downlink;
+	@Mock
+	private LwM2mClient client;
 
 	private String expectedRequestRoot;
 	private Map<String, String> validMap;
 	private OperationResponse operationResponse;
-	private final String VALID_REQUEST_PAYLOAD = "</lwm2m>;rt=\"oma.lwm2m\", </lwm2m/1/101>, </lwm2m/1/102>, </lwm2m/2/0>, </lwm2m/2/1>, </lwm2m/2/2>, </lwm2m/3/0>, </lwm2m/4/0>, </lwm2m/5>";
+	private final String VALID_REQUEST_PAYLOAD = "</lwm2m>, </lwm2m/1/101>, </lwm2m/1/102>, </lwm2m/2/0>, </lwm2m/2/1>, </lwm2m/2/2>, </lwm2m/3/0>, </lwm2m/4/0>, </lwm2m/5>";
 	private final String INVALID_REQUEST_PAYLOAD = "";
 	private Object actualRequestPayload;
 	private InetSocketAddress serverAddress;
@@ -78,6 +83,7 @@ public class RegisterUplinkTest {
 		validMap.put("lt", "1000000");
 		validMap.put("lwm2m", "1.1");
 		validMap.put("b", "U");
+		
 
 	}
 
@@ -88,8 +94,12 @@ public class RegisterUplinkTest {
 		verify(endpoint, times(tearDownEndpointStops)).stop();
 	}
 
-	private void initializeServerResponse(final InterfaceTypes interfaceType, final OperationTypes operationType, final ResponseCode responseCode, final Set<WebLink> objectsAndInstances) {
+	private void initializeServerResponse(final InterfaceTypes interfaceType, final OperationTypes operationType, final ResponseCode responseCode, final String objectsAndInstances) {
 		tearDownEndpointStops = 1;
+		
+		if(objectsAndInstances != null){
+			Mockito.when(client.getObjectLinks()).thenReturn(LinkFormatParser.parse(objectsAndInstances.getBytes()));
+		}
 
 		doAnswer(new Answer<Void>(){
 
@@ -109,7 +119,7 @@ public class RegisterUplinkTest {
 			}
 		}).when(endpoint).sendRequest(any(Request.class));
 
-		uplink = new RegisterUplink(serverAddress, endpoint, downlink, objectsAndInstances);
+		uplink = new RegisterUplink(serverAddress, endpoint, downlink, client);
 	}
 
 	private void sendRegisterAndGetAsyncResponse(final RegisterUplink uplink, final String payload) {
@@ -117,7 +127,7 @@ public class RegisterUplinkTest {
 	}
 
 	private void sendRegisterAndGetAsyncResponse(final RegisterUplink uplink, final Map<String, String> parameters, final String payload) {
-		uplink.register(ENDPOINT_NAME, parameters,  LinkFormat.parse(payload), callback);
+		uplink.register(ENDPOINT_NAME, parameters, callback);
 
 		await().untilTrue(callback.isCalled());
 		if(callback.isSuccess()){
@@ -144,7 +154,7 @@ public class RegisterUplinkTest {
 
 	@Test
 	public void testAsyncGoodRegistration() {
-		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED, LinkFormat.parse(VALID_REQUEST_PAYLOAD));
+		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED, VALID_REQUEST_PAYLOAD);
 
 		sendRegisterAndGetAsyncResponse(uplink, VALID_REQUEST_PAYLOAD);
 
@@ -155,7 +165,7 @@ public class RegisterUplinkTest {
 
 	@Test
 	public void testAsyncBadRegistration() {
-		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.BAD_REQUEST, LinkFormat.parse(VALID_REQUEST_PAYLOAD));
+		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.BAD_REQUEST, VALID_REQUEST_PAYLOAD);
 
 		sendRegisterAndGetAsyncResponse(uplink, VALID_REQUEST_PAYLOAD);
 
@@ -165,7 +175,7 @@ public class RegisterUplinkTest {
 
 	@Test
 	public void testSyncGoodRegistration(){
-		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED, LinkFormat.parse(VALID_REQUEST_PAYLOAD));
+		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED, VALID_REQUEST_PAYLOAD);
 
 		sendRegisterAndGetSyncResponse(uplink, VALID_REQUEST_PAYLOAD);
 
@@ -175,7 +185,7 @@ public class RegisterUplinkTest {
 
 	@Test
 	public void testSyncBadRegistration() {
-		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.BAD_REQUEST, LinkFormat.parse(VALID_REQUEST_PAYLOAD));
+		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.BAD_REQUEST, VALID_REQUEST_PAYLOAD);
 
 		sendRegisterAndGetSyncResponse(uplink, VALID_REQUEST_PAYLOAD);
 
@@ -185,7 +195,7 @@ public class RegisterUplinkTest {
 
 	@Test
 	public void testSyncBadNullParametersRegistration(){
-		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED, LinkFormat.parse(INVALID_REQUEST_PAYLOAD));
+		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED, INVALID_REQUEST_PAYLOAD);
 
 		sendRegisterAndGetSyncResponse(uplink, null, INVALID_REQUEST_PAYLOAD);
 
@@ -199,7 +209,7 @@ public class RegisterUplinkTest {
 		final Map<String, String> invalidSmsMap = new HashMap<String, String>();
 		invalidSmsMap.put("sms", UUID.randomUUID().toString());
 
-		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED, LinkFormat.parse(INVALID_REQUEST_PAYLOAD));
+		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED, INVALID_REQUEST_PAYLOAD);
 
 		sendRegisterAndGetSyncResponse(uplink, invalidSmsMap, INVALID_REQUEST_PAYLOAD);
 
@@ -213,7 +223,7 @@ public class RegisterUplinkTest {
 		final Map<String, String> invalidSmsMap = new HashMap<String, String>();
 		invalidSmsMap.put("b", "US");
 
-		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED, LinkFormat.parse(INVALID_REQUEST_PAYLOAD));
+		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED, INVALID_REQUEST_PAYLOAD);
 
 		sendRegisterAndGetSyncResponse(uplink, invalidSmsMap, INVALID_REQUEST_PAYLOAD);
 
@@ -227,7 +237,7 @@ public class RegisterUplinkTest {
 		final HashMap<String, String> invalidQueueMap = new HashMap<String, String>();
 		invalidQueueMap.put("b", "UQ");
 
-		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED, LinkFormat.parse(INVALID_REQUEST_PAYLOAD));
+		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED, INVALID_REQUEST_PAYLOAD);
 
 		sendRegisterAndGetSyncResponse(uplink, invalidQueueMap, INVALID_REQUEST_PAYLOAD);
 
@@ -242,7 +252,7 @@ public class RegisterUplinkTest {
 		invalidIllegalMap.put("b", "X");
 		invalidIllegalMap.put("InvalidKey", "Lulz");
 
-		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED, LinkFormat.parse(INVALID_REQUEST_PAYLOAD));
+		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED, INVALID_REQUEST_PAYLOAD);
 
 		sendRegisterAndGetSyncResponse(uplink, invalidIllegalMap, INVALID_REQUEST_PAYLOAD);
 
@@ -253,7 +263,7 @@ public class RegisterUplinkTest {
 
 	@Test
 	public void testSyncGoodAllParametersSyncRegistration(){
-		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED, LinkFormat.parse(VALID_REQUEST_PAYLOAD));
+		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED, VALID_REQUEST_PAYLOAD);
 
 		final String validQuery = leshan.client.lwm2m.request.Request.toQueryStringMap(validMap);
 
@@ -265,7 +275,7 @@ public class RegisterUplinkTest {
 
 	@Test
 	public void testAsyncGoodParametersRegistration() {
-		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED, LinkFormat.parse(VALID_REQUEST_PAYLOAD));
+		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED, VALID_REQUEST_PAYLOAD);
 		
 		final String validQuery = leshan.client.lwm2m.request.Request.toQueryStringMap(validMap);
 
@@ -281,7 +291,7 @@ public class RegisterUplinkTest {
 		invalidIllegalMap.put("b", "X");
 		invalidIllegalMap.put("InvalidKey", "Lulz");
 
-		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED, LinkFormat.parse(VALID_REQUEST_PAYLOAD));
+		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED, VALID_REQUEST_PAYLOAD);
 
 		sendRegisterAndGetAsyncResponse(uplink, invalidIllegalMap, VALID_REQUEST_PAYLOAD);
 
@@ -292,7 +302,7 @@ public class RegisterUplinkTest {
 
 	@Test
 	public void testSyncGoodPayloadRegistration(){
-		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED, LinkFormat.parse(VALID_REQUEST_PAYLOAD));
+		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED, VALID_REQUEST_PAYLOAD);
 
 		final String validQuery = leshan.client.lwm2m.request.Request.toQueryStringMap(validMap);
 
@@ -309,7 +319,7 @@ public class RegisterUplinkTest {
 
 	@Test
 	public void testSyncBadPayloadRegistration(){
-		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED, LinkFormat.parse(INVALID_REQUEST_PAYLOAD));
+		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.REGISTER, ResponseCode.CHANGED, INVALID_REQUEST_PAYLOAD);
 
 		sendRegisterAndGetSyncResponse(uplink, validMap, INVALID_REQUEST_PAYLOAD);
 
