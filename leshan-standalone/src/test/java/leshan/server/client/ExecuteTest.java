@@ -30,9 +30,6 @@ public class ExecuteTest extends LwM2mClientServerIntegrationTest {
 		return new LwM2mClient(objectOne, objectTwo);
 	}
 
-	// TODO: This test tests something that is untestable by the LWM2M spec and should
-	// probably be deleted. Ignored until this is confirmed
-	@Ignore
 	@Test
 	public void canNotExecuteWriteOnlyResource() {
 		register();
@@ -42,7 +39,7 @@ public class ExecuteTest extends LwM2mClientServerIntegrationTest {
 		final ClientResponse response = ExecRequest.newRequest(getClient(), GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID,
 				"world", ContentFormat.TEXT).send(server.getRequestHandler());
 
-		assertResponse(response, ResponseCode.METHOD_NOT_ALLOWED, new byte[0]);
+		assertEmptyResponse(response, ResponseCode.METHOD_NOT_ALLOWED);
 	}
 
 	@Test
