@@ -1,3 +1,8 @@
+/*!
+ * Copyright (c) 2013-2014, Sierra Wireless
+ * Released under the BSD license
+ */
+
 var myModule = angular.module('lwResourcesServices', []);
 
 myModule.factory('lwResources', function() {

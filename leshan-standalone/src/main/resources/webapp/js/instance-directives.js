@@ -1,3 +1,8 @@
+/*!
+ * Copyright (c) 2013-2014, Sierra Wireless
+ * Released under the BSD license
+ */
+
 angular.module('instanceDirectives', [])
 
 .directive('instance', function ($compile, $routeParams, $http, dialog,$filter, lwResources, $modal) {

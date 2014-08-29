@@ -1,3 +1,8 @@
+/*!
+ * Copyright (c) 2013-2014, Sierra Wireless
+ * Released under the BSD license
+ */
+
 angular.module('objectDirectives', [])
 
 .directive('object', function ($compile, $routeParams, $http, dialog,$filter,$modal,lwResources) {
