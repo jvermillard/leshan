@@ -40,9 +40,7 @@ angular.module('modalInstanceControllers', [])
         // Define button function 
         $scope.submit = function() {
             $scope.$broadcast('show-errors-check-validity');
-            console.log("submit")
             if ($scope.form.$valid){
-                console.log("valid")
                 $modalInstance.close($scope.instance);
             }
         };
