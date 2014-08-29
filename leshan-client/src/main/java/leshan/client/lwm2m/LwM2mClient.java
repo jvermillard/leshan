@@ -69,7 +69,7 @@ public class LwM2mClient {
 		return new RegisterUplink(destination, endpoint, downlink, this);
 	}
 	
-	public LinkObject[] getObjectLinks(final Integer...ids){
+	public LinkObject[] getObjectModel(final Integer...ids){
 		if(ids.length > 3){
 			throw new IllegalArgumentException("An Object Model Only Goes 3 levels deep:  Object ID/ObjectInstance ID/Resource ID");
 		}

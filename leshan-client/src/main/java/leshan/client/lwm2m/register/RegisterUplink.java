@@ -39,7 +39,7 @@ public class RegisterUplink extends Uplink{
 			return OperationResponse.failure(ResponseCode.BAD_REQUEST, MESSAGE_BAD_PARAMETERS);
 		}
 
-		final String payload = LinkFormatUtils.payloadize(client.getObjectLinks());
+		final String payload = LinkFormatUtils.payloadize(client.getObjectModel());
 		if(payload == null || payload.equals("<>")){
 			return OperationResponse.failure(ResponseCode.BAD_REQUEST, MESSAGE_BAD_OBJECTS);
 		}
@@ -56,7 +56,7 @@ public class RegisterUplink extends Uplink{
 			return;
 		}
 
-		final String payload = LinkFormatUtils.payloadize(client.getObjectLinks());
+		final String payload = LinkFormatUtils.payloadize(client.getObjectModel());
 		if(payload == null || payload.equals("<>")){
 			callback.onFailure(OperationResponse.failure(ResponseCode.BAD_REQUEST, MESSAGE_BAD_OBJECTS));
 			return;
@@ -80,7 +80,7 @@ public class RegisterUplink extends Uplink{
 			return;
 		}
 
-		final String payload = LinkFormatUtils.payloadize(client.getObjectLinks());
+		final String payload = LinkFormatUtils.payloadize(client.getObjectModel());
 
 		final Request request = createUpdateRequest(endpointLocation, parameters);
 		if(!payload.equals("<>")){
@@ -95,7 +95,7 @@ public class RegisterUplink extends Uplink{
 			return OperationResponse.failure(ResponseCode.BAD_REQUEST, MESSAGE_BAD_PARAMETERS);
 		}
 		
-		final String payload = LinkFormatUtils.payloadize(client.getObjectLinks());
+		final String payload = LinkFormatUtils.payloadize(client.getObjectModel());
 
 		final Request request = createUpdateRequest(endpointLocation, parameters);
 		if(!payload.equals("<>")){

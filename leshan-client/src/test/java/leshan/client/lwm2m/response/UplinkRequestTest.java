@@ -71,7 +71,7 @@ public class UplinkRequestTest {
 		when(Request.newPut()).thenReturn(request);
 		when(Request.newDelete()).thenReturn(request);
 		
-		when(client.getObjectLinks()).thenReturn(LinkFormatParser.parse(VALID_REQUEST_PAYLOAD.getBytes()));
+		when(client.getObjectModel()).thenReturn(LinkFormatParser.parse(VALID_REQUEST_PAYLOAD.getBytes()));
 
 		doAnswer(new Answer<Void>(){
 

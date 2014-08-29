@@ -98,7 +98,7 @@ public class RegisterUplinkTest {
 		tearDownEndpointStops = 1;
 		
 		if(objectsAndInstances != null){
-			Mockito.when(client.getObjectLinks()).thenReturn(LinkFormatParser.parse(objectsAndInstances.getBytes()));
+			Mockito.when(client.getObjectModel()).thenReturn(LinkFormatParser.parse(objectsAndInstances.getBytes()));
 		}
 
 		doAnswer(new Answer<Void>(){

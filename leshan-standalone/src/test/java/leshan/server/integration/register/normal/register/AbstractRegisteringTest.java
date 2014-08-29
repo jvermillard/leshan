@@ -117,7 +117,7 @@ public class AbstractRegisteringTest {
 				assertEquals("1.0", clientParameters.get("lwM2MmVersion"));
 				assertEquals(lifetime.doubleValue(), Double.parseDouble(clientParameters.get("lifetime").toString()), 0.001);
 
-				final String actualCurrentLinkObjects = LinkFormatUtils.payloadize(client.getObjectLinks());
+				final String actualCurrentLinkObjects = LinkFormatUtils.payloadize(client.getObjectModel());
 				final Collection<LinkedTreeMap> links = (Collection<LinkedTreeMap>) clientParameters.get("objectLinks");
 				for (final LinkedTreeMap link : links) {
 					assertTrue(actualCurrentLinkObjects.contains(link.get("url").toString()));

@@ -34,7 +34,7 @@ public class DiscoverTest extends LwM2mClientServerIntegrationTest {
 		register();
 		
 		final ClientResponse response = sendDiscover(GOOD_OBJECT_ID);
-		assertLinkFormatResponse(response, ResponseCode.CONTENT, client.getObjectLinks(GOOD_OBJECT_ID));
+		assertLinkFormatResponse(response, ResponseCode.CONTENT, client.getObjectModel(GOOD_OBJECT_ID));
 	}
 	
 	@Test(expected=IllegalArgumentException.class)
@@ -42,7 +42,7 @@ public class DiscoverTest extends LwM2mClientServerIntegrationTest {
 		register();
 		
 		final ClientResponse response = sendDiscover(GOOD_OBJECT_ID);
-		assertLinkFormatResponse(response, ResponseCode.CONTENT, client.getObjectLinks(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, FIRST_RESOURCE_ID, SECOND_RESOURCE_ID));
+		assertLinkFormatResponse(response, ResponseCode.CONTENT, client.getObjectModel(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, FIRST_RESOURCE_ID, SECOND_RESOURCE_ID));
 	}
 	
 	@Test
@@ -51,7 +51,7 @@ public class DiscoverTest extends LwM2mClientServerIntegrationTest {
 		
 		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 		
-		assertLinkFormatResponse(sendDiscover(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.CONTENT, client.getObjectLinks(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID));
+		assertLinkFormatResponse(sendDiscover(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.CONTENT, client.getObjectModel(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID));
 	}
 	
 	@Test
@@ -60,7 +60,7 @@ public class DiscoverTest extends LwM2mClientServerIntegrationTest {
 		
 		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 		
-		assertLinkFormatResponse(sendDiscover(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, FIRST_RESOURCE_ID), ResponseCode.CONTENT, client.getObjectLinks(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, FIRST_RESOURCE_ID));
+		assertLinkFormatResponse(sendDiscover(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, FIRST_RESOURCE_ID), ResponseCode.CONTENT, client.getObjectModel(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, FIRST_RESOURCE_ID));
 	}
 	
 	@Test
