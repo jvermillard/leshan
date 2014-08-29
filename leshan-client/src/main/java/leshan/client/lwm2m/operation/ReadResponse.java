@@ -8,8 +8,12 @@ public abstract class ReadResponse {
 	}
 
 
+	public static ReadResponse success(final ResponseCode code, final byte[] readValue) {
+		return new SuccessResponse(code, readValue);
+	}
+	
 	public static ReadResponse success(final byte[] readValue) {
-		return new SuccessResponse(readValue);
+		return new SuccessResponse(ResponseCode.CONTENT, readValue);
 	}
 
 	public static ReadResponse failure() {
@@ -23,14 +27,16 @@ public abstract class ReadResponse {
 	private static class SuccessResponse extends ReadResponse {
 
 		private final byte[] value;
+		private final ResponseCode code;
 
-		public SuccessResponse(final byte[] readValue) {
+		public SuccessResponse(final ResponseCode code, final byte[] readValue) {
+			this.code = code;
 			this.value = readValue;
 		}
 
 		@Override
 		public ResponseCode getCode() {
-			return ResponseCode.CONTENT;
+			return code;
 		}
 		
 		@Override

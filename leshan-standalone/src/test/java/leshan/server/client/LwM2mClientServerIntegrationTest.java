@@ -18,6 +18,7 @@ import leshan.client.lwm2m.operation.Readable;
 import leshan.client.lwm2m.operation.Writable;
 import leshan.client.lwm2m.operation.WriteResponse;
 import leshan.client.lwm2m.register.RegisterUplink;
+import leshan.client.lwm2m.resource.Notifier;
 import leshan.server.lwm2m.LwM2mServer;
 import leshan.server.lwm2m.bootstrap.BootstrapStoreImpl;
 import leshan.server.lwm2m.client.Client;
@@ -26,10 +27,12 @@ import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.CreateRequest;
 import leshan.server.lwm2m.message.DeleteRequest;
 import leshan.server.lwm2m.message.DiscoverRequest;
+import leshan.server.lwm2m.message.ObserveRequest;
 import leshan.server.lwm2m.message.ReadRequest;
 import leshan.server.lwm2m.message.ResponseCode;
 import leshan.server.lwm2m.observation.ObservationRegistry;
 import leshan.server.lwm2m.observation.ObservationRegistryImpl;
+import leshan.server.lwm2m.observation.ResourceObserver;
 import leshan.server.lwm2m.security.SecurityRegistry;
 import leshan.server.lwm2m.tlv.Tlv;
 import leshan.server.lwm2m.tlv.TlvType;
@@ -143,6 +146,24 @@ public abstract class LwM2mClientServerIntegrationTest {
 				.newRequest(getClient(), objectID, objectInstanceID, resourceID)
 				.send(server.getRequestHandler());
 	}
+	
+	protected ClientResponse sendObserve(final int objectID, final ResourceObserver observer) {
+		return ObserveRequest 
+				.newRequest(getClient(), observer, objectID)
+				.send(server.getRequestHandler());
+	}
+
+	protected ClientResponse sendObserve(final int objectID, final int objectInstanceID, final ResourceObserver observer) {
+		return ObserveRequest 
+				.newRequest(getClient(), observer, objectID, objectInstanceID)
+				.send(server.getRequestHandler());
+	}
+
+	protected ClientResponse sendObserve(final int objectID, final int objectInstanceID, final int resourceID, final ResourceObserver observer) {
+		return ObserveRequest
+				.newRequest(getClient(), observer, objectID, objectInstanceID, resourceID)
+				.send(server.getRequestHandler());
+	}
 
 	protected ClientResponse sendDiscover(final int objectID) {
 		return DiscoverRequest
@@ -198,17 +219,32 @@ public abstract class LwM2mClientServerIntegrationTest {
 	public class ReadableWritable implements Readable, Writable{
 
 		private String value;
+		private Notifier notifier;
 
 		@Override
 		public WriteResponse write(final int objectId, final int objectInstanceId, final int resourceId,
 				final byte[] valueToWrite) {
-			value = new String(valueToWrite);
+			setValue(new String(valueToWrite));
+			
 			return WriteResponse.success();
 		}
 
 		@Override
 		public ReadResponse read() {
-			return ReadResponse.success(value.getBytes());
+			final ReadResponse response = ReadResponse.success(value.getBytes());
+			return response;
+		}
+
+		public void setValue(final String newValue) {
+			value = newValue;
+			if(notifier != null){
+				notifier.notify(ReadResponse.success(value.getBytes()));
+			}
+		}
+
+		@Override
+		public void observe(final Notifier notifier) {
+			this.notifier = notifier;
 		}
 
 	}
@@ -230,6 +266,11 @@ public abstract class LwM2mClientServerIntegrationTest {
 		@Override
 		public ReadResponse read() {
 			return ReadResponse.success(value.getBytes());
+		}
+
+		@Override
+		public void observe(final Notifier notifier) {
+			notifier.notify(ReadResponse.success(value.getBytes()));
 		}
 
 	}
