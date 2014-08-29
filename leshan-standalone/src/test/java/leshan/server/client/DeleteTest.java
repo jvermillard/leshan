@@ -41,6 +41,14 @@ public class DeleteTest extends LwM2mClientServerIntegrationTest {
 
 		assertEmptyResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.NOT_FOUND);
 	}
+	
+	@Test
+	public void cantDeleteUnknownObjectInstance(){
+		register();
+
+		final ClientResponse responseDelete = sendDelete(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID);
+		assertEmptyResponse(responseDelete, ResponseCode.NOT_FOUND);
+	}
 
 	@Test
 	public void cantDeleteObject(){
