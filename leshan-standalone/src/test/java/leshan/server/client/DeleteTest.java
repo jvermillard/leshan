@@ -10,7 +10,6 @@ import leshan.client.lwm2m.resource.ClientObject;
 import leshan.client.lwm2m.resource.SingleResourceDefinition;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ResponseCode;
-import leshan.server.lwm2m.tlv.TlvEncoder;
 
 public class DeleteTest extends LwM2mClientServerIntegrationTest {
 

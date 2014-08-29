@@ -2,15 +2,10 @@ package leshan.client.lwm2m.util;
 
 import static org.junit.Assert.*;
 
-import java.util.Set;
-
 import leshan.server.lwm2m.client.LinkObject;
 import leshan.server.lwm2m.linkformat.LinkFormatParser;
 
 import org.junit.Test;
-
-import ch.ethz.inf.vs.californium.WebLink;
-import ch.ethz.inf.vs.californium.coap.LinkFormat;
 
 public class LinkFormatUtilsTest {
 	private final String VALID_REQUEST_PAYLOAD = "</lwm2m>;rt=\"oma.lwm2m\", </lwm2m/1/101>, </lwm2m/1/102>, </lwm2m/2/0>, </lwm2m/2/1>, </lwm2m/2/2>, </lwm2m/3/0>, </lwm2m/4/0>, </lwm2m/5>";

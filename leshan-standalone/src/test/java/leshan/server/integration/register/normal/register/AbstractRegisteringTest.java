@@ -8,17 +8,14 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
 import leshan.client.lwm2m.LwM2mClient;
-import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.operation.Executable;
 import leshan.client.lwm2m.operation.Readable;
 import leshan.client.lwm2m.operation.Writable;
@@ -30,16 +27,10 @@ import leshan.client.lwm2m.util.LinkFormatUtils;
 import leshan.client.lwm2m.util.ResponseCallback;
 import leshan.server.LeshanMain;
 import leshan.server.clienttest.TestUtils;
-import leshan.server.lwm2m.client.LinkObject;
-
 import org.junit.After;
 import org.junit.Before;
-import org.mockito.Mock;
-
 import ch.ethz.inf.vs.californium.WebLink;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
-import ch.ethz.inf.vs.californium.coap.LinkFormat;
-
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 
@@ -52,9 +43,6 @@ public class AbstractRegisteringTest {
 	protected Map<String, String> clientParameters;
 	protected Set<WebLink> objectsAndInstances;
 	protected int clientPort;
-
-	@Mock
-	protected ManageDownlink downlink;
 
 	protected ResponseCallback callback;
 	protected RegisterUplink registerUplink;
@@ -81,7 +69,7 @@ public class AbstractRegisteringTest {
 		final ClientObject objectTwo = new ClientObject(2000,
 				new SingleResourceDefinition(1, Readable.NOT_READABLE, Writable.NOT_WRITABLE, Executable.NOT_EXECUTABLE));
 		client = new LwM2mClient(objectOne, objectTwo);
-		registerUplink = client.startRegistration(clientPort, serverAddress, downlink);
+		registerUplink = client.startRegistration(clientPort, serverAddress);
 	}
 
 	@After

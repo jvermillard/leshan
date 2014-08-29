@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 
 import leshan.client.lwm2m.LwM2mClient;
-import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.operation.Executable;
 import leshan.client.lwm2m.operation.ExecuteResponse;
 import leshan.client.lwm2m.operation.ReadResponse;
@@ -38,6 +37,7 @@ import leshan.server.lwm2m.tlv.TlvType;
 
 import org.junit.After;
 import org.junit.Before;
+import org.mockito.Matchers;
 import org.mockito.Mockito;
 
 import ch.ethz.inf.vs.californium.WebLink;
@@ -89,7 +89,7 @@ public abstract class LwM2mClientServerIntegrationTest {
 		server.start();
 
 		executableAlwaysSuccessful = mock(Executable.class);
-		when(executableAlwaysSuccessful.execute(Mockito.anyInt(), Mockito.anyInt(), Mockito.anyInt())).thenReturn(ExecuteResponse.success());
+		when(executableAlwaysSuccessful.execute(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyInt())).thenReturn(ExecuteResponse.success());
 
 		firstReadableWritable = new ReadableWritable();
 		secondReadableWritable = new ReadableWritable();
@@ -106,13 +106,11 @@ public abstract class LwM2mClientServerIntegrationTest {
 	}
 
 	protected RegisterUplink registerAndGetUplink() {
-		final ManageDownlink downlink = mock(ManageDownlink.class);
 		final Response goodRawResponse = new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT);
 		goodRawResponse.setPayload(GOOD_PAYLOAD);
 		final OperationResponse goodResponse = OperationResponse.of(goodRawResponse);
-		when(downlink.read(Mockito.anyInt())).thenReturn(goodResponse);
 
-		final RegisterUplink registerUplink = client.startRegistration(CLIENT_PORT, serverAddress, downlink);
+		final RegisterUplink registerUplink = client.startRegistration(CLIENT_PORT, serverAddress);
 		return registerUplink;
 	}
 

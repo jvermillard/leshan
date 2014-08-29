@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import leshan.client.lwm2m.LwM2mClient;
-import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.util.ResponseCallback;
 import leshan.server.lwm2m.linkformat.LinkFormatParser;
@@ -17,7 +16,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
@@ -27,7 +25,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
-import ch.ethz.inf.vs.californium.coap.LinkFormat;
 import ch.ethz.inf.vs.californium.coap.Request;
 import ch.ethz.inf.vs.californium.coap.Response;
 import ch.ethz.inf.vs.californium.coap.CoAP.Code;
@@ -52,8 +49,6 @@ public class UplinkRequestTest {
 	private CoAPEndpoint endpoint;
 	@Mock
 	private Request request;
-	@Mock
-	private ManageDownlink downlink;
 	@Mock
 	private Response response;
 	@Mock
@@ -91,7 +86,7 @@ public class UplinkRequestTest {
 			}
 		}).when(endpoint).sendRequest(any(Request.class));
 
-		uplink = new RegisterUplink(serverAddress, endpoint, downlink, client);
+		uplink = new RegisterUplink(serverAddress, endpoint, client);
 	}
 	
 	@Test

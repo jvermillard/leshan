@@ -12,13 +12,11 @@ import static org.mockito.Mockito.verify;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.InterfaceTypes;
 import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.OperationTypes;
-import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.util.ResponseCallback;
 import leshan.server.lwm2m.linkformat.LinkFormatParser;
@@ -33,10 +31,8 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
-import ch.ethz.inf.vs.californium.WebLink;
 import ch.ethz.inf.vs.californium.coap.CoAP.Code;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
-import ch.ethz.inf.vs.californium.coap.LinkFormat;
 import ch.ethz.inf.vs.californium.coap.Request;
 import ch.ethz.inf.vs.californium.coap.Response;
 import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
@@ -58,8 +54,6 @@ public class RegisterUplinkTest {
 
 	@Mock
 	private CoAPEndpoint endpoint;
-	@Mock
-	private ManageDownlink downlink;
 	@Mock
 	private LwM2mClient client;
 
@@ -119,7 +113,7 @@ public class RegisterUplinkTest {
 			}
 		}).when(endpoint).sendRequest(any(Request.class));
 
-		uplink = new RegisterUplink(serverAddress, endpoint, downlink, client);
+		uplink = new RegisterUplink(serverAddress, endpoint, client);
 	}
 
 	private void sendRegisterAndGetAsyncResponse(final RegisterUplink uplink, final String payload) {

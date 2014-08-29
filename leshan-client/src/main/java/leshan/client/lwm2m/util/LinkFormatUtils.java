@@ -2,12 +2,8 @@ package leshan.client.lwm2m.util;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import leshan.server.lwm2m.client.LinkObject;
-import ch.ethz.inf.vs.californium.WebLink;
 import ch.ethz.inf.vs.californium.coap.LinkFormat;
-import ch.ethz.inf.vs.californium.server.resources.ResourceAttributes;
 
 public class LinkFormatUtils {
 	public static final String INVALID_LINK_PAYLOAD = "<>";

@@ -7,9 +7,9 @@ import static org.mockito.Mockito.*;
 import java.net.InetSocketAddress;
 import java.util.UUID;
 
+import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.InterfaceTypes;
 import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.OperationTypes;
-import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.response.OperationResponseCode;
 import leshan.client.lwm2m.util.ResponseCallback;
@@ -38,9 +38,10 @@ public class DeregisterUplinkTest {
 
 	@Mock
 	private CoAPEndpoint endpoint;
-	@Mock
-	private ManageDownlink downlink;
 	
+	@Mock
+	private LwM2mClient client;
+
 	private String actualRequestLocation;
 
 	private RegisterUplink uplink;
@@ -56,8 +57,8 @@ public class DeregisterUplinkTest {
 	public void setUp(){
 		callback = new ResponseCallback();
 		serverAddress = InetSocketAddress.createUnresolved(SERVER_HOST, SERVER_PORT);
-		uplink = new RegisterUplink(serverAddress, endpoint, downlink);
-		
+		uplink = new RegisterUplink(serverAddress, endpoint, client);
+
 		doAnswer(new Answer<Void>() {
 
 			@Override

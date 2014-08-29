@@ -1,21 +1,13 @@
 package leshan.client.lwm2m;
 
 import java.net.InetSocketAddress;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Set;
-import java.util.TreeSet;
-
 import leshan.client.lwm2m.bootstrap.BootstrapDownlink;
 import leshan.client.lwm2m.bootstrap.BootstrapUplink;
-import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.resource.ClientObject;
 import leshan.client.lwm2m.resource.LinkFormattable;
 import leshan.server.lwm2m.client.LinkObject;
 import leshan.server.lwm2m.linkformat.LinkFormatParser;
-import ch.ethz.inf.vs.californium.WebLink;
-import ch.ethz.inf.vs.californium.coap.LinkFormat;
 import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 import ch.ethz.inf.vs.californium.server.Server;
 import ch.ethz.inf.vs.californium.server.resources.Resource;
@@ -23,7 +15,6 @@ import ch.ethz.inf.vs.californium.server.resources.Resource;
 public class LwM2mClient {
 
 	private final Server clientSideServer;
-	ManageDownlink downlink;
 
 	public LwM2mClient(final ClientObject... objs) {
 		this(new Server(), objs);
@@ -59,14 +50,16 @@ public class LwM2mClient {
 		return uplink;
 	}
 
-	public RegisterUplink startRegistration(final int port, final InetSocketAddress destination, final ManageDownlink downlink){
-		final CoAPEndpoint endpoint = new CoAPEndpoint(port);
+	public RegisterUplink startRegistration(final int port, final InetSocketAddress destination){
+		CoAPEndpoint endpoint = (CoAPEndpoint) clientSideServer.getEndpoint(port);
+		if(endpoint == null){
+			endpoint = new CoAPEndpoint(port);
+		}
+		
 		clientSideServer.addEndpoint(endpoint);
 		clientSideServer.start();
 
-		this.downlink = downlink;
-
-		return new RegisterUplink(destination, endpoint, downlink, this);
+		return new RegisterUplink(destination, endpoint, this);
 	}
 	
 	public LinkObject[] getObjectModel(final Integer...ids){

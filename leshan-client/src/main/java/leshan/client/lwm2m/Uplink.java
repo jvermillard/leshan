@@ -21,6 +21,10 @@ public abstract class Uplink {
 	private final InetSocketAddress destination;
 
 	public Uplink(final InetSocketAddress destination, final CoAPEndpoint origin) {
+		if(destination == null || origin == null){
+			throw new IllegalArgumentException("Destination and/or Origin cannot be null.");
+		}
+		
 		this.destination = destination;
 		this.origin = origin;
 	}

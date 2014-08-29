@@ -4,7 +4,6 @@ import java.net.InetSocketAddress;
 
 import leshan.client.lwm2m.bootstrap.BootstrapDownlink;
 import leshan.client.lwm2m.bootstrap.BootstrapUplink;
-import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.operation.Executable;
 import leshan.client.lwm2m.operation.Readable;
 import leshan.client.lwm2m.operation.Writable;
@@ -26,8 +25,6 @@ import ch.ethz.inf.vs.californium.server.resources.ResourceBase;
 public class LwM2mClientTest {
 	@Mock
 	private BootstrapDownlink fakeBootstrapDownlink;
-	@Mock
-	private ManageDownlink fakeRegisterDownlink;
 
 	@Mock
 	private Server server;
@@ -64,16 +61,16 @@ public class LwM2mClientTest {
 		Mockito.when(server.getRoot()).thenReturn(new ResourceBase("basic"));
 		final LwM2mClient client = new LwM2mClient(server, object);
 
-		final RegisterUplink uplink = client.startRegistration(4321, InetSocketAddress.createUnresolved("localhost", 1234), fakeRegisterDownlink);
+		final RegisterUplink uplink = client.startRegistration(4321, InetSocketAddress.createUnresolved("localhost", 1234));
 
 	}
 
 	@Test(expected=IllegalArgumentException.class)
-	public void testIllegalNullRegisterUplinkCreate() {
+	public void testIllegalNullAddressCreate() {
 		final ClientObject object = new ClientObject(1, 
 				new SingleResourceDefinition(0, Readable.NOT_READABLE, Writable.NOT_WRITABLE, Executable.NOT_EXECUTABLE));
 		final LwM2mClient client = new LwM2mClient(object);
-		final RegisterUplink uplink = client.startRegistration(4321, InetSocketAddress.createUnresolved("localhost", 1234), null);
+		final RegisterUplink uplink = client.startRegistration(4321, null);
 	}
 
 }

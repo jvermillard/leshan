@@ -3,16 +3,11 @@ package leshan.client.lwm2m.register;
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
-
 import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.Uplink;
-import leshan.client.lwm2m.manage.ManageDownlink;
 import leshan.client.lwm2m.response.Callback;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.util.LinkFormatUtils;
-import leshan.server.lwm2m.client.LinkObject;
-import ch.ethz.inf.vs.californium.WebLink;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.coap.Request;
 import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
@@ -22,15 +17,13 @@ public class RegisterUplink extends Uplink{
 	private static final String MESSAGE_BAD_OBJECTS = "Objects and Instances Passed Were Not in Valid Link Format.";
 	private static final String MESSAGE_BAD_PARAMETERS = "Either the Parameters are Invalid or the Objects and Instances are Null.";
 	private static final String ENDPOINT = "ep";
-	private final ManageDownlink downlink;
 	private final LwM2mClient client;
 
-	public RegisterUplink(final InetSocketAddress destination, final CoAPEndpoint origin, final ManageDownlink downlink, final LwM2mClient client) {
+	public RegisterUplink(final InetSocketAddress destination, final CoAPEndpoint origin, final LwM2mClient client) {
 		super(destination, origin);
-		if(downlink == null){
-			throw new IllegalArgumentException("RegisterDownlink must not be null.");
+		if(client == null){
+			throw new IllegalArgumentException("Client must not be null.");
 		}
-		this.downlink = downlink;
 		this.client = client;
 	}
 
