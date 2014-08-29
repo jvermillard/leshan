@@ -18,7 +18,6 @@ import leshan.client.lwm2m.operation.Readable;
 import leshan.client.lwm2m.operation.Writable;
 import leshan.client.lwm2m.operation.WriteResponse;
 import leshan.client.lwm2m.register.RegisterUplink;
-import leshan.client.lwm2m.response.OperationResponse;
 import leshan.server.lwm2m.LwM2mServer;
 import leshan.server.lwm2m.bootstrap.BootstrapStoreImpl;
 import leshan.server.lwm2m.client.Client;
@@ -38,7 +37,6 @@ import leshan.server.lwm2m.tlv.TlvType;
 import org.junit.After;
 import org.junit.Before;
 import org.mockito.Matchers;
-import org.mockito.Mockito;
 
 import ch.ethz.inf.vs.californium.WebLink;
 import ch.ethz.inf.vs.californium.coap.LinkFormat;
@@ -51,9 +49,6 @@ public abstract class LwM2mClientServerIntegrationTest {
 	protected static final int FIRST_RESOURCE_ID = 4;
 	protected static final int SECOND_RESOURCE_ID = 5;
 	protected static final int EXECUTABLE_RESOURCE_ID = 6;
-
-	protected static final int BROKEN_OBJECT_ID = GOOD_OBJECT_ID + 1;
-	protected static final int BROKEN_RESOURCE_ID = 7;
 
 	protected static final int BAD_OBJECT_ID = 1000;
 	protected static final String ENDPOINT = "epflwmtm";
@@ -108,7 +103,6 @@ public abstract class LwM2mClientServerIntegrationTest {
 	protected RegisterUplink registerAndGetUplink() {
 		final Response goodRawResponse = new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT);
 		goodRawResponse.setPayload(GOOD_PAYLOAD);
-		final OperationResponse goodResponse = OperationResponse.of(goodRawResponse);
 
 		final RegisterUplink registerUplink = client.startRegistration(CLIENT_PORT, serverAddress);
 		return registerUplink;
@@ -132,12 +126,6 @@ public abstract class LwM2mClientServerIntegrationTest {
 		return values;
 	}
 
-	protected Tlv[] createBrokenResourcesTlv(final String value) {
-		final Tlv[] values = new Tlv[1];
-		values[0] = new Tlv(TlvType.RESOURCE_VALUE, null, value.getBytes(), BROKEN_RESOURCE_ID);
-		return values;
-	}
-
 	protected ClientResponse sendRead(final int objectID) {
 		return ReadRequest
 				.newRequest(getClient(), objectID)
@@ -155,7 +143,7 @@ public abstract class LwM2mClientServerIntegrationTest {
 				.newRequest(getClient(), objectID, objectInstanceID, resourceID)
 				.send(server.getRequestHandler());
 	}
-	
+
 	protected ClientResponse sendDiscover(final int objectID) {
 		return DiscoverRequest
 				.newRequest(getClient(), objectID)
@@ -163,11 +151,11 @@ public abstract class LwM2mClientServerIntegrationTest {
 	}
 
 	protected ClientResponse sendDiscover(final int objectID, final int objectInstanceID) {
-		return DiscoverRequest 
+		return DiscoverRequest
 				.newRequest(getClient(), objectID, objectInstanceID)
 				.send(server.getRequestHandler());
 	}
-	
+
 	protected ClientResponse sendDiscover(final int objectID, final int objectInstanceID, final int resourceID) {
 		return DiscoverRequest
 				.newRequest(getClient(), objectID, objectInstanceID, resourceID)
@@ -179,7 +167,7 @@ public abstract class LwM2mClientServerIntegrationTest {
 				.newRequest(getClient(), objectID, values)
 				.send(server.getRequestHandler());
 	}
-	
+
 	protected ClientResponse sendDelete(final Tlv[] values, final int objectID, final Integer objectInstanceID) {
 		return DeleteRequest
 				.newRequest(getClient(), objectID, objectInstanceID)

@@ -11,11 +11,16 @@ import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ContentFormat;
 import leshan.server.lwm2m.message.ResponseCode;
 import leshan.server.lwm2m.message.WriteRequest;
+import leshan.server.lwm2m.tlv.Tlv;
+import leshan.server.lwm2m.tlv.TlvType;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
 public class WriteTest extends LwM2mClientServerIntegrationTest {
+
+	protected static final int BROKEN_OBJECT_ID = GOOD_OBJECT_ID + 1;
+	protected static final int BROKEN_RESOURCE_ID = 7;
 
 	@Override
 	protected LwM2mClient createClient() {
@@ -74,6 +79,12 @@ public class WriteTest extends LwM2mClientServerIntegrationTest {
 		assertResponse(response, ResponseCode.CHANGED, new byte[0]);
 		assertResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
 				ResponseCode.CONTENT, "world".getBytes());
+	}
+
+	protected Tlv[] createBrokenResourcesTlv(final String value) {
+		final Tlv[] values = new Tlv[1];
+		values[0] = new Tlv(TlvType.RESOURCE_VALUE, null, value.getBytes(), BROKEN_RESOURCE_ID);
+		return values;
 	}
 
 }
