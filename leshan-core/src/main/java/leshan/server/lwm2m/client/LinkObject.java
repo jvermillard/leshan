@@ -41,11 +41,11 @@ public class LinkObject {
 
     private final Map<String, Object> attributes;
 
-    private Integer objectId;
+    private final Integer objectId;
 
-    private Integer objectInstanceId;
+    private final Integer objectInstanceId;
 
-    private Integer resourceId;
+    private final Integer resourceId;
 
     /**
      * Creates a new link object without attributes.
@@ -69,7 +69,18 @@ public class LinkObject {
         } else {
             this.attributes = Collections.unmodifiableMap(new HashMap<String, Object>());
         }
-        setIdsFromObjectLink(url);
+
+        Matcher mat = Pattern.compile("(/(\\d+))(/(\\d+))?(/(\\d+))?").matcher(url);
+
+        if (mat.find()) {
+            objectId = mat.group(2) == null ? null : new Integer(mat.group(2));
+            objectInstanceId = mat.group(4) == null ? null : new Integer(mat.group(4));
+            resourceId = mat.group(6) == null ? null : new Integer(mat.group(6));
+        } else {
+            objectId = null;
+            objectInstanceId = null;
+            resourceId = null;
+        }
     }
 
     /**
@@ -105,36 +116,5 @@ public class LinkObject {
 
     public Integer getResourceId() {
         return resourceId;
-    }
-
-    private void setObjectId(Integer objectId) {
-        this.objectId = objectId;
-    }
-
-    private void setObjectInstanceId(Integer objectInstanceId) {
-        this.objectInstanceId = objectInstanceId;
-    }
-
-    private void setResourceId(Integer resourceId) {
-        this.resourceId = resourceId;
-    }
-
-    private void setIdsFromObjectLink(String url) {
-
-        String pattern = "(/(\\d+))(/(\\d+))?(/(\\d+))?";
-        Pattern pat = Pattern.compile(pattern);
-        Matcher mat = pat.matcher(url);
-
-        if (mat.find()) {
-            if (mat.group(2) != null) {
-                this.setObjectId(new Integer(mat.group(2)));
-            }
-            if (mat.group(4) != null) {
-                this.setObjectInstanceId(new Integer(mat.group(4)));
-            }
-            if (mat.group(6) != null) {
-                this.setResourceId(new Integer(mat.group(6)));
-            }
-        }
     }
 }

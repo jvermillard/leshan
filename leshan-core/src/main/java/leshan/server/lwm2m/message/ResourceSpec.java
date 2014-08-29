@@ -41,9 +41,9 @@ public final class ResourceSpec {
 
     public ResourceSpec(Client client, Integer objectId, Integer objectInstanceId, Integer resourceId) {
         if (client == null) {
-            throw new NullPointerException("Client must not be null");
+            throw new IllegalArgumentException("Client must not be null");
         } else if (objectId == null) {
-            throw new NullPointerException("Object ID must not be null");
+            throw new IllegalArgumentException("Object ID must not be null");
         }
         this.client = client;
         this.objectId = objectId;
@@ -82,16 +82,9 @@ public final class ResourceSpec {
 
     @Override
     public String toString() {
-        synchronized (this) {
-            if (this.stringRepresentation == null) {
-                StringBuilder b = new StringBuilder("client=");
-                b.append(getClient().getEndpoint());
-                b.append(", objectId=").append(getObjectId());
-                b.append(", objectInstanceId=").append(getObjectInstanceId());
-                b.append(", resourceId=").append(getResourceId());
-                this.stringRepresentation = b.toString();
-            }
-        }
-        return this.stringRepresentation;
+        return String.format(
+                "ResourceSpec [client=%s, objectId=%s, objectInstanceId=%s, resourceId=%s, stringRepresentation=%s]",
+                client, objectId, objectInstanceId, resourceId, stringRepresentation);
     }
+
 }
