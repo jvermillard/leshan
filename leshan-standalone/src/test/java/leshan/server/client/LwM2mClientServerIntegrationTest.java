@@ -71,8 +71,8 @@ public abstract class LwM2mClientServerIntegrationTest {
 	private InetSocketAddress serverAddress;
 	protected LwM2mClient client;
 	protected Executable executableAlwaysSuccessful;
-	protected ReadWriteListener firstResourceListener;
-	protected ReadWriteListener secondResourceListener;
+	protected ReadableWritable firstReadableWritable;
+	protected ReadableWritable secondReadableWritable;
 
 	@Before
 	public void setup() {
@@ -91,8 +91,8 @@ public abstract class LwM2mClientServerIntegrationTest {
 		executableAlwaysSuccessful = mock(Executable.class);
 		when(executableAlwaysSuccessful.execute(Mockito.anyInt(), Mockito.anyInt(), Mockito.anyInt())).thenReturn(ExecuteResponse.success());
 
-		firstResourceListener = new ReadWriteListener();
-		secondResourceListener = new ReadWriteListener();
+		firstReadableWritable = new ReadableWritable();
+		secondReadableWritable = new ReadableWritable();
 
 		client = createClient();
 	}
@@ -209,7 +209,7 @@ public abstract class LwM2mClientServerIntegrationTest {
 		assertTrue(payload == null || payload.length == 0);
 	}
 
-	public class ReadWriteListener implements Readable, Writable{
+	public class ReadableWritable implements Readable, Writable{
 
 		private String value;
 

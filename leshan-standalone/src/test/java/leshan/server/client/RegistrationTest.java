@@ -22,11 +22,11 @@ public class RegistrationTest extends LwM2mClientServerIntegrationTest {
 		final ReadWriteListenerWithBrokenWrite brokenResourceListener = new ReadWriteListenerWithBrokenWrite();
 
 		final ClientObject objectOne = new ClientObject(GOOD_OBJECT_ID,
-				new SingleResourceDefinition(FIRST_RESOURCE_ID, Executable.NOT_EXECUTABLE, firstResourceListener, firstResourceListener),
-				new SingleResourceDefinition(SECOND_RESOURCE_ID, Executable.NOT_EXECUTABLE, secondResourceListener, secondResourceListener),
-				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executableAlwaysSuccessful, Writable.NOT_WRITABLE, Readable.NOT_READABLE));
+				new SingleResourceDefinition(FIRST_RESOURCE_ID, firstReadableWritable, firstReadableWritable, Executable.NOT_EXECUTABLE),
+				new SingleResourceDefinition(SECOND_RESOURCE_ID, secondReadableWritable, secondReadableWritable, Executable.NOT_EXECUTABLE),
+				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, Readable.NOT_READABLE, Writable.NOT_WRITABLE, executableAlwaysSuccessful));
 		final ClientObject objectTwo = new ClientObject(BROKEN_OBJECT_ID,
-				new SingleResourceDefinition(BROKEN_RESOURCE_ID, Executable.NOT_EXECUTABLE, brokenResourceListener, brokenResourceListener));
+				new SingleResourceDefinition(BROKEN_RESOURCE_ID, brokenResourceListener, brokenResourceListener, Executable.NOT_EXECUTABLE));
 		return new LwM2mClient(objectOne, objectTwo);
 	}
 

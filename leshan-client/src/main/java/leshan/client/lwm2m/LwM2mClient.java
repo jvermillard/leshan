@@ -79,47 +79,31 @@ public class LwM2mClient {
 		}
 		return new RegisterUplink(destination, endpoint, downlink, objectsAndInstances );
 	}
-
-	public LinkObject[] getObjectLinks(final int objectId) {
-		final Resource clientObject = clientSideServer.getRoot().getChild(Integer.toString(objectId));
+	
+	public LinkObject[] getObjectLinks(final Integer...ids){
+		if(ids.length == 0 || ids.length > 3){
+			throw new IllegalArgumentException("An Object Model Only Goes 3 levels deep:  Object ID/ObjectInstance ID/Resource ID");
+		}
+		
+		final Resource clientObject = clientSideServer.getRoot().getChild(Integer.toString(ids[0]));
 
 		if(clientObject == null){
 			return new LinkObject[]{};
 		}
-
-		return LinkFormatParser.parse(((LinkFormattable) clientObject).asLinkFormat().getBytes());
-	}
-
-	public LinkObject[] getObjectLinks(final int objectId, final int objectInstanceId) {
-		final Resource clientObject = clientSideServer.getRoot().getChild(Integer.toString(objectId));
-
-		if(clientObject == null){
-			return new LinkObject[]{};
+		else if(ids.length == 1){
+			return LinkFormatParser.parse(((LinkFormattable) clientObject).asLinkFormat().getBytes());
 		}
 
-		final Resource clientObjectInstance = clientObject.getChild(Integer.toString(objectInstanceId));
+		final Resource clientObjectInstance = clientObject.getChild(Integer.toString(ids[1]));
 		
 		if(clientObjectInstance == null){
 			return new LinkObject[]{};
 		}
-
-		return LinkFormatParser.parse(((LinkFormattable) clientObjectInstance).asLinkFormat().getBytes());
-	}
-
-	public LinkObject[] getObjectLinks(final int objectId, final int objectInstanceId, final int resourceId) {
-		final Resource clientObject = clientSideServer.getRoot().getChild(Integer.toString(objectId));
-
-		if(clientObject == null){
-			return new LinkObject[]{};
-		}
-
-		final Resource clientObjectInstance = clientObject.getChild(Integer.toString(objectInstanceId));
-		
-		if(clientObjectInstance == null){
-			return new LinkObject[]{};
+		else if(ids.length == 2){
+			return LinkFormatParser.parse(((LinkFormattable) clientObjectInstance).asLinkFormat().getBytes());
 		}
 		
-		final Resource clientResource = clientObjectInstance.getChild(Integer.toString(resourceId));
+		final Resource clientResource = clientObjectInstance.getChild(Integer.toString(ids[2]));
 		
 		if(clientResource == null){
 			return new LinkObject[]{};

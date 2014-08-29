@@ -11,7 +11,7 @@ public class SingleResourceDefinition implements ClientResourceDefinition {
 	private final Writable writable;
 	private final Readable readable;
 
-	public SingleResourceDefinition(final int id, final Executable executable, final Writable writable, final Readable readable) {
+	public SingleResourceDefinition(final int id, final Readable readable, final Writable writable, final Executable executable) {
 		this.id = id;
 		this.executable = executable;
 		this.writable = writable;
