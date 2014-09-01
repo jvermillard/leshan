@@ -2,44 +2,32 @@ package leshan.client.lwm2m.resource;
 
 import static ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT;
 
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import leshan.client.lwm2m.operation.ClientObservation;
-import leshan.client.lwm2m.operation.ClientObservationImpl;
-import leshan.client.lwm2m.operation.Executable;
 import leshan.client.lwm2m.operation.ExecuteResponse;
+import leshan.client.lwm2m.operation.LwM2mResource;
 import leshan.client.lwm2m.operation.ReadResponse;
-import leshan.client.lwm2m.operation.Readable;
-import leshan.client.lwm2m.operation.Writable;
 import leshan.client.lwm2m.operation.WriteResponse;
-import leshan.server.lwm2m.message.ObserveRequest;
 import leshan.server.lwm2m.tlv.Tlv;
 import leshan.server.lwm2m.tlv.TlvType;
+import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.coap.LinkFormat;
 import ch.ethz.inf.vs.californium.coap.MediaTypeRegistry;
-import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
-import ch.ethz.inf.vs.californium.network.Exchange;
 import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
 import ch.ethz.inf.vs.californium.server.resources.ResourceBase;
 
 class ClientResource extends ResourceBase implements LinkFormattable, ClientObservable, Notifier{
 
 	private static final int IS_OBSERVE = 0;
-	private final Executable executable;
-	private final Writable writable;
-	private final Readable readable;
+	private final LwM2mResource resource;
 	private final Map<ClientObservable, String> observationTokens;
 
-	public ClientResource(final int id, final Executable executable, final Writable writable, final Readable readable) {
+	public ClientResource(final int id, final LwM2mResource executable) {
 		super(Integer.toString(id));
 		setObservable(true);
 
-		this.executable = executable;
-		this.writable = writable;
-		this.readable = readable;
+		this.resource = executable;
 
 		observationTokens = new ConcurrentHashMap<>();
 	}
@@ -49,7 +37,7 @@ class ClientResource extends ResourceBase implements LinkFormattable, ClientObse
 	}
 
 	public Tlv asTlv() {
-		final ReadResponse response = readable.read();
+		final ReadResponse response = resource.read();
 
 		if(ResponseCode.isSuccess(response.getCode())){
 			return new Tlv(TlvType.RESOURCE_VALUE, null, response.getValue(), getId());
@@ -57,6 +45,10 @@ class ClientResource extends ResourceBase implements LinkFormattable, ClientObse
 		else{
 			return new Tlv(TlvType.RESOURCE_VALUE, null, new byte[0], getId());
 		}
+	}
+
+	public boolean isReadable() {
+		return resource.isReadable();
 	}
 
 	@Override
@@ -80,11 +72,11 @@ class ClientResource extends ResourceBase implements LinkFormattable, ClientObse
 		else{
 			handleNormalRead(exchange);
 		}
-		
+
 	}
 
 	private void handleNormalRead(final CoapExchange exchange) {
-		final ReadResponse response = readable.read();
+		final ReadResponse response = resource.read();
 
 		if(ResponseCode.isSuccess(response.getCode())){
 			exchange.respond(response.getCode(), response.getValue());
@@ -96,7 +88,7 @@ class ClientResource extends ResourceBase implements LinkFormattable, ClientObse
 	}
 
 	private void handleObserveNotifyRead(final CoapExchange exchange) {
-		final ReadResponse response = readable.read();
+		final ReadResponse response = resource.read();
 		if(ResponseCode.isSuccess(response.getCode())){
 			exchange.respond(ResponseCode.CHANGED, response.getValue());
 		}
@@ -111,7 +103,7 @@ class ClientResource extends ResourceBase implements LinkFormattable, ClientObse
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -127,7 +119,7 @@ class ClientResource extends ResourceBase implements LinkFormattable, ClientObse
 			observationTokens.put(observable, exchange.advanced().getRequest().getTokenString());
 
 			if(observationTokens.size() == 1){
-				readable.observe(this);
+				resource.observe(this);
 			}
 		}
 		else{
@@ -143,22 +135,10 @@ class ClientResource extends ResourceBase implements LinkFormattable, ClientObse
 
 	@Override
 	public void handlePOST(final CoapExchange exchange) {
-		final ExecuteResponse response = executable.execute(Integer.parseInt(getParent().getParent().getName()),
+		final ExecuteResponse response = resource.execute(Integer.parseInt(getParent().getParent().getName()),
 				Integer.parseInt(getParent().getName()),
 				Integer.parseInt(getName()));
 		exchange.respond(response.getCode());
-	}
-
-	public boolean isExecutable() {
-		return executable != Executable.NOT_EXECUTABLE;
-	}
-
-	public boolean isWritable() {
-		return writable != Writable.NOT_WRITABLE;
-	}
-
-	public boolean isReadable() {
-		return readable != Readable.NOT_READABLE;
 	}
 
 	public void writeTlv(final Tlv tlv) {
@@ -166,7 +146,7 @@ class ClientResource extends ResourceBase implements LinkFormattable, ClientObse
 	}
 
 	private WriteResponse writeValue(final byte[] value) {
-		return writable.write(Integer.parseInt(getParent().getParent().getName()),
+		return resource.write(Integer.parseInt(getParent().getParent().getName()),
 				Integer.parseInt(getParent().getName()),
 				Integer.parseInt(getName()), value);
 	}

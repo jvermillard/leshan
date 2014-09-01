@@ -2,7 +2,7 @@ package leshan.server.client;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.net.InetSocketAddress;
@@ -11,14 +11,14 @@ import java.util.Map;
 import java.util.Set;
 
 import leshan.client.lwm2m.LwM2mClient;
-import leshan.client.lwm2m.operation.Executable;
 import leshan.client.lwm2m.operation.ExecuteResponse;
+import leshan.client.lwm2m.operation.LwM2mResource;
 import leshan.client.lwm2m.operation.ReadResponse;
-import leshan.client.lwm2m.operation.Readable;
-import leshan.client.lwm2m.operation.Writable;
 import leshan.client.lwm2m.operation.WriteResponse;
 import leshan.client.lwm2m.register.RegisterUplink;
+import leshan.client.lwm2m.resource.ClientObject;
 import leshan.client.lwm2m.resource.Notifier;
+import leshan.client.lwm2m.resource.SingleResourceDefinition;
 import leshan.server.lwm2m.LwM2mServer;
 import leshan.server.lwm2m.bootstrap.BootstrapStoreImpl;
 import leshan.server.lwm2m.client.Client;
@@ -68,9 +68,9 @@ public abstract class LwM2mClientServerIntegrationTest {
 	protected Set<WebLink> objectsAndInstances;
 	private InetSocketAddress serverAddress;
 	protected LwM2mClient client;
-	protected Executable executableAlwaysSuccessful;
-	protected ReadableWritable firstReadableWritable;
-	protected ReadableWritable secondReadableWritable;
+	protected ExecutableResource executableResource;
+	protected ValueResource firstResource;
+	protected ValueResource secondResource;
 
 	@Before
 	public void setup() {
@@ -86,16 +86,22 @@ public abstract class LwM2mClientServerIntegrationTest {
 		server = new LwM2mServer(serverAddress, serverAddressSecure, clientRegistry, securityRegistry, observationRegistry, bsStore);
 		server.start();
 
-		executableAlwaysSuccessful = mock(Executable.class);
-		when(executableAlwaysSuccessful.execute(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyInt())).thenReturn(ExecuteResponse.success());
+		executableResource = spy(new ExecutableResource());
+		when(executableResource.execute(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyInt())).thenReturn(ExecuteResponse.success());
 
-		firstReadableWritable = new ReadableWritable();
-		secondReadableWritable = new ReadableWritable();
+		firstResource = new ValueResource();
+		secondResource = new ValueResource();
 
 		client = createClient();
 	}
 
-	protected abstract LwM2mClient createClient();
+	protected LwM2mClient createClient() {
+		final ClientObject objectOne = new ClientObject(GOOD_OBJECT_ID,
+				new SingleResourceDefinition(FIRST_RESOURCE_ID, firstResource),
+				new SingleResourceDefinition(SECOND_RESOURCE_ID, secondResource),
+				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executableResource));
+		return new LwM2mClient(objectOne);
+	}
 
 	@After
 	public void teardown() {
@@ -146,15 +152,15 @@ public abstract class LwM2mClientServerIntegrationTest {
 				.newRequest(getClient(), objectID, objectInstanceID, resourceID)
 				.send(server.getRequestHandler());
 	}
-	
+
 	protected ClientResponse sendObserve(final int objectID, final ResourceObserver observer) {
-		return ObserveRequest 
+		return ObserveRequest
 				.newRequest(getClient(), observer, objectID)
 				.send(server.getRequestHandler());
 	}
 
 	protected ClientResponse sendObserve(final int objectID, final int objectInstanceID, final ResourceObserver observer) {
-		return ObserveRequest 
+		return ObserveRequest
 				.newRequest(getClient(), observer, objectID, objectInstanceID)
 				.send(server.getRequestHandler());
 	}
@@ -216,7 +222,7 @@ public abstract class LwM2mClientServerIntegrationTest {
 		assertTrue(payload == null || payload.length == 0);
 	}
 
-	public class ReadableWritable implements Readable, Writable{
+	public class ValueResource implements LwM2mResource {
 
 		private String value;
 		private Notifier notifier;
@@ -225,7 +231,7 @@ public abstract class LwM2mClientServerIntegrationTest {
 		public WriteResponse write(final int objectId, final int objectInstanceId, final int resourceId,
 				final byte[] valueToWrite) {
 			setValue(new String(valueToWrite));
-			
+
 			return WriteResponse.success();
 		}
 
@@ -247,9 +253,20 @@ public abstract class LwM2mClientServerIntegrationTest {
 			this.notifier = notifier;
 		}
 
+		@Override
+		public ExecuteResponse execute(final int objectId, final int objectInstanceId,
+				final int resourceId) {
+			return ExecuteResponse.failure();
+		}
+
+		@Override
+		public boolean isReadable() {
+			return true;
+		}
+
 	}
 
-	public class ReadWriteListenerWithBrokenWrite implements Readable, Writable{
+	public class ReadWriteListenerWithBrokenWrite implements LwM2mResource {
 
 		private String value;
 
@@ -271,6 +288,47 @@ public abstract class LwM2mClientServerIntegrationTest {
 		@Override
 		public void observe(final Notifier notifier) {
 			notifier.notify(ReadResponse.success(value.getBytes()));
+		}
+
+		@Override
+		public ExecuteResponse execute(final int objectId, final int objectInstanceId,
+				final int resourceId) {
+			return ExecuteResponse.failure();
+		}
+
+		@Override
+		public boolean isReadable() {
+			return true;
+		}
+
+	}
+
+	public class ExecutableResource implements LwM2mResource {
+
+		@Override
+		public ReadResponse read() {
+			return ReadResponse.failure();
+		}
+
+		@Override
+		public WriteResponse write(final int objectId, final int objectInstanceId,
+				final int resourceId, final byte[] valueToWrite) {
+			return WriteResponse.failure();
+		}
+
+		@Override
+		public ExecuteResponse execute(final int objectId, final int objectInstanceId,
+				final int resourceId) {
+			return ExecuteResponse.success();
+		}
+
+		@Override
+		public void observe(final Notifier notifier) {
+		}
+
+		@Override
+		public boolean isReadable() {
+			return false;
 		}
 
 	}

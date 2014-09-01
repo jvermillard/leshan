@@ -7,11 +7,6 @@ public abstract class ReadResponse {
 	private ReadResponse() {
 	}
 
-
-	public static ReadResponse success(final ResponseCode code, final byte[] readValue) {
-		return new SuccessResponse(code, readValue);
-	}
-	
 	public static ReadResponse success(final byte[] readValue) {
 		return new SuccessResponse(ResponseCode.CONTENT, readValue);
 	}
@@ -19,7 +14,7 @@ public abstract class ReadResponse {
 	public static ReadResponse failure() {
 		return new FailureResponse();
 	}
-	
+
 	public abstract byte[] getValue();
 
 	public abstract ResponseCode getCode();
@@ -38,7 +33,7 @@ public abstract class ReadResponse {
 		public ResponseCode getCode() {
 			return code;
 		}
-		
+
 		@Override
 		public byte[] getValue() {
 			return value;

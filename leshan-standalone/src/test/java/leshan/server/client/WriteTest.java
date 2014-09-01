@@ -2,9 +2,6 @@ package leshan.server.client;
 
 import static org.junit.Assert.assertArrayEquals;
 import leshan.client.lwm2m.LwM2mClient;
-import leshan.client.lwm2m.operation.Executable;
-import leshan.client.lwm2m.operation.Readable;
-import leshan.client.lwm2m.operation.Writable;
 import leshan.client.lwm2m.resource.ClientObject;
 import leshan.client.lwm2m.resource.SingleResourceDefinition;
 import leshan.server.lwm2m.message.ClientResponse;
@@ -27,11 +24,11 @@ public class WriteTest extends LwM2mClientServerIntegrationTest {
 		final ReadWriteListenerWithBrokenWrite brokenResourceListener = new ReadWriteListenerWithBrokenWrite();
 
 		final ClientObject objectOne = new ClientObject(GOOD_OBJECT_ID,
-				new SingleResourceDefinition(FIRST_RESOURCE_ID, firstReadableWritable, firstReadableWritable, Executable.NOT_EXECUTABLE),
-				new SingleResourceDefinition(SECOND_RESOURCE_ID, secondReadableWritable, secondReadableWritable, Executable.NOT_EXECUTABLE),
-				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, Readable.NOT_READABLE, Writable.NOT_WRITABLE, executableAlwaysSuccessful));
+				new SingleResourceDefinition(FIRST_RESOURCE_ID, firstResource),
+				new SingleResourceDefinition(SECOND_RESOURCE_ID, secondResource),
+				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executableResource));
 		final ClientObject objectTwo = new ClientObject(BROKEN_OBJECT_ID,
-				new SingleResourceDefinition(BROKEN_RESOURCE_ID, brokenResourceListener, brokenResourceListener, Executable.NOT_EXECUTABLE));
+				new SingleResourceDefinition(BROKEN_RESOURCE_ID, brokenResourceListener));
 		return new LwM2mClient(objectOne, objectTwo);
 	}
 
@@ -47,7 +44,7 @@ public class WriteTest extends LwM2mClientServerIntegrationTest {
 		assertResponse(response, ResponseCode.CHANGED, new byte[0]);
 		assertResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
 				ResponseCode.CONTENT, "world".getBytes());
-		assertArrayEquals(secondReadableWritable.read().getValue(), "world".getBytes());
+		assertArrayEquals(secondResource.read().getValue(), "world".getBytes());
 	}
 
 	@Test

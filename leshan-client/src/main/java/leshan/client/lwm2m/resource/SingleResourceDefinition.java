@@ -1,21 +1,15 @@
 package leshan.client.lwm2m.resource;
 
-import leshan.client.lwm2m.operation.Executable;
-import leshan.client.lwm2m.operation.Readable;
-import leshan.client.lwm2m.operation.Writable;
+import leshan.client.lwm2m.operation.LwM2mResource;
 
 public class SingleResourceDefinition implements ClientResourceDefinition {
 
 	private final int id;
-	private final Executable executable;
-	private final Writable writable;
-	private final Readable readable;
+	private final LwM2mResource resource;
 
-	public SingleResourceDefinition(final int id, final Readable readable, final Writable writable, final Executable executable) {
+	public SingleResourceDefinition(final int id, final LwM2mResource resource) {
 		this.id = id;
-		this.executable = executable;
-		this.writable = writable;
-		this.readable = readable;
+		this.resource = resource;
 	}
 
 	@Override
@@ -25,7 +19,7 @@ public class SingleResourceDefinition implements ClientResourceDefinition {
 
 	@Override
 	public ClientResource createResource() {
-		return new ClientResource(id, executable, writable, readable);
+		return new ClientResource(id, resource);
 	}
 
 }

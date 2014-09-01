@@ -4,27 +4,14 @@ import static com.jayway.awaitility.Awaitility.await;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import leshan.client.lwm2m.LwM2mClient;
-import leshan.client.lwm2m.operation.Executable;
-import leshan.client.lwm2m.operation.Readable;
-import leshan.client.lwm2m.operation.Writable;
 import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.resource.ClientObject;
-import leshan.client.lwm2m.resource.SingleResourceDefinition;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.util.ResponseCallback;
 
 import org.junit.Test;
 
 public class RegistrationTest extends LwM2mClientServerIntegrationTest {
-
-	@Override
-	protected LwM2mClient createClient() {
-		final ClientObject objectOne = new ClientObject(GOOD_OBJECT_ID,
-				new SingleResourceDefinition(FIRST_RESOURCE_ID, firstReadableWritable, firstReadableWritable, Executable.NOT_EXECUTABLE),
-				new SingleResourceDefinition(SECOND_RESOURCE_ID, secondReadableWritable, secondReadableWritable, Executable.NOT_EXECUTABLE),
-				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, Readable.NOT_READABLE, Writable.NOT_WRITABLE, executableAlwaysSuccessful));
-		return new LwM2mClient(objectOne);
-	}
 
 	@Test
 	public void registeredDeviceExists() {
