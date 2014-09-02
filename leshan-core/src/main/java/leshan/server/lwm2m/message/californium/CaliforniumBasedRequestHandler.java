@@ -347,6 +347,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
 
     private Request prepareRequest(WriteRequest request) {
         Request coapRequest = request.isReplaceRequest() ? Request.newPut() : Request.newPost();
+        coapRequest.getOptions().setContentFormat(request.getContentFormat().getCode());
         coapRequest.setPayload(request.getBytes());
         setTarget(coapRequest, request.getTarget());
         return coapRequest;
