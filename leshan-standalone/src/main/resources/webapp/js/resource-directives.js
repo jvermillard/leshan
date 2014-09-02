@@ -99,7 +99,15 @@ angular.module('resourceDirectives', [])
                     
                     // manage read data
                     if (data.status == "CONTENT") {
-                        scope.resource.value = data.value;
+                        if (data.type == "TLV"){
+                            if (data.value[0] && data.value[0].type == "RESOURCE_VALUE")
+                                scope.resource.value = data.value[0].value;
+                            else
+                                scope.resource.value = data.value;
+                        }else{
+                            scope.resource.value = data.value;    
+                        }
+                        
                         scope.resource.valuesupposed = false;
                         scope.resource.tooltip = formattedDate;
                     }
