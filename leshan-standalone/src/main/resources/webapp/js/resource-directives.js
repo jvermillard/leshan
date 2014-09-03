@@ -22,10 +22,8 @@ angular.module('resourceDirectives', [])
             scope.resource.observe  =  {tooltip : "Observe <br/>"+ scope.resource.path};
             
             scope.readable = function() {
-                if(scope.resource.def.instances != "multiple") {
-                    if(scope.resource.def.hasOwnProperty("operations")) {
-                        return scope.resource.def.operations.indexOf("R") != -1;
-                    }
+                if(scope.resource.def.hasOwnProperty("operations")) {
+                    return scope.resource.def.operations.indexOf("R") != -1;
                 }
                 return false;
             }
@@ -100,10 +98,18 @@ angular.module('resourceDirectives', [])
                     // manage read data
                     if (data.status == "CONTENT") {
                         if (data.type == "TLV"){
-                            if (data.value[0] && data.value[0].type == "RESOURCE_VALUE")
-                                scope.resource.value = data.value[0].value;
-                            else
-                                scope.resource.value = data.value;
+                            if (data.value[0]){
+                                var tlvresource = data.value[0];
+                                if (tlvresource.type == "RESOURCE_VALUE"){
+                                    scope.resource.value = data.value[0].value;
+                                }else if (tlvresource.type == "MULTIPLE_RESOURCE"){
+                                    var tab= new Array();
+                                    for (var i in tlvresource.resources){
+                                        tab.push(tlvresource.resources[i].value)
+                                    }
+                                    scope.resource.value = tab.join(", ");
+                                }
+                            }
                         }else{
                             scope.resource.value = data.value;    
                         }
