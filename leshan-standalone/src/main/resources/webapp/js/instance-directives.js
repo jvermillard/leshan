@@ -1,6 +1,7 @@
 /*!
  * Copyright (c) 2013-2014, Sierra Wireless
  * Released under the BSD license
+ * https://raw.githubusercontent.com/jvermillard/leshan/master/LICENSE
  */
 
 angular.module('instanceDirectives', [])
