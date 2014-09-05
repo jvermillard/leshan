@@ -16,7 +16,7 @@ import leshan.client.lwm2m.operation.LwM2mResource;
 import leshan.client.lwm2m.operation.ReadResponse;
 import leshan.client.lwm2m.operation.WriteResponse;
 import leshan.client.lwm2m.register.RegisterUplink;
-import leshan.client.lwm2m.resource.ClientObject;
+import leshan.client.lwm2m.resource.LwM2mObjectDefinition;
 import leshan.client.lwm2m.resource.Notifier;
 import leshan.client.lwm2m.resource.SingleResourceDefinition;
 import leshan.server.lwm2m.LwM2mServer;
@@ -96,7 +96,7 @@ public abstract class LwM2mClientServerIntegrationTest {
 	}
 
 	protected LwM2mClient createClient() {
-		final ClientObject objectOne = new ClientObject(GOOD_OBJECT_ID,
+		final LwM2mObjectDefinition objectOne = new LwM2mObjectDefinition(GOOD_OBJECT_ID,
 				new SingleResourceDefinition(FIRST_RESOURCE_ID, firstResource),
 				new SingleResourceDefinition(SECOND_RESOURCE_ID, secondResource),
 				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executableResource));

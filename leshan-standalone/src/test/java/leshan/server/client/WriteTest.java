@@ -2,7 +2,7 @@ package leshan.server.client;
 
 import static org.junit.Assert.assertArrayEquals;
 import leshan.client.lwm2m.LwM2mClient;
-import leshan.client.lwm2m.resource.ClientObject;
+import leshan.client.lwm2m.resource.LwM2mObjectDefinition;
 import leshan.client.lwm2m.resource.SingleResourceDefinition;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ContentFormat;
@@ -23,11 +23,11 @@ public class WriteTest extends LwM2mClientServerIntegrationTest {
 	protected LwM2mClient createClient() {
 		final ReadWriteListenerWithBrokenWrite brokenResourceListener = new ReadWriteListenerWithBrokenWrite();
 
-		final ClientObject objectOne = new ClientObject(GOOD_OBJECT_ID,
+		final LwM2mObjectDefinition objectOne = new LwM2mObjectDefinition(GOOD_OBJECT_ID,
 				new SingleResourceDefinition(FIRST_RESOURCE_ID, firstResource),
 				new SingleResourceDefinition(SECOND_RESOURCE_ID, secondResource),
 				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executableResource));
-		final ClientObject objectTwo = new ClientObject(BROKEN_OBJECT_ID,
+		final LwM2mObjectDefinition objectTwo = new LwM2mObjectDefinition(BROKEN_OBJECT_ID,
 				new SingleResourceDefinition(BROKEN_RESOURCE_ID, brokenResourceListener));
 		return new LwM2mClient(objectOne, objectTwo);
 	}
