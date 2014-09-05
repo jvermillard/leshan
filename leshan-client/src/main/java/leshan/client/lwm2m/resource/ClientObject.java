@@ -23,10 +23,10 @@ import ch.ethz.inf.vs.californium.server.resources.ResourceBase;
 
 public class ClientObject extends ResourceBase implements LinkFormattable{
 
-	private final ClientResourceDefinition[] definitions;
+	private final LwM2mResourceDefinition[] definitions;
 	private final AtomicInteger instanceCounter;
 
-	public ClientObject(final int objectId, final ClientResourceDefinition... definitions) {
+	public ClientObject(final int objectId, final LwM2mResourceDefinition... definitions) {
 		super(Integer.toString(objectId));
 		if (definitions == null || definitions.length == 0) {
 			throw new IllegalArgumentException("Must provide at least one resource definition");
@@ -52,12 +52,12 @@ public class ClientObject extends ResourceBase implements LinkFormattable{
 
 	private void handleRead(final CoapExchange exchange) {
 		final List<Tlv> tlvs = new ArrayList<>();
-		
+
 		for (final Resource res : getChildren()) {
 			final ClientObjectInstance instance = (ClientObjectInstance)res;
 			tlvs.add(new Tlv(TlvType.OBJECT_INSTANCE, instance.asTlvArray(), null, instance.getInstanceId()));
 		}
-		
+
 		final byte[] payload = TlvEncoder.encode(tlvs.toArray(new Tlv[0])).array();
 		exchange.respond(CONTENT, payload);
 	}
@@ -66,8 +66,8 @@ public class ClientObject extends ResourceBase implements LinkFormattable{
 	public void handlePOST(final CoapExchange exchange) {
 		final Tlv[] tlvs = TlvDecoder.decode(ByteBuffer.wrap(exchange.getRequestPayload()));
 		final Map<Integer, ClientResource> resources = new TreeMap<>();
-		for (final ClientResourceDefinition def : definitions) {
-			resources.put(def.getId(), def.createResource());
+		for (final LwM2mResourceDefinition def : definitions) {
+			resources.put(def.getId(), new ClientResource(def.getId(), def.createResource()));
 		}
 
 		final ClientObjectInstance instance = new ClientObjectInstance(getNewInstanceId(exchange), resources);
