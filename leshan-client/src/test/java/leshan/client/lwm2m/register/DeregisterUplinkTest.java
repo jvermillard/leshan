@@ -38,7 +38,7 @@ public class DeregisterUplinkTest {
 
 	@Mock
 	private CoAPEndpoint endpoint;
-	
+
 	@Mock
 	private LwM2mClient client;
 
@@ -47,8 +47,6 @@ public class DeregisterUplinkTest {
 	private RegisterUplink uplink;
 
 	private ResponseCallback callback;
-
-	private byte[] actualResponsePayload;
 
 	private InetSocketAddress serverAddress;
 	private int tearDownEndpointStops;
@@ -106,8 +104,8 @@ public class DeregisterUplinkTest {
 		uplink.deregister(ENDPOINT_LOCATION, callback);
 		
 		await().untilTrue(callback.isCalled());
-		actualResponsePayload = callback.getResponsePayload();
-		
+		callback.getResponsePayload();
+
 		verify(endpoint).stop();
 		verify(endpoint).sendRequest(any(Request.class));
 		

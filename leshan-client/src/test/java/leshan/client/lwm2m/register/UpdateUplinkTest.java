@@ -1,9 +1,14 @@
 package leshan.client.lwm2m.register;
 
 import static com.jayway.awaitility.Awaitility.await;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -38,7 +43,7 @@ public class UpdateUplinkTest {
 	private static final int SYNC_TIMEOUT_MS = 2000;
 	private static final String SERVER_HOST = "leshan.com";
 	private static final int SERVER_PORT = 1234;
-		
+
 	private static final String ENDPOINT_LOCATION = UUID.randomUUID().toString();
 	private final String VALID_REQUEST_PAYLOAD = "</lwm2m>;rt=\"oma.lwm2m\", </lwm2m/1/101>, </lwm2m/1/102>, </lwm2m/2/0>, </lwm2m/2/1>, </lwm2m/2/2>, </lwm2m/3/0>, </lwm2m/4/0>, </lwm2m/5>";
 
@@ -52,8 +57,6 @@ public class UpdateUplinkTest {
 
 	private String actualRequestPayload;
 	private ResponseCallback callback;
-	private OperationResponse asyncResponse;
-
 	private InetSocketAddress serverAddress;
 	private int tearDownEndpointStops;
 	private RegisterUplink uplink;
@@ -66,11 +69,11 @@ public class UpdateUplinkTest {
 		callback = new ResponseCallback();
 		serverAddress = InetSocketAddress.createUnresolved(SERVER_HOST, SERVER_PORT);
 	}
-	
+
 	@After
 	public void tearDown(){
 		uplink.stop();
-		
+
 		verify(endpoint, times(tearDownEndpointStops)).stop();
 	}
 
@@ -81,7 +84,7 @@ public class UpdateUplinkTest {
 		if(objectsAndInstances != null){
 			Mockito.when(client.getObjectModel()).thenReturn(LinkFormatParser.parse(objectsAndInstances.getBytes()));
 		}
-		
+
 		doAnswer(new Answer<Void>() {
 
 			@Override
@@ -192,7 +195,7 @@ public class UpdateUplinkTest {
 	public void testGoodAsyncWithPayloadUpdate() {
 		final Map<String, String> validMap = generateValidParameters();
 		final String validQuery = leshan.client.lwm2m.request.Request.toQueryStringMap(validMap);
-		
+
 		expectedRequestLocation ="coap://localhost/?" + validQuery;
 
 		initializeServerResponse(InterfaceTypes.REGISTRATION, OperationTypes.UPDATE, ResponseCode.CHANGED, VALID_REQUEST_PAYLOAD);

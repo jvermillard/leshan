@@ -10,9 +10,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import leshan.client.lwm2m.object.xsd.LWM2M;
-import leshan.client.lwm2m.object.xsd.LWM2MBuilder;
-
 import org.eclipse.jetty.util.ConcurrentHashSet;
 
 import ch.ethz.inf.vs.californium.coap.Request;
@@ -22,7 +19,6 @@ public final class LWM2MObject {
 	private final Set<Instance> createdObjects;
 
 	private LWM2MObject(final InputStream stream) {
-		final LWM2M obj = LWM2MBuilder.create(stream);
 		this.createdObjects = new ConcurrentHashSet<>();
 
 	}
@@ -54,14 +50,8 @@ public final class LWM2MObject {
 
 	public final class Instance {
 		private final int instanceId;
-		private final LWM2MObject obj;
-		private final AccessControlObject aco;
-
-		private List<LWM2MResource.Instance> resources;
 
 		protected Instance(final LWM2MServer server, final LWM2MObject obj, final int instanceId) {
-			this.aco = AccessControlObject.instantiate(server);
-			this.obj = obj;
 			this.instanceId = instanceId;
 		}
 

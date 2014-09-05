@@ -1,13 +1,13 @@
 package leshan.client.lwm2m.util;
 
-import java.util.List;
 import java.util.Map;
+
 import leshan.server.lwm2m.client.LinkObject;
 import ch.ethz.inf.vs.californium.coap.LinkFormat;
 
 public class LinkFormatUtils {
 	public static final String INVALID_LINK_PAYLOAD = "<>";
-	
+
 	private static final String TRAILER = ", ";
 
 	public static String payloadize(final LinkObject... linkObjects) {
@@ -16,9 +16,9 @@ public class LinkFormatUtils {
 		for(final LinkObject link : linkObjects){
 			builder.append(payloadizeLink(link)).append(TRAILER);
 		}
-		
+
 		builder.delete(builder.length() - TRAILER.length(), builder.length());
-		
+
 		return builder.toString();
 		}
 		catch(final Exception e){
@@ -31,9 +31,9 @@ public class LinkFormatUtils {
 		builder.append('<');
 		builder.append(link.getUrl());
 		builder.append('>');
-		
+
 		final Map<String, Object> attributes = link.getAttributes();
-		
+
 		if(hasPayloadAttributes(attributes)){
 			builder.append(";");
 			if (attributes.containsKey(LinkFormat.RESOURCE_TYPE)) {
@@ -51,14 +51,10 @@ public class LinkFormatUtils {
 			if (attributes.containsKey(LinkFormat.OBSERVABLE)) {
 				builder.append(LinkFormat.OBSERVABLE);
 			}
-			
-		}
-		
-		return builder.toString();
-	}
 
-	private static String listToLinkString(final List<String> attributeValue) {
-		return attributeValue.toString().replaceAll("[\\[\\]]+", "\"");
+		}
+
+		return builder.toString();
 	}
 
 	private static boolean hasPayloadAttributes(final Map<String, Object> attributes) {
@@ -69,7 +65,7 @@ public class LinkFormatUtils {
 			attributes.containsKey(LinkFormat.OBSERVABLE)){
 				return true;
 			}
-			
+
 			return false;
 	}
 

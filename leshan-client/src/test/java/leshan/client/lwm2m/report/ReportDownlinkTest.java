@@ -208,20 +208,6 @@ public class ReportDownlinkTest {
 		uplink = new ReportUplink(serverAddress, endpoint);
 	}
 
-	private void initializeCanceledResponse() {
-		doAnswer(new Answer<Void>(){
-
-			@Override
-			public Void answer(final InvocationOnMock invocation) throws Throwable {
-				actualResponse = (Response) invocation.getArguments()[0];
-				actualResponse.setCanceled(true);
-				return null;
-			}
-		}).when(exchange).sendResponse(any(Response.class));
-
-		uplink = new ReportUplink(serverAddress, endpoint);
-	}
-
 	private void initializeRequestReturn(final String uri, final byte[] token) {
 		when(request.getURI()).thenReturn(uri);
 		when(request.getToken()).thenReturn(token);
