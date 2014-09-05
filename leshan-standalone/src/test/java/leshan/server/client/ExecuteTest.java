@@ -14,7 +14,7 @@ public class ExecuteTest extends LwM2mClientServerIntegrationTest {
 	public void canNotExecuteWriteOnlyResource() {
 		register();
 
-		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+		sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 
 		final ClientResponse response = ExecRequest.newRequest(getClient(), GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID,
 				"world", ContentFormat.TEXT).send(server.getRequestHandler());
@@ -26,7 +26,7 @@ public class ExecuteTest extends LwM2mClientServerIntegrationTest {
 	public void canExecuteResource() {
 		register();
 
-		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+		sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 
 		final ClientResponse response = ExecRequest.newRequest(getClient(), GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, EXECUTABLE_RESOURCE_ID,
 				"world", ContentFormat.TEXT).send(server.getRequestHandler());

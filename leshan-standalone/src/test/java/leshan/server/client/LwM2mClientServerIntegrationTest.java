@@ -122,13 +122,13 @@ public abstract class LwM2mClientServerIntegrationTest {
 		registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
 	}
 
-	protected Tlv[] createObjectInstaceTlv(final String value0, final String value1) {
+	protected Tlv[] createGoodObjectInstaceTlv(final String value0, final String value1) {
 		final Tlv[] values = new Tlv[1];
-		values[0] = new Tlv(TlvType.OBJECT_INSTANCE, createResourcesTlv(value0, value1), null, 0);
+		values[0] = new Tlv(TlvType.OBJECT_INSTANCE, createGoodResourcesTlv(value0, value1), null, 0);
 		return values;
 	}
 
-	protected Tlv[] createResourcesTlv(final String value0, final String value1) {
+	protected Tlv[] createGoodResourcesTlv(final String value0, final String value1) {
 		final Tlv[] values = new Tlv[2];
 		values[1] = new Tlv(TlvType.RESOURCE_VALUE, null, value0.getBytes(), FIRST_RESOURCE_ID);
 		values[0] = new Tlv(TlvType.RESOURCE_VALUE, null, value1.getBytes(), SECOND_RESOURCE_ID);

@@ -30,7 +30,7 @@ public class DiscoverTest extends LwM2mClientServerIntegrationTest {
 	public void testDiscoverObjectAndObjectInstance() {
 		register();
 
-		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+		sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 
 		assertLinkFormatResponse(sendDiscover(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.CONTENT, client.getObjectModel(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID));
 	}
@@ -39,7 +39,7 @@ public class DiscoverTest extends LwM2mClientServerIntegrationTest {
 	public void testDiscoverObjectAndObjectInstanceAndResource() {
 		register();
 
-		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+		sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 
 		assertLinkFormatResponse(sendDiscover(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, FIRST_RESOURCE_ID), ResponseCode.CONTENT, client.getObjectModel(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, FIRST_RESOURCE_ID));
 	}
@@ -48,7 +48,7 @@ public class DiscoverTest extends LwM2mClientServerIntegrationTest {
 	public void testCantDiscoverNonExistentObjectAndObjectInstanceAndResource() {
 		register();
 
-		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+		sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 
 		assertEmptyResponse(sendDiscover(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, 1234231), ResponseCode.NOT_FOUND);
 	}

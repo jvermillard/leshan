@@ -27,7 +27,7 @@ public class DeleteTest extends LwM2mClientServerIntegrationTest {
 	public void cantDeleteUnknownObjectInstance(){
 		register();
 
-		final ClientResponse responseDelete = sendDelete(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID);
+		final ClientResponse responseDelete = sendDelete(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID);
 		assertEmptyResponse(responseDelete, ResponseCode.NOT_FOUND);
 	}
 
@@ -35,16 +35,16 @@ public class DeleteTest extends LwM2mClientServerIntegrationTest {
 	public void cantDeleteObject(){
 		register();
 
-		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+		sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 
-		final ClientResponse responseDelete = sendDelete(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID, null);
+		final ClientResponse responseDelete = sendDelete(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID, null);
 		assertEmptyResponse(responseDelete, ResponseCode.METHOD_NOT_ALLOWED);
 	}
 
 	private void createAndThenAssertDeleted() {
-		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+		sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 
-		final ClientResponse responseDelete = sendDelete(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID);
+		final ClientResponse responseDelete = sendDelete(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID);
 		assertResponse(responseDelete, ResponseCode.DELETED, new byte[0]);
 	}
 

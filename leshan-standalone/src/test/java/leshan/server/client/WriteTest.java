@@ -36,7 +36,7 @@ public class WriteTest extends LwM2mClientServerIntegrationTest {
 	public void canWriteReplaceToResource() {
 		register();
 
-		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+		sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 
 		final ClientResponse response = WriteRequest.newReplaceRequest(getClient(), GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID,
 				"world", ContentFormat.TEXT).send(server.getRequestHandler());
@@ -68,7 +68,7 @@ public class WriteTest extends LwM2mClientServerIntegrationTest {
 	public void canWritePartialUpdateToResource() {
 		register();
 
-		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+		sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 
 		final ClientResponse response = WriteRequest.newUpdateRequest(getClient(), GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID,
 				"world", ContentFormat.TEXT).send(server.getRequestHandler());

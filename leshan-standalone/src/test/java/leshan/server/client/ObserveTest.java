@@ -20,7 +20,7 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 	public void canObserveResource() {
 		register();
 
-		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+		sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 
 		final ClientResponse response = sendObserve(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, FIRST_RESOURCE_ID, observer);
 		assertResponse(response, ResponseCode.CONTENT, "hello".getBytes());

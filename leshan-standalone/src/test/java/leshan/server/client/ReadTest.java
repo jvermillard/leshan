@@ -28,23 +28,23 @@ public class ReadTest extends LwM2mClientServerIntegrationTest {
 	@Test
 	public void canReadObjectWithCreatedInstance() {
 		register();
-		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+		sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 
-		assertResponse(sendRead(GOOD_OBJECT_ID), ResponseCode.CONTENT, TlvEncoder.encode(createObjectInstaceTlv("hello", "goodbye")).array());
+		assertResponse(sendRead(GOOD_OBJECT_ID), ResponseCode.CONTENT, TlvEncoder.encode(createGoodObjectInstaceTlv("hello", "goodbye")).array());
 	}
 
 	@Test
 	public void canReadObjectInstace() {
 		register();
-		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+		sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 
-		assertResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.CONTENT, TlvEncoder.encode(createResourcesTlv("hello", "goodbye")).array());
+		assertResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.CONTENT, TlvEncoder.encode(createGoodResourcesTlv("hello", "goodbye")).array());
 	}
 
 	@Test
 	public void canReadResource() {
 		register();
-		sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+		sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 
 		assertResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, FIRST_RESOURCE_ID),
 				ResponseCode.CONTENT, "hello".getBytes());

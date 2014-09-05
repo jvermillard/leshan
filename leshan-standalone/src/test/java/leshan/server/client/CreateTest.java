@@ -11,7 +11,7 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
 	public void canCreateInstanceOfObject() {
 		register();
 
-		final ClientResponse response = sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+		final ClientResponse response = sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 		assertResponse(response, ResponseCode.CREATED, ("/" + GOOD_OBJECT_ID + "/0").getBytes());
 	}
 
@@ -19,7 +19,7 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
 	public void canCreateSpecificInstanceOfObject() {
 		register();
 
-		final ClientResponse response = sendCreate(createResourcesTlv("one", "two"), GOOD_OBJECT_ID, 14);
+		final ClientResponse response = sendCreate(createGoodResourcesTlv("one", "two"), GOOD_OBJECT_ID, 14);
 		assertResponse(response, ResponseCode.CREATED, ("/" + GOOD_OBJECT_ID + "/14").getBytes());
 	}
 
@@ -27,10 +27,10 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
 	public void canCreateMultipleInstanceOfObject() {
 		register();
 
-		final ClientResponse response = sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+		final ClientResponse response = sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 		assertResponse(response, ResponseCode.CREATED, ("/" + GOOD_OBJECT_ID + "/0").getBytes());
 
-		final ClientResponse responseTwo = sendCreate(createResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+		final ClientResponse responseTwo = sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 		assertResponse(responseTwo, ResponseCode.CREATED, ("/" + GOOD_OBJECT_ID + "/1").getBytes());
 	}
 
@@ -38,7 +38,7 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
 	public void canNotCreateInstanceOfObject() {
 		register();
 
-		final ClientResponse response = sendCreate(createResourcesTlv("hello", "goodbye"), BAD_OBJECT_ID);
+		final ClientResponse response = sendCreate(createGoodResourcesTlv("hello", "goodbye"), BAD_OBJECT_ID);
 		assertEmptyResponse(response, ResponseCode.NOT_FOUND);
 	}
 
