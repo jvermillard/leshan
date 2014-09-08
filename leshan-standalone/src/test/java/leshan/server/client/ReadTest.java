@@ -35,7 +35,7 @@ public class ReadTest extends LwM2mClientServerIntegrationTest {
 	}
 
 	@Test
-	public void canReadObjectInstace() {
+	public void canReadObjectInstance() {
 		register();
 		sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 

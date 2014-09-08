@@ -20,4 +20,14 @@ public class AggregatedLwM2mExchange implements LwM2mExchange {
 		return null;
 	}
 
+	@Override
+	public boolean hasObjectInstanceId() {
+		return false;
+	}
+
+	@Override
+	public int getObjectInstanceId() {
+		throw new UnsupportedOperationException();
+	}
+
 }

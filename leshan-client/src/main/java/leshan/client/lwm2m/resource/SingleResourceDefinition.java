@@ -23,6 +23,7 @@ public class SingleResourceDefinition implements LwM2mResourceDefinition {
 		return resource;
 	}
 
+	//TODO This should be replaced with calls to write()
 	@Override
 	public LwM2mResource createResource(final byte[] value) {
 		resource.write(new LwM2mExchange() {
@@ -34,6 +35,18 @@ public class SingleResourceDefinition implements LwM2mResourceDefinition {
 			@Override
 			public byte[] getRequestPayload() {
 				return value;
+			}
+
+			@Override
+			public boolean hasObjectInstanceId() {
+				// TODO Auto-generated method stub
+				return false;
+			}
+
+			@Override
+			public int getObjectInstanceId() {
+				// TODO Auto-generated method stub
+				return 0;
 			}
 
 		});

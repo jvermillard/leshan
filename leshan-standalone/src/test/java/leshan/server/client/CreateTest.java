@@ -64,9 +64,10 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
 	@Test
 	public void cannotCreateInstanceWithExtraneousResources() {
 		register();
-		final Tlv[] values = new Tlv[2];
+		final Tlv[] values = new Tlv[3];
 		values[0] = new Tlv(TlvType.RESOURCE_VALUE, null, "hello".getBytes(), FIRST_RESOURCE_ID);
-		values[1] = new Tlv(TlvType.RESOURCE_VALUE, null, "lolz".getBytes(), INVALID_RESOURCE_ID);
+		values[1] = new Tlv(TlvType.RESOURCE_VALUE, null, "goodbye".getBytes(), SECOND_RESOURCE_ID);
+		values[2] = new Tlv(TlvType.RESOURCE_VALUE, null, "lolz".getBytes(), INVALID_RESOURCE_ID);
 
 		final ClientResponse response = sendCreate(values, GOOD_OBJECT_ID);
 		assertEmptyResponse(response, ResponseCode.METHOD_NOT_ALLOWED);

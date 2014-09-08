@@ -1,4 +1,4 @@
-package leshan.client.lwm2m.resource;
+package leshan.client.lwm2m.californium;
 
 import static ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT;
 
@@ -8,6 +8,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import leshan.client.lwm2m.operation.CaliforniumBasedLwM2mExchange;
 import leshan.client.lwm2m.operation.LwM2mExchange;
 import leshan.client.lwm2m.operation.ReadResponse;
+import leshan.client.lwm2m.resource.ClientObservable;
+import leshan.client.lwm2m.resource.LinkFormattable;
+import leshan.client.lwm2m.resource.LwM2mResource;
+import leshan.client.lwm2m.resource.Notifier;
 import ch.ethz.inf.vs.californium.coap.LinkFormat;
 import ch.ethz.inf.vs.californium.coap.MediaTypeRegistry;
 import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
@@ -16,16 +20,16 @@ import ch.ethz.inf.vs.californium.server.resources.ResourceBase;
 class ClientResource extends ResourceBase implements LinkFormattable, ClientObservable, Notifier{
 
 	private static final int IS_OBSERVE = 0;
-	private final LwM2mResource resource;
+	private final LwM2mResource lwm2mResource;
 	private final Map<ClientObservable, String> observationTokens;
 	private final int id;
 
-	public ClientResource(final int id, final LwM2mResource executable) {
+	public ClientResource(final int id, final LwM2mResource lwM2mResource) {
 		super(Integer.toString(id));
 		this.id = id;
 		setObservable(true);
 
-		this.resource = executable;
+		this.lwm2mResource = lwM2mResource;
 
 		observationTokens = new ConcurrentHashMap<>();
 	}
@@ -57,11 +61,11 @@ class ClientResource extends ResourceBase implements LinkFormattable, ClientObse
 	}
 
 	public void handleNormalRead(final LwM2mExchange exchange) {
-		resource.read(exchange);
+		lwm2mResource.read(exchange);
 	}
 
 	private void handleObserveNotifyRead(final CoapExchange exchange) {
-		resource.read(new CaliforniumBasedLwM2mExchange(exchange));
+		lwm2mResource.read(new CaliforniumBasedLwM2mExchange(exchange));
 	}
 
 	private boolean isNotifyRead(final CoapExchange exchange) {
@@ -87,7 +91,7 @@ class ClientResource extends ResourceBase implements LinkFormattable, ClientObse
 			observationTokens.put(observable, exchange.advanced().getRequest().getTokenString());
 
 			if(observationTokens.size() == 1){
-				resource.observe(this);
+				lwm2mResource.observe(this);
 			}
 		}
 		else{
@@ -97,12 +101,12 @@ class ClientResource extends ResourceBase implements LinkFormattable, ClientObse
 
 	@Override
 	public void handlePUT(final CoapExchange exchange) {
-		resource.write(new CaliforniumBasedLwM2mExchange(exchange));
+		lwm2mResource.write(new CaliforniumBasedLwM2mExchange(exchange));
 	}
 
 	@Override
 	public void handlePOST(final CoapExchange exchange) {
-		resource.execute(new CaliforniumBasedLwM2mExchange(exchange));
+		lwm2mResource.execute(new CaliforniumBasedLwM2mExchange(exchange));
 	}
 
 	@Override
