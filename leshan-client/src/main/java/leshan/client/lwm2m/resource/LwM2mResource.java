@@ -1,6 +1,6 @@
-package leshan.client.lwm2m.operation;
+package leshan.client.lwm2m.resource;
 
-import leshan.client.lwm2m.resource.Notifier;
+import leshan.client.lwm2m.operation.LwM2mExchange;
 
 public interface LwM2mResource {
 

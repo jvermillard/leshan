@@ -7,7 +7,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import leshan.client.lwm2m.operation.CaliforniumBasedLwM2mExchange;
 import leshan.client.lwm2m.operation.LwM2mExchange;
-import leshan.client.lwm2m.operation.LwM2mResource;
 import leshan.client.lwm2m.operation.ReadResponse;
 import ch.ethz.inf.vs.californium.coap.LinkFormat;
 import ch.ethz.inf.vs.californium.coap.MediaTypeRegistry;

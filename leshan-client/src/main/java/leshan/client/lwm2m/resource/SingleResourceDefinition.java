@@ -1,7 +1,6 @@
 package leshan.client.lwm2m.resource;
 
 import leshan.client.lwm2m.operation.LwM2mExchange;
-import leshan.client.lwm2m.operation.LwM2mResource;
 import leshan.client.lwm2m.operation.LwM2mResponse;
 
 public class SingleResourceDefinition implements LwM2mResourceDefinition {
