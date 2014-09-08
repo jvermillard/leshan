@@ -1,6 +1,6 @@
 package leshan.server.client;
 
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.resource.LwM2mObjectDefinition;
 import leshan.client.lwm2m.resource.SingleResourceDefinition;
@@ -44,7 +44,7 @@ public class WriteTest extends LwM2mClientServerIntegrationTest {
 		assertResponse(response, ResponseCode.CHANGED, new byte[0]);
 		assertResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
 				ResponseCode.CONTENT, "world".getBytes());
-		assertArrayEquals(secondResource.read().getValue(), "world".getBytes());
+		assertEquals("world", secondResource.getValue());
 	}
 
 	@Test

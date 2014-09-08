@@ -3,15 +3,17 @@ package leshan.server.client;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.operation.ExecuteResponse;
+import leshan.client.lwm2m.operation.LwM2mExchange;
 import leshan.client.lwm2m.operation.LwM2mResource;
 import leshan.client.lwm2m.operation.ReadResponse;
 import leshan.client.lwm2m.operation.WriteResponse;
@@ -35,11 +37,11 @@ import leshan.server.lwm2m.observation.ObservationRegistryImpl;
 import leshan.server.lwm2m.observation.ResourceObserver;
 import leshan.server.lwm2m.security.SecurityRegistry;
 import leshan.server.lwm2m.tlv.Tlv;
+import leshan.server.lwm2m.tlv.TlvDecoder;
 import leshan.server.lwm2m.tlv.TlvType;
 
 import org.junit.After;
 import org.junit.Before;
-import org.mockito.Matchers;
 
 import ch.ethz.inf.vs.californium.WebLink;
 import ch.ethz.inf.vs.californium.coap.LinkFormat;
@@ -52,6 +54,7 @@ public abstract class LwM2mClientServerIntegrationTest {
 	protected static final int FIRST_RESOURCE_ID = 4;
 	protected static final int SECOND_RESOURCE_ID = 5;
 	protected static final int EXECUTABLE_RESOURCE_ID = 6;
+	protected static final int INVALID_RESOURCE_ID = 9;
 
 	protected static final int BAD_OBJECT_ID = 1000;
 	protected static final String ENDPOINT = "epflwmtm";
@@ -87,7 +90,6 @@ public abstract class LwM2mClientServerIntegrationTest {
 		server.start();
 
 		executableResource = spy(new ExecutableResource());
-		when(executableResource.execute(Matchers.anyInt(), Matchers.anyInt(), Matchers.anyInt())).thenReturn(ExecuteResponse.success());
 
 		firstResource = new ValueResource();
 		secondResource = new ValueResource();
@@ -130,8 +132,8 @@ public abstract class LwM2mClientServerIntegrationTest {
 
 	protected Tlv[] createGoodResourcesTlv(final String value0, final String value1) {
 		final Tlv[] values = new Tlv[2];
-		values[1] = new Tlv(TlvType.RESOURCE_VALUE, null, value0.getBytes(), FIRST_RESOURCE_ID);
-		values[0] = new Tlv(TlvType.RESOURCE_VALUE, null, value1.getBytes(), SECOND_RESOURCE_ID);
+		values[0] = new Tlv(TlvType.RESOURCE_VALUE, null, value0.getBytes(), FIRST_RESOURCE_ID);
+		values[1] = new Tlv(TlvType.RESOURCE_VALUE, null, value1.getBytes(), SECOND_RESOURCE_ID);
 		return values;
 	}
 
@@ -213,7 +215,14 @@ public abstract class LwM2mClientServerIntegrationTest {
 
 	protected void assertResponse(final ClientResponse response, final ResponseCode responseCode, final byte[] payload) {
 		assertEquals(responseCode, response.getCode());
-		assertEquals(new String(payload), new String(response.getContent()));
+		try {
+			final Tlv[] expected = TlvDecoder.decode(ByteBuffer.wrap(payload));
+			final Tlv[] actual = TlvDecoder.decode(ByteBuffer.wrap(response.getContent()));
+			assertEquals("Expected TLVs " + Arrays.toString(expected) + ", but was " + Arrays.toString(actual) + "",
+					new String(payload), new String(response.getContent()));
+		} catch (final Exception e) {
+			assertEquals(new String(payload), new String(response.getContent()));
+		}
 	}
 
 	protected void assertEmptyResponse(final ClientResponse response, final ResponseCode responseCode) {
@@ -224,22 +233,8 @@ public abstract class LwM2mClientServerIntegrationTest {
 
 	public class ValueResource implements LwM2mResource {
 
-		private String value;
+		private String value = "blergs";
 		private Notifier notifier;
-
-		@Override
-		public WriteResponse write(final int objectId, final int objectInstanceId, final int resourceId,
-				final byte[] valueToWrite) {
-			setValue(new String(valueToWrite));
-
-			return WriteResponse.success();
-		}
-
-		@Override
-		public ReadResponse read() {
-			final ReadResponse response = ReadResponse.success(value.getBytes());
-			return response;
-		}
 
 		public void setValue(final String newValue) {
 			value = newValue;
@@ -248,19 +243,39 @@ public abstract class LwM2mClientServerIntegrationTest {
 			}
 		}
 
+		public String getValue() {
+			return value;
+		}
+
+		@Override
+		public void write(final LwM2mExchange exchange) {
+			setValue(new String(exchange.getRequestPayload()));
+
+			exchange.respond(WriteResponse.success());
+		}
+
+		@Override
+		public void read(final LwM2mExchange exchange) {
+			exchange.respond(ReadResponse.success(value.getBytes()));
+		}
+
 		@Override
 		public void observe(final Notifier notifier) {
 			this.notifier = notifier;
 		}
 
 		@Override
-		public ExecuteResponse execute(final int objectId, final int objectInstanceId,
-				final int resourceId) {
-			return ExecuteResponse.failure();
+		public void execute(final LwM2mExchange exchange) {
+			exchange.respond(ExecuteResponse.failure());
 		}
 
 		@Override
 		public boolean isReadable() {
+			return true;
+		}
+
+		@Override
+		public boolean isRequired() {
 			return true;
 		}
 
@@ -271,18 +286,17 @@ public abstract class LwM2mClientServerIntegrationTest {
 		private String value;
 
 		@Override
-		public WriteResponse write(final int objectId, final int objectInstanceId, final int resourceId,
-				final byte[] valueToWrite) {
+		public void write(final LwM2mExchange exchange) {
 			if (value == null) {
-				value = new String(valueToWrite);
-				return WriteResponse.success();
+				value = new String(exchange.getRequestPayload());
+				exchange.respond(WriteResponse.success());
 			}
-			return WriteResponse.failure();
+			exchange.respond(WriteResponse.failure());
 		}
 
 		@Override
-		public ReadResponse read() {
-			return ReadResponse.success(value.getBytes());
+		public void read(final LwM2mExchange exchange) {
+			exchange.respond(ReadResponse.success(value.getBytes()));
 		}
 
 		@Override
@@ -291,13 +305,17 @@ public abstract class LwM2mClientServerIntegrationTest {
 		}
 
 		@Override
-		public ExecuteResponse execute(final int objectId, final int objectInstanceId,
-				final int resourceId) {
-			return ExecuteResponse.failure();
+		public void execute(final LwM2mExchange exchange) {
+			exchange.respond(ExecuteResponse.failure());
 		}
 
 		@Override
 		public boolean isReadable() {
+			return true;
+		}
+
+		@Override
+		public boolean isRequired() {
 			return true;
 		}
 
@@ -306,20 +324,18 @@ public abstract class LwM2mClientServerIntegrationTest {
 	public class ExecutableResource implements LwM2mResource {
 
 		@Override
-		public ReadResponse read() {
-			return ReadResponse.failure();
+		public void read(final LwM2mExchange exchange) {
+			exchange.respond(ReadResponse.failure());
 		}
 
 		@Override
-		public WriteResponse write(final int objectId, final int objectInstanceId,
-				final int resourceId, final byte[] valueToWrite) {
-			return WriteResponse.failure();
+		public void write(final LwM2mExchange exchange) {
+			exchange.respond(WriteResponse.failure());
 		}
 
 		@Override
-		public ExecuteResponse execute(final int objectId, final int objectInstanceId,
-				final int resourceId) {
-			return ExecuteResponse.success();
+		public void execute(final LwM2mExchange exchange) {
+			exchange.respond(ExecuteResponse.success());
 		}
 
 		@Override
@@ -328,6 +344,11 @@ public abstract class LwM2mClientServerIntegrationTest {
 
 		@Override
 		public boolean isReadable() {
+			return false;
+		}
+
+		@Override
+		public boolean isRequired() {
 			return false;
 		}
 

@@ -5,13 +5,10 @@ import static ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import leshan.client.lwm2m.operation.ExecuteResponse;
+import leshan.client.lwm2m.operation.CaliforniumBasedLwM2mExchange;
+import leshan.client.lwm2m.operation.LwM2mExchange;
 import leshan.client.lwm2m.operation.LwM2mResource;
 import leshan.client.lwm2m.operation.ReadResponse;
-import leshan.client.lwm2m.operation.WriteResponse;
-import leshan.server.lwm2m.tlv.Tlv;
-import leshan.server.lwm2m.tlv.TlvType;
-import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.coap.LinkFormat;
 import ch.ethz.inf.vs.californium.coap.MediaTypeRegistry;
 import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
@@ -22,9 +19,11 @@ class ClientResource extends ResourceBase implements LinkFormattable, ClientObse
 	private static final int IS_OBSERVE = 0;
 	private final LwM2mResource resource;
 	private final Map<ClientObservable, String> observationTokens;
+	private final int id;
 
 	public ClientResource(final int id, final LwM2mResource executable) {
 		super(Integer.toString(id));
+		this.id = id;
 		setObservable(true);
 
 		this.resource = executable;
@@ -33,30 +32,14 @@ class ClientResource extends ResourceBase implements LinkFormattable, ClientObse
 	}
 
 	public int getId() {
-		return Integer.parseInt(getName());
-	}
-
-	public Tlv asTlv() {
-		final ReadResponse response = resource.read();
-
-		if(ResponseCode.isSuccess(response.getCode())){
-			return new Tlv(TlvType.RESOURCE_VALUE, null, response.getValue(), getId());
-		}
-		else{
-			return new Tlv(TlvType.RESOURCE_VALUE, null, new byte[0], getId());
-		}
-	}
-
-	public boolean isReadable() {
-		return resource.isReadable();
+		return id;
 	}
 
 	@Override
 	public void handleGET(final CoapExchange exchange) {
-		if(exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_LINK_FORMAT){
+		if (exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_LINK_FORMAT) {
 			handleDiscover(exchange);
-		}
-		else{
+		} else {
 			handleRead(exchange);
 		}
 	}
@@ -66,40 +49,25 @@ class ClientResource extends ResourceBase implements LinkFormattable, ClientObse
 	}
 
 	private void handleRead(final CoapExchange exchange) {
-		if(isNotifyRead(exchange)){
+		if (isNotifyRead(exchange)) {
 			handleObserveNotifyRead(exchange);
-		}
-		else{
-			handleNormalRead(exchange);
+		} else {
+			handleNormalRead(new CaliforniumBasedLwM2mExchange(exchange));
 		}
 
 	}
 
-	private void handleNormalRead(final CoapExchange exchange) {
-		final ReadResponse response = resource.read();
-
-		if(ResponseCode.isSuccess(response.getCode())){
-			exchange.respond(response.getCode(), response.getValue());
-			handleObserve(exchange);
-		}
-		else{
-			exchange.respond(response.getCode());
-		}
+	public void handleNormalRead(final LwM2mExchange exchange) {
+		resource.read(exchange);
 	}
 
 	private void handleObserveNotifyRead(final CoapExchange exchange) {
-		final ReadResponse response = resource.read();
-		if(ResponseCode.isSuccess(response.getCode())){
-			exchange.respond(ResponseCode.CHANGED, response.getValue());
-		}
-		else{
-			exchange.respond(response.getCode());
-		}
+		resource.read(new CaliforniumBasedLwM2mExchange(exchange));
 	}
 
 	private boolean isNotifyRead(final CoapExchange exchange) {
-		for(final String t : observationTokens.values()){
-			if(t.equals(exchange.advanced().getRequest().getTokenString())){
+		for (final String t : observationTokens.values()) {
+			if (t.equals(exchange.advanced().getRequest().getTokenString())) {
 				return true;
 			}
 		}
@@ -107,8 +75,9 @@ class ClientResource extends ResourceBase implements LinkFormattable, ClientObse
 		return false;
 	}
 
+	@SuppressWarnings("unused")
 	private void handleObserve(final CoapExchange exchange) {
-		if(exchange.getRequestOptions().hasObserve() && exchange.getRequestOptions().getObserve() == IS_OBSERVE){
+		if (exchange.getRequestOptions().hasObserve() && exchange.getRequestOptions().getObserve() == IS_OBSERVE) {
 			createObservation(this, exchange);
 		}
 	}
@@ -129,26 +98,12 @@ class ClientResource extends ResourceBase implements LinkFormattable, ClientObse
 
 	@Override
 	public void handlePUT(final CoapExchange exchange) {
-		final WriteResponse writeResponse = writeValue(exchange.getRequestPayload());
-		exchange.respond(writeResponse.getCode(), new byte[0]);
+		resource.write(new CaliforniumBasedLwM2mExchange(exchange));
 	}
 
 	@Override
 	public void handlePOST(final CoapExchange exchange) {
-		final ExecuteResponse response = resource.execute(Integer.parseInt(getParent().getParent().getName()),
-				Integer.parseInt(getParent().getName()),
-				Integer.parseInt(getName()));
-		exchange.respond(response.getCode());
-	}
-
-	public void writeTlv(final Tlv tlv) {
-		writeValue(tlv.getValue());
-	}
-
-	private WriteResponse writeValue(final byte[] value) {
-		return resource.write(Integer.parseInt(getParent().getParent().getName()),
-				Integer.parseInt(getParent().getName()),
-				Integer.parseInt(getName()), value);
+		resource.execute(new CaliforniumBasedLwM2mExchange(exchange));
 	}
 
 	@Override

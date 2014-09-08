@@ -3,12 +3,13 @@ package leshan.client.lwm2m.resource;
 import static ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT;
 import static ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.DELETED;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
-import leshan.server.lwm2m.tlv.Tlv;
-import leshan.server.lwm2m.tlv.TlvEncoder;
+import leshan.client.lwm2m.operation.AggregatedLwM2mExchange;
+import leshan.client.lwm2m.operation.CaliforniumBasedLwM2mExchange;
+import leshan.client.lwm2m.operation.LwM2mExchange;
+import leshan.client.lwm2m.operation.LwM2mResourceReadResponseAggregator;
+import leshan.client.lwm2m.operation.LwM2mResponseAggregator;
 import ch.ethz.inf.vs.californium.coap.LinkFormat;
 import ch.ethz.inf.vs.californium.coap.MediaTypeRegistry;
 import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
@@ -24,29 +25,16 @@ class ClientObjectInstance extends ResourceBase implements LinkFormattable{
 		}
 	}
 
-	public int getInstanceId() {
+	public int getId() {
 		return Integer.parseInt(getName());
-	}
-
-	public Tlv[] asTlvArray() {
-		final List<Tlv> tlvs = new ArrayList<>();
-		for (final Resource res : getChildren()) {
-			final ClientResource resource = (ClientResource) res;
-			if (resource.isReadable()) {
-				tlvs.add(resource.asTlv());
-			}
-		}
-		final Tlv[] tlvArray = tlvs.toArray(new Tlv[0]);
-		return tlvArray;
 	}
 
 	@Override
 	public void handleGET(final CoapExchange exchange) {
 		if(exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_LINK_FORMAT){
 			handleDiscover(exchange);
-		}
-		else{
-			handleRead(exchange);
+		} else {
+			handleNormalRead(new CaliforniumBasedLwM2mExchange(exchange));
 		}
 	}
 
@@ -54,26 +42,31 @@ class ClientObjectInstance extends ResourceBase implements LinkFormattable{
 		exchange.respond(CONTENT, asLinkFormat());
 	}
 
-	private void handleRead(final CoapExchange exchange) {
-		final Tlv[] tlvArray = asTlvArray();
-		exchange.respond(CONTENT, TlvEncoder.encode(tlvArray).array());
+	public void handleNormalRead(final LwM2mExchange exchange) {
+		final LwM2mResponseAggregator aggr = new LwM2mResourceReadResponseAggregator(
+				exchange,
+				getChildren().size());
+		for (final Resource child : getChildren()) {
+			final ClientResource res = (ClientResource)child;
+			res.handleNormalRead(new AggregatedLwM2mExchange(aggr, res.getId()));
+		}
 	}
-	
+
 	@Override
 	public void handleDELETE(final CoapExchange exchange) {
 		getParent().remove(this);
-		
+
 		exchange.respond(DELETED);
 	}
 
 	@Override
 	public String asLinkFormat() {
 		final StringBuilder linkFormat = LinkFormat.serializeResource(this).append(LinkFormat.serializeAttributes(getAttributes()));
-		for(final Resource child : getChildren()){
+		for(final Resource child : getChildren()) {
 			linkFormat.append(LinkFormat.serializeResource(child));
 		}
 		linkFormat.deleteCharAt(linkFormat.length() - 1);
-		
+
 		return linkFormat.toString();
 	}
 

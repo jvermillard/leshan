@@ -4,14 +4,16 @@ import leshan.client.lwm2m.resource.Notifier;
 
 public interface LwM2mResource {
 
-	public ReadResponse read();
+	public void read(LwM2mExchange exchange);
 
-	public WriteResponse write(int objectId, int objectInstanceId, int resourceId, byte[] valueToWrite);
+	public void write(LwM2mExchange exchange);
 
-	public ExecuteResponse execute(int objectId, int objectInstanceId, int resourceId);
+	public void execute(LwM2mExchange exchange);
 
-	void observe(Notifier notifier);
+	public void observe(Notifier notifier);
 
-	boolean isReadable();
+	public boolean isReadable();
+
+	public boolean isRequired();
 
 }

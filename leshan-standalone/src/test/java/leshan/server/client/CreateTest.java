@@ -1,8 +1,12 @@
 package leshan.server.client;
 
+import static org.junit.Assert.assertEquals;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ResponseCode;
+import leshan.server.lwm2m.tlv.Tlv;
+import leshan.server.lwm2m.tlv.TlvType;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class CreateTest extends LwM2mClientServerIntegrationTest {
@@ -12,7 +16,8 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
 		register();
 
 		final ClientResponse response = sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
-		assertResponse(response, ResponseCode.CREATED, ("/" + GOOD_OBJECT_ID + "/0").getBytes());
+		assertEmptyResponse(response, ResponseCode.CREATED);
+		assertEquals(GOOD_OBJECT_ID + "/0", response.getLocation());
 	}
 
 	@Test
@@ -20,7 +25,8 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
 		register();
 
 		final ClientResponse response = sendCreate(createGoodResourcesTlv("one", "two"), GOOD_OBJECT_ID, 14);
-		assertResponse(response, ResponseCode.CREATED, ("/" + GOOD_OBJECT_ID + "/14").getBytes());
+		assertEmptyResponse(response, ResponseCode.CREATED);
+		assertEquals(GOOD_OBJECT_ID + "/14", response.getLocation());
 	}
 
 	@Test
@@ -28,18 +34,42 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
 		register();
 
 		final ClientResponse response = sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
-		assertResponse(response, ResponseCode.CREATED, ("/" + GOOD_OBJECT_ID + "/0").getBytes());
+		assertEmptyResponse(response, ResponseCode.CREATED);
+		assertEquals(GOOD_OBJECT_ID + "/0", response.getLocation());
 
 		final ClientResponse responseTwo = sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
-		assertResponse(responseTwo, ResponseCode.CREATED, ("/" + GOOD_OBJECT_ID + "/1").getBytes());
+		assertEmptyResponse(responseTwo, ResponseCode.CREATED);
+		assertEquals(GOOD_OBJECT_ID + "/1", responseTwo.getLocation());
 	}
 
 	@Test
-	public void canNotCreateInstanceOfObject() {
+	public void cannotCreateInstanceOfObject() {
 		register();
 
 		final ClientResponse response = sendCreate(createGoodResourcesTlv("hello", "goodbye"), BAD_OBJECT_ID);
 		assertEmptyResponse(response, ResponseCode.NOT_FOUND);
+	}
+
+	@Ignore
+	@Test
+	public void cannotCreateInstanceWithoutAllRequiredResources() {
+		register();
+		final Tlv[] values = new Tlv[1];
+		values[0] = new Tlv(TlvType.RESOURCE_VALUE, null, "hello".getBytes(), FIRST_RESOURCE_ID);
+
+		final ClientResponse response = sendCreate(values, GOOD_OBJECT_ID);
+		assertEmptyResponse(response, ResponseCode.BAD_REQUEST);
+	}
+
+	@Test
+	public void cannotCreateInstanceWithExtraneousResources() {
+		register();
+		final Tlv[] values = new Tlv[2];
+		values[0] = new Tlv(TlvType.RESOURCE_VALUE, null, "hello".getBytes(), FIRST_RESOURCE_ID);
+		values[1] = new Tlv(TlvType.RESOURCE_VALUE, null, "lolz".getBytes(), INVALID_RESOURCE_ID);
+
+		final ClientResponse response = sendCreate(values, GOOD_OBJECT_ID);
+		assertEmptyResponse(response, ResponseCode.METHOD_NOT_ALLOWED);
 	}
 
 }

@@ -2,7 +2,7 @@ package leshan.client.lwm2m.operation;
 
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 
-public abstract class WriteResponse {
+public abstract class WriteResponse implements LwM2mResponse {
 
 	private WriteResponse() {
 	}
@@ -15,13 +15,16 @@ public abstract class WriteResponse {
 		return new FailureResponse();
 	}
 
-	public abstract ResponseCode getCode();
-
 	private static class SuccessResponse extends WriteResponse {
 
 		@Override
 		public ResponseCode getCode() {
 			return ResponseCode.CHANGED;
+		}
+
+		@Override
+		public byte[] getResponsePayload() {
+			return new byte[0];
 		}
 
 	}
@@ -31,6 +34,11 @@ public abstract class WriteResponse {
 		@Override
 		public ResponseCode getCode() {
 			return ResponseCode.BAD_REQUEST;
+		}
+
+		@Override
+		public byte[] getResponsePayload() {
+			return new byte[0];
 		}
 
 	}

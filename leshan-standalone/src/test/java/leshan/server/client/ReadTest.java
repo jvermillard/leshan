@@ -30,7 +30,8 @@ public class ReadTest extends LwM2mClientServerIntegrationTest {
 		register();
 		sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 
-		assertResponse(sendRead(GOOD_OBJECT_ID), ResponseCode.CONTENT, TlvEncoder.encode(createGoodObjectInstaceTlv("hello", "goodbye")).array());
+		assertResponse(sendRead(GOOD_OBJECT_ID), ResponseCode.CONTENT,
+				TlvEncoder.encode(createGoodObjectInstaceTlv("hello", "goodbye")).array());
 	}
 
 	@Test
@@ -38,7 +39,8 @@ public class ReadTest extends LwM2mClientServerIntegrationTest {
 		register();
 		sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
 
-		assertResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.CONTENT, TlvEncoder.encode(createGoodResourcesTlv("hello", "goodbye")).array());
+		assertResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.CONTENT,
+				TlvEncoder.encode(createGoodResourcesTlv("hello", "goodbye")).array());
 	}
 
 	@Test

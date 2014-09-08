@@ -1,42 +1,53 @@
 package leshan.client.lwm2m.operation;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 
-public abstract class ReadResponse {
+public abstract class ReadResponse implements LwM2mResponse {
 
 	private ReadResponse() {
 	}
 
 	public static ReadResponse success(final byte[] readValue) {
-		return new SuccessResponse(ResponseCode.CONTENT, readValue);
+		return new SuccessResponse(readValue);
 	}
 
 	public static ReadResponse failure() {
 		return new FailureResponse();
 	}
 
-	public abstract byte[] getValue();
-
-	public abstract ResponseCode getCode();
-
 	private static class SuccessResponse extends ReadResponse {
 
 		private final byte[] value;
-		private final ResponseCode code;
 
-		public SuccessResponse(final ResponseCode code, final byte[] readValue) {
-			this.code = code;
+		public SuccessResponse(final byte[] readValue) {
 			this.value = readValue;
 		}
 
 		@Override
 		public ResponseCode getCode() {
-			return code;
+			return ResponseCode.CONTENT;
 		}
 
 		@Override
-		public byte[] getValue() {
+		public byte[] getResponsePayload() {
 			return value;
+		}
+
+		@Override
+		public boolean equals(final Object o) {
+			if (!(o instanceof SuccessResponse)) {
+				return false;
+			}
+			final SuccessResponse other = (SuccessResponse)o;
+			return Arrays.equals(value, other.value);
+		}
+
+		@Override
+		public int hashCode() {
+			return Arrays.hashCode(value);
 		}
 
 	}
@@ -49,8 +60,19 @@ public abstract class ReadResponse {
 		}
 
 		@Override
-		public byte[] getValue() {
-			throw new IllegalAccessError("Failure Reads Do Not Have Values");
+		public byte[] getResponsePayload() {
+			return new byte[0];
+			//			throw new IllegalAccessError("Failure Reads Do Not Have Values");
+		}
+
+		@Override
+		public boolean equals(final Object o) {
+			return o instanceof FailureResponse;
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash();
 		}
 
 	}

@@ -8,10 +8,12 @@ import leshan.server.lwm2m.message.ContentFormat;
 import leshan.server.lwm2m.message.ResponseCode;
 import leshan.server.lwm2m.observation.ResourceObserver;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.jayway.awaitility.Awaitility;
 
+@Ignore
 public class ObserveTest extends LwM2mClientServerIntegrationTest {
 
 	private final Observer observer = new Observer();

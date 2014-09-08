@@ -1,6 +1,8 @@
 package leshan.client.lwm2m.resource;
 
+import leshan.client.lwm2m.operation.LwM2mExchange;
 import leshan.client.lwm2m.operation.LwM2mResource;
+import leshan.client.lwm2m.operation.LwM2mResponse;
 
 public class SingleResourceDefinition implements LwM2mResourceDefinition {
 
@@ -13,12 +15,29 @@ public class SingleResourceDefinition implements LwM2mResourceDefinition {
 	}
 
 	@Override
-	public Integer getId() {
+	public int getId() {
 		return id;
 	}
 
 	@Override
 	public LwM2mResource createResource() {
+		return resource;
+	}
+
+	@Override
+	public LwM2mResource createResource(final byte[] value) {
+		resource.write(new LwM2mExchange() {
+
+			@Override
+			public void respond(final LwM2mResponse response) {
+			}
+
+			@Override
+			public byte[] getRequestPayload() {
+				return value;
+			}
+
+		});
 		return resource;
 	}
 
