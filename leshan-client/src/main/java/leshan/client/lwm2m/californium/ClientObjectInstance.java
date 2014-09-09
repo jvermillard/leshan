@@ -19,8 +19,8 @@ public class ClientObjectInstance extends ResourceBase implements LinkFormattabl
 
 	private final LwM2mObjectInstance lwm2mObjectInstance;
 
-	public ClientObjectInstance(final int instanceID, final LwM2mObjectInstance lwm2mObjectInstance) {
-		super(Integer.toString(instanceID));
+	public ClientObjectInstance(final int instanceId, final LwM2mObjectInstance lwm2mObjectInstance) {
+		super(Integer.toString(instanceId));
 		this.lwm2mObjectInstance = lwm2mObjectInstance;
 		for (final Entry<Integer, LwM2mResource> entry : lwm2mObjectInstance.getAllResources().entrySet()) {
 			final Integer resourceId = entry.getKey();

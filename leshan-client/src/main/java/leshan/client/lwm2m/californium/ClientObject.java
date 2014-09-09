@@ -59,12 +59,14 @@ public class ClientObject extends ResourceBase implements LinkFormattable {
 			@Override
 			public void onFailure() {
 			}
+
 		};
 		lwm2mObject.handleCreate(new CaliforniumBasedLwM2mCreateExchange(exchange, callback));
 	}
 
 	public void onSuccessfulCreate(final LwM2mObjectInstance instance) {
 		add(new ClientObjectInstance(instance.getId(), instance));
+		lwm2mObject.onSuccessfulCreate(instance);
 	}
 
 	@Override

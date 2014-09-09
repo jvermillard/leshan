@@ -17,18 +17,17 @@ import leshan.server.lwm2m.tlv.TlvDecoder;
 
 public class LwM2mObjectInstance {
 
+	private final Map<Integer, LwM2mResourceDefinition> definitionMap;
 	private final Map<Integer, LwM2mResource> resources;
-	private int id;
+	private final int id;
 
-	public static LwM2mObjectInstance instantiate(final int id, final LwM2mCreateExchange exchange,
-			final Map<Integer, LwM2mResourceDefinition> definitionMap) {
-		final LwM2mObjectInstance result = new LwM2mObjectInstance(id, exchange, definitionMap);
-		return result.resources == null ? null : result;
+	public LwM2mObjectInstance(final int id, final Map<Integer, LwM2mResourceDefinition> definitionMap) {
+		this.id = id;
+		this.resources = new HashMap<>();
+		this.definitionMap = definitionMap;
 	}
 
-	private LwM2mObjectInstance(final int id, final LwM2mCreateExchange exchange,
-			final Map<Integer, LwM2mResourceDefinition> definitionMap) {
-		resources = new HashMap<>();
+	public void handleCreate(final LwM2mCreateExchange exchange) {
 		final byte[] payload = exchange.getRequestPayload();
 		final Tlv[] tlvs = TlvDecoder.decode(ByteBuffer.wrap(payload));
 		final LwM2mResponseAggregator aggr = new CreateResponseAggregator(exchange, tlvs.length, id);
@@ -40,8 +39,8 @@ public class LwM2mObjectInstance {
 				final LwM2mResource res = def.createResource();
 				final AggregatedLwM2mExchange partialExchange = new AggregatedLwM2mExchange(aggr, tlv.getIdentifier());
 				partialExchange.setRequestPayload(tlv.getValue());
-				res.write(partialExchange);
 				resources.put(tlv.getIdentifier(), res);
+				res.write(partialExchange);
 			}
 		}
 	}
