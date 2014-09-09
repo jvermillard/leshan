@@ -1,7 +1,11 @@
-package leshan.client.lwm2m.operation;
+package leshan.client.lwm2m.californium;
 
 import java.util.List;
 
+import leshan.client.lwm2m.operation.CreateResponse;
+import leshan.client.lwm2m.operation.LwM2mExchange;
+import leshan.client.lwm2m.operation.LwM2mResponse;
+import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
 
 public class CaliforniumBasedLwM2mExchange implements LwM2mExchange {
@@ -19,7 +23,7 @@ public class CaliforniumBasedLwM2mExchange implements LwM2mExchange {
 			exchange.setLocationPath(objectId  + "/" + ((CreateResponse)response).getLocation());
 		}
 
-		exchange.respond(response.getCode(), response.getResponsePayload());
+		exchange.respond(ResponseCode.valueOf(response.getCode().getValue()), response.getResponsePayload());
 	}
 
 	@Override

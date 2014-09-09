@@ -1,6 +1,7 @@
-package leshan.client.lwm2m.operation;
+package leshan.client.lwm2m.californium;
 
-import leshan.client.lwm2m.californium.Callback;
+import leshan.client.lwm2m.operation.LwM2mCreateExchange;
+import leshan.client.lwm2m.operation.LwM2mResponse;
 import leshan.client.lwm2m.resource.LwM2mObjectInstance;
 import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
 

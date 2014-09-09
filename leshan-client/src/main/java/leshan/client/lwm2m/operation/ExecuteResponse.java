@@ -1,11 +1,12 @@
 package leshan.client.lwm2m.operation;
 
-import static ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CHANGED;
-import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
+import static leshan.client.lwm2m.response.OperationResponseCode.CHANGED;
+import static leshan.client.lwm2m.response.OperationResponseCode.METHOD_NOT_ALLOWED;
+import leshan.client.lwm2m.response.OperationResponseCode;
 
 public class ExecuteResponse extends BaseLwM2mResponse {
 
-	private ExecuteResponse(final ResponseCode code) {
+	private ExecuteResponse(final OperationResponseCode code) {
 		super(code, new byte[0]);
 	}
 
@@ -14,7 +15,7 @@ public class ExecuteResponse extends BaseLwM2mResponse {
 	}
 
 	public static ExecuteResponse failure() {
-		return new ExecuteResponse(ResponseCode.METHOD_NOT_ALLOWED);
+		return new ExecuteResponse(METHOD_NOT_ALLOWED);
 	}
 
 }

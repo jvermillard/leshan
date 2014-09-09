@@ -1,12 +1,12 @@
 package leshan.client.lwm2m.operation;
 
-import static ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.BAD_REQUEST;
-import static ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CHANGED;
-import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
+import static leshan.client.lwm2m.response.OperationResponseCode.BAD_REQUEST;
+import static leshan.client.lwm2m.response.OperationResponseCode.CHANGED;
+import leshan.client.lwm2m.response.OperationResponseCode;
 
 public class WriteResponse extends BaseLwM2mResponse {
 
-	private WriteResponse(final ResponseCode code) {
+	private WriteResponse(final OperationResponseCode code) {
 		super(code, new byte[0]);
 	}
 

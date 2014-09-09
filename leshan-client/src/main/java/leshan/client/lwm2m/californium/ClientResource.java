@@ -5,7 +5,6 @@ import static ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import leshan.client.lwm2m.operation.CaliforniumBasedLwM2mExchange;
 import leshan.client.lwm2m.operation.LwM2mExchange;
 import leshan.client.lwm2m.operation.ReadResponse;
 import leshan.client.lwm2m.resource.ClientObservable;

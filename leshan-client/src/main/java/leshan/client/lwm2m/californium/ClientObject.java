@@ -4,8 +4,6 @@ import static ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import leshan.client.lwm2m.operation.CaliforniumBasedLwM2mCreateExchange;
-import leshan.client.lwm2m.operation.CaliforniumBasedLwM2mExchange;
 import leshan.client.lwm2m.resource.LinkFormattable;
 import leshan.client.lwm2m.resource.LwM2mObject;
 import leshan.client.lwm2m.resource.LwM2mObjectInstance;

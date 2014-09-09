@@ -3,20 +3,20 @@ package leshan.client.lwm2m.operation;
 import java.util.Arrays;
 import java.util.Objects;
 
-import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
+import leshan.client.lwm2m.response.OperationResponseCode;
 
 public abstract class BaseLwM2mResponse implements LwM2mResponse {
 
-	private final ResponseCode code;
+	private final OperationResponseCode code;
 	private final byte[] payload;
 
-	public BaseLwM2mResponse(final ResponseCode code, final byte[] payload) {
+	public BaseLwM2mResponse(final OperationResponseCode code, final byte[] payload) {
 		this.code = code;
 		this.payload = payload;
 	}
 
 	@Override
-	public ResponseCode getCode() {
+	public OperationResponseCode getCode() {
 		return code;
 	}
 
@@ -27,7 +27,7 @@ public abstract class BaseLwM2mResponse implements LwM2mResponse {
 
 	@Override
 	public boolean isSuccess() {
-		return ResponseCode.isSuccess(code);
+		return OperationResponseCode.isSuccess(code);
 	}
 
 	@Override

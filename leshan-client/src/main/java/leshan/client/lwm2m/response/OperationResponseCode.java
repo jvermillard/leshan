@@ -76,15 +76,15 @@ public enum OperationResponseCode {
 	}
 
 	public static boolean isSuccess(final OperationResponseCode code) {
-		return ResponseCode.isSuccess(ResponseCode.valueOf(code.responseCode.value));
+		return ResponseCode.isSuccess(code.responseCode);
 	}
 
 	public static boolean isClientError(final OperationResponseCode code) {
-		return ResponseCode.isClientError(ResponseCode.valueOf(code.responseCode.value));
+		return ResponseCode.isClientError(code.responseCode);
 	}
 
 	public static boolean isServerError(final OperationResponseCode code) {
-		return ResponseCode.isServerError(ResponseCode.valueOf(code.responseCode.value));
+		return ResponseCode.isServerError(code.responseCode);
 	}
 
 	public static String generateReasonPhrase(final OperationResponseCode code, final InterfaceTypes interfaceType, final OperationTypes operationType) {

@@ -5,7 +5,6 @@ import static ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.DELETED;
 
 import java.util.Map.Entry;
 
-import leshan.client.lwm2m.operation.CaliforniumBasedLwM2mExchange;
 import leshan.client.lwm2m.resource.LinkFormattable;
 import leshan.client.lwm2m.resource.LwM2mObjectInstance;
 import leshan.client.lwm2m.resource.LwM2mResource;

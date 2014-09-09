@@ -1,16 +1,16 @@
 package leshan.client.lwm2m.operation;
 
-import static ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT;
-import static ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.METHOD_NOT_ALLOWED;
-import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
+import static leshan.client.lwm2m.response.OperationResponseCode.CONTENT;
+import static leshan.client.lwm2m.response.OperationResponseCode.METHOD_NOT_ALLOWED;
+import leshan.client.lwm2m.response.OperationResponseCode;
 
 public class ReadResponse extends BaseLwM2mResponse {
 
-	private ReadResponse(final ResponseCode code, final byte[] payload) {
+	private ReadResponse(final OperationResponseCode code, final byte[] payload) {
 		super(code, payload);
 	}
 
-	private ReadResponse(final ResponseCode code) {
+	private ReadResponse(final OperationResponseCode code) {
 		this(code, new byte[0]);
 	}
 
