@@ -1,13 +1,10 @@
 package leshan.client.lwm2m.californium;
 
 import static ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT;
-
-import java.util.concurrent.atomic.AtomicInteger;
-
 import leshan.client.lwm2m.resource.LinkFormattable;
 import leshan.client.lwm2m.resource.LwM2mObject;
+import leshan.client.lwm2m.resource.LwM2mObjectDefinition;
 import leshan.client.lwm2m.resource.LwM2mObjectInstance;
-import leshan.client.lwm2m.resource.LwM2mResourceDefinition;
 import ch.ethz.inf.vs.californium.coap.LinkFormat;
 import ch.ethz.inf.vs.californium.coap.MediaTypeRegistry;
 import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
@@ -18,21 +15,17 @@ public class ClientObject extends ResourceBase implements LinkFormattable {
 
 	private final LwM2mObject lwm2mObject;
 
-	public ClientObject(final int objectId, final LwM2mResourceDefinition... definitions) {
-		super(Integer.toString(objectId));
-		if (definitions == null || definitions.length == 0) {
-			throw new IllegalArgumentException("Must provide at least one resource definition");
-		}
-		new AtomicInteger(0);
-		lwm2mObject = new LwM2mObject(definitions);
+	public ClientObject(final LwM2mObjectDefinition def) {
+		super(Integer.toString(def.getId()));
+
+		lwm2mObject = new LwM2mObject(def);
 	}
 
 	@Override
 	public void handleGET(final CoapExchange exchange) {
 		if(exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_LINK_FORMAT){
 			handleDiscover(exchange);
-		}
-		else{
+		} else {
 			handleRead(exchange);
 		}
 	}

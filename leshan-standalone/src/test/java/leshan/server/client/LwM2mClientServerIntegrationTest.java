@@ -56,6 +56,9 @@ public abstract class LwM2mClientServerIntegrationTest {
 	protected static final int EXECUTABLE_RESOURCE_ID = 6;
 	protected static final int INVALID_RESOURCE_ID = 9;
 
+	protected static final int BROKEN_OBJECT_ID = GOOD_OBJECT_ID + 1;
+	protected static final int BROKEN_RESOURCE_ID = 7;
+
 	protected static final int BAD_OBJECT_ID = 1000;
 	protected static final String ENDPOINT = "epflwmtm";
 	private static final int CLIENT_PORT = 44022;
@@ -98,11 +101,15 @@ public abstract class LwM2mClientServerIntegrationTest {
 	}
 
 	protected LwM2mClient createClient() {
+		final ReadWriteListenerWithBrokenWrite brokenResourceListener = new ReadWriteListenerWithBrokenWrite();
+
 		final LwM2mObjectDefinition objectOne = new LwM2mObjectDefinition(GOOD_OBJECT_ID,
-				new SingleResourceDefinition(FIRST_RESOURCE_ID, firstResource, true),
-				new SingleResourceDefinition(SECOND_RESOURCE_ID, secondResource, true),
-				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executableResource, false));
-		return new LwM2mClient(objectOne);
+				new SingleResourceDefinition(FIRST_RESOURCE_ID, firstResource, true, true),
+				new SingleResourceDefinition(SECOND_RESOURCE_ID, secondResource, true, true),
+				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executableResource, false, false));
+		final LwM2mObjectDefinition objectTwo = new LwM2mObjectDefinition(BROKEN_OBJECT_ID,
+				new SingleResourceDefinition(BROKEN_RESOURCE_ID, brokenResourceListener, true, true));
+		return new LwM2mClient(objectOne, objectTwo);
 	}
 
 	@After
@@ -320,7 +327,7 @@ public abstract class LwM2mClientServerIntegrationTest {
 
 		@Override
 		public void write(final LwM2mExchange exchange) {
-			exchange.respond(WriteResponse.failure());
+			exchange.respond(WriteResponse.notAllowed());
 		}
 
 		@Override

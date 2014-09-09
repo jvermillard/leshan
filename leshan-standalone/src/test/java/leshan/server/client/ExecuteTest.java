@@ -8,7 +8,6 @@ import leshan.server.lwm2m.message.ContentFormat;
 import leshan.server.lwm2m.message.ExecRequest;
 import leshan.server.lwm2m.message.ResponseCode;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class ExecuteTest extends LwM2mClientServerIntegrationTest {
@@ -25,7 +24,6 @@ public class ExecuteTest extends LwM2mClientServerIntegrationTest {
 		assertEmptyResponse(response, ResponseCode.METHOD_NOT_ALLOWED);
 	}
 
-	@Ignore
 	@Test
 	public void canExecuteResource() {
 		register();

@@ -2,6 +2,7 @@ package leshan.client.lwm2m.operation;
 
 import static leshan.client.lwm2m.response.OperationResponseCode.BAD_REQUEST;
 import static leshan.client.lwm2m.response.OperationResponseCode.CHANGED;
+import static leshan.client.lwm2m.response.OperationResponseCode.METHOD_NOT_ALLOWED;
 import leshan.client.lwm2m.response.OperationResponseCode;
 
 public class WriteResponse extends BaseLwM2mResponse {
@@ -16,6 +17,10 @@ public class WriteResponse extends BaseLwM2mResponse {
 
 	public static WriteResponse failure() {
 		return new WriteResponse(BAD_REQUEST);
+	}
+
+	public static WriteResponse notAllowed() {
+		return new WriteResponse(METHOD_NOT_ALLOWED);
 	}
 
 }

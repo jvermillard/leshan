@@ -34,7 +34,7 @@ public class LwM2mClient {
 				throw new IllegalArgumentException("Trying to load Client Object of name '" + def.getId() + "' when one was already added.");
 			}
 
-			clientSideServer.add(new ClientObject(def.getId(), def.getDefinitions()));
+			clientSideServer.add(new ClientObject(def));
 		}
 	}
 

@@ -1,7 +1,6 @@
 package leshan.client.lwm2m.resource;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -15,15 +14,12 @@ import leshan.client.lwm2m.operation.ReadResponse;
 
 public class LwM2mObject {
 
-	private final Map<Integer, LwM2mResourceDefinition> definitionMap;
+	private final LwM2mObjectDefinition definition;
 	private final AtomicInteger instanceCounter;
 	private final Map<Integer, LwM2mObjectInstance> instances;
 
-	public LwM2mObject(final LwM2mResourceDefinition... definitions) {
-		definitionMap = new HashMap<>();
-		for (final LwM2mResourceDefinition def : definitions) {
-			definitionMap.put(def.getId(), def);
-		}
+	public LwM2mObject(final LwM2mObjectDefinition definition) {
+		this.definition = definition;
 		this.instanceCounter = new AtomicInteger(0);
 		this.instances = new ConcurrentHashMap<>();
 	}
@@ -46,7 +42,7 @@ public class LwM2mObject {
 
 	public void handleCreate(final LwM2mCreateExchange exchange) {
 		final int newInstanceId = getNewInstanceId(exchange);
-		final LwM2mObjectInstance instance = new LwM2mObjectInstance(newInstanceId, definitionMap);
+		final LwM2mObjectInstance instance = new LwM2mObjectInstance(newInstanceId, definition);
 		exchange.setObjectInstance(instance);
 		instance.handleCreate(exchange);
 	}

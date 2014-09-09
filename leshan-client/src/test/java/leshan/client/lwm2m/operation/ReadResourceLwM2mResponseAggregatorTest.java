@@ -24,7 +24,7 @@ public class ReadResourceLwM2mResponseAggregatorTest {
 		final int resourceId = 45;
 		final byte[] resourceValue = "value".getBytes();
 
-		final LwM2mResponseAggregator aggr = new LwM2mResourceReadResponseAggregator(coapExchange, numExpectedResults);
+		final LwM2mResponseAggregator aggr = new LwM2mObjectInstanceReadResponseAggregator(coapExchange, numExpectedResults);
 		final LwM2mExchange exchange = new AggregatedLwM2mExchange(aggr, resourceId);
 
 		exchange.respond(ReadResponse.success(resourceValue));
@@ -42,7 +42,7 @@ public class ReadResourceLwM2mResponseAggregatorTest {
 		final byte[] resourceValue1 = "hello".getBytes();
 		final byte[] resourceValue2 = "world".getBytes();
 
-		final LwM2mResponseAggregator aggr = new LwM2mResourceReadResponseAggregator(coapExchange, numExpectedResults);
+		final LwM2mResponseAggregator aggr = new LwM2mObjectInstanceReadResponseAggregator(coapExchange, numExpectedResults);
 		final LwM2mExchange exchange1 = new AggregatedLwM2mExchange(aggr, resourceId1);
 		final LwM2mExchange exchange2 = new AggregatedLwM2mExchange(aggr, resourceId2);
 
@@ -61,7 +61,7 @@ public class ReadResourceLwM2mResponseAggregatorTest {
 		final int resourceId = 45;
 		final byte[] resourceValue = "hello".getBytes();
 
-		final LwM2mResponseAggregator aggr = new LwM2mResourceReadResponseAggregator(coapExchange, numExpectedResults);
+		final LwM2mResponseAggregator aggr = new LwM2mObjectInstanceReadResponseAggregator(coapExchange, numExpectedResults);
 		final LwM2mExchange exchange = new AggregatedLwM2mExchange(aggr, resourceId);
 
 		exchange.respond(ReadResponse.success(resourceValue));

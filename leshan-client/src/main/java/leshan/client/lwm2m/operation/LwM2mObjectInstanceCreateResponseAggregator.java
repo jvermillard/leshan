@@ -3,11 +3,11 @@ package leshan.client.lwm2m.operation;
 import java.util.Collection;
 import java.util.Map;
 
-public class CreateResponseAggregator extends LwM2mResponseAggregator {
+public class LwM2mObjectInstanceCreateResponseAggregator extends LwM2mResponseAggregator {
 
 	private final int instanceId;
 
-	public CreateResponseAggregator(final LwM2mCreateExchange exchange,
+	public LwM2mObjectInstanceCreateResponseAggregator(final LwM2mCreateExchange exchange,
 			final int numExpectedResults, final int instanceId) {
 		super(exchange, numExpectedResults);
 		this.instanceId = instanceId;
