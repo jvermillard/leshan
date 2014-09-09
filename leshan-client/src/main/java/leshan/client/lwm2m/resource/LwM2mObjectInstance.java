@@ -53,8 +53,7 @@ public class LwM2mObjectInstance {
 		}
 	}
 
-	private boolean hasAllRequiredKeys(final Map<Integer, LwM2mResourceDefinition> definitionMap,
-			final Tlv[] tlvs) {
+	private boolean hasAllRequiredKeys(final Map<Integer, LwM2mResourceDefinition> definitionMap, final Tlv[] tlvs) {
 		final Set<Integer> resourceIds = new HashSet<>();
 		for(final Tlv tlv : tlvs) {
 			resourceIds.add(tlv.getIdentifier());
