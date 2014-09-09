@@ -18,7 +18,12 @@ public class ReadResponse extends BaseLwM2mResponse {
 		return new ReadResponse(CONTENT, readValue);
 	}
 
+	// TODO Evaluate whether this needs to be used
 	public static ReadResponse failure() {
+		return new ReadResponse(METHOD_NOT_ALLOWED);
+	}
+
+	public static ReadResponse notAllowed() {
 		return new ReadResponse(METHOD_NOT_ALLOWED);
 	}
 

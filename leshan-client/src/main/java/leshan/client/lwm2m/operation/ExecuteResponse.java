@@ -14,7 +14,12 @@ public class ExecuteResponse extends BaseLwM2mResponse {
 		return new ExecuteResponse(CHANGED);
 	}
 
+	// TODO Evaluate whether this needs to be used
 	public static ExecuteResponse failure() {
+		return new ExecuteResponse(METHOD_NOT_ALLOWED);
+	}
+
+	public static ExecuteResponse notAllowed() {
 		return new ExecuteResponse(METHOD_NOT_ALLOWED);
 	}
 

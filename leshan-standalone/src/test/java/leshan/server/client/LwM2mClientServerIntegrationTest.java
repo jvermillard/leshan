@@ -18,8 +18,7 @@ import leshan.client.lwm2m.operation.ReadResponse;
 import leshan.client.lwm2m.operation.WriteResponse;
 import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.resource.LwM2mObjectDefinition;
-import leshan.client.lwm2m.resource.LwM2mResource;
-import leshan.client.lwm2m.resource.Notifier;
+import leshan.client.lwm2m.resource.SingleLwM2mResource;
 import leshan.client.lwm2m.resource.SingleResourceDefinition;
 import leshan.server.lwm2m.LwM2mServer;
 import leshan.server.lwm2m.bootstrap.BootstrapStoreImpl;
@@ -238,16 +237,12 @@ public abstract class LwM2mClientServerIntegrationTest {
 		assertTrue(payload == null || payload.length == 0);
 	}
 
-	public class ValueResource implements LwM2mResource {
+	public class ValueResource extends SingleLwM2mResource {
 
 		private String value = "blergs";
-		private Notifier notifier;
 
 		public void setValue(final String newValue) {
 			value = newValue;
-			if(notifier != null){
-				notifier.notify(ReadResponse.success(value.getBytes()));
-			}
 		}
 
 		public String getValue() {
@@ -255,40 +250,25 @@ public abstract class LwM2mClientServerIntegrationTest {
 		}
 
 		@Override
-		public void write(final LwM2mExchange exchange) {
+		public void handleWrite(final LwM2mExchange exchange) {
 			setValue(new String(exchange.getRequestPayload()));
 
 			exchange.respond(WriteResponse.success());
 		}
 
 		@Override
-		public void read(final LwM2mExchange exchange) {
+		public void handleRead(final LwM2mExchange exchange) {
 			exchange.respond(ReadResponse.success(value.getBytes()));
-		}
-
-		@Override
-		public void observe(final Notifier notifier) {
-			this.notifier = notifier;
-		}
-
-		@Override
-		public void execute(final LwM2mExchange exchange) {
-			exchange.respond(ExecuteResponse.failure());
-		}
-
-		@Override
-		public boolean isReadable() {
-			return true;
 		}
 
 	}
 
-	public class ReadWriteListenerWithBrokenWrite implements LwM2mResource {
+	public class ReadWriteListenerWithBrokenWrite extends SingleLwM2mResource {
 
 		private String value;
 
 		@Override
-		public void write(final LwM2mExchange exchange) {
+		public void handleWrite(final LwM2mExchange exchange) {
 			if (value == null) {
 				value = new String(exchange.getRequestPayload());
 				exchange.respond(WriteResponse.success());
@@ -297,51 +277,17 @@ public abstract class LwM2mClientServerIntegrationTest {
 		}
 
 		@Override
-		public void read(final LwM2mExchange exchange) {
+		public void handleRead(final LwM2mExchange exchange) {
 			exchange.respond(ReadResponse.success(value.getBytes()));
-		}
-
-		@Override
-		public void observe(final Notifier notifier) {
-			notifier.notify(ReadResponse.success(value.getBytes()));
-		}
-
-		@Override
-		public void execute(final LwM2mExchange exchange) {
-			exchange.respond(ExecuteResponse.failure());
-		}
-
-		@Override
-		public boolean isReadable() {
-			return true;
 		}
 
 	}
 
-	public class ExecutableResource implements LwM2mResource {
+	public class ExecutableResource extends SingleLwM2mResource {
 
 		@Override
-		public void read(final LwM2mExchange exchange) {
-			exchange.respond(ReadResponse.failure());
-		}
-
-		@Override
-		public void write(final LwM2mExchange exchange) {
-			exchange.respond(WriteResponse.notAllowed());
-		}
-
-		@Override
-		public void execute(final LwM2mExchange exchange) {
+		public void handleExecute(final LwM2mExchange exchange) {
 			exchange.respond(ExecuteResponse.success());
-		}
-
-		@Override
-		public void observe(final Notifier notifier) {
-		}
-
-		@Override
-		public boolean isReadable() {
-			return false;
 		}
 
 	}
