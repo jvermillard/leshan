@@ -8,4 +8,6 @@ public interface LwM2mResponse {
 
 	public byte[] getResponsePayload();
 
+	public boolean isSuccess();
+
 }

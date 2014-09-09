@@ -1,46 +1,21 @@
 package leshan.client.lwm2m.operation;
 
+import static ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.BAD_REQUEST;
+import static ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CHANGED;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 
-public abstract class WriteResponse implements LwM2mResponse {
+public class WriteResponse extends BaseLwM2mResponse {
 
-	private WriteResponse() {
+	private WriteResponse(final ResponseCode code) {
+		super(code, new byte[0]);
 	}
 
 	public static WriteResponse success() {
-		return new SuccessResponse();
+		return new WriteResponse(CHANGED);
 	}
 
 	public static WriteResponse failure() {
-		return new FailureResponse();
-	}
-
-	private static class SuccessResponse extends WriteResponse {
-
-		@Override
-		public ResponseCode getCode() {
-			return ResponseCode.CHANGED;
-		}
-
-		@Override
-		public byte[] getResponsePayload() {
-			return new byte[0];
-		}
-
-	}
-
-	private static class FailureResponse extends WriteResponse {
-
-		@Override
-		public ResponseCode getCode() {
-			return ResponseCode.BAD_REQUEST;
-		}
-
-		@Override
-		public byte[] getResponsePayload() {
-			return new byte[0];
-		}
-
+		return new WriteResponse(BAD_REQUEST);
 	}
 
 }

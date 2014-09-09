@@ -4,6 +4,7 @@ import static ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import leshan.client.lwm2m.operation.CaliforniumBasedLwM2mCreateExchange;
 import leshan.client.lwm2m.operation.CaliforniumBasedLwM2mExchange;
 import leshan.client.lwm2m.resource.LinkFormattable;
 import leshan.client.lwm2m.resource.LwM2mObject;
@@ -15,7 +16,7 @@ import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
 import ch.ethz.inf.vs.californium.server.resources.Resource;
 import ch.ethz.inf.vs.californium.server.resources.ResourceBase;
 
-public class ClientObject extends ResourceBase implements LinkFormattable{
+public class ClientObject extends ResourceBase implements LinkFormattable {
 
 	private final LwM2mObject lwm2mObject;
 
@@ -48,11 +49,22 @@ public class ClientObject extends ResourceBase implements LinkFormattable{
 
 	@Override
 	public void handlePOST(final CoapExchange exchange) {
-		final LwM2mObjectInstance instance = lwm2mObject.createInstance(new CaliforniumBasedLwM2mExchange(exchange));
+		final Callback<LwM2mObjectInstance> callback = new Callback<LwM2mObjectInstance>() {
 
-		if (instance != null) {
-			add(new ClientObjectInstance(instance.getId(), instance));
-		}
+			@Override
+			public void onSuccess(final LwM2mObjectInstance newInstance) {
+				onSuccessfulCreate(newInstance);
+			}
+
+			@Override
+			public void onFailure() {
+			}
+		};
+		lwm2mObject.handleCreate(new CaliforniumBasedLwM2mCreateExchange(exchange, callback));
+	}
+
+	public void onSuccessfulCreate(final LwM2mObjectInstance instance) {
+		add(new ClientObjectInstance(instance.getId(), instance));
 	}
 
 	@Override

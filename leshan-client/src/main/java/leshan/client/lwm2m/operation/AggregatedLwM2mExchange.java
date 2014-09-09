@@ -4,6 +4,7 @@ public class AggregatedLwM2mExchange implements LwM2mExchange {
 
 	private final LwM2mResponseAggregator aggr;
 	private final int id;
+	private byte[] payload;
 
 	public AggregatedLwM2mExchange(final LwM2mResponseAggregator aggr, final int id) {
 		this.aggr = aggr;
@@ -17,7 +18,11 @@ public class AggregatedLwM2mExchange implements LwM2mExchange {
 
 	@Override
 	public byte[] getRequestPayload() {
-		return null;
+		return payload;
+	}
+
+	public void setRequestPayload(final byte[] newPayload) {
+		payload = newPayload;
 	}
 
 	@Override

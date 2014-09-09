@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import leshan.client.lwm2m.operation.AggregatedLwM2mExchange;
+import leshan.client.lwm2m.operation.LwM2mCreateExchange;
 import leshan.client.lwm2m.operation.LwM2mExchange;
 import leshan.client.lwm2m.operation.LwM2mObjectReadResponseAggregator;
 import leshan.client.lwm2m.operation.LwM2mResponseAggregator;
@@ -43,13 +44,13 @@ public class LwM2mObject {
 		}
 	}
 
-	public LwM2mObjectInstance createInstance(final LwM2mExchange exchange) {
+	public void handleCreate(final LwM2mCreateExchange exchange) {
 		final int newInstanceId = getNewInstanceId(exchange);
 		final LwM2mObjectInstance instance = LwM2mObjectInstance.instantiate(newInstanceId, exchange, definitionMap);
 		if (instance != null) {
 			instances.put(newInstanceId, instance);
 		}
-		return instance;
+		exchange.setObjectInstance(instance);
 	}
 
 	private int getNewInstanceId(final LwM2mExchange exchange) {
