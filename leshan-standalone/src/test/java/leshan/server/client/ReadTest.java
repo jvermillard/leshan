@@ -13,9 +13,9 @@ public class ReadTest extends LwM2mClientServerIntegrationTest {
 	@Override
 	protected LwM2mClient createClient() {
 		final LwM2mObjectDefinition objectOne = new LwM2mObjectDefinition(GOOD_OBJECT_ID,
-				new SingleResourceDefinition(FIRST_RESOURCE_ID, firstResource),
-				new SingleResourceDefinition(SECOND_RESOURCE_ID, secondResource),
-				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executableResource));
+				new SingleResourceDefinition(FIRST_RESOURCE_ID, firstResource, true),
+				new SingleResourceDefinition(SECOND_RESOURCE_ID, secondResource, true),
+				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executableResource, false));
 		return new LwM2mClient(objectOne);
 	}
 

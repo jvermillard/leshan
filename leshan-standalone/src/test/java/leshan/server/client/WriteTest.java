@@ -24,11 +24,11 @@ public class WriteTest extends LwM2mClientServerIntegrationTest {
 		final ReadWriteListenerWithBrokenWrite brokenResourceListener = new ReadWriteListenerWithBrokenWrite();
 
 		final LwM2mObjectDefinition objectOne = new LwM2mObjectDefinition(GOOD_OBJECT_ID,
-				new SingleResourceDefinition(FIRST_RESOURCE_ID, firstResource),
-				new SingleResourceDefinition(SECOND_RESOURCE_ID, secondResource),
-				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executableResource));
+				new SingleResourceDefinition(FIRST_RESOURCE_ID, firstResource, true),
+				new SingleResourceDefinition(SECOND_RESOURCE_ID, secondResource, true),
+				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executableResource, false));
 		final LwM2mObjectDefinition objectTwo = new LwM2mObjectDefinition(BROKEN_OBJECT_ID,
-				new SingleResourceDefinition(BROKEN_RESOURCE_ID, brokenResourceListener));
+				new SingleResourceDefinition(BROKEN_RESOURCE_ID, brokenResourceListener, true));
 		return new LwM2mClient(objectOne, objectTwo);
 	}
 

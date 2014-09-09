@@ -6,7 +6,6 @@ import leshan.server.lwm2m.message.ResponseCode;
 import leshan.server.lwm2m.tlv.Tlv;
 import leshan.server.lwm2m.tlv.TlvType;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class CreateTest extends LwM2mClientServerIntegrationTest {
@@ -50,7 +49,6 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
 		assertEmptyResponse(response, ResponseCode.NOT_FOUND);
 	}
 
-	@Ignore
 	@Test
 	public void cannotCreateInstanceWithoutAllRequiredResources() {
 		register();
@@ -59,6 +57,8 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
 
 		final ClientResponse response = sendCreate(values, GOOD_OBJECT_ID);
 		assertEmptyResponse(response, ResponseCode.BAD_REQUEST);
+
+		assertEmptyResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.NOT_FOUND);
 	}
 
 	@Test
@@ -71,6 +71,8 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
 
 		final ClientResponse response = sendCreate(values, GOOD_OBJECT_ID);
 		assertEmptyResponse(response, ResponseCode.METHOD_NOT_ALLOWED);
+
+		assertEmptyResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.NOT_FOUND);
 	}
 
 }

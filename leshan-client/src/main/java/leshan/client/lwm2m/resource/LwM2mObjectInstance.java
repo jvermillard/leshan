@@ -2,8 +2,10 @@ package leshan.client.lwm2m.resource;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import leshan.client.lwm2m.operation.AggregatedLwM2mExchange;
 import leshan.client.lwm2m.operation.CreateResponse;
@@ -30,6 +32,12 @@ public class LwM2mObjectInstance {
 	public void handleCreate(final LwM2mCreateExchange exchange) {
 		final byte[] payload = exchange.getRequestPayload();
 		final Tlv[] tlvs = TlvDecoder.decode(ByteBuffer.wrap(payload));
+
+		if (!hasAllRequiredKeys(definitionMap, tlvs)) {
+			exchange.respond(CreateResponse.invalidResource());
+			return;
+		}
+
 		final LwM2mResponseAggregator aggr = new CreateResponseAggregator(exchange, tlvs.length, id);
 		for (final Tlv tlv : tlvs) {
 			final LwM2mResourceDefinition def = definitionMap.get(tlv.getIdentifier());
@@ -43,6 +51,21 @@ public class LwM2mObjectInstance {
 				res.write(partialExchange);
 			}
 		}
+	}
+
+	private boolean hasAllRequiredKeys(final Map<Integer, LwM2mResourceDefinition> definitionMap,
+			final Tlv[] tlvs) {
+		final Set<Integer> resourceIds = new HashSet<>();
+		for(final Tlv tlv : tlvs) {
+			resourceIds.add(tlv.getIdentifier());
+		}
+		final Set<Entry<Integer, LwM2mResourceDefinition>> entrySet = definitionMap.entrySet();
+		for (final Entry<Integer, LwM2mResourceDefinition> entry : entrySet) {
+			if (entry.getValue().isRequired() && !resourceIds.contains(entry.getKey())) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public int getId() {

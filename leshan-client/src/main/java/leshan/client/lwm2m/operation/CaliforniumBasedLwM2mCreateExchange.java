@@ -16,7 +16,11 @@ public class CaliforniumBasedLwM2mCreateExchange extends CaliforniumBasedLwM2mEx
 
 	@Override
 	public void respond(final LwM2mResponse response) {
-		callback.onSuccess(objectInstance);
+		if (response.isSuccess()) {
+			callback.onSuccess(objectInstance);
+		} else {
+			callback.onFailure();
+		}
 		super.respond(response);
 	}
 
