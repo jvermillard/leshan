@@ -32,12 +32,20 @@ package leshan.server.lwm2m.client;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class LinkObject {
 
     private final String url;
 
     private final Map<String, Object> attributes;
+
+    private final Integer objectId;
+
+    private final Integer objectInstanceId;
+
+    private final Integer resourceId;
 
     /**
      * Creates a new link object without attributes.
@@ -60,6 +68,18 @@ public class LinkObject {
             this.attributes = Collections.unmodifiableMap(new HashMap<String, Object>(attributes));
         } else {
             this.attributes = Collections.unmodifiableMap(new HashMap<String, Object>());
+        }
+
+        Matcher mat = Pattern.compile("(/(\\d+))(/(\\d+))?(/(\\d+))?").matcher(url);
+
+        if (mat.find()) {
+            objectId = mat.group(2) == null ? null : new Integer(mat.group(2));
+            objectInstanceId = mat.group(4) == null ? null : new Integer(mat.group(4));
+            resourceId = mat.group(6) == null ? null : new Integer(mat.group(6));
+        } else {
+            objectId = null;
+            objectInstanceId = null;
+            resourceId = null;
         }
     }
 
@@ -84,5 +104,17 @@ public class LinkObject {
     @Override
     public String toString() {
         return String.format("LinkObject [url=%s, attributes=%s]", url, attributes);
+    }
+
+    public Integer getObjectId() {
+        return objectId;
+    }
+
+    public Integer getObjectInstanceId() {
+        return objectInstanceId;
+    }
+
+    public Integer getResourceId() {
+        return resourceId;
     }
 }

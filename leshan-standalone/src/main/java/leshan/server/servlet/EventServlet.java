@@ -158,7 +158,8 @@ public class EventServlet extends HttpServlet implements EventListener {
         
         Collection<Continuation> disconnected = new ArrayList<>();
         for (Continuation c : continuations) {
-            if (endpoint.equals(c.getAttribute(QUERY_PARAM_ENDPOINT)) || !EventType.EVENT_NOTIFICATION.equals(eventType)) {
+            Object endpointAttribute = c.getAttribute(QUERY_PARAM_ENDPOINT);
+            if (endpointAttribute == null || endpointAttribute.equals(endpoint)) {
                 try {
                     OutputStream output = c.getServletResponse().getOutputStream();
                     output.write(EVENT);

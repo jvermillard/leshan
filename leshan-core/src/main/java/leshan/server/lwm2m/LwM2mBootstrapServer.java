@@ -31,17 +31,11 @@ package leshan.server.lwm2m;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.HashSet;
-import java.util.Set;
 
-import leshan.server.lwm2m.client.ClientRegistry;
-import leshan.server.lwm2m.message.RequestHandler;
-import leshan.server.lwm2m.message.californium.CaliforniumBasedRequestHandler;
-import leshan.server.lwm2m.observation.ObservationRegistry;
-import leshan.server.lwm2m.resource.RegisterResource;
+import leshan.server.lwm2m.bootstrap.BootstrapStore;
+import leshan.server.lwm2m.resource.BootstrapResource;
 import leshan.server.lwm2m.security.SecureEndpoint;
 import leshan.server.lwm2m.security.SecurityRegistry;
-import leshan.server.lwm2m.security.SecurityStore;
 
 import org.apache.commons.lang.Validate;
 import org.eclipse.californium.scandium.DTLSConnector;
@@ -53,20 +47,11 @@ import ch.ethz.inf.vs.californium.network.Endpoint;
 import ch.ethz.inf.vs.californium.server.Server;
 
 /**
- * A Lightweight M2M server.
- * <p>
- * This CoAP server defines a /rd resources as described in the CoRE RD specification. A {@link ClientRegistry} must be
- * provided to host the description of all the registered LW-M2M clients.
- * </p>
- * <p>
- * A {@link RequestHandler} is provided to perform server-initiated requests to LW-M2M clients.
- * </p>
+ * A Lightweight M2M server, serving bootstrap information on /bs.
  */
-public class LwM2mServer {
+public class LwM2mBootstrapServer {
 
-    private final Server coapServer;
-
-    private static final Logger LOG = LoggerFactory.getLogger(LwM2mServer.class);
+    private final static Logger LOG = LoggerFactory.getLogger(LwM2mBootstrapServer.class);
 
     /** IANA assigned UDP port for CoAP (so for LWM2M) */
     public static final int PORT = 5683;
@@ -74,29 +59,17 @@ public class LwM2mServer {
     /** IANA assigned UDP port for CoAP with DTLS (so for LWM2M) */
     public static final int PORT_DTLS = 5684;
 
-    private final RequestHandler requestHandler;
+    private final Server coapServer;
 
-    /**
-     * Initialize a server which will bind to default UDP port for CoAP (5684).
-     * 
-     * @param clientRegistry the client registry
-     */
-    public LwM2mServer(ClientRegistry clientRegistry, SecurityStore securityRegistry,
-            ObservationRegistry observationRegistry) {
+    public LwM2mBootstrapServer(BootstrapStore bsStore, SecurityRegistry securityRegistry) {
         this(new InetSocketAddress((InetAddress) null, PORT), new InetSocketAddress((InetAddress) null, PORT_DTLS),
-                clientRegistry, securityRegistry, observationRegistry);
+                bsStore, securityRegistry);
+
     }
 
-    /**
-     * Initialize a server which will bind to the specified address and port.
-     * 
-     * @param localAddress the address to bind the CoAP server.
-     * @param clientRegistry the client registry
-     */
-    public LwM2mServer(InetSocketAddress localAddress, InetSocketAddress localAddressSecure,
-            ClientRegistry clientRegistry, SecurityStore securityRegistry, ObservationRegistry observationRegistry) {
-        Validate.notNull(clientRegistry, "Client registry must not be null");
-        Validate.notNull(localAddress, "IP address cannot be null");
+    public LwM2mBootstrapServer(InetSocketAddress localAddress, InetSocketAddress localAddressSecure,
+            BootstrapStore bsStore, SecurityRegistry securityRegistry) {
+        Validate.notNull(bsStore, "bootstrap store must not be null");
 
         // init CoAP server
         coapServer = new Server();
@@ -105,28 +78,15 @@ public class LwM2mServer {
 
         // init DTLS server
 
-        if (securityRegistry == null) {
-            securityRegistry = new SecurityRegistry();
-        }
-
         DTLSConnector connector = new DTLSConnector(localAddressSecure, null);
         connector.getConfig().setServerPsk(securityRegistry);
 
         Endpoint secureEndpoint = new SecureEndpoint(connector);
         coapServer.addEndpoint(secureEndpoint);
 
-        // define /rd resource
-        RegisterResource rdResource = new RegisterResource(clientRegistry, securityRegistry);
-        coapServer.add(rdResource);
-
-        Set<Endpoint> endpoints = new HashSet<>();
-        endpoints.add(endpoint);
-        endpoints.add(secureEndpoint);
-        CaliforniumBasedRequestHandler handler = new CaliforniumBasedRequestHandler(endpoints, observationRegistry, 0);
-        // register the request handler as listener in order to cancel
-        // observations and free up resources when clients unregister
-        clientRegistry.addListener(handler);
-        requestHandler = handler;
+        // define /bs ressource
+        BootstrapResource bsResource = new BootstrapResource(bsStore);
+        coapServer.add(bsResource);
     }
 
     /**
@@ -149,9 +109,5 @@ public class LwM2mServer {
      */
     public void destroy() {
         coapServer.destroy();
-    }
-
-    public RequestHandler getRequestHandler() {
-        return requestHandler;
     }
 }

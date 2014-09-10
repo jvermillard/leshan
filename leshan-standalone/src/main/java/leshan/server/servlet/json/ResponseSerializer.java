@@ -59,6 +59,7 @@ public class ResponseSerializer implements JsonSerializer<ClientResponse> {
                 Object value = null;
                 ClientResponse cResponse = (ClientResponse) src;
                 if (cResponse.getCode() == ResponseCode.CONTENT) {
+                    String format = cResponse.getFormat().toString();
                     switch (cResponse.getFormat()) {
                     case TLV:
                         value = this.tlvDecoder.decode(ByteBuffer.wrap(cResponse.getContent()));
@@ -73,6 +74,7 @@ public class ResponseSerializer implements JsonSerializer<ClientResponse> {
                         break;
                     }
                     element.add("value", context.serialize(value));
+                    element.add("type", context.serialize(format));
                 }
             }
             return element;

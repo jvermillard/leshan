@@ -56,7 +56,7 @@ Connect on Leshan UI: http://localhost:8080
 
 Leshan provides a very simple UI  to get the list of connected clients and interact with clients resources.
 
-Now you can register your LWM2M client like [Eclipse Wakaama](http://eclipse.org/wakaama)
+Now you can register your LWM2M client like [Eclipse Wakaama](http://eclipse.org/wakaama) or its lua binding [lualwm2m] (https://github.com/sbernard31/lualwm2m).
 
 The list of the registered clients: http://localhost:8080/api/clients
 

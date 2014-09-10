@@ -1,3 +1,9 @@
+/*!
+ * Copyright (c) 2013-2014, Sierra Wireless
+ * Released under the BSD license
+ * https://raw.githubusercontent.com/jvermillard/leshan/master/LICENSE
+ */
+
 angular.module('modalInstanceControllers', [])
 
 .controller('modalInstanceController',[
@@ -40,9 +46,7 @@ angular.module('modalInstanceControllers', [])
         // Define button function 
         $scope.submit = function() {
             $scope.$broadcast('show-errors-check-validity');
-            console.log("submit")
             if ($scope.form.$valid){
-                console.log("valid")
                 $modalInstance.close($scope.instance);
             }
         };

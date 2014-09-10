@@ -1,3 +1,9 @@
+/*!
+ * Copyright (c) 2013-2014, Sierra Wireless
+ * Released under the BSD license
+ * https://raw.githubusercontent.com/jvermillard/leshan/master/LICENSE
+ */
+
 angular.module('instanceDirectives', [])
 
 .directive('instance', function ($compile, $routeParams, $http, dialog,$filter, lwResources, $modal) {
@@ -34,7 +40,15 @@ angular.module('instanceDirectives', [])
                         for (var i in data.value) {
                             var tlvresource = data.value[i];
                             resource = lwResources.addResource(scope.parent, scope.instance, tlvresource.id, null)
-                            resource.value = tlvresource.value;
+                            if (tlvresource.type == "MULTIPLE_RESOURCE"){
+                                var tab= new Array();
+                                for (var i in tlvresource.resources){
+                                    tab.push(tlvresource.resources[i].value)
+                                }
+                                resource.value = tab.join(", ");
+                            }else{
+                                resource.value = tlvresource.value;
+                            }
                             resource.valuesupposed = false;
                             resource.tooltip = formattedDate;
                         }

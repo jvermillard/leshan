@@ -52,6 +52,7 @@
     <modules>
         <module>leshan-core</module>
         <module>leshan-standalone</module>
+        <module>leshan-bs-server</module>
     </modules>
 
     <scm>
@@ -258,6 +259,22 @@
                 <artifactId>commons-io</artifactId>
                 <version>2.4</version>
             </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-webapp</artifactId>
+                <version>9.1.4.v20140401</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-continuation</artifactId>
+                <version>9.1.4.v20140401</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>2.2.4</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-core</artifactId>

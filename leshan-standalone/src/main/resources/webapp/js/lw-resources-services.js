@@ -1,3 +1,9 @@
+/*!
+ * Copyright (c) 2013-2014, Sierra Wireless
+ * Released under the BSD license
+ * https://raw.githubusercontent.com/jvermillard/leshan/master/LICENSE
+ */
+
 var myModule = angular.module('lwResourcesServices', []);
 
 myModule.factory('lwResources', function() {
@@ -174,13 +180,16 @@ var addResource = function(object, instance, resourceId, attributes) {
 
     // create resource if necessary
     if (resource == undefined) {
-        // create resource definition
-        var resourcedef = {
-            name : "Resource " + resourceId,
-            id : resourceId,
-            operations : "RW"
-        };
-        object.resourcedefs.push(resourcedef)
+        // create resource definition if necessary
+        var resourcedef = searchById(object.resourcedefs, resourceId);
+        if (resourcedef == undefined){
+            var resourcedef = {
+                name : "Resource " + resourceId,
+                id : resourceId,
+                operations : "RW"
+            };
+            object.resourcedefs.push(resourcedef)
+        }
 
         // create resource
         resource = {
