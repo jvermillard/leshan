@@ -9,26 +9,26 @@ public class IntegerLwM2mResource implements LwM2mResource {
 
 	@Override
 	public final void read(final LwM2mExchange exchange) {
-		handleRead(exchange);
+		handleRead(new IntegerLwM2mExchange(exchange));
 	}
 
-	protected void handleRead(final LwM2mExchange exchange) {
-		exchange.respond(ReadResponse.notAllowed());
+	protected void handleRead(final IntegerLwM2mExchange exchange) {
+		exchange.advanced().respond(ReadResponse.notAllowed());
 	}
 
 	@Override
 	public final void write(final LwM2mExchange exchange) {
 		// TODO: Add encoding if needed
 		try {
-			handleWrite(Integer.parseInt(new String(exchange.getRequestPayload())), exchange);
+			handleWrite(new IntegerLwM2mExchange(exchange));
 		} catch(final NumberFormatException e) {
 			exchange.respond(WriteResponse.badRequest());
 		}
 
 	}
 
-	protected void handleWrite(final int newValue, final LwM2mExchange exchange) {
-		exchange.respond(WriteResponse.notAllowed());
+	protected void handleWrite(final IntegerLwM2mExchange exchange) {
+		exchange.advanced().respond(WriteResponse.notAllowed());
 	}
 
 	@Override

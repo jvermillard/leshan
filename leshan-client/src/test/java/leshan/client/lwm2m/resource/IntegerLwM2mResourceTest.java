@@ -1,10 +1,7 @@
 package leshan.client.lwm2m.resource;
 
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import leshan.client.lwm2m.operation.LwM2mExchange;
@@ -14,7 +11,6 @@ import leshan.client.lwm2m.operation.WriteResponse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 public class IntegerLwM2mResourceTest {
 
@@ -27,44 +23,88 @@ public class IntegerLwM2mResourceTest {
 	}
 
 	@Test
-	public void testIntegerParsingGoodValue() {
+	public void testWriteGoodValue() {
 		final LwM2mExchange exchange = mock(LwM2mExchange.class);
 		when(exchange.getRequestPayload()).thenReturn(Integer.toString(42).getBytes());
 
-		final WriteableTestIntegerResource testResource = spy(new WriteableTestIntegerResource());
+		final ReadableWriteableTestResource testResource = new ReadableWriteableTestResource();
 		testResource.write(exchange);
 
-		verify(testResource).handleWrite(42, exchange);
+		assertEquals(42, testResource.value);
 		verify(exchange).respond(WriteResponse.success());
 	}
 
 	@Test
-	public void testIntegerParsingBadValue() {
+	public void testWriteBadValue() {
 		final LwM2mExchange exchange = mock(LwM2mExchange.class);
 		when(exchange.getRequestPayload()).thenReturn("badwolf".getBytes());
 
-		final WriteableTestIntegerResource testResource = Mockito.spy(new WriteableTestIntegerResource());
+		final ReadableWriteableTestResource testResource = new ReadableWriteableTestResource();
 		testResource.write(exchange);
 
-		verify(testResource, never()).handleWrite(anyInt(), eq(exchange));
+		assertEquals(0, testResource.value);
 		verify(exchange).respond(WriteResponse.badRequest());
 	}
 
-	private class WriteableTestIntegerResource extends IntegerLwM2mResource {
+	@Test
+	public void testRead() {
+		final LwM2mExchange exchange = mock(LwM2mExchange.class);
+
+		final ReadableWriteableTestResource testResource = new ReadableWriteableTestResource(84);
+		testResource.read(exchange);
+
+		assertEquals(84, testResource.value);
+		verify(exchange).respond(ReadResponse.success(Integer.toString(84).getBytes()));
+	}
+
+	@Test
+	public void testDefaultPermissionsRead() {
+		final LwM2mExchange exchange = mock(LwM2mExchange.class);
+
+		final DefaultTestResource testResource = new DefaultTestResource();
+		testResource.read(exchange);
+
+		verify(exchange).respond(ReadResponse.notAllowed());
+	}
+
+	@Test
+	public void testDefaultPermissionsWrite() {
+		final LwM2mExchange exchange = mock(LwM2mExchange.class);
+		when(exchange.getRequestPayload()).thenReturn("badwolf".getBytes());
+
+		final DefaultTestResource testResource = new DefaultTestResource();
+		testResource.write(exchange);
+
+		verify(exchange).respond(WriteResponse.notAllowed());
+	}
+
+	private class ReadableWriteableTestResource extends IntegerLwM2mResource {
 
 		private int value;
 
-		@Override
-		protected void handleWrite(final int newValue, final LwM2mExchange exchange) {
-			this.value = newValue;
-			exchange.respond(WriteResponse.success());
+		public ReadableWriteableTestResource(final int newValue) {
+			value = newValue;
+		}
+
+		public ReadableWriteableTestResource() {
 		}
 
 		@Override
-		protected void handleRead(final LwM2mExchange exchange) {
-			exchange.respond(ReadResponse.successWithInt(value));
+		protected void handleWrite(final IntegerLwM2mExchange exchange) {
+			this.value = exchange.getRequestPayload();
+			exchange.respondSuccess();
 		}
 
+		@Override
+		protected void handleRead(final IntegerLwM2mExchange exchange) {
+			exchange.respondContent(value);
+		}
+
+	}
+
+	private class DefaultTestResource extends IntegerLwM2mResource {
+
+		private int value;
 
 	}
 
