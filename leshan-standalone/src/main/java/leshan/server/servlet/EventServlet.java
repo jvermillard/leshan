@@ -96,7 +96,7 @@ public class EventServlet extends HttpServlet implements EventListener {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeHierarchyAdapter(Client.class, new ClientSerializer());
         this.gson = gsonBuilder.create();
-        EventDispatcher.getInstance().addEventListener(this);
+        EventDispatcher.INSTANCE.addEventListener(this);
     }
 
     @Override

@@ -123,7 +123,7 @@ public class LeshanMain {
         // root.setResourceBase(webappDirLocation);
         root.setParentLoaderPriority(true);
 
-        EventDispatcher eventDispatcher = EventDispatcher.getInstance();
+        EventDispatcher eventDispatcher = EventDispatcher.INSTANCE;
         clientRegistry.addListener(eventDispatcher);
         
         EventServlet eventServlet = new EventServlet();
