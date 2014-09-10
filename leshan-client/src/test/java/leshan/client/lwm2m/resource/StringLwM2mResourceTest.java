@@ -10,41 +10,31 @@ import leshan.client.lwm2m.operation.WriteResponse;
 
 import org.junit.Test;
 
-public class IntegerLwM2mResourceTest {
+public class StringLwM2mResourceTest {
 
 	@Test
 	public void testWriteGoodValue() {
 		final LwM2mExchange exchange = mock(LwM2mExchange.class);
-		when(exchange.getRequestPayload()).thenReturn(Integer.toString(42).getBytes());
+		final String valueToWrite = "zeus";
+		when(exchange.getRequestPayload()).thenReturn(valueToWrite.getBytes());
 
 		final ReadableWriteableTestResource testResource = new ReadableWriteableTestResource();
 		testResource.write(exchange);
 
-		assertEquals(42, testResource.value);
+		assertEquals(valueToWrite, testResource.value);
 		verify(exchange).respond(WriteResponse.success());
-	}
-
-	@Test
-	public void testWriteBadValue() {
-		final LwM2mExchange exchange = mock(LwM2mExchange.class);
-		when(exchange.getRequestPayload()).thenReturn("badwolf".getBytes());
-
-		final ReadableWriteableTestResource testResource = new ReadableWriteableTestResource(8675309);
-		testResource.write(exchange);
-
-		assertEquals(8675309, testResource.value);
-		verify(exchange).respond(WriteResponse.badRequest());
 	}
 
 	@Test
 	public void testRead() {
 		final LwM2mExchange exchange = mock(LwM2mExchange.class);
 
-		final ReadableWriteableTestResource testResource = new ReadableWriteableTestResource(84);
+		final String initialValue = "redballoon";
+		final ReadableWriteableTestResource testResource = new ReadableWriteableTestResource(initialValue);
 		testResource.read(exchange);
 
-		assertEquals(84, testResource.value);
-		verify(exchange).respond(ReadResponse.success(Integer.toString(84).getBytes()));
+		assertEquals(initialValue, testResource.value);
+		verify(exchange).respond(ReadResponse.success(initialValue.getBytes()));
 	}
 
 	@Test
@@ -68,11 +58,11 @@ public class IntegerLwM2mResourceTest {
 		verify(exchange).respond(WriteResponse.notAllowed());
 	}
 
-	private class ReadableWriteableTestResource extends IntegerLwM2mResource {
+	private class ReadableWriteableTestResource extends StringLwM2mResource {
 
-		private int value;
+		private String value;
 
-		public ReadableWriteableTestResource(final int newValue) {
+		public ReadableWriteableTestResource(final String newValue) {
 			value = newValue;
 		}
 
@@ -80,13 +70,13 @@ public class IntegerLwM2mResourceTest {
 		}
 
 		@Override
-		protected void handleWrite(final IntegerLwM2mExchange exchange) {
+		protected void handleWrite(final StringLwM2mExchange exchange) {
 			this.value = exchange.getRequestPayload();
 			exchange.respondSuccess();
 		}
 
 		@Override
-		protected void handleRead(final IntegerLwM2mExchange exchange) {
+		protected void handleRead(final StringLwM2mExchange exchange) {
 			exchange.respondContent(value);
 		}
 
