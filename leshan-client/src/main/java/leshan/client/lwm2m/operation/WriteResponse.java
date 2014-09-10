@@ -23,4 +23,8 @@ public class WriteResponse extends BaseLwM2mResponse {
 		return new WriteResponse(METHOD_NOT_ALLOWED);
 	}
 
+	public static WriteResponse badRequest() {
+		return new WriteResponse(BAD_REQUEST);
+	}
+
 }

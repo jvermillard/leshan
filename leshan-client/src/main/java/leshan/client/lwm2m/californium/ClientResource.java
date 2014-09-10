@@ -60,6 +60,8 @@ class ClientResource extends ResourceBase implements LinkFormattable, ClientObse
 	}
 
 	public void handleNormalRead(final LwM2mExchange exchange) {
+		// TODO: Put resource check for permissions
+		// TODO: Put resource check for valid op
 		lwm2mResource.read(exchange);
 	}
 

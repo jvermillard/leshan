@@ -14,7 +14,28 @@ public class ReadResponse extends BaseLwM2mResponse {
 		this(code, new byte[0]);
 	}
 
-	public static ReadResponse success(final byte[] readValue) {
+	public static ReadResponse successWithInt(final int readValue) {
+		return new ReadResponse(CONTENT, Integer.toString(readValue).getBytes());
+	}
+
+	public static ReadResponse successWithString(final String readValue) {
+		return new ReadResponse(CONTENT, readValue.getBytes());
+	}
+
+	// TODO: Type me!
+	public static ReadResponse successWithTime(final String readValue) {
+		return new ReadResponse(CONTENT, readValue.getBytes());
+	}
+
+	public static ReadResponse successWithFloat(final float readValue) {
+		return new ReadResponse(CONTENT, Float.toString(readValue).getBytes());
+	}
+
+	public static ReadResponse successWithBoolean(final boolean readValue) {
+		return new ReadResponse(CONTENT, Boolean.toString(readValue).getBytes());
+	}
+
+	public static ReadResponse successWithOpaque(final byte[] readValue) {
 		return new ReadResponse(CONTENT, readValue);
 	}
 
