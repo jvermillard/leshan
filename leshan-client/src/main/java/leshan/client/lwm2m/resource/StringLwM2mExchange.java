@@ -1,31 +1,21 @@
 package leshan.client.lwm2m.resource;
 
 import leshan.client.lwm2m.operation.LwM2mExchange;
-import leshan.client.lwm2m.operation.ReadResponse;
-import leshan.client.lwm2m.operation.WriteResponse;
 
-public class StringLwM2mExchange {
-
-	private final LwM2mExchange exchange;
+public class StringLwM2mExchange extends TypedLwM2mExchange<String> {
 
 	public StringLwM2mExchange(final LwM2mExchange exchange) {
-		this.exchange = exchange;
+		super(exchange);
 	}
 
-	public String getRequestPayload() {
-		return new String(exchange.getRequestPayload());
+	@Override
+	protected String convertFromBytes(final byte[] value) {
+		return new String(value);
 	}
 
-	public void respondContent(final String value) {
-		exchange.respond(ReadResponse.success(value.getBytes()));
-	}
-
-	public void respondSuccess() {
-		exchange.respond(WriteResponse.success());
-	}
-
-	public LwM2mExchange advanced() {
-		return exchange;
+	@Override
+	protected byte[] convertToBytes(final String value) {
+		return value.getBytes();
 	}
 
 }
