@@ -32,11 +32,20 @@ package leshan.bootstrap;
 
 import java.net.InetSocketAddress;
 
+import leshan.bootstrap.servlet.BootstrapServlet;
 import leshan.server.lwm2m.LwM2mBootstrapServer;
 import leshan.server.lwm2m.bootstrap.BootstrapStoreImpl;
 import leshan.server.lwm2m.security.SecurityRegistry;
 
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.webapp.WebAppContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class BootstrapMain {
+
+    private static final Logger LOG = LoggerFactory.getLogger(BootstrapMain.class);
 
     public static void main(String[] args) {
 
@@ -49,7 +58,7 @@ public class BootstrapMain {
         // ss.publicKeyOrId = "Bleh".getBytes();
         // ss.secretKey = "S3cr3tm3".getBytes();
         // ss.securityMode = SecurityMode.NO_SEC;
-        // ss.uri = "coaps://54.67.9.2";
+        // ss.uri = "coaps://54.67.9.2";clazz
         // ss.serverId = 1;
         //
         // bsConfig.security.put(0, ss);
@@ -79,6 +88,38 @@ public class BootstrapMain {
         }
 
         bsServer.start();
+        // now prepare and start jetty
+
+        String webPort = System.getenv("PORT");
+
+        if (webPort == null || webPort.isEmpty()) {
+            webPort = System.getProperty("PORT");
+        }
+
+        if (webPort == null || webPort.isEmpty()) {
+            webPort = "8080";
+        }
+
+        Server server = new Server(Integer.valueOf(webPort));
+        WebAppContext root = new WebAppContext();
+
+        root.setContextPath("/");
+        // root.setDescriptor(webappDirLocation + "/WEB-INF/web.xml");
+        root.setResourceBase(BootstrapMain.class.getClassLoader().getResource("webapp").toExternalForm());
+
+        // root.setResourceBase(webappDirLocation);
+        root.setParentLoaderPriority(true);
+
+        ServletHolder bsServletHolder = new ServletHolder(new BootstrapServlet(bsStore));
+        root.addServlet(bsServletHolder, "/api/bootstrap/*");
+
+        server.setHandler(root);
+
+        try {
+            server.start();
+        } catch (Exception e) {
+            LOG.error("jetty error", e);
+        }
 
     }
 }

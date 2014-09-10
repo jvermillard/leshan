@@ -29,6 +29,7 @@
  */
 package leshan.server.lwm2m.bootstrap;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -46,5 +47,9 @@ public class BootstrapStoreImpl implements BootstrapStore {
 
     public void addConfig(String endpoint, BootstrapConfig config) {
         bootstrapByEndpoint.put(endpoint, config);
+    }
+
+    public Map<String, BootstrapConfig> getBootstrapConfigs() {
+        return Collections.unmodifiableMap(bootstrapByEndpoint);
     }
 }
