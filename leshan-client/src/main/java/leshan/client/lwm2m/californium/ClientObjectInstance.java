@@ -28,16 +28,12 @@ public class ClientObjectInstance extends ResourceBase implements LinkFormattabl
 		}
 	}
 
-	public int getId() {
-		return Integer.parseInt(getName());
-	}
-
 	@Override
 	public void handleGET(final CoapExchange exchange) {
 		if(exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_LINK_FORMAT){
 			handleDiscover(exchange);
 		} else {
-			lwm2mObjectInstance.handleNormalRead(new CaliforniumBasedLwM2mExchange(exchange));
+			lwm2mObjectInstance.handleRead(new CaliforniumBasedLwM2mExchange(exchange));
 		}
 	}
 

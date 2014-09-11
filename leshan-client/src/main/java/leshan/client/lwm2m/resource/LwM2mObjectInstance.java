@@ -28,6 +28,10 @@ public class LwM2mObjectInstance {
 		this.definition = definition;
 	}
 
+	public int getId() {
+		return id;
+	}
+
 	public void handleCreate(final LwM2mCreateExchange exchange) {
 		final byte[] payload = exchange.getRequestPayload();
 		final Tlv[] tlvs = TlvDecoder.decode(ByteBuffer.wrap(payload));
@@ -57,11 +61,7 @@ public class LwM2mObjectInstance {
 		}
 	}
 
-	public int getId() {
-		return id;
-	}
-
-	public void handleNormalRead(final LwM2mExchange exchange) {
+	public void handleRead(final LwM2mExchange exchange) {
 		final LwM2mResponseAggregator aggr = new LwM2mObjectInstanceReadResponseAggregator(
 				exchange,
 				resources.size());

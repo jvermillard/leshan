@@ -36,7 +36,7 @@ public class LwM2mObject {
 				exchange,
 				instances.size());
 		for (final LwM2mObjectInstance inst : instances) {
-			inst.handleNormalRead(new AggregatedLwM2mExchange(aggr, inst.getId()));
+			inst.handleRead(new AggregatedLwM2mExchange(aggr, inst.getId()));
 		}
 	}
 
