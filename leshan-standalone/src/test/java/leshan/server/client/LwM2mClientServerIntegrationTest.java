@@ -16,6 +16,7 @@ import leshan.client.lwm2m.operation.ExecuteResponse;
 import leshan.client.lwm2m.operation.LwM2mExchange;
 import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.resource.LwM2mObjectDefinition;
+import leshan.client.lwm2m.resource.MultipleLwM2mExchange;
 import leshan.client.lwm2m.resource.MultipleLwM2mResource;
 import leshan.client.lwm2m.resource.SingleLwM2mResource;
 import leshan.client.lwm2m.resource.SingleResourceDefinition;
@@ -32,6 +33,7 @@ import leshan.server.lwm2m.message.DiscoverRequest;
 import leshan.server.lwm2m.message.ObserveRequest;
 import leshan.server.lwm2m.message.ReadRequest;
 import leshan.server.lwm2m.message.ResponseCode;
+import leshan.server.lwm2m.message.WriteRequest;
 import leshan.server.lwm2m.observation.ObservationRegistry;
 import leshan.server.lwm2m.observation.ObservationRegistryImpl;
 import leshan.server.lwm2m.observation.ResourceObserver;
@@ -101,6 +103,8 @@ public abstract class LwM2mClientServerIntegrationTest {
 		firstResource = new ValueResource();
 		secondResource = new ValueResource();
 
+		multipleResource = new MultipleResource();
+
 		client = createClient();
 	}
 
@@ -146,7 +150,7 @@ public abstract class LwM2mClientServerIntegrationTest {
 		return values;
 	}
 
-	protected Tlv[] createGoodResourcesTlv(final String value0, final String value1) {
+	protected static Tlv[] createGoodResourcesTlv(final String value0, final String value1) {
 		final Tlv[] values = new Tlv[2];
 		values[0] = new Tlv(TlvType.RESOURCE_VALUE, null, value0.getBytes(), FIRST_RESOURCE_ID);
 		values[1] = new Tlv(TlvType.RESOURCE_VALUE, null, value1.getBytes(), SECOND_RESOURCE_ID);
@@ -213,6 +217,7 @@ public abstract class LwM2mClientServerIntegrationTest {
 				.send(server.getRequestHandler());
 	}
 
+	// objectInstanceId is an Integer, because null is a valid value
 	protected ClientResponse sendDelete(final Tlv[] values, final int objectID, final Integer objectInstanceID) {
 		return DeleteRequest
 				.newRequest(getClient(), objectID, objectInstanceID)
@@ -225,6 +230,18 @@ public abstract class LwM2mClientServerIntegrationTest {
 				.send(server.getRequestHandler());
 	}
 
+	protected ClientResponse sendUpdate(final Tlv[] payload, final int objectId, final int objectInstanceId, final int resourceId) {
+		return WriteRequest
+				.newUpdateRequest(getClient(), objectId, objectInstanceId, resourceId, payload)
+				.send(server.getRequestHandler());
+	}
+
+	protected ClientResponse sendReplace(final Tlv[] payload, final int objectId, final int objectInstanceId, final int resourceId) {
+		return WriteRequest
+				.newReplaceRequest(getClient(), objectId, objectInstanceId, resourceId, payload)
+				.send(server.getRequestHandler());
+	}
+
 	protected Client getClient() {
 		return clientRegistry.get(ENDPOINT);
 	}
@@ -234,7 +251,7 @@ public abstract class LwM2mClientServerIntegrationTest {
 		try {
 			final Tlv[] expected = TlvDecoder.decode(ByteBuffer.wrap(payload));
 			final Tlv[] actual = TlvDecoder.decode(ByteBuffer.wrap(response.getContent()));
-			assertEquals("Expected TLVs " + Arrays.toString(expected) + ", but was " + Arrays.toString(actual) + "",
+			assertEquals("Expected TLVs " + Arrays.toString(expected) + ", but was " + Arrays.toString(actual),
 					new String(payload), new String(response.getContent()));
 		} catch (final Exception e) {
 			assertEquals(new String(payload), new String(response.getContent()));
@@ -305,7 +322,22 @@ public abstract class LwM2mClientServerIntegrationTest {
 
 	public class MultipleResource extends MultipleLwM2mResource {
 
+		private Map<Integer, byte[]> value;
 
+		public void setValue(final Map<Integer, byte[]> initialValue) {
+			this.value = initialValue;
+		}
+
+		@Override
+		public void handleRead(final MultipleLwM2mExchange exchange) {
+			exchange.respondContent(value);
+		}
+
+		@Override
+		public void handleWrite(final MultipleLwM2mExchange exchange) {
+			this.value = exchange.getRequestPayload();
+			exchange.respondSuccess();
+		}
 
 	}
 

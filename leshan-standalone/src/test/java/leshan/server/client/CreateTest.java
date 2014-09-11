@@ -1,5 +1,6 @@
 package leshan.server.client;
 
+import static leshan.server.lwm2m.message.ResponseCode.CREATED;
 import static org.junit.Assert.assertEquals;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ResponseCode;
@@ -87,6 +88,12 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
 		assertEmptyResponse(response, ResponseCode.METHOD_NOT_ALLOWED);
 
 		assertEmptyResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.NOT_FOUND);
+	}
+
+	@Test
+	public void canCreateObjectInstanceWithEmptyPayload() {
+		register();
+		assertEmptyResponse(sendCreate(new Tlv[0], MULTIPLE_OBJECT_ID), CREATED);
 	}
 
 }

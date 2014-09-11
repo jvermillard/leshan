@@ -13,10 +13,15 @@ public abstract class LwM2mResponseAggregator {
 		this.exchange = exchange;
 		this.responses = new ConcurrentHashMap<>();
 		this.numExpectedResults = numExpectedResults;
+		respondIfReady();
 	}
 
 	public void respond(final int id, final LwM2mResponse response) {
 		responses.put(id, response);
+		respondIfReady();
+	}
+
+	private void respondIfReady() {
 		if (responses.size() == numExpectedResults) {
 			respondToExchange(responses, exchange);
 		}
