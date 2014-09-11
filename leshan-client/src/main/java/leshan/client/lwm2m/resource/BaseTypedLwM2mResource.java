@@ -1,5 +1,8 @@
 package leshan.client.lwm2m.resource;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import leshan.client.lwm2m.operation.ExecuteResponse;
 import leshan.client.lwm2m.operation.LwM2mExchange;
 import leshan.client.lwm2m.operation.ReadResponse;
@@ -9,8 +12,13 @@ public abstract class BaseTypedLwM2mResource<E extends TypedLwM2mExchange<?>> im
 
 	protected abstract E createSpecificExchange(final LwM2mExchange exchange);
 
+	private final Set<LwM2mExchange> observers = new HashSet<>();
+
 	@Override
 	public final void read(final LwM2mExchange exchange) {
+		if(exchange.isObserve()) {
+			observers.add(exchange);
+		}
 		handleRead(createSpecificExchange(exchange));
 	}
 
@@ -48,6 +56,12 @@ public abstract class BaseTypedLwM2mResource<E extends TypedLwM2mExchange<?>> im
 	@Override
 	public boolean isReadable() {
 		return false;
+	}
+
+	protected final void notifyResourceUpdated() {
+		for(final LwM2mExchange exchange : observers) {
+			read(exchange);
+		}
 	}
 
 }

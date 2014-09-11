@@ -1,5 +1,6 @@
 package leshan.client.lwm2m.operation;
 
+
 public class AggregatedLwM2mExchange implements LwM2mExchange {
 
 	private final LwM2mResponseAggregator aggr;
@@ -33,6 +34,11 @@ public class AggregatedLwM2mExchange implements LwM2mExchange {
 	@Override
 	public int getObjectInstanceId() {
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean isObserve() {
+		return aggr.isObserve();
 	}
 
 }

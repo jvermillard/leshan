@@ -270,6 +270,7 @@ public abstract class LwM2mClientServerIntegrationTest {
 
 		public void setValue(final String newValue) {
 			value = newValue;
+			notifyResourceUpdated();
 		}
 
 		public String getValue() {

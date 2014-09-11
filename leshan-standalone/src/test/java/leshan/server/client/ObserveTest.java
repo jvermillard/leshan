@@ -1,37 +1,39 @@
 package leshan.server.client;
 
+import static leshan.server.lwm2m.message.ResponseCode.CONTENT;
+
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import leshan.server.lwm2m.message.ClientResourceSpec;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ContentFormat;
-import leshan.server.lwm2m.message.ResponseCode;
 import leshan.server.lwm2m.observation.ResourceObserver;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.jayway.awaitility.Awaitility;
 
-@Ignore
 public class ObserveTest extends LwM2mClientServerIntegrationTest {
 
+	private static final String HELLO = "hello";
+	private static final String GOODBYE = "goodbye";
+	private static final String WORLD = "world";
 	private final Observer observer = new Observer();
 
 	@Test
 	public void canObserveResource() {
 		register();
 
-		sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
+		sendCreate(createGoodResourcesTlv(HELLO, GOODBYE), GOOD_OBJECT_ID);
 
 		final ClientResponse response = sendObserve(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, FIRST_RESOURCE_ID, observer);
-		assertResponse(response, ResponseCode.CONTENT, "hello".getBytes());
+		assertResponse(response, CONTENT, HELLO.getBytes());
 
-		firstResource.setValue("world");
+		firstResource.setValue(WORLD);
 		Awaitility.await().untilTrue(observer.receievedNotify());
 	}
 
-	public class Observer implements ResourceObserver{
+	public class Observer implements ResourceObserver {
 
 		private byte[] content;
 		private ContentFormat contentFormat;
@@ -64,7 +66,5 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 		}
 
 	}
-
-
 
 }

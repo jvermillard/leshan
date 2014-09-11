@@ -7,5 +7,6 @@ public interface LwM2mExchange {
 
 	public boolean hasObjectInstanceId();
 	public int getObjectInstanceId();
+	public boolean isObserve();
 
 }

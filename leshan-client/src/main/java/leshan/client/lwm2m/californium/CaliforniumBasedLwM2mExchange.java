@@ -5,6 +5,7 @@ import java.util.List;
 import leshan.client.lwm2m.operation.CreateResponse;
 import leshan.client.lwm2m.operation.LwM2mExchange;
 import leshan.client.lwm2m.operation.LwM2mResponse;
+import ch.ethz.inf.vs.californium.coap.CoAP;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
 
@@ -47,6 +48,11 @@ public class CaliforniumBasedLwM2mExchange implements LwM2mExchange {
 
 	private List<String> getUriPaths() {
 		return exchange.getRequestOptions().getURIPaths();
+	}
+
+	@Override
+	public boolean isObserve() {
+		return exchange.getRequestOptions().hasObserve() && exchange.getRequestCode() == CoAP.Code.GET;
 	}
 
 }
