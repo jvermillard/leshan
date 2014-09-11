@@ -18,7 +18,6 @@ import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.resource.LwM2mObjectDefinition;
 import leshan.client.lwm2m.resource.MultipleLwM2mExchange;
 import leshan.client.lwm2m.resource.MultipleLwM2mResource;
-import leshan.client.lwm2m.resource.SingleLwM2mResource;
 import leshan.client.lwm2m.resource.SingleResourceDefinition;
 import leshan.client.lwm2m.resource.StringLwM2mExchange;
 import leshan.client.lwm2m.resource.StringLwM2mResource;
@@ -312,7 +311,7 @@ public abstract class LwM2mClientServerIntegrationTest {
 
 	}
 
-	public class ExecutableResource extends SingleLwM2mResource {
+	public class ExecutableResource extends StringLwM2mResource {
 
 		@Override
 		public void handleExecute(final LwM2mExchange exchange) {

@@ -11,5 +11,6 @@ public interface LwM2mResource {
 	public void observe(Notifier notifier);
 
 	public boolean isReadable();
+	public void notifyResourceUpdated();
 
 }

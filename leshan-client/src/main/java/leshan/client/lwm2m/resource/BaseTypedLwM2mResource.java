@@ -5,6 +5,7 @@ import java.util.Set;
 
 import leshan.client.lwm2m.operation.ExecuteResponse;
 import leshan.client.lwm2m.operation.LwM2mExchange;
+import leshan.client.lwm2m.operation.ObserveNotifyExchange;
 import leshan.client.lwm2m.operation.ReadResponse;
 import leshan.client.lwm2m.operation.WriteResponse;
 
@@ -58,9 +59,10 @@ public abstract class BaseTypedLwM2mResource<E extends TypedLwM2mExchange<?>> im
 		return false;
 	}
 
-	protected final void notifyResourceUpdated() {
+	@Override
+	public final void notifyResourceUpdated() {
 		for(final LwM2mExchange exchange : observers) {
-			read(exchange);
+			read(new ObserveNotifyExchange(exchange));
 		}
 	}
 
