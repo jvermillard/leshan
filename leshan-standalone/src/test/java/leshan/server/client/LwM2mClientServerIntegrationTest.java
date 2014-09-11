@@ -14,12 +14,13 @@ import java.util.Set;
 import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.operation.ExecuteResponse;
 import leshan.client.lwm2m.operation.LwM2mExchange;
-import leshan.client.lwm2m.operation.ReadResponse;
-import leshan.client.lwm2m.operation.WriteResponse;
 import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.resource.LwM2mObjectDefinition;
+import leshan.client.lwm2m.resource.MultipleLwM2mResource;
 import leshan.client.lwm2m.resource.SingleLwM2mResource;
 import leshan.client.lwm2m.resource.SingleResourceDefinition;
+import leshan.client.lwm2m.resource.StringLwM2mExchange;
+import leshan.client.lwm2m.resource.StringLwM2mResource;
 import leshan.server.lwm2m.LwM2mServer;
 import leshan.server.lwm2m.bootstrap.BootstrapStoreImpl;
 import leshan.server.lwm2m.client.Client;
@@ -58,6 +59,9 @@ public abstract class LwM2mClientServerIntegrationTest {
 	protected static final int BROKEN_OBJECT_ID = GOOD_OBJECT_ID + 1;
 	protected static final int BROKEN_RESOURCE_ID = 7;
 
+	protected static final int MULTIPLE_OBJECT_ID = GOOD_OBJECT_ID + 2;
+	protected static final int MULTIPLE_RESOURCE_ID = 0;
+
 	protected static final int BAD_OBJECT_ID = 1000;
 	protected static final String ENDPOINT = "epflwmtm";
 	private static final int CLIENT_PORT = 44022;
@@ -76,6 +80,7 @@ public abstract class LwM2mClientServerIntegrationTest {
 	protected ExecutableResource executableResource;
 	protected ValueResource firstResource;
 	protected ValueResource secondResource;
+	protected MultipleResource multipleResource;
 
 	@Before
 	public void setup() {
@@ -102,13 +107,18 @@ public abstract class LwM2mClientServerIntegrationTest {
 	protected LwM2mClient createClient() {
 		final ReadWriteListenerWithBrokenWrite brokenResourceListener = new ReadWriteListenerWithBrokenWrite();
 
+		final boolean required = true;
+		final boolean writable = true;
+
 		final LwM2mObjectDefinition objectOne = new LwM2mObjectDefinition(GOOD_OBJECT_ID,
-				new SingleResourceDefinition(FIRST_RESOURCE_ID, firstResource, true, true),
-				new SingleResourceDefinition(SECOND_RESOURCE_ID, secondResource, true, true),
-				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executableResource, false, false));
+				new SingleResourceDefinition(FIRST_RESOURCE_ID, firstResource, required, writable),
+				new SingleResourceDefinition(SECOND_RESOURCE_ID, secondResource, required, writable),
+				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executableResource, !required, !writable));
 		final LwM2mObjectDefinition objectTwo = new LwM2mObjectDefinition(BROKEN_OBJECT_ID,
-				new SingleResourceDefinition(BROKEN_RESOURCE_ID, brokenResourceListener, true, true));
-		return new LwM2mClient(objectOne, objectTwo);
+				new SingleResourceDefinition(BROKEN_RESOURCE_ID, brokenResourceListener, required, writable));
+		final LwM2mObjectDefinition objectThree = new LwM2mObjectDefinition(MULTIPLE_OBJECT_ID,
+				new SingleResourceDefinition(MULTIPLE_RESOURCE_ID, multipleResource, !required, !writable));
+		return new LwM2mClient(objectOne, objectTwo, objectThree);
 	}
 
 	@After
@@ -237,7 +247,7 @@ public abstract class LwM2mClientServerIntegrationTest {
 		assertTrue(payload == null || payload.length == 0);
 	}
 
-	public class ValueResource extends SingleLwM2mResource {
+	public class ValueResource extends StringLwM2mResource {
 
 		private String value = "blergs";
 
@@ -250,35 +260,36 @@ public abstract class LwM2mClientServerIntegrationTest {
 		}
 
 		@Override
-		public void handleWrite(final LwM2mExchange exchange) {
-			setValue(new String(exchange.getRequestPayload()));
+		public void handleWrite(final StringLwM2mExchange exchange) {
+			setValue(exchange.getRequestPayload());
 
-			exchange.respond(WriteResponse.success());
+			exchange.respondSuccess();
 		}
 
 		@Override
-		public void handleRead(final LwM2mExchange exchange) {
-			exchange.respond(ReadResponse.success(value.getBytes()));
+		public void handleRead(final StringLwM2mExchange exchange) {
+			exchange.respondContent(value);
 		}
 
 	}
 
-	public class ReadWriteListenerWithBrokenWrite extends SingleLwM2mResource {
+	public class ReadWriteListenerWithBrokenWrite extends StringLwM2mResource {
 
 		private String value;
 
 		@Override
-		public void handleWrite(final LwM2mExchange exchange) {
+		public void handleWrite(final StringLwM2mExchange exchange) {
 			if (value == null) {
-				value = new String(exchange.getRequestPayload());
-				exchange.respond(WriteResponse.success());
+				value = exchange.getRequestPayload();
+				exchange.respondSuccess();
+			} else {
+				exchange.respondFailure();
 			}
-			exchange.respond(WriteResponse.failure());
 		}
 
 		@Override
-		public void handleRead(final LwM2mExchange exchange) {
-			exchange.respond(ReadResponse.success(value.getBytes()));
+		public void handleRead(final StringLwM2mExchange exchange) {
+			exchange.respondContent(value);
 		}
 
 	}
@@ -289,6 +300,12 @@ public abstract class LwM2mClientServerIntegrationTest {
 		public void handleExecute(final LwM2mExchange exchange) {
 			exchange.respond(ExecuteResponse.success());
 		}
+
+	}
+
+	public class MultipleResource extends MultipleLwM2mResource {
+
+
 
 	}
 
