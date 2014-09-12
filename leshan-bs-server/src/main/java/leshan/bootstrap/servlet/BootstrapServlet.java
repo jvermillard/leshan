@@ -38,8 +38,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import leshan.bootstrap.BootstrapStoreImpl;
 import leshan.server.lwm2m.bootstrap.BootstrapConfig;
-import leshan.server.lwm2m.bootstrap.BootstrapStoreImpl;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.lang.StringUtils;
@@ -105,6 +105,32 @@ public class BootstrapServlet extends HttpServlet {
             }
         } catch (JsonSyntaxException jsonEx) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, jsonEx.getMessage());
+        }
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        if (req.getPathInfo() == null) {
+            // we need the endpoint in the URL
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "endpoint name should be specified in the URL");
+            return;
+        }
+
+        String[] path = StringUtils.split(req.getPathInfo(), '/');
+
+        // endPoint
+        if (path.length != 1) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                    "endpoint name should be specified in the URL, nothing more");
+            return;
+        }
+
+        String endpoint = path[0];
+
+        if (bsStore.deleteConfig(endpoint)) {
+            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        } else {
+            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
         }
     }
 }

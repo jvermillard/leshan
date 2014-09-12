@@ -27,11 +27,14 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.lwm2m.bootstrap;
+package leshan.bootstrap;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import leshan.server.lwm2m.bootstrap.BootstrapConfig;
+import leshan.server.lwm2m.bootstrap.BootstrapStore;
 
 /**
  * Simple bootstrap store implementation storing bootstrap information in memory
@@ -51,5 +54,9 @@ public class BootstrapStoreImpl implements BootstrapStore {
 
     public Map<String, BootstrapConfig> getBootstrapConfigs() {
         return Collections.unmodifiableMap(bootstrapByEndpoint);
+    }
+
+    public boolean deleteConfig(String enpoint) {
+        return bootstrapByEndpoint.remove(enpoint) != null;
     }
 }

@@ -35,7 +35,7 @@ import java.net.InetSocketAddress;
 import leshan.server.lwm2m.bootstrap.BootstrapStore;
 import leshan.server.lwm2m.resource.BootstrapResource;
 import leshan.server.lwm2m.security.SecureEndpoint;
-import leshan.server.lwm2m.security.SecurityRegistry;
+import leshan.server.lwm2m.security.SecurityStore;
 
 import org.apache.commons.lang.Validate;
 import org.eclipse.californium.scandium.DTLSConnector;
@@ -61,14 +61,14 @@ public class LwM2mBootstrapServer {
 
     private final Server coapServer;
 
-    public LwM2mBootstrapServer(BootstrapStore bsStore, SecurityRegistry securityRegistry) {
+    public LwM2mBootstrapServer(BootstrapStore bsStore, SecurityStore securityStore) {
         this(new InetSocketAddress((InetAddress) null, PORT), new InetSocketAddress((InetAddress) null, PORT_DTLS),
-                bsStore, securityRegistry);
+                bsStore, securityStore);
 
     }
 
     public LwM2mBootstrapServer(InetSocketAddress localAddress, InetSocketAddress localAddressSecure,
-            BootstrapStore bsStore, SecurityRegistry securityRegistry) {
+            BootstrapStore bsStore, SecurityStore securityStore) {
         Validate.notNull(bsStore, "bootstrap store must not be null");
 
         // init CoAP server
@@ -79,7 +79,7 @@ public class LwM2mBootstrapServer {
         // init DTLS server
 
         DTLSConnector connector = new DTLSConnector(localAddressSecure, null);
-        connector.getConfig().setServerPsk(securityRegistry);
+        connector.getConfig().setServerPsk(securityStore);
 
         Endpoint secureEndpoint = new SecureEndpoint(connector);
         coapServer.addEndpoint(secureEndpoint);
