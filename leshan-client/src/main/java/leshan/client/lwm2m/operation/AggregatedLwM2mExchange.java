@@ -1,5 +1,7 @@
 package leshan.client.lwm2m.operation;
 
+import leshan.server.lwm2m.observation.ObserveSpec;
+
 
 public class AggregatedLwM2mExchange implements LwM2mExchange {
 
@@ -38,7 +40,12 @@ public class AggregatedLwM2mExchange implements LwM2mExchange {
 
 	@Override
 	public boolean isObserve() {
-		return aggr.isObserve();
+		return aggr.getUnderlyingExchange().isObserve();
+	}
+
+	@Override
+	public ObserveSpec getObserveSpec() {
+		return aggr.getUnderlyingExchange().getObserveSpec();
 	}
 
 }

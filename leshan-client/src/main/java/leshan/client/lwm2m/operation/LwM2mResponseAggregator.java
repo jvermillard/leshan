@@ -29,8 +29,8 @@ public abstract class LwM2mResponseAggregator {
 
 	protected abstract void respondToExchange(Map<Integer, LwM2mResponse> responses, LwM2mExchange exchange);
 
-	public boolean isObserve() {
-		return exchange.isObserve();
+	public LwM2mExchange getUnderlyingExchange() {
+		return exchange;
 	}
 
 }

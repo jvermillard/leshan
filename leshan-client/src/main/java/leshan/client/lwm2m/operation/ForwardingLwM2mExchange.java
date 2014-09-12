@@ -1,5 +1,7 @@
 package leshan.client.lwm2m.operation;
 
+import leshan.server.lwm2m.observation.ObserveSpec;
+
 public class ForwardingLwM2mExchange implements LwM2mExchange {
 
 	protected final LwM2mExchange exchange;
@@ -31,6 +33,11 @@ public class ForwardingLwM2mExchange implements LwM2mExchange {
 	@Override
 	public boolean isObserve() {
 		return exchange.isObserve();
+	}
+
+	@Override
+	public ObserveSpec getObserveSpec() {
+		return exchange.getObserveSpec();
 	}
 
 }

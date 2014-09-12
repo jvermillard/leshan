@@ -15,6 +15,8 @@ import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.operation.ExecuteResponse;
 import leshan.client.lwm2m.operation.LwM2mExchange;
 import leshan.client.lwm2m.register.RegisterUplink;
+import leshan.client.lwm2m.resource.IntegerLwM2mExchange;
+import leshan.client.lwm2m.resource.IntegerLwM2mResource;
 import leshan.client.lwm2m.resource.LwM2mObjectDefinition;
 import leshan.client.lwm2m.resource.MultipleLwM2mExchange;
 import leshan.client.lwm2m.resource.MultipleLwM2mResource;
@@ -63,6 +65,9 @@ public abstract class LwM2mClientServerIntegrationTest {
 	protected static final int MULTIPLE_OBJECT_ID = GOOD_OBJECT_ID + 2;
 	protected static final int MULTIPLE_RESOURCE_ID = 0;
 
+	protected static final int INT_OBJECT_ID = GOOD_OBJECT_ID + 3;
+	protected static final int INT_RESOURCE_ID = 0;
+
 	protected static final int BAD_OBJECT_ID = 1000;
 	protected static final String ENDPOINT = "epflwmtm";
 	private static final int CLIENT_PORT = 44022;
@@ -82,6 +87,7 @@ public abstract class LwM2mClientServerIntegrationTest {
 	protected ValueResource firstResource;
 	protected ValueResource secondResource;
 	protected MultipleResource multipleResource;
+	protected IntValueResource intResource;
 
 	@Before
 	public void setup() {
@@ -97,12 +103,12 @@ public abstract class LwM2mClientServerIntegrationTest {
 		server = new LwM2mServer(serverAddress, serverAddressSecure, clientRegistry, securityRegistry, observationRegistry, bsStore);
 		server.start();
 
-		executableResource = spy(new ExecutableResource());
 
 		firstResource = new ValueResource();
 		secondResource = new ValueResource();
-
+		executableResource = spy(new ExecutableResource());
 		multipleResource = new MultipleResource();
+		intResource = new IntValueResource();
 
 		client = createClient();
 	}
@@ -121,7 +127,9 @@ public abstract class LwM2mClientServerIntegrationTest {
 				new SingleResourceDefinition(BROKEN_RESOURCE_ID, brokenResourceListener, required, writable));
 		final LwM2mObjectDefinition objectThree = new LwM2mObjectDefinition(MULTIPLE_OBJECT_ID,
 				new SingleResourceDefinition(MULTIPLE_RESOURCE_ID, multipleResource, !required, !writable));
-		return new LwM2mClient(objectOne, objectTwo, objectThree);
+		final LwM2mObjectDefinition objectFour = new LwM2mObjectDefinition(INT_OBJECT_ID,
+				new SingleResourceDefinition(INT_RESOURCE_ID, intResource, !required, !writable));
+		return new LwM2mClient(objectOne, objectTwo, objectThree, objectFour);
 	}
 
 	@After
@@ -285,6 +293,33 @@ public abstract class LwM2mClientServerIntegrationTest {
 
 		@Override
 		public void handleRead(final StringLwM2mExchange exchange) {
+			exchange.respondContent(value);
+		}
+
+	}
+
+	public class IntValueResource extends IntegerLwM2mResource {
+
+		private int value = 0;
+
+		public void setValue(final int newValue) {
+			value = newValue;
+			notifyResourceUpdated();
+		}
+
+		public int getValue() {
+			return value;
+		}
+
+		@Override
+		public void handleWrite(final IntegerLwM2mExchange exchange) {
+			setValue(exchange.getRequestPayload());
+
+			exchange.respondSuccess();
+		}
+
+		@Override
+		public void handleRead(final IntegerLwM2mExchange exchange) {
 			exchange.respondContent(value);
 		}
 

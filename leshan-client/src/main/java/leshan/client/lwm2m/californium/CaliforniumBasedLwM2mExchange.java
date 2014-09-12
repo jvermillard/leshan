@@ -5,6 +5,8 @@ import java.util.List;
 import leshan.client.lwm2m.operation.CreateResponse;
 import leshan.client.lwm2m.operation.LwM2mExchange;
 import leshan.client.lwm2m.operation.LwM2mResponse;
+import leshan.client.lwm2m.util.ObserveSpecParser;
+import leshan.server.lwm2m.observation.ObserveSpec;
 import ch.ethz.inf.vs.californium.coap.CoAP;
 import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
 import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
@@ -53,6 +55,16 @@ public class CaliforniumBasedLwM2mExchange implements LwM2mExchange {
 	@Override
 	public boolean isObserve() {
 		return exchange.getRequestOptions().hasObserve() && exchange.getRequestCode() == CoAP.Code.GET;
+	}
+
+	@Override
+	public ObserveSpec getObserveSpec() {
+		if (exchange.advanced().getRequest().getOptions().getURIQueryCount() == 0) {
+			return null;
+		}
+		final List<String> uriQueries = exchange.advanced().getRequest().getOptions().getURIQueries();
+		System.out.println(uriQueries);
+		return ObserveSpecParser.parse(uriQueries);
 	}
 
 }
