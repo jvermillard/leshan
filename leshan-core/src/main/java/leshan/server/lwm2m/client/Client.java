@@ -32,6 +32,7 @@ package leshan.server.lwm2m.client;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 
 import org.apache.commons.lang.Validate;
@@ -104,6 +105,7 @@ public class Client {
         this.address = address;
         this.port = port;
         this.objectLinks = objectLinks;
+
         this.registrationDate = registrationDate == null ? new Date() : registrationDate;
         lifeTimeInSec = lifetime == null ? DEFAULT_LIFETIME_IN_SEC : lifetime;
         this.lwM2mVersion = lwM2mVersion == null ? DEFAULT_LWM2M_VERSION : lwM2mVersion;
@@ -157,7 +159,27 @@ public class Client {
     }
 
     public LinkObject[] getObjectLinks() {
-        return objectLinks;
+        // sort the list of objects
+        if (objectLinks == null) {
+            return null;
+        }
+        LinkObject[] res = Arrays.copyOf(objectLinks, objectLinks.length);
+
+        Arrays.sort(res, new Comparator<LinkObject>() {
+
+            @Override
+            public int compare(LinkObject o1, LinkObject o2) {
+                if (o1 == null && o2 == null)
+                    return 0;
+                if (o1 == null)
+                    return -1;
+                if (o2 == null)
+                    return 1;
+                return o1.getPath().compareTo(o2.getPath());
+            }
+        });
+
+        return res;
     }
 
     void setObjectLinks(LinkObject[] objectLinks) {
@@ -220,8 +242,8 @@ public class Client {
     public synchronized void markLastRequestFailed() {
         failedLastRequest = true;
     }
-    
-    public synchronized boolean isMarkLastRequestFailed(){
+
+    public synchronized boolean isMarkLastRequestFailed() {
         return failedLastRequest;
     }
 

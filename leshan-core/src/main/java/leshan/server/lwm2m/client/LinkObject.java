@@ -101,6 +101,23 @@ public class LinkObject {
         return attributes;
     }
 
+    public String getPath() {
+        StringBuilder sb = new StringBuilder("/");
+        if (objectId != null) {
+            sb.append(objectId);
+        }
+
+        if (objectInstanceId != null) {
+            sb.append("/").append(objectInstanceId);
+        }
+
+        if (resourceId != null) {
+            sb.append("/").append(resourceId);
+        }
+
+        return sb.toString();
+    }
+
     @Override
     public String toString() {
         return String.format("LinkObject [url=%s, attributes=%s]", url, attributes);
