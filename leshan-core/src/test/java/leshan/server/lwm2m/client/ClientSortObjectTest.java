@@ -42,8 +42,8 @@ public class ClientSortObjectTest {
     @Test
     public void sort_link_object_on_get() throws UnknownHostException {
         LinkObject[] objs = new LinkObject[3];
-        objs[0] = new LinkObject("/0/1/2");
-        objs[1] = new LinkObject("/0/1");
+        objs[0] = new LinkObject("/0/1024/2");
+        objs[1] = new LinkObject("/0/2");
         objs[2] = null;
         Client c = new Client("registrationId", "endpoint", Inet4Address.getByName("127.0.0.1"), 1,
                 new InetSocketAddress(212));
@@ -53,7 +53,7 @@ public class ClientSortObjectTest {
         LinkObject[] res = c.getObjectLinks();
         Assert.assertEquals(3, res.length);
         Assert.assertNull(res[0]);
-        Assert.assertEquals("/0/1", res[1].getPath());
-        Assert.assertEquals("/0/1/2", res[2].getPath());
+        Assert.assertEquals("/0/2", res[1].getPath());
+        Assert.assertEquals("/0/1024/2", res[2].getPath());
     }
 }

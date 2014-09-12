@@ -167,6 +167,7 @@ public class Client {
 
         Arrays.sort(res, new Comparator<LinkObject>() {
 
+            /* sort by objectid, object instance and ressource */
             @Override
             public int compare(LinkObject o1, LinkObject o2) {
                 if (o1 == null && o2 == null)
@@ -175,7 +176,53 @@ public class Client {
                     return -1;
                 if (o2 == null)
                     return 1;
-                return o1.getPath().compareTo(o2.getPath());
+                // by object
+                Integer oi1 = o1.getObjectId();
+                Integer oi2 = o2.getObjectId();
+
+                if (oi1 == null && oi2 == null) {
+                    return 0;
+                }
+                if (oi1 == null) {
+                    return -1;
+                }
+                if (oi2 == null) {
+                    return 1;
+                }
+                int oicomp = oi1.compareTo(oi2);
+                if (oicomp != 0) {
+                    return oicomp;
+                }
+
+                Integer oii1 = o1.getObjectInstanceId();
+                Integer oii2 = o2.getObjectInstanceId();
+                if (oii1 == null && oii2 == null) {
+                    return 0;
+                }
+                if (oii1 == null) {
+                    return -1;
+                }
+                if (oii2 == null) {
+                    return 1;
+                }
+                int oiicomp = oii1.compareTo(oii2);
+                if (oiicomp != 0) {
+                    return oiicomp;
+                }
+
+                Integer or1 = o1.getResourceId();
+                Integer or2 = o2.getResourceId();
+                if (or1 == null && or2 == null) {
+                    return 0;
+                }
+                if (or1 == null) {
+                    return -1;
+                }
+                if (or2 == null) {
+                    return 1;
+                }
+                return or1.compareTo(or2);
+
             }
         });
 
