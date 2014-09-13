@@ -34,9 +34,11 @@ import leshan.server.lwm2m.message.DiscoverRequest;
 import leshan.server.lwm2m.message.ObserveRequest;
 import leshan.server.lwm2m.message.ReadRequest;
 import leshan.server.lwm2m.message.ResponseCode;
+import leshan.server.lwm2m.message.WriteAttributesRequest;
 import leshan.server.lwm2m.message.WriteRequest;
 import leshan.server.lwm2m.observation.ObservationRegistry;
 import leshan.server.lwm2m.observation.ObservationRegistryImpl;
+import leshan.server.lwm2m.observation.ObserveSpec;
 import leshan.server.lwm2m.observation.ResourceObserver;
 import leshan.server.lwm2m.security.SecurityRegistry;
 import leshan.server.lwm2m.tlv.Tlv;
@@ -246,6 +248,12 @@ public abstract class LwM2mClientServerIntegrationTest {
 	protected ClientResponse sendReplace(final Tlv[] payload, final int objectId, final int objectInstanceId, final int resourceId) {
 		return WriteRequest
 				.newReplaceRequest(getClient(), objectId, objectInstanceId, resourceId, payload)
+				.send(server.getRequestHandler());
+	}
+
+	protected ClientResponse sendWriteAttributes(final ObserveSpec observeSpec, final int objectId, final int objectInstanceId, final int resourceId) {
+		return WriteAttributesRequest
+				.newRequest(getClient(), objectId, objectInstanceId, resourceId, observeSpec)
 				.send(server.getRequestHandler());
 	}
 

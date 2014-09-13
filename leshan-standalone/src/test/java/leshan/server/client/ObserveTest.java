@@ -9,7 +9,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import leshan.server.lwm2m.message.ClientResourceSpec;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ContentFormat;
-import leshan.server.lwm2m.message.WriteAttributesRequest;
 import leshan.server.lwm2m.observation.ObserveSpec;
 import leshan.server.lwm2m.observation.ResourceObserver;
 import leshan.server.lwm2m.tlv.Tlv;
@@ -53,21 +52,29 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 		assertArrayEquals("2".getBytes(), observer.getContent());
 	}
 
-	private void sleep(final long time) {
-		try {
-			Thread.sleep(time);
-		} catch (final InterruptedException e) {
-		}
-	}
-
 	@Test
-	public void canObserveIntResourceWithAttribute() {
+	public void canObserveIntResourceWithGtAttributeWithNotify() {
 		register();
 
 		sendCreate(new Tlv[0], INT_OBJECT_ID);
 
-		WriteAttributesRequest.newRequest(getClient(), INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID,
-				new ObserveSpec.Builder().greaterThan(6).build()).send(server.getRequestHandler());
+		sendWriteAttributes(new ObserveSpec.Builder().greaterThan(6).build(), INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
+
+		final ClientResponse response = sendObserve(INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID, observer);
+		assertResponse(response, CONTENT, "0".getBytes());
+
+		intResource.setValue(20);
+		Awaitility.await().untilTrue(observer.receievedNotify());
+		assertArrayEquals("20".getBytes(), observer.getContent());
+	}
+
+	@Test
+	public void canObserveIntResourceWithGtAttributeNoNotify() {
+		register();
+
+		sendCreate(new Tlv[0], INT_OBJECT_ID);
+
+		sendWriteAttributes(new ObserveSpec.Builder().greaterThan(6).build(), INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
 
 		final ClientResponse response = sendObserve(INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID, observer);
 		assertResponse(response, CONTENT, "0".getBytes());
@@ -77,19 +84,70 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 		assertFalse(observer.receievedNotify().get());
 	}
 
-	public class Observer implements ResourceObserver {
+	@Test
+	public void canObserveIntResourceWithLtAttributeWithNotify() {
+		register();
+
+		sendCreate(new Tlv[0], INT_OBJECT_ID);
+
+		sendWriteAttributes(new ObserveSpec.Builder().lessThan(6).build(), INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
+
+		final ClientResponse response = sendObserve(INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID, observer);
+		assertResponse(response, CONTENT, "0".getBytes());
+
+		intResource.setValue(2);
+		Awaitility.await().untilTrue(observer.receievedNotify());
+		assertArrayEquals("2".getBytes(), observer.getContent());
+	}
+
+	@Test
+	public void canObserveIntResourceWithLtAttributeNoNotify() {
+		register();
+
+		sendCreate(new Tlv[0], INT_OBJECT_ID);
+
+		sendWriteAttributes(new ObserveSpec.Builder().lessThan(6).build(), INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
+
+		final ClientResponse response = sendObserve(INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID, observer);
+		assertResponse(response, CONTENT, "0".getBytes());
+
+		intResource.setValue(20);
+		sleep(500);
+		assertFalse(observer.receievedNotify().get());
+	}
+
+	@Test
+	public void canObserveIntResourceWithGtAndLtAttributeWithNotify() {
+		register();
+
+		sendCreate(new Tlv[0], INT_OBJECT_ID);
+
+		sendWriteAttributes(new ObserveSpec.Builder().greaterThan(10).lessThan(6).build(), INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
+
+		final ClientResponse response = sendObserve(INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID, observer);
+		assertResponse(response, CONTENT, "0".getBytes());
+
+		intResource.setValue(20);
+		Awaitility.await().untilTrue(observer.receievedNotify());
+		assertArrayEquals("20".getBytes(), observer.getContent());
+	}
+
+	private void sleep(final long time) {
+		try {
+			Thread.sleep(time);
+		} catch (final InterruptedException e) {
+		}
+	}
+
+	private class Observer implements ResourceObserver {
 
 		private byte[] content;
-		private ContentFormat contentFormat;
-		private ClientResourceSpec target;
 		private final AtomicBoolean notified = new AtomicBoolean(false);
 
 		@Override
 		public void notify(final byte[] content, final ContentFormat contentFormat,
 				final ClientResourceSpec target) {
 			this.content = content;
-			this.contentFormat = contentFormat;
-			this.target = target;
 			notified.set(true);
 		}
 
@@ -99,14 +157,6 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 
 		public byte[] getContent() {
 			return content;
-		}
-
-		public ContentFormat getContentFormat() {
-			return contentFormat;
-		}
-
-		public ClientResourceSpec getTarget() {
-			return target;
 		}
 
 	}
