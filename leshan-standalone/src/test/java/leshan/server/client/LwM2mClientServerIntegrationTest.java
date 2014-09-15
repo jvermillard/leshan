@@ -70,6 +70,15 @@ public abstract class LwM2mClientServerIntegrationTest {
 	protected static final int INT_OBJECT_ID = GOOD_OBJECT_ID + 3;
 	protected static final int INT_RESOURCE_ID = 0;
 
+	protected static final int MANDATORY_MULTIPLE_OBJECT_ID = GOOD_OBJECT_ID + 4;
+	protected static final int MANDATORY_MULTIPLE_RESOURCE_ID = 0;
+
+	protected static final int MANDATORY_SINGLE_OBJECT_ID = GOOD_OBJECT_ID + 5;
+	protected static final int MANDATORY_SINGLE_RESOURCE_ID = 0;
+
+	protected static final int OPTIONAL_SINGLE_OBJECT_ID = GOOD_OBJECT_ID + 6;
+	protected static final int OPTIONAL_SINGLE_RESOURCE_ID = 0;
+
 	protected static final int BAD_OBJECT_ID = 1000;
 	protected static final String ENDPOINT = "epflwmtm";
 	private static final int CLIENT_PORT = 44022;
@@ -118,20 +127,27 @@ public abstract class LwM2mClientServerIntegrationTest {
 	protected LwM2mClient createClient() {
 		final ReadWriteListenerWithBrokenWrite brokenResourceListener = new ReadWriteListenerWithBrokenWrite();
 
-		final boolean required = true;
+		final boolean single = true;
+		final boolean mandatory = true;
 		final boolean writable = true;
 
-		final LwM2mObjectDefinition objectOne = new LwM2mObjectDefinition(GOOD_OBJECT_ID,
-				new SingleResourceDefinition(FIRST_RESOURCE_ID, firstResource, required, writable),
-				new SingleResourceDefinition(SECOND_RESOURCE_ID, secondResource, required, writable),
-				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executableResource, !required, !writable));
-		final LwM2mObjectDefinition objectTwo = new LwM2mObjectDefinition(BROKEN_OBJECT_ID,
-				new SingleResourceDefinition(BROKEN_RESOURCE_ID, brokenResourceListener, required, writable));
-		final LwM2mObjectDefinition objectThree = new LwM2mObjectDefinition(MULTIPLE_OBJECT_ID,
-				new SingleResourceDefinition(MULTIPLE_RESOURCE_ID, multipleResource, !required, !writable));
-		final LwM2mObjectDefinition objectFour = new LwM2mObjectDefinition(INT_OBJECT_ID,
-				new SingleResourceDefinition(INT_RESOURCE_ID, intResource, !required, !writable));
-		return new LwM2mClient(objectOne, objectTwo, objectThree, objectFour);
+		final LwM2mObjectDefinition objectOne = new LwM2mObjectDefinition(GOOD_OBJECT_ID, !mandatory, !single,
+				new SingleResourceDefinition(FIRST_RESOURCE_ID, firstResource, mandatory, writable),
+				new SingleResourceDefinition(SECOND_RESOURCE_ID, secondResource, mandatory, writable),
+				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executableResource, !mandatory, !writable));
+		final LwM2mObjectDefinition objectTwo = new LwM2mObjectDefinition(BROKEN_OBJECT_ID, !mandatory, !single,
+				new SingleResourceDefinition(BROKEN_RESOURCE_ID, brokenResourceListener, mandatory, writable));
+		final LwM2mObjectDefinition objectThree = new LwM2mObjectDefinition(MULTIPLE_OBJECT_ID, !mandatory, !single,
+				new SingleResourceDefinition(MULTIPLE_RESOURCE_ID, multipleResource, !mandatory, !writable));
+		final LwM2mObjectDefinition objectFour = new LwM2mObjectDefinition(INT_OBJECT_ID, !mandatory, !single,
+				new SingleResourceDefinition(INT_RESOURCE_ID, intResource, !mandatory, !writable));
+		final LwM2mObjectDefinition mandatoryMultipleObject = new LwM2mObjectDefinition(MANDATORY_MULTIPLE_OBJECT_ID, mandatory, !single,
+				new SingleResourceDefinition(MANDATORY_MULTIPLE_RESOURCE_ID, intResource, !mandatory, !writable));
+		final LwM2mObjectDefinition mandatorySingleObject = new LwM2mObjectDefinition(MANDATORY_SINGLE_OBJECT_ID, mandatory, single,
+				new SingleResourceDefinition(MANDATORY_SINGLE_RESOURCE_ID, intResource, !mandatory, !writable));
+		final LwM2mObjectDefinition optionalSingleObject = new LwM2mObjectDefinition(OPTIONAL_SINGLE_OBJECT_ID, !mandatory, single,
+				new SingleResourceDefinition(OPTIONAL_SINGLE_RESOURCE_ID, intResource, !mandatory, !writable));
+		return new LwM2mClient(objectOne, objectTwo, objectThree, objectFour, mandatoryMultipleObject, mandatorySingleObject, optionalSingleObject);
 	}
 
 	@After

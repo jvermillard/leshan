@@ -13,17 +13,36 @@ public class LwM2mObjectDefinition {
 
 	private final int id;
 	private final Map<Integer, LwM2mResourceDefinition> defMap;
+	private final boolean isMandatory;
+	private final boolean isSingle;
 
-	public LwM2mObjectDefinition(final int objectId, final LwM2mResourceDefinition... definitions) {
+	public LwM2mObjectDefinition(final int objectId, final boolean isMandatory, final boolean isSingle, final LwM2mResourceDefinition... definitions) {
 		this.id = objectId;
-		this.defMap = new HashMap<Integer, LwM2mResourceDefinition>();
+		this.isMandatory = isMandatory;
+		this.isSingle = isSingle;
+
+		this.defMap = mapFromResourceDefinitions(definitions);
+	}
+
+	private Map<Integer, LwM2mResourceDefinition> mapFromResourceDefinitions(final LwM2mResourceDefinition[] definitions) {
+		final Map<Integer, LwM2mResourceDefinition> map = new HashMap<Integer, LwM2mResourceDefinition>();
 		for (final LwM2mResourceDefinition def : definitions) {
-			defMap.put(def.getId(), def);
+			map.put(def.getId(), def);
 		}
+
+		return map;
 	}
 
 	public int getId() {
 		return id;
+	}
+
+	public boolean isMandatory() {
+		return isMandatory;
+	}
+
+	public boolean isSingle()  {
+		return isSingle;
 	}
 
 	public boolean hasAllRequiredResourceIds(final Tlv[] tlvs) {
@@ -50,7 +69,7 @@ public class LwM2mObjectDefinition {
 				result.add(def);
 			}
 		}
-		return result ;
+		return result;
 	}
 
 }

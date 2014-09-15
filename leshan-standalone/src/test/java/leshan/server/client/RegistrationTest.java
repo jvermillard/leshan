@@ -29,7 +29,7 @@ public class RegistrationTest extends LwM2mClientServerIntegrationTest {
 
 	@Test(expected=IllegalArgumentException.class)
 	public void failToCreateClientWithSameObjectTwice(){
-		final LwM2mObjectDefinition objectOne = new LwM2mObjectDefinition(1);
+		final LwM2mObjectDefinition objectOne = new LwM2mObjectDefinition(1, false, false);
 		client = new LwM2mClient(objectOne, objectOne);
 	}
 

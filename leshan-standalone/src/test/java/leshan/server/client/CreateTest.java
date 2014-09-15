@@ -96,4 +96,24 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
 		assertEmptyResponse(sendCreate(new Tlv[0], MULTIPLE_OBJECT_ID), CREATED);
 	}
 
+	@Test
+	public void cannotCreateMandatorySingleObject() {
+		register();
+		assertEmptyResponse(sendCreate(new Tlv[0], MANDATORY_SINGLE_OBJECT_ID), ResponseCode.BAD_REQUEST);
+	}
+
+	@Test
+	public void canCreateMandatoryMultipleObject() {
+		register();
+		assertEmptyResponse(sendCreate(new Tlv[0], MANDATORY_MULTIPLE_OBJECT_ID), ResponseCode.CREATED);
+		assertEmptyResponse(sendCreate(new Tlv[0], MANDATORY_MULTIPLE_OBJECT_ID), ResponseCode.CREATED);
+	}
+
+	@Test
+	public void cannotCreateMoreThanOneSingleObject() {
+		register();
+		assertEmptyResponse(sendCreate(new Tlv[0], OPTIONAL_SINGLE_OBJECT_ID), ResponseCode.CREATED);
+		assertEmptyResponse(sendCreate(new Tlv[0], OPTIONAL_SINGLE_OBJECT_ID), ResponseCode.BAD_REQUEST);
+	}
+
 }

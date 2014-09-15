@@ -6,10 +6,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import leshan.client.lwm2m.operation.AggregatedLwM2mExchange;
+import leshan.client.lwm2m.operation.CreateResponse;
 import leshan.client.lwm2m.operation.LwM2mCreateExchange;
 import leshan.client.lwm2m.operation.LwM2mExchange;
 import leshan.client.lwm2m.operation.LwM2mObjectReadResponseAggregator;
 import leshan.client.lwm2m.operation.LwM2mResponseAggregator;
+import leshan.client.lwm2m.operation.MandatoryObjectExchange;
 import leshan.client.lwm2m.operation.ReadResponse;
 
 public class LwM2mObject {
@@ -22,6 +24,10 @@ public class LwM2mObject {
 		this.definition = definition;
 		this.instanceCounter = new AtomicInteger(0);
 		this.instances = new ConcurrentHashMap<>();
+
+		if(definition.isMandatory()) {
+			handleCreate(new MandatoryObjectExchange());
+		}
 	}
 
 	public void handleRead(final LwM2mExchange exchange) {
@@ -41,6 +47,10 @@ public class LwM2mObject {
 	}
 
 	public void handleCreate(final LwM2mCreateExchange exchange) {
+		if(instanceCounter.get() >= 1 && definition.isSingle()) {
+			exchange.respond(CreateResponse.invalidResource());
+		}
+
 		final int newInstanceId = getNewInstanceId(exchange);
 		final LwM2mObjectInstance instance = new LwM2mObjectInstance(newInstanceId, definition);
 		exchange.setObjectInstance(instance);
