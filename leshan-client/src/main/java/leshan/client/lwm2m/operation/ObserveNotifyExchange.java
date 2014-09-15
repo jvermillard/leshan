@@ -13,9 +13,21 @@ public class ObserveNotifyExchange extends ForwardingLwM2mExchange {
 
 	@Override
 	public void respond(final LwM2mResponse response) {
-		final Float greaterThan = observeSpec.getGreaterThan();
-		if (greaterThan == null || Float.parseFloat(new String(response.getResponsePayload())) > greaterThan) {
+		if (shouldNotifyRange(response)) {
 			exchange.respond(ObserveResponse.notifyWithContent(response.getResponsePayload()));
+		}
+	}
+
+	private boolean shouldNotifyRange(final LwM2mResponse response) {
+		try {
+			final float value = Float.parseFloat(new String(response.getResponsePayload()));
+			final Float greaterThan = observeSpec.getGreaterThan();
+			final Float lessThan = observeSpec.getLessThan();
+			return (greaterThan != null && value > greaterThan) ||
+					(lessThan != null && value < lessThan) ||
+					(greaterThan == null && lessThan == null);
+		} catch (final NumberFormatException e) {
+			return true;
 		}
 	}
 
