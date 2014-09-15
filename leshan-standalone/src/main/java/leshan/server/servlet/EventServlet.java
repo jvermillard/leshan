@@ -40,13 +40,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import leshan.server.lwm2m.Lwm2mServer;
 import leshan.server.lwm2m.client.Client;
-import leshan.server.lwm2m.client.ClientRegistry;
-import leshan.server.lwm2m.client.RegistryListener;
-import leshan.server.lwm2m.message.ContentFormat;
-import leshan.server.lwm2m.message.ResourceSpec;
-import leshan.server.lwm2m.observation.ResourceObserver;
+import leshan.server.lwm2m.client.ClientRegistryListener;
+import leshan.server.lwm2m.node.LwM2mNode;
+import leshan.server.lwm2m.observation.Observation;
+import leshan.server.lwm2m.observation.ObservationRegistryListener;
 import leshan.server.servlet.json.ClientSerializer;
+import leshan.server.servlet.json.LwM2mNodeSerializer;
 
 import org.eclipse.jetty.continuation.Continuation;
 import org.eclipse.jetty.continuation.ContinuationListener;
@@ -58,7 +59,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class EventServlet extends HttpServlet implements ResourceObserver {
+public class EventServlet extends HttpServlet {
 
     private static final String EVENT_DEREGISTRATION = "DEREGISTRATION";
 
@@ -86,19 +87,17 @@ public class EventServlet extends HttpServlet implements ResourceObserver {
 
     private final Set<Continuation> continuations = new ConcurrentHashSet<>();
 
-    private final RegistryListener listener = new RegistryListener() {
+    private final ClientRegistryListener clientRegistryListener = new ClientRegistryListener() {
 
         @Override
         public void registered(Client client) {
             String jClient = EventServlet.this.gson.toJson(client);
-
             sendEvent(EVENT_REGISTRATION, jClient, client.getEndpoint());
         }
 
         @Override
         public void updated(Client clientUpdated) {
             String jClient = EventServlet.this.gson.toJson(clientUpdated);
-
             sendEvent(EVENT_UPDATED, jClient, clientUpdated.getEndpoint());
         };
 
@@ -109,42 +108,38 @@ public class EventServlet extends HttpServlet implements ResourceObserver {
         }
     };
 
-    public EventServlet(ClientRegistry registry) {
-        registry.addListener(this.listener);
+    private final ObservationRegistryListener observationRegistryListener = new ObservationRegistryListener() {
+
+        @Override
+        public void cancelled(Observation observation) {
+        }
+
+        @Override
+        public void newValue(Observation observation, LwM2mNode value) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Received notification from [{}] containing value [{}]", observation.getPath(),
+                        value.toString());
+            }
+            String data = new StringBuffer("{\"ep\":\"").append(observation.getClient().getEndpoint())
+                    .append("\",\"res\":\"").append(observation.getPath().toString()).append("\",\"val\":")
+                    .append(gson.toJson(value)).append("}").toString();
+
+            sendEvent(EVENT_NOTIFICATION, data, observation.getClient().getEndpoint());
+        }
+
+        @Override
+        public void newObservation(Observation observation) {
+        }
+    };
+
+    public EventServlet(Lwm2mServer server) {
+        server.getClientRegistry().addListener(this.clientRegistryListener);
+        server.getObservationRegistry().addListener(this.observationRegistryListener);
 
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeHierarchyAdapter(Client.class, new ClientSerializer());
+        gsonBuilder.registerTypeHierarchyAdapter(LwM2mNode.class, new LwM2mNodeSerializer());
         this.gson = gsonBuilder.create();
-    }
-
-    @Override
-    public void notify(byte[] content, ContentFormat contentFormat, ResourceSpec target) {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Received notification from [{}] containing value [{}]", target, new String(content));
-        }
-
-        String data = null;
-        switch (contentFormat) {
-        case OPAQUE:
-            // TODO: handle binary data
-            LOG.debug("Binary data not supported yet");
-            return;
-        case TLV:
-            // TODO: decode TLV
-            LOG.debug("TLV encoded data not supported yet");
-            return;
-        case JSON:
-            // TODO: handle JSON data
-            LOG.debug("JSON encoded data not supported yet");
-            return;
-        case TEXT:
-        default:
-            data = new StringBuffer("{\"ep\":\"").append(target.getClient().getEndpoint()).append("\",\"res\":\"")
-                    .append(target.asRelativePath()).append("\",\"val\":\"").append(new String(content)).append("\"}")
-                    .toString();
-
-        }
-        sendEvent(EVENT_NOTIFICATION, data, target.getClient().getEndpoint());
     }
 
     private synchronized void sendEvent(String event, String data, String endpoint) {
@@ -174,7 +169,6 @@ public class EventServlet extends HttpServlet implements ResourceObserver {
                 }
             }
         }
-
         continuations.removeAll(disconnected);
     }
 

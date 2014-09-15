@@ -33,7 +33,7 @@ package leshan.bootstrap;
 import java.net.InetSocketAddress;
 
 import leshan.bootstrap.servlet.BootstrapServlet;
-import leshan.server.lwm2m.LwM2mBootstrapServer;
+import leshan.server.lwm2m.impl.LwM2mBootstrapServerImpl;
 import leshan.server.lwm2m.security.SecurityStore;
 
 import org.eclipse.jetty.server.Server;
@@ -55,16 +55,16 @@ public class BootstrapMain {
         String iface = System.getenv("COAPIFACE");
         String ifaces = System.getenv("COAPSIFACE");
 
-        LwM2mBootstrapServer bsServer;
+        LwM2mBootstrapServerImpl bsServer;
 
         if (iface == null || iface.isEmpty() || ifaces == null || ifaces.isEmpty()) {
-            bsServer = new LwM2mBootstrapServer(bsStore, securityStore);
+            bsServer = new LwM2mBootstrapServerImpl(bsStore, securityStore);
         } else {
             String[] add = iface.split(":");
             String[] adds = ifaces.split(":");
 
             // user specified the iface to be bound
-            bsServer = new LwM2mBootstrapServer(new InetSocketAddress(add[0], Integer.parseInt(add[1])),
+            bsServer = new LwM2mBootstrapServerImpl(new InetSocketAddress(add[0], Integer.parseInt(add[1])),
                     new InetSocketAddress(adds[0], Integer.parseInt(adds[1])), bsStore, securityStore);
         }
 

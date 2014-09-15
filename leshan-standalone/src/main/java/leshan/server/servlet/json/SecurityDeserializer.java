@@ -68,11 +68,10 @@ public class SecurityDeserializer implements JsonDeserializer<SecurityInfo> {
             if (psk == null) { // psk only for now
                 throw new JsonParseException("Invalid security info content");
             }
-            String identity  = null;
-            if(psk.has("identity")) {
-            identity = psk.get("identity").getAsString();
-            }
-            else {
+            String identity = null;
+            if (psk.has("identity")) {
+                identity = psk.get("identity").getAsString();
+            } else {
                 throw new JsonParseException("Missing PSK identity");
             }
             byte[] key;

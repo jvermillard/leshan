@@ -38,11 +38,17 @@ angular.module('objectDirectives', [])
             
                 modalInstance.result.then(function (instance) {
                     // Build payload
-                    var payload = []
+                    var payload = {};
+                    payload["id"] = instance.id;
+                    payload["resources"] = []
+
                     for(i in instance.resources){
                         var resource = instance.resources[i];
                         if (resource.value != undefined){
-                            payload.push({id:resource.id,type:'RESOURCE_VALUE',value:resource.value})
+                            payload.resources.push({
+                                id:resource.id,
+                                value:lwResources.getTypedValue(resource.value, resource.def.type)
+                            })
                         } 
                     }
                     // Send request
@@ -56,8 +62,8 @@ angular.module('objectDirectives', [])
                         create.tooltip = formattedDate + "<br/>" + create.status;
                         
                         if (data.status == "CREATED") {
-                            for (var i in payload) {
-                                var tlvresource = payload[i];
+                            for (var i in payload.resources) {
+                                var tlvresource = payload.resources[i];
                                 var newinstance = lwResources.addInstance(scope.object, instance.id, null)
                                 resource = lwResources.addResource(scope.object, newinstance, tlvresource.id, null)
                                 resource.value = tlvresource.value;

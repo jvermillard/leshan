@@ -6,7 +6,7 @@
 
 angular.module('resourceDirectives', [])
 
-.directive('resource', function ($compile, $routeParams, $http, dialog,$filter) {
+.directive('resource', function ($compile, $routeParams, $http, dialog, $filter, lwResources) {
     return {
         restrict: "E",
         replace: true,
@@ -57,10 +57,20 @@ angular.module('resourceDirectives', [])
                     observe.status = data.status;
                     observe.tooltip = formattedDate + "<br/>" + observe.status;
                     
-                    // HACK
-                    if (data.status == "CONTENT" || data.status == "CHANGED") {
+                    if (data.status == "CONTENT") {
                         scope.resource.observed = true;
-                        scope.resource.value = data.value;
+                        if("value" in data.content) {
+                            // single value
+                            scope.resource.value = data.content.value
+                        }
+                        else if("values" in data.content) {
+                            // multiple instances
+                            var tab = new Array();
+                            for (var i in data.content.values) {
+                                tab.push(data.content.values[i])
+                            }
+                            scope.resource.value = tab.join(", ");
+                        }
                         scope.resource.valuesupposed = false;
                         scope.resource.tooltip = formattedDate;
                     }
@@ -97,24 +107,19 @@ angular.module('resourceDirectives', [])
                     read.tooltip = formattedDate + "<br/>" + read.status;
                     
                     // manage read data
-                    if (data.status == "CONTENT") {
-                        if (data.type == "TLV"){
-                            if (data.value[0]){
-                                var tlvresource = data.value[0];
-                                if (tlvresource.type == "RESOURCE_VALUE"){
-                                    scope.resource.value = data.value[0].value;
-                                }else if (tlvresource.type == "MULTIPLE_RESOURCE"){
-                                    var tab= new Array();
-                                    for (var i in tlvresource.resources){
-                                        tab.push(tlvresource.resources[i].value)
-                                    }
-                                    scope.resource.value = tab.join(", ");
-                                }
+                    if (data.status == "CONTENT" && data.content) {
+                    	if("value" in data.content) {
+                    		// single value
+                    		scope.resource.value = data.content.value
+                    	}
+                    	else if("values" in data.content) {
+                    		// multiple instances
+                    		var tab = new Array();
+                            for (var i in data.content.values) {
+                                tab.push(data.content.values[i])
                             }
-                        }else{
-                            scope.resource.value = data.value;    
-                        }
-                        
+                            scope.resource.value = tab.join(", ");
+                    	}
                         scope.resource.valuesupposed = false;
                         scope.resource.tooltip = formattedDate;
                     }
@@ -135,9 +140,15 @@ angular.module('resourceDirectives', [])
                 $('#writeSubmit').click(function(e){
                     e.preventDefault();
                     var value = $('#writeInputValue').val();
+
                     if(value) {
                         $('#writeModal').modal('hide');
-                        $http({method: 'PUT', url: "api/clients/" + $routeParams.clientId + scope.resource.path, data: value, headers:{'Content-Type': 'text/plain'}})
+
+                        var rsc = {};
+                        rsc["id"] = scope.resource.def.id;
+                        rsc["value"] = lwResources.getTypedValue(value, scope.resource.def.type);
+
+                        $http({method: 'PUT', url: "api/clients/" + $routeParams.clientId + scope.resource.path, data: rsc, headers:{'Content-Type': 'application/json'}})
                         .success(function(data, status, headers, config) {
                             write = scope.resource.write;
                             write.date = new Date();

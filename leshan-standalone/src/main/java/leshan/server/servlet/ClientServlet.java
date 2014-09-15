@@ -31,6 +31,7 @@ package leshan.server.servlet;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,28 +40,29 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import leshan.server.lwm2m.Lwm2mServer;
 import leshan.server.lwm2m.client.Client;
-import leshan.server.lwm2m.client.ClientRegistry;
-import leshan.server.lwm2m.message.ClientResponse;
-import leshan.server.lwm2m.message.ContentFormat;
-import leshan.server.lwm2m.message.CreateRequest;
-import leshan.server.lwm2m.message.DeleteRequest;
-import leshan.server.lwm2m.message.ExecRequest;
-import leshan.server.lwm2m.message.ObserveRequest;
-import leshan.server.lwm2m.message.ReadRequest;
-import leshan.server.lwm2m.message.RequestHandler;
-import leshan.server.lwm2m.message.ResourceAccessException;
-import leshan.server.lwm2m.message.WriteRequest;
-import leshan.server.lwm2m.observation.ObservationRegistry;
-import leshan.server.lwm2m.observation.ResourceObserver;
-import leshan.server.lwm2m.tlv.Tlv;
+import leshan.server.lwm2m.node.LwM2mNode;
+import leshan.server.lwm2m.node.LwM2mObjectInstance;
+import leshan.server.lwm2m.node.LwM2mResource;
+import leshan.server.lwm2m.node.Value;
+import leshan.server.lwm2m.request.ClientResponse;
+import leshan.server.lwm2m.request.ContentFormat;
+import leshan.server.lwm2m.request.CreateRequest;
+import leshan.server.lwm2m.request.DeleteRequest;
+import leshan.server.lwm2m.request.ExecuteRequest;
+import leshan.server.lwm2m.request.ObserveRequest;
+import leshan.server.lwm2m.request.ReadRequest;
+import leshan.server.lwm2m.request.ResourceAccessException;
+import leshan.server.lwm2m.request.ValueResponse;
+import leshan.server.lwm2m.request.WriteRequest;
 import leshan.server.servlet.json.ClientSerializer;
+import leshan.server.servlet.json.DateSerializer;
+import leshan.server.servlet.json.LwM2mNodeDeserializer;
+import leshan.server.servlet.json.LwM2mNodeSerializer;
 import leshan.server.servlet.json.ResponseSerializer;
-import leshan.server.servlet.json.TlvDeserializer;
-import leshan.server.servlet.json.TlvSerializer;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jetty.http.HttpFields;
 import org.slf4j.Logger;
@@ -79,25 +81,19 @@ public class ClientServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    private final RequestHandler requestHandler;
-    private final ResourceObserver resourceObserver;
-    private final ClientRegistry clientRegistry;
-    private final ObservationRegistry observationRegistry;
+    private final Lwm2mServer server;
 
     private final Gson gson;
 
-    public ClientServlet(RequestHandler requestHandler, ClientRegistry clientRegistry,
-            ObservationRegistry observationRegistry, ResourceObserver observer) {
-        this.requestHandler = requestHandler;
-        this.clientRegistry = clientRegistry;
-        this.observationRegistry = observationRegistry;
-        this.resourceObserver = observer;
+    public ClientServlet(Lwm2mServer server) {
+        this.server = server;
 
         GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder.registerTypeAdapter(Tlv.class, new TlvSerializer());
-        gsonBuilder.registerTypeAdapter(Tlv.class, new TlvDeserializer());
         gsonBuilder.registerTypeHierarchyAdapter(Client.class, new ClientSerializer());
         gsonBuilder.registerTypeHierarchyAdapter(ClientResponse.class, new ResponseSerializer());
+        gsonBuilder.registerTypeHierarchyAdapter(LwM2mNode.class, new LwM2mNodeSerializer());
+        gsonBuilder.registerTypeHierarchyAdapter(LwM2mNode.class, new LwM2mNodeDeserializer());
+        gsonBuilder.registerTypeHierarchyAdapter(Date.class, new DateSerializer());
         this.gson = gsonBuilder.create();
     }
 
@@ -109,7 +105,7 @@ public class ClientServlet extends HttpServlet {
 
         // all registered clients
         if (req.getPathInfo() == null) {
-            Collection<Client> clients = this.clientRegistry.allClients();
+            Collection<Client> clients = server.getClientRegistry().allClients();
 
             String json = this.gson.toJson(clients.toArray(new Client[] {}));
             resp.setContentType("application/json");
@@ -119,11 +115,15 @@ public class ClientServlet extends HttpServlet {
         }
 
         String[] path = StringUtils.split(req.getPathInfo(), '/');
+        if (path.length < 1) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid path");
+            return;
+        }
+        String clientEndpoint = path[0];
 
         // /endPoint : get client
         if (path.length == 1) {
-            String clientEndpoint = path[0];
-            Client client = this.clientRegistry.get(clientEndpoint);
+            Client client = server.getClientRegistry().get(clientEndpoint);
             if (client != null) {
                 resp.setContentType("application/json");
                 resp.getOutputStream().write(this.gson.toJson(client).getBytes("UTF-8"));
@@ -137,16 +137,18 @@ public class ClientServlet extends HttpServlet {
 
         // /clients/endPoint/LWRequest : do LightWeight M2M read request on a given client.
         try {
-            RequestInfo requestInfo = new RequestInfo(path);
-            Client client = this.clientRegistry.get(requestInfo.endpoint);
+            String target = StringUtils.removeStart(req.getPathInfo(), "/" + clientEndpoint);
+            Client client = server.getClientRegistry().get(clientEndpoint);
             if (client != null) {
-                ClientResponse cResponse = this.readRequest(client, requestInfo, resp);
+                ReadRequest request = new ReadRequest(client, target);
+                ValueResponse cResponse = server.send(request);
                 processDeviceResponse(resp, cResponse);
             } else {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                resp.getWriter().format("no registered client with id '%s'", requestInfo.endpoint).flush();
+                resp.getWriter().format("No registered client with id '%s'", clientEndpoint).flush();
             }
         } catch (IllegalArgumentException e) {
+            LOG.debug("Invalid request", e);
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().append(e.getMessage()).flush();
         } catch (ResourceAccessException e) {
@@ -162,20 +164,26 @@ public class ClientServlet extends HttpServlet {
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String[] path = StringUtils.split(req.getPathInfo(), '/');
+        String clientEndpoint = path[0];
 
-        // /clients/endPoint/LWRequest : do LightWeight M2M write request on a given client.
+        // at least /endpoint/objectId/instanceId
+        if (path.length < 3) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid path");
+            return;
+        }
+
         try {
-            RequestInfo requestInfo = new RequestInfo(path);
-            Client client = this.clientRegistry.get(requestInfo.endpoint);
+            String target = StringUtils.removeStart(req.getPathInfo(), "/" + clientEndpoint);
+            Client client = server.getClientRegistry().get(clientEndpoint);
             if (client != null) {
-                ClientResponse cResponse = this.writeRequest(client, requestInfo, req, resp);
+                ClientResponse cResponse = this.writeRequest(client, target, req, resp);
                 processDeviceResponse(resp, cResponse);
             } else {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                resp.getWriter().format("no registered client with id '%s'", requestInfo.endpoint).flush();
+                resp.getWriter().format("No registered client with id '%s'", clientEndpoint).flush();
             }
         } catch (IllegalArgumentException e) {
-            // content type not supported
+            LOG.debug("Invalid request", e);
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().append(e.getMessage()).flush();
         } catch (ResourceAccessException e) {
@@ -191,20 +199,23 @@ public class ClientServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String[] path = StringUtils.split(req.getPathInfo(), '/');
+        String clientEndpoint = path[0];
 
         // /clients/endPoint/LWRequest/observe : do LightWeight M2M observe request on a given client.
         if (path.length >= 4 && "observe".equals(path[path.length - 1])) {
             try {
-                RequestInfo requestInfo = new RequestInfo((String[]) ArrayUtils.remove(path, path.length - 1));
-                Client client = this.clientRegistry.get(requestInfo.endpoint);
+                String target = StringUtils.substringBetween(req.getPathInfo(), clientEndpoint, "observe");
+                Client client = server.getClientRegistry().get(clientEndpoint);
                 if (client != null) {
-                    ClientResponse cResponse = this.observeRequest(client, requestInfo, resp);
+                    ObserveRequest request = new ObserveRequest(client, target);
+                    ClientResponse cResponse = server.send(request);
                     processDeviceResponse(resp, cResponse);
                 } else {
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    resp.getWriter().format("no registered client with id '%s'", requestInfo.endpoint).flush();
+                    resp.getWriter().format("no registered client with id '%s'", clientEndpoint).flush();
                 }
             } catch (IllegalArgumentException e) {
+                LOG.debug("Invalid request", e);
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 resp.getWriter().append(e.getMessage()).flush();
             } catch (ResourceAccessException e) {
@@ -215,19 +226,22 @@ public class ClientServlet extends HttpServlet {
             return;
         }
 
+        String target = StringUtils.removeStart(req.getPathInfo(), "/" + clientEndpoint);
+
         // /clients/endPoint/LWRequest : do LightWeight M2M execute request on a given client.
         if (path.length == 4) {
             try {
-                RequestInfo requestInfo = new RequestInfo(path);
-                Client client = this.clientRegistry.get(requestInfo.endpoint);
+                Client client = server.getClientRegistry().get(clientEndpoint);
                 if (client != null) {
-                    ClientResponse cResponse = this.execRequest(client, requestInfo, resp);
+                    ExecuteRequest request = new ExecuteRequest(client, target);
+                    ClientResponse cResponse = server.send(request);
                     processDeviceResponse(resp, cResponse);
                 } else {
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    resp.getWriter().format("no registered client with id '%s'", requestInfo.endpoint).flush();
+                    resp.getWriter().format("no registered client with id '%s'", clientEndpoint).flush();
                 }
             } catch (IllegalArgumentException e) {
+                LOG.debug("Invalid request", e);
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 resp.getWriter().append(e.getMessage()).flush();
             } catch (ResourceAccessException e) {
@@ -241,16 +255,16 @@ public class ClientServlet extends HttpServlet {
         // /clients/endPoint/LWRequest : do LightWeight M2M create request on a given client.
         if (2 <= path.length && path.length <= 3) {
             try {
-                RequestInfo requestInfo = new RequestInfo(path);
-                Client client = this.clientRegistry.get(requestInfo.endpoint);
+                Client client = server.getClientRegistry().get(clientEndpoint);
                 if (client != null) {
-                    ClientResponse cResponse = this.createRequest(client, requestInfo, req, resp);
+                    ClientResponse cResponse = this.createRequest(client, target, req, resp);
                     processDeviceResponse(resp, cResponse);
                 } else {
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    resp.getWriter().format("no registered client with id '%s'", requestInfo.endpoint).flush();
+                    resp.getWriter().format("no registered client with id '%s'", clientEndpoint).flush();
                 }
             } catch (IllegalArgumentException e) {
+                LOG.debug("Invalid request", e);
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 resp.getWriter().append(e.getMessage()).flush();
             } catch (ResourceAccessException e) {
@@ -265,21 +279,22 @@ public class ClientServlet extends HttpServlet {
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String[] path = StringUtils.split(req.getPathInfo(), '/');
+        String clientEndpoint = path[0];
 
         // /clients/endPoint/LWRequest/observe : cancel observation for the given resource.
         if (path.length >= 4 && "observe".equals(path[path.length - 1])) {
             try {
-
-                RequestInfo requestInfo = new RequestInfo((String[]) ArrayUtils.remove(path, path.length - 1));
-                Client client = this.clientRegistry.get(requestInfo.endpoint);
+                String target = StringUtils.substringsBetween(req.getPathInfo(), clientEndpoint, "observe")[0];
+                Client client = server.getClientRegistry().get(clientEndpoint);
                 if (client != null) {
-                    observationRegistry.cancelObservation(client, requestInfo.getResourcePath());
+                    server.getObservationRegistry().cancelObservation(client, target);
                     resp.setStatus(HttpServletResponse.SC_OK);
                 } else {
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                    resp.getWriter().format("no registered client with id '%s'", requestInfo.endpoint).flush();
+                    resp.getWriter().format("no registered client with id '%s'", clientEndpoint).flush();
                 }
             } catch (IllegalArgumentException e) {
+                LOG.debug("Invalid request", e);
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 resp.getWriter().append(e.getMessage()).flush();
             } catch (ResourceAccessException e) {
@@ -292,16 +307,18 @@ public class ClientServlet extends HttpServlet {
 
         // /clients/endPoint/LWRequest/ : delete instance
         try {
-            RequestInfo requestInfo = new RequestInfo(path);
-            Client client = this.clientRegistry.get(requestInfo.endpoint);
+            String target = StringUtils.removeStart(req.getPathInfo(), "/" + clientEndpoint);
+            Client client = server.getClientRegistry().get(clientEndpoint);
             if (client != null) {
-                ClientResponse cResponse = this.deleteRequest(client, requestInfo, resp);
+                DeleteRequest request = new DeleteRequest(client, target);
+                ClientResponse cResponse = server.send(request);
                 processDeviceResponse(resp, cResponse);
             } else {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                resp.getWriter().format("no registered client with id '%s'", requestInfo.endpoint).flush();
+                resp.getWriter().format("no registered client with id '%s'", clientEndpoint).flush();
             }
         } catch (IllegalArgumentException e) {
+            LOG.debug("Invalid request", e);
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().append(e.getMessage()).flush();
         } catch (ResourceAccessException e) {
@@ -323,120 +340,57 @@ public class ClientServlet extends HttpServlet {
         resp.setStatus(HttpServletResponse.SC_OK);
     }
 
-    private ClientResponse readRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp) {
-        return ReadRequest.newRequest(client, requestInfo.objectId, requestInfo.objectInstanceId,
-                requestInfo.resourceId).send(this.requestHandler);
-    }
-
-    private ClientResponse observeRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp) {
-        ClientResponse response = ObserveRequest.newRequest(client, this.resourceObserver, requestInfo.objectId,
-                requestInfo.objectInstanceId, requestInfo.resourceId).send(this.requestHandler);
-        return response;
-    }
-
-    private ClientResponse execRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp) {
-        return ExecRequest.newRequest(client, requestInfo.objectId, requestInfo.objectInstanceId,
-                requestInfo.resourceId).send(this.requestHandler);
-    }
-
-    private ClientResponse writeRequest(Client client, RequestInfo requestInfo, HttpServletRequest req,
-            HttpServletResponse resp) throws IOException {
+    // TODO refactor the code to remove this method.
+    private ClientResponse writeRequest(Client client, String target, HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
         Map<String, String> parameters = new HashMap<String, String>();
         String contentType = HttpFields.valueParameters(req.getContentType(), parameters);
+
         if ("text/plain".equals(contentType)) {
             String content = IOUtils.toString(req.getInputStream(), parameters.get("charset"));
-            return WriteRequest.newReplaceRequest(client, requestInfo.objectId, requestInfo.objectInstanceId,
-                    requestInfo.resourceId, content, ContentFormat.TEXT).send(this.requestHandler);
+            int rscId = Integer.valueOf(target.substring(target.lastIndexOf("/") + 1));
+            return server.send(new WriteRequest(client, target,
+                    new LwM2mResource(rscId, Value.newStringValue(content)), ContentFormat.TEXT, true));
+
         } else if ("application/json".equals(contentType)) {
             String content = IOUtils.toString(req.getInputStream(), parameters.get("charset"));
-            Tlv[] tlvs;
+            LwM2mNode node = null;
             try {
-                tlvs = gson.fromJson(content, Tlv[].class);
+                node = gson.fromJson(content, LwM2mNode.class);
             } catch (JsonSyntaxException e) {
                 throw new IllegalArgumentException("unable to parse json to tlv:" + e.getMessage(), e);
             }
-            return WriteRequest.newReplaceRequest(client, requestInfo.objectId, requestInfo.objectInstanceId,
-                    requestInfo.resourceId, tlvs).send(this.requestHandler);
+
+            return server.send(new WriteRequest(client, target, node, ContentFormat.TLV, true));
+
         } else {
             throw new IllegalArgumentException("content type " + req.getContentType()
                     + " not supported for write requests");
         }
     }
 
-    private ClientResponse createRequest(Client client, RequestInfo requestInfo, HttpServletRequest req,
-            HttpServletResponse resp) throws IOException {
+    // TODO refactor the code to remove this method.
+    private ClientResponse createRequest(Client client, String target, HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
         Map<String, String> parameters = new HashMap<String, String>();
         String contentType = HttpFields.valueParameters(req.getContentType(), parameters);
         if ("application/json".equals(contentType)) {
             String content = IOUtils.toString(req.getInputStream(), parameters.get("charset"));
-            Tlv[] tlvs;
+            LwM2mNode node;
             try {
-                tlvs = gson.fromJson(content, Tlv[].class);
+                node = gson.fromJson(content, LwM2mNode.class);
             } catch (JsonSyntaxException e) {
                 throw new IllegalArgumentException("unable to parse json to tlv:" + e.getMessage(), e);
             }
-            return CreateRequest.newRequest(client, requestInfo.objectId, requestInfo.objectInstanceId, tlvs).send(
-                    this.requestHandler);
+            if (!(node instanceof LwM2mObjectInstance)) {
+                throw new IllegalArgumentException("payload must contain an object instance");
+            }
+
+            return server.send(new CreateRequest(client, target, (LwM2mObjectInstance) node, ContentFormat.TLV));
         } else {
             throw new IllegalArgumentException("content type " + req.getContentType()
                     + " not supported for write requests");
         }
     }
 
-    private ClientResponse deleteRequest(Client client, RequestInfo requestInfo, HttpServletResponse resp) {
-        return DeleteRequest.newRequest(client, requestInfo.objectId, requestInfo.objectInstanceId).send(
-                this.requestHandler);
-    }
-
-    class RequestInfo {
-
-        final String endpoint;
-        final Integer objectId;
-        Integer objectInstanceId;
-        Integer resourceId;
-        Integer resourceInstanceId;
-        final String resourcepath;
-
-        /**
-         * Build LW request info from URI path
-         */
-        RequestInfo(String[] path) {
-
-            if (path.length < 2 || path.length > 5) {
-                throw new IllegalArgumentException("invalid lightweight M2M path");
-            }
-
-            endpoint = path[0];
-
-            StringBuffer b = new StringBuffer();
-            try {
-                this.objectId = Integer.valueOf(path[1]);
-                b.append("/").append(objectId);
-
-                if (path.length > 2) {
-                    objectInstanceId = Integer.valueOf(path[2]);
-                    b.append("/").append(objectInstanceId);
-                }
-                if (path.length > 3) {
-                    resourceId = Integer.valueOf(path[3]);
-                    b.append("/").append(resourceId);
-                }
-                if (path.length > 4) {
-                    resourceInstanceId = Integer.valueOf(path[4]);
-                }
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("invalid lightweight M2M path", e);
-            }
-            resourcepath = b.toString();
-        }
-
-        public String getResourcePath() {
-            return resourcepath;
-        }
-
-        @Override
-        public String toString() {
-            return StringUtils.join(new String[] { "/", endpoint, resourcepath });
-        }
-    }
 }

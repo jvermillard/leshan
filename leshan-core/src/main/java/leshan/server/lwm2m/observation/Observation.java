@@ -29,7 +29,8 @@
  */
 package leshan.server.lwm2m.observation;
 
-import leshan.server.lwm2m.message.ResourceSpec;
+import leshan.server.lwm2m.client.Client;
+import leshan.server.lwm2m.node.LwM2mPath;
 
 /**
  * An observation of a resource provided by a LWM2M Client.
@@ -39,28 +40,27 @@ import leshan.server.lwm2m.message.ResourceSpec;
 public interface Observation {
 
     /**
-     * Gets the observed resource.
+     * Gets the observed client.
      * 
-     * @return the resource
+     * @return the client
      */
-    ResourceSpec getResource();
+    Client getClient();
 
     /**
-     * Gets the <em>observer</em> of the resource.
+     * Gets the observed resource path.
      * 
-     * The observer receives all notifications by means of the
-     * {@link ResourceObserver#notify(byte[], leshan.server.lwm2m.message.ContentFormat, ResourceSpec)}
-     * method.
-     * 
-     * @return the observer
+     * @return the resource path
      */
-    ResourceObserver getResourceObserver();
+    LwM2mPath getPath();
 
     /**
      * Cancels the observation.
      * 
-     * As a result the observer will no longer get notified about changes to the
-     * resource.
+     * As a result the observer will no longer get notified about changes to the resource.
      */
     void cancel();
+
+    void addListener(ObservationListener listener);
+
+    void removeListener(ObservationListener listener);
 }

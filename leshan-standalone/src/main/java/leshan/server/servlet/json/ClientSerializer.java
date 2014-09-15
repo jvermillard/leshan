@@ -31,8 +31,8 @@ package leshan.server.servlet.json;
 
 import java.lang.reflect.Type;
 
-import leshan.server.lwm2m.LwM2mServer;
 import leshan.server.lwm2m.client.Client;
+import leshan.server.lwm2m.impl.LwM2mServerImpl;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -55,7 +55,7 @@ public class ClientSerializer implements JsonSerializer<Client> {
         element.addProperty("bindingMode", src.getBindingMode().toString());
         element.add("objectLinks", context.serialize(src.getObjectLinks()));
         element.add("secure",
-                context.serialize(src.getRegistrationEndpointAddress().getPort() == LwM2mServer.PORT_DTLS));
+                context.serialize(src.getRegistrationEndpointAddress().getPort() == LwM2mServerImpl.PORT_DTLS));
 
         return element;
     }

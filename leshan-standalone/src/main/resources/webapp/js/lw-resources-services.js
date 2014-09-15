@@ -12,6 +12,7 @@ myModule.factory('lwResources', function() {
     serviceInstance.findResource = findResource;
     serviceInstance.addInstance = addInstance;
     serviceInstance.addResource = addResource;
+    serviceInstance.getTypedValue = getTypedValue;
     return serviceInstance;
 });
 
@@ -208,359 +209,377 @@ var addResource = function(object, instance, resourceId, attributes) {
     return resource;
 }
 
+var getTypedValue = function(strValue, type) {
+    var val = strValue;
+    if(type != undefined) {
+        switch(type) {
+            case "integer":
+            case "time":
+                val = parseInt(strValue);
+                break;
+            case "float":
+                val = parseFloat(strValue);
+                break;
+            default:
+                val = strValue;   
+        }
+    }
+    return val;
+}
+
 /**
  * Return model describing the LWM2M Objects defined by OMA
  */
 var getObjectDefinitions = function() {
     return [ {
         name : "LWM2M Security",
-        id : "0",
+        id : 0,
         instancetype : "multiple",
         resourcedefs : [ {
             name : "LWM2M Server URI",
-            id : "0",
+            id : 0,
             operations : "W"
         }, {
             name : "Bootstrap Server",
-            id : "1",
+            id : 1,
             operations : "W"
         }, {
             name : "Security Mode",
-            id : "2",
+            id : 2,
             operations : "W"
         }, {
             name : "Public Key or Identity",
-            id : "3",
+            id : 3,
             operations : "W"
         }, {
             name : "Server Public Key or Identity",
-            id : "4",
+            id : 4,
             operations : "W"
         }, {
             name : "Secret Key",
-            id : "5",
+            id : 5,
             operations : "W"
         }, {
             name : "SMS Security Mode",
-            id : "6",
+            id : 6,
             operations : "W"
         }, {
             name : "SMS Binding Key Parameters",
-            id : "7",
+            id : 7,
             operations : "W"
         }, {
             name : "SMS Binding Secret Keys",
-            id : "8",
+            id : 8,
             operations : "W"
         }, {
             name : "LWM2M Server SMS Number",
-            id : "9",
+            id : 9,
             operations : "W"
         }, {
             name : "Short Server ID",
-            id : "10",
+            id : 10,
             operations : "W"
         }, {
             name : "Client Hold Off Time",
-            id : "11",
+            id : 11,
             operations : "W"
         } ]
     }, {
         name : "LWM2M Server",
-        id : "1",
+        id : 1,
         instancetype : "multiple",
         resourcedefs : [ {
             name : "Short Server ID",
-            id : "0",
+            id : 0,
             operations : "R"
         }, {
             name : "Lifetime",
-            id : "1",
+            id : 1,
             operations : "RW"
         }, {
             name : "Default Minimum Period",
-            id : "2",
+            id : 2,
             operations : "RW"
         }, {
             name : "Default Maximum Period",
-            id : "3",
+            id : 3,
             operations : "RW"
         }, {
             name : "Disable",
-            id : "4",
+            id : 4,
             operations : "E"
         }, {
             name : "Disable Timeout",
-            id : "5",
+            id : 5,
             operations : "RW"
         }, {
             name : "Notification Storing When Disabled or Offline",
-            id : "6",
+            id : 6,
             operations : "RW"
         }, {
             name : "Binding",
-            id : "7",
+            id : 7,
             operations : "RW"
         }, {
             name : "Registration of Update Trigger",
-            id : "8",
+            id : 8,
             operations : "E"
         } ]
     }, {
         name : "Access Control",
-        id : "2",
+        id : 2,
         instancetype : "multiple",
         resourcedefs : [ {
             name : "Object ID",
-            id : "0",
+            id : 0,
             operations : "R"
         }, {
             name : "Object Instance ID",
-            id : "1",
+            id : 1,
             operations : "R"
         }, {
             name : "ACL",
-            id : "2",
+            id : 2,
             operations : "RW"
         }, {
             name : "Access Control Owner",
-            id : "3",
+            id : 3,
             operations : "RW"
         } ]
     }, {
         name : "Device",
-        id : "3",
+        id : 3,
         instancetype : "single",
         resourcedefs : [ {
             name : "Manufacturer",
-            id : "0",
+            id : 0,
             operations : "R",
             type : "string"
         }, {
             name : "Model Number",
-            id : "1",
+            id : 1,
             operations : "R",
             type : "string"
         }, {
             name : "Serial Number",
-            id : "2",
+            id : 2,
             operations : "R",
             type : "string"
         }, {
             name : "Firmware Version",
-            id : "3",
+            id : 3,
             operations : "R",
             type : "string"
         }, {
             name : "Reboot",
-            id : "4",
+            id : 4,
             operations : "E"
         }, {
             name : "Factory Reset",
-            id : "5",
+            id : 5,
             operations : "E"
         }, {
             name : "Available Power Sources",
-            id : "6",
+            id : 6,
             operations : "R",
             type : "integer",
             instances : "multiple"
         }, {
             name : "Power Source Voltage",
-            id : "7",
+            id : 7,
             operations : "R",
             type : "integer",
             instances : "multiple"
         }, {
             name : "Power Source Current",
-            id : "8",
+            id : 8,
             operations : "R",
             type : "integer",
             instances : "multiple"
         }, {
             name : "Battery Level",
-            id : "9",
+            id : 9,
             operations : "R",
             type : "integer"
         }, {
             name : "Memory Free",
-            id : "10",
+            id : 10,
             operations : "R",
             type : "integer"
         }, {
             name : "Error Code",
-            id : "11",
+            id : 11,
             operations : "R",
             type : "integer",
             instances : "multiple"
         }, {
             name : "Reset Error Code",
-            id : "12",
+            id : 12,
             operations : "E"
         }, {
             name : "Current Time",
-            id : "13",
+            id : 13,
             operations : "RW",
             type : "time"
         }, {
             name : "UTC Offset",
-            id : "14",
+            id : 14,
             operations : "RW",
             type : "string"
         }, {
             name : "Timezone",
-            id : "15",
+            id : 15,
             operations : "RW",
             type : "string"
         }, {
             name : "Supported Binding and Modes",
-            id : "16",
+            id : 16,
             operations : "R",
             type : "string"
         } ]
     }, {
         name : "Connectivity Monitoring",
-        id : "4",
+        id : 4,
         instancetype : "single",
         resourcedefs : [ {
             name : "Network Bearer",
-            id : "0",
+            id : 0,
             operations : "R"
         }, {
             name : "Available Network Bearer",
-            id : "1",
+            id : 1,
             operations : "R"
         }, {
             name : "Radio Signal Strength",
-            id : "2",
+            id : 2,
             operations : "R"
         }, {
             name : "Link Quality",
-            id : "3",
+            id : 3,
             operations : "R"
         }, {
             name : "IP Addresses",
-            id : "4",
+            id : 4,
             operations : "R"
         }, {
             name : "Router IP Addresse",
-            id : "5",
+            id : 5,
             operations : "R"
         }, {
             name : "Link Utilization",
-            id : "6",
+            id : 6,
             operations : "R"
         }, {
             name : "APN",
-            id : "7",
+            id : 7,
             operations : "R"
         }, {
             name : "Cell ID",
-            id : "8",
+            id : 8,
             operations : "R"
         }, {
             name : "SMNC",
-            id : "9",
+            id : 9,
             operations : "R"
         }, {
             name : "SMCC",
-            id : "10",
+            id : 10,
             operations : "R"
         } ]
     }, {
         name : "Firmware",
-        id : "5",
+        id : 5,
         instancetype : "single",
         resourcedefs : [ {
             name : "Package",
-            id : "0",
+            id : 0,
             operations : "W",
             type : "opaque"
         }, {
             name : "Package URI",
-            id : "1",
+            id : 1,
             operations : "W",
             type : "string"
         }, {
             name : "Update",
-            id : "2",
+            id : 2,
             operations : "E"
         }, {
             name : "State",
-            id : "3",
+            id : 3,
             operations : "R",
             type : "integer"
         }, {
             name : "Update Supported Objects",
-            id : "4",
+            id : 4,
             operations : "RW",
             type : "boolean"
         }, {
             name : "Update Result",
-            id : "5",
+            id : 5,
             operations : "R",
             type : "integer"
         } ]
     }, {
         name : "Location",
-        id : "6",
+        id : 6,
         instancetype : "single",
         resourcedefs : [ {
             name : "Latitude",
-            id : "0",
+            id : 0,
             operations : "R"
         }, {
             name : "Longitude",
-            id : "1",
+            id : 1,
             operations : "R"
         }, {
             name : "Altitude",
-            id : "2",
+            id : 2,
             operations : "R"
         }, {
             name : "Uncertainty",
-            id : "3",
+            id : 3,
             operations : "R"
         }, {
             name : "Velocity",
-            id : "4",
+            id : 4,
             operations : "R"
         }, {
             name : "Timestamp",
-            id : "5",
+            id : 5,
             operations : "R"
         } ]
     }, {
         name : "Connectivity Statistics",
-        id : "7",
+        id : 7,
         instancetype : "single",
         resourcedefs : [ {
             name : "SMS Tx Counter",
-            id : "0",
+            id : 0,
             operations : "R"
         }, {
             name : "SMS Rx Counter",
-            id : "1",
+            id : 1,
             operations : "R"
         }, {
             name : "Tx Data",
-            id : "2",
+            id : 2,
             operations : "R"
         }, {
             name : "Rx Data",
-            id : "3",
+            id : 3,
             operations : "R"
         }, {
             name : "Max Message Size",
-            id : "4",
+            id : 4,
             operations : "R"
         }, {
             name : "Average Message Size",
-            id : "5",
+            id : 5,
             operations : "R"
         }, {
             name : "StartOrReset",
-            id : "6",
+            id : 6,
             operations : "E"
         } ]
     } ]

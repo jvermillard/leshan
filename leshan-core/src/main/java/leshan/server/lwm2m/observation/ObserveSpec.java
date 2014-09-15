@@ -33,8 +33,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * A container for attributes describing the intended behavior of a LWM2M Client
- * regarding sending notifications for an observed resource.
+ * A container for attributes describing the intended behavior of a LWM2M Client regarding sending notifications for an
+ * observed resource.
  * 
  * The Lightweight M2M spec defines the following attributes:
  * <ul>
@@ -124,8 +124,7 @@ public final class ObserveSpec {
     /**
      * A builder for ObserveSpec instances.
      * 
-     * Provides a <em>fluid API</em> for setting attributes. Creating an
-     * ObserveSpec instance works like this:
+     * Provides a <em>fluid API</em> for setting attributes. Creating an ObserveSpec instance works like this:
      * 
      * <pre>
      * ObserveSpec spec = new ObserveSpec.Builder().minPeriod(10).greaterThan(34.12).build();

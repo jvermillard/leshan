@@ -35,5 +35,4 @@ package leshan.server.lwm2m.tlv;
 public enum TlvType {
 
     OBJECT_INSTANCE, RESOURCE_INSTANCE, MULTIPLE_RESOURCE, RESOURCE_VALUE;
-
 }

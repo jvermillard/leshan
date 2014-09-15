@@ -29,6 +29,8 @@
  */
 package leshan.server.lwm2m.observation;
 
+import java.util.Set;
+
 import leshan.server.lwm2m.client.Client;
 
 /**
@@ -68,4 +70,15 @@ public interface ObservationRegistry {
      * @return the number of canceled observations
      */
     void cancelObservation(Client client, String resourcepath);
+
+    /**
+     * Get all running observation for a given client
+     * 
+     * @return an unmodifiable set of observation
+     */
+    Set<Observation> getObservations(Client client);
+
+    void addListener(ObservationRegistryListener listener);
+
+    void removeListener(ObservationRegistryListener listener);
 }

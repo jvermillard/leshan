@@ -31,11 +31,7 @@ package leshan.server;
 
 import java.net.InetSocketAddress;
 
-import leshan.server.lwm2m.LwM2mServer;
-import leshan.server.lwm2m.client.ClientRegistryImpl;
-import leshan.server.lwm2m.observation.ObservationRegistry;
-import leshan.server.lwm2m.observation.ObservationRegistryImpl;
-import leshan.server.lwm2m.security.SecurityRegistry;
+import leshan.server.lwm2m.impl.LwM2mServerImpl;
 import leshan.server.servlet.ClientServlet;
 import leshan.server.servlet.EventServlet;
 import leshan.server.servlet.SecurityServlet;
@@ -51,68 +47,52 @@ public class LeshanMain {
     private static final Logger LOG = LoggerFactory.getLogger(LeshanMain.class);
 
     private Server server;
-    private LwM2mServer lwServer;
+    private LwM2mServerImpl lwServer;
 
     public void start() {
-
-        ClientRegistryImpl clientRegistry = new ClientRegistryImpl();
-        ObservationRegistry observationRegistry = new ObservationRegistryImpl();
-        SecurityRegistry securityRegistry = new SecurityRegistry();
-
         // use those ENV variables for specifying the interface to be bound for coap and coaps
         String iface = System.getenv("COAPIFACE");
         String ifaces = System.getenv("COAPSIFACE");
 
         // LWM2M server
         if (iface == null || iface.isEmpty() || ifaces == null || ifaces.isEmpty()) {
-            lwServer = new LwM2mServer(clientRegistry, securityRegistry, observationRegistry);
+            lwServer = new LwM2mServerImpl();
         } else {
             String[] add = iface.split(":");
             String[] adds = ifaces.split(":");
-
             // user specified the iface to be bound
-            lwServer = new LwM2mServer(new InetSocketAddress(add[0], Integer.parseInt(add[1])), new InetSocketAddress(
-                    adds[0], Integer.parseInt(adds[1])), clientRegistry, securityRegistry, observationRegistry);
+            lwServer = new LwM2mServerImpl(new InetSocketAddress(add[0], Integer.parseInt(add[1])),
+                    new InetSocketAddress(adds[0], Integer.parseInt(adds[1])));
         }
-
         lwServer.start();
-        clientRegistry.start();
 
         // now prepare and start jetty
-
         String webPort = System.getenv("PORT");
-
         if (webPort == null || webPort.isEmpty()) {
             webPort = System.getProperty("PORT");
         }
-
         if (webPort == null || webPort.isEmpty()) {
             webPort = "8080";
         }
-
         server = new Server(Integer.valueOf(webPort));
         WebAppContext root = new WebAppContext();
-
         root.setContextPath("/");
-        // root.setDescriptor(webappDirLocation + "/WEB-INF/web.xml");
         root.setResourceBase(this.getClass().getClassLoader().getResource("webapp").toExternalForm());
-
-        // root.setResourceBase(webappDirLocation);
         root.setParentLoaderPriority(true);
+        server.setHandler(root);
 
-        EventServlet eventServlet = new EventServlet(clientRegistry);
+        // Create Servlet
+        EventServlet eventServlet = new EventServlet(lwServer);
         ServletHolder eventServletHolder = new ServletHolder(eventServlet);
         root.addServlet(eventServletHolder, "/event/*");
 
-        ServletHolder clientServletHolder = new ServletHolder(new ClientServlet(lwServer.getRequestHandler(),
-                clientRegistry, observationRegistry, eventServlet));
+        ServletHolder clientServletHolder = new ServletHolder(new ClientServlet(lwServer));
         root.addServlet(clientServletHolder, "/api/clients/*");
 
-        ServletHolder securityServletHolder = new ServletHolder(new SecurityServlet(securityRegistry));
+        ServletHolder securityServletHolder = new ServletHolder(new SecurityServlet(lwServer.getSecurityRegistry()));
         root.addServlet(securityServletHolder, "/api/security/*");
 
-        server.setHandler(root);
-
+        // Start jetty
         try {
             server.start();
         } catch (Exception e) {
@@ -132,5 +112,4 @@ public class LeshanMain {
     public static void main(String[] args) {
         new LeshanMain().start();
     }
-
 }

@@ -29,15 +29,10 @@
  */
 package leshan.server.servlet.json;
 
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
-import java.nio.ByteBuffer;
 
-import leshan.server.lwm2m.message.ClientResponse;
-import leshan.server.lwm2m.message.ResponseCode;
-import leshan.server.lwm2m.tlv.TlvDecoder;
-
-import org.apache.commons.codec.binary.Hex;
+import leshan.server.lwm2m.request.ClientResponse;
+import leshan.server.lwm2m.request.ValueResponse;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -46,40 +41,16 @@ import com.google.gson.JsonSerializer;
 
 public class ResponseSerializer implements JsonSerializer<ClientResponse> {
 
-    private final TlvDecoder tlvDecoder = new TlvDecoder();
-
     @Override
     public JsonElement serialize(ClientResponse src, Type typeOfSrc, JsonSerializationContext context) {
-        try {
-            JsonObject element = new JsonObject();
+        JsonObject element = new JsonObject();
 
-            element.addProperty("status", src.getCode().toString());
+        element.addProperty("status", src.getCode().toString());
 
-            if (src instanceof ClientResponse) {
-                Object value = null;
-                ClientResponse cResponse = (ClientResponse) src;
-                if (cResponse.getCode() == ResponseCode.CONTENT) {
-                    String format = cResponse.getFormat().toString();
-                    switch (cResponse.getFormat()) {
-                    case TLV:
-                        value = this.tlvDecoder.decode(ByteBuffer.wrap(cResponse.getContent()));
-                        break;
-                    case TEXT:
-                    case JSON:
-                    case LINK:
-                        value = new String(cResponse.getContent(), "UTF-8");
-                        break;
-                    case OPAQUE:
-                        value = Hex.encodeHexString(cResponse.getContent());
-                        break;
-                    }
-                    element.add("value", context.serialize(value));
-                    element.add("type", context.serialize(format));
-                }
-            }
-            return element;
-        } catch (UnsupportedEncodingException e) {
-            throw new IllegalStateException(e);
+        if (typeOfSrc == ValueResponse.class) {
+            element.add("content", context.serialize(((ValueResponse) src).getContent()));
         }
+
+        return element;
     }
 }

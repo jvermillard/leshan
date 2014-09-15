@@ -36,19 +36,22 @@ angular.module('instanceDirectives', [])
                     read.tooltip = formattedDate + "<br/>" + read.status;
                     
                     // manage read data
-                    if (data.status == "CONTENT") {
-                        for (var i in data.value) {
-                            var tlvresource = data.value[i];
+                    if (data.status == "CONTENT" && data.content) {
+                    	for(var i in data.content.resources) {
+                            var tlvresource = data.content.resources[i];
                             resource = lwResources.addResource(scope.parent, scope.instance, tlvresource.id, null)
-                            if (tlvresource.type == "MULTIPLE_RESOURCE"){
-                                var tab= new Array();
-                                for (var i in tlvresource.resources){
-                                    tab.push(tlvresource.resources[i].value)
-                                }
-                                resource.value = tab.join(", ");
-                            }else{
-                                resource.value = tlvresource.value;
-                            }
+                            if("value" in tlvresource) {
+	                    		// single value
+	                    		resource.value = tlvresource.value
+	                    	}
+	                    	else if("values" in tlvresource) {
+	                    		// multiple instances
+	                    		var tab = new Array();
+	                            for (var j in tlvresource.values) {
+	                                tab.push(tlvresource.values[j])
+	                            }
+	                            resource.value = tab.join(", ");
+	                    	}
                             resource.valuesupposed = false;
                             resource.tooltip = formattedDate;
                         }
@@ -95,11 +98,17 @@ angular.module('instanceDirectives', [])
             
                 modalInstance.result.then(function (instance) {
                     // Build payload
-                    var payload = []
+                    var payload = {};
+                    payload["id"] = scope.instance.id;
+                    payload["resources"] = [];
+
                     for(i in instance.resources){
                         var resource = instance.resources[i];
                         if (resource.value != undefined){
-                            payload.push({id:resource.id,type:'RESOURCE_VALUE',value:resource.value})
+                            payload.resources.push({
+                                id:resource.id,
+                                value:lwResources.getTypedValue(resource.value, resource.def.type)
+                            })
                         } 
                     }
                     // Send request
@@ -112,8 +121,8 @@ angular.module('instanceDirectives', [])
                         write.tooltip = formattedDate + "<br/>" + write.status;
                         
                         if (data.status == "CHANGED") {
-                            for (var i in payload) {
-                                var tlvresource = payload[i];
+                            for (var i in payload.resources) {
+                                var tlvresource = payload.resources[i];
                                 resource = lwResources.addResource(scope.parent, scope.instance, tlvresource.id, null)
                                 resource.value = tlvresource.value;
                                 resource.valuesupposed = true;
@@ -125,7 +134,7 @@ angular.module('instanceDirectives', [])
                         dialog.open(errormessage);
                         console.error(errormessage)
                     });;
-                  console.log(instance);
+
                 });
             };
         }

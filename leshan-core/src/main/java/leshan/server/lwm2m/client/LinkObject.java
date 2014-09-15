@@ -35,6 +35,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.Charsets;
+import org.apache.commons.lang.StringUtils;
+
 public class LinkObject {
 
     private final String url;
@@ -83,11 +86,6 @@ public class LinkObject {
         }
     }
 
-    /**
-     * Gets the link URL.
-     * 
-     * @return the URL
-     */
     public String getUrl() {
         return url;
     }
@@ -133,5 +131,45 @@ public class LinkObject {
 
     public Integer getResourceId() {
         return resourceId;
+    }
+
+    public static LinkObject[] parse(byte[] content) {
+        String s = new String(content, Charsets.UTF_8);
+        String[] links = s.split(",");
+        LinkObject[] linksResult = new LinkObject[links.length];
+        int index = 0;
+        for (String link : links) {
+            String[] linkParts = link.split(";");
+
+            // clean URL
+            String url = StringUtils.trim(linkParts[0]);
+            url = StringUtils.removeStart(StringUtils.removeEnd(url, ">"), "<");
+
+            // parse attributes
+            Map<String, Object> attributes = new HashMap<>();
+
+            if (linkParts.length > 1) {
+                for (int i = 1; i < linkParts.length; i++) {
+                    String[] attParts = linkParts[i].split("=");
+                    if (attParts.length > 0) {
+                        String key = attParts[0];
+                        Object value = null;
+                        if (attParts.length > 1) {
+                            String rawvalue = attParts[1];
+                            try {
+                                value = Integer.valueOf(rawvalue);
+                            } catch (NumberFormatException e) {
+
+                                value = rawvalue.replaceFirst("^\"(.*)\"$", "$1");
+                            }
+                        }
+                        attributes.put(key, value);
+                    }
+                }
+            }
+            linksResult[index] = new LinkObject(url, attributes);
+            index++;
+        }
+        return linksResult;
     }
 }

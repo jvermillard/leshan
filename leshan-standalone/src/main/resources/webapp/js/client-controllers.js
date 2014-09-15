@@ -128,7 +128,18 @@ lwClientControllers.controller('ClientDetailCtrl', [
                     var content = JSON.parse(msg.data);
                     var resource = lwResources.findResource($scope.objects, content.res);
                     if (resource) {
-                        resource.value = content.val;
+                        if("value" in content.val) {
+                            // single value
+                            resource.value = content.val.value
+                        }
+                        else if("values" in content.val) {
+                            // multiple instances
+                            var tab = new Array();
+                            for (var i in content.valvalues) {
+                                tab.push(content.val.values[i])
+                            }
+                            resource.value = tab.join(", ");
+                        }
                         resource.valuesupposed = false;
                         resource.observed = true;
 

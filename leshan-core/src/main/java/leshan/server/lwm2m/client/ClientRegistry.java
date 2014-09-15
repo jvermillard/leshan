@@ -56,30 +56,26 @@ public interface ClientRegistry {
      * 
      * @param listener
      */
-    void addListener(RegistryListener listener);
+    void addListener(ClientRegistryListener listener);
 
     /**
      * Removes a client registration listener.
      * 
      * @param listener the listener to be removed
      */
-    void removeListener(RegistryListener listener);
+    void removeListener(ClientRegistryListener listener);
 
     /**
      * Registers a new client.
      * 
-     * An implementation must notify all registered listeners as part of
-     * processing the registration request.
+     * An implementation must notify all registered listeners as part of processing the registration request.
      * 
      * @param client the client to register, identified by its end-point.
-     * @return any <em>stale</em> registration information for the given
-     *         client's end-point name or <code>null</code> if no stale
-     *         registration info exists for the end-point. This may happen, if a
-     *         client somehow loses track of its registration status with this
-     *         server and simply starts over with a new registration request in
-     *         order to remedy the situation. According to the LWM2M spec an
-     *         implementation must remove the <em>stale</em> registration
-     *         information in this case.
+     * @return any <em>stale</em> registration information for the given client's end-point name or <code>null</code> if
+     *         no stale registration info exists for the end-point. This may happen, if a client somehow loses track of
+     *         its registration status with this server and simply starts over with a new registration request in order
+     *         to remedy the situation. According to the LWM2M spec an implementation must remove the <em>stale</em>
+     *         registration information in this case.
      * @throws ClientRegistrationException if registration fails
      */
     Client registerClient(Client client) throws ClientRegistrationException;
@@ -88,10 +84,9 @@ public interface ClientRegistry {
      * Updates registration properties for a given client.
      * 
      * @param client the registration properties to update
-     * @return the updated registered client or <code>null</code> if no client
-     *         is registered under the given end-point name
-     * @throws ClientRegistrationException when the registration update has
-     *             failed
+     * @return the updated registered client or <code>null</code> if no client is registered under the given end-point
+     *         name
+     * @throws ClientRegistrationException when the registration update has failed
      */
     Client updateClient(ClientUpdate update) throws ClientRegistrationException;
 
@@ -99,10 +94,8 @@ public interface ClientRegistry {
      * De-registers a client.
      * 
      * @param registrationId the client registrationId
-     * @return the previously registered client or <code>null</code> if no
-     *         client is registered under the given ID
-     * @throws ClientRegistrationException when the client de-registation has
-     *             failed
+     * @return the previously registered client or <code>null</code> if no client is registered under the given ID
+     * @throws ClientRegistrationException when the client de-registation has failed
      */
     Client deregisterClient(String registrationId) throws ClientRegistrationException;
 }
