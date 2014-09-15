@@ -18,7 +18,7 @@ public class BooleanLwM2mExchange extends TypedLwM2mExchange<Boolean> {
 			throw new IllegalArgumentException();
 		}
 
-		return Boolean.parseBoolean(parsedValue);
+		return parsedValue.equals(ONE);
 	}
 
 	@Override
