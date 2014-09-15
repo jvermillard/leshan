@@ -18,6 +18,22 @@ public class ObserveNotifyExchange extends ForwardingLwM2mExchange {
 		}
 	}
 
+	/**
+	 * This method checks the value provided in the response against the range
+	 * in the ObserveSpec object. It will return true if ANY of the following
+	 * are true:
+	 *  - The value is not numeric
+	 *  - The ObserveSpec specifies neither a "gt" nor an "lt" parameter
+	 *  - The ObserveSpec specifies a "gt" parameter and the value is greater
+	 *    than the parameter specified
+	 *  - The ObserveSpec specifies an "lt" parameter and the value is less
+	 *    than the parameter specified
+	 *
+	 * @param response Response containing the value that may or may not be
+	 * notified
+	 * @return A boolean indicating whether the response should be notified
+	 * with respect to the ObserveSpec
+	 */
 	private boolean shouldNotifyRange(final LwM2mResponse response) {
 		try {
 			final float value = Float.parseFloat(new String(response.getResponsePayload()));
