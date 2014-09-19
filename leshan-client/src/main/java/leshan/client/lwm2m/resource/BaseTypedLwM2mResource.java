@@ -2,6 +2,9 @@ package leshan.client.lwm2m.resource;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import leshan.client.lwm2m.operation.ExecuteResponse;
 import leshan.client.lwm2m.operation.LwM2mExchange;
@@ -14,19 +17,32 @@ public abstract class BaseTypedLwM2mResource<E extends TypedLwM2mExchange<?>> im
 
 	protected abstract E createSpecificExchange(final LwM2mExchange exchange);
 
-	private final Set<LwM2mExchange> observers = new HashSet<>();
+	private final Set<ObserveNotifyExchange> observers = new HashSet<>();
 	private ObserveSpec observeSpec;
 
 	public BaseTypedLwM2mResource() {
+		final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+		service.scheduleWithFixedDelay(new Runnable() {
+
+			@Override
+			public void run() {
+				notifyResourceUpdated();
+			}
+
+		}, 0, 1, TimeUnit.SECONDS);
+
 		this.observeSpec = new ObserveSpec.Builder().build();
 	}
 
 	@Override
 	public final void read(final LwM2mExchange exchange) {
-		if(exchange.isObserve()) {
-			observers.add(exchange);
+		if(exchange.isObserve() && !observers.contains(exchange)) {
+			final ObserveNotifyExchange observeNotifyExchange = new ObserveNotifyExchange(exchange);
+			observers.add(observeNotifyExchange);
+			handleRead(createSpecificExchange(observeNotifyExchange));
+		} else {
+			handleRead(createSpecificExchange(exchange));
 		}
-		handleRead(createSpecificExchange(exchange));
 	}
 
 	protected void handleRead(final E exchange) {
@@ -77,8 +93,9 @@ public abstract class BaseTypedLwM2mResource<E extends TypedLwM2mExchange<?>> im
 
 	@Override
 	public final void notifyResourceUpdated() {
-		for(final LwM2mExchange exchange : observers) {
-			read(new ObserveNotifyExchange(exchange, observeSpec));
+		for(final ObserveNotifyExchange exchange : observers) {
+			exchange.setObserveSpec(observeSpec);
+			read(exchange);
 		}
 	}
 
