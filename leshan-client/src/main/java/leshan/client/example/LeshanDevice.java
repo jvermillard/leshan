@@ -71,7 +71,7 @@ public class LeshanDevice {
 	private LwM2mObjectDefinition createObjectDefinition() {
 		final TimeZone timeZone = TimeZone.getTimeZone("America/Los_Angeles");
 		//Create an object model
-		final StringValueResource manufacturerResource = new StringValueResource("Leshan Technologies", 0);
+		final StringValueResource manufacturerResource = new StringValueResource("Leshan Example Device", 0);
 		final StringValueResource modelResource = new StringValueResource("Model 500", 1);
 		final StringValueResource serialNumberResource = new StringValueResource("LT-500-000-0001", 2);
 		final StringValueResource firmwareResource = new StringValueResource("1.0.0", 3);
