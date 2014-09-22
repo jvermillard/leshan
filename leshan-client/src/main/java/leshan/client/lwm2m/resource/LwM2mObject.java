@@ -11,7 +11,6 @@ import leshan.client.lwm2m.operation.LwM2mCreateExchange;
 import leshan.client.lwm2m.operation.LwM2mExchange;
 import leshan.client.lwm2m.operation.LwM2mObjectReadResponseAggregator;
 import leshan.client.lwm2m.operation.LwM2mResponseAggregator;
-import leshan.client.lwm2m.operation.MandatoryObjectExchange;
 import leshan.client.lwm2m.operation.ReadResponse;
 
 public class LwM2mObject {
@@ -25,9 +24,9 @@ public class LwM2mObject {
 		this.instanceCounter = new AtomicInteger(0);
 		this.instances = new ConcurrentHashMap<>();
 
-		if(definition.isMandatory()) {
-			handleCreate(new MandatoryObjectExchange());
-		}
+//		if(definition.isMandatory()) {
+//			handleCreate(new MandatoryObjectExchange());
+//		}
 	}
 
 	public void handleRead(final LwM2mExchange exchange) {

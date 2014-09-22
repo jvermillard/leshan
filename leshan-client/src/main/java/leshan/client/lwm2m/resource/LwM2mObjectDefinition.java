@@ -65,5 +65,5 @@ public class LwM2mObjectDefinition {
 	public Collection<LwM2mResourceDefinition> getResourceDefinitions() {
 		return new ArrayList<>(defMap.values());
 	}
-
+	
 }

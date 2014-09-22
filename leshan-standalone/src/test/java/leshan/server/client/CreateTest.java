@@ -7,6 +7,7 @@ import leshan.server.lwm2m.node.Value;
 import leshan.server.lwm2m.request.CreateResponse;
 import leshan.server.lwm2m.request.ResponseCode;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class CreateTest extends LwM2mClientServerIntegrationTest {

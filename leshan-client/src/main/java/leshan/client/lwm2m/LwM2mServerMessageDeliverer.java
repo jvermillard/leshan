@@ -113,7 +113,7 @@ public class LwM2mServerMessageDeliverer implements MessageDeliverer {
 	 * @param list the path as list of resource names
 	 * @return the resource or null if not found
 	 */
-	private Resource findResource(final List<String> list, final Code code) {
+	public Resource findResource(final List<String> list, final Code code) {
 		final Resource result = searchResourceTree(list);
 		if (result == null && shouldDeliverAbsenteeToParent(list, code)) {
 			return searchResourceTree(list.subList(0, list.size() - 1));

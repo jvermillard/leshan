@@ -12,5 +12,4 @@ public interface LwM2mResource {
 
 	public boolean isReadable();
 	public void notifyResourceUpdated();
-
 }
