@@ -58,6 +58,20 @@ Leshan provides a very simple UI  to get the list of connected clients and inter
 
 Now you can register your LWM2M client like [Eclipse Wakaama](http://eclipse.org/wakaama) or its lua binding [lualwm2m] (https://github.com/sbernard31/lualwm2m).
 
+Alternatively, you can build a client using the leshan-client library or use the example LeshanDevice.  To build the LeshanDevice example, first compile the leshan-client:
+
+```
+mvn install
+cd leshan-client
+mvn assembly:assembly -DdescriptorId=jar-with-dependencies
+```
+
+Then run, setting first the hostname and port of the Leshan server followed by the port the client should use (i.e., something that isn't either 5683 or 5684 if both the server and client are running on the same machine):
+
+```
+java -jar target/leshan-client-*-SNAPSHOT-jar-with-dependencies.jar localhost 5683 9000 
+```
+
 The list of the registered clients: http://localhost:8080/api/clients
 
 Get the instace 0 of the object 3 of a registered client: http://localhost:8080/api/clients/{endpoint}/3/0
