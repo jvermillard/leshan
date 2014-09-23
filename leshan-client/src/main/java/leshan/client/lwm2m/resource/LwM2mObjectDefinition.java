@@ -62,14 +62,8 @@ public class LwM2mObjectDefinition {
 		return defMap.get(identifier);
 	}
 
-	public Collection<LwM2mResourceDefinition> getNonWritableResourceDefinitions() {
-		final Collection<LwM2mResourceDefinition> result = new ArrayList<>();
-		for (final LwM2mResourceDefinition def : defMap.values()) {
-			if (!def.isWritable()) {
-				result.add(def);
-			}
-		}
-		return result;
+	public Collection<LwM2mResourceDefinition> getResourceDefinitions() {
+		return new ArrayList<>(defMap.values());
 	}
 
 }

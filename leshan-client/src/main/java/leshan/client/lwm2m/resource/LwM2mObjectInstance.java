@@ -1,16 +1,15 @@
 package leshan.client.lwm2m.resource;
 
 import java.nio.ByteBuffer;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import leshan.client.lwm2m.operation.AggregatedLwM2mExchange;
 import leshan.client.lwm2m.operation.CreateResponse;
-import leshan.client.lwm2m.operation.LwM2mObjectInstanceCreateResponseAggregator;
 import leshan.client.lwm2m.operation.LwM2mCreateExchange;
 import leshan.client.lwm2m.operation.LwM2mExchange;
+import leshan.client.lwm2m.operation.LwM2mObjectInstanceCreateResponseAggregator;
 import leshan.client.lwm2m.operation.LwM2mObjectInstanceReadResponseAggregator;
 import leshan.client.lwm2m.operation.LwM2mResponseAggregator;
 import leshan.server.lwm2m.tlv.Tlv;
@@ -41,8 +40,7 @@ public class LwM2mObjectInstance {
 			return;
 		}
 
-		final Collection<LwM2mResourceDefinition> auto = definition.getNonWritableResourceDefinitions();
-		for (final LwM2mResourceDefinition def : auto) {
+		for (final LwM2mResourceDefinition def : definition.getResourceDefinitions()) {
 			resources.put(def.getId(), def.createResource());
 		}
 

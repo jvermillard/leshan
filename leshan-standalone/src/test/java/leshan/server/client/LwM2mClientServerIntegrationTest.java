@@ -129,24 +129,23 @@ public abstract class LwM2mClientServerIntegrationTest {
 
 		final boolean single = true;
 		final boolean mandatory = true;
-		final boolean writable = true;
 
 		final LwM2mObjectDefinition objectOne = new LwM2mObjectDefinition(GOOD_OBJECT_ID, !mandatory, !single,
-				new SingleResourceDefinition(FIRST_RESOURCE_ID, firstResource, mandatory, writable),
-				new SingleResourceDefinition(SECOND_RESOURCE_ID, secondResource, mandatory, writable),
-				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executableResource, !mandatory, !writable));
+				new SingleResourceDefinition(FIRST_RESOURCE_ID, firstResource, mandatory),
+				new SingleResourceDefinition(SECOND_RESOURCE_ID, secondResource, mandatory),
+				new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executableResource, !mandatory));
 		final LwM2mObjectDefinition objectTwo = new LwM2mObjectDefinition(BROKEN_OBJECT_ID, !mandatory, !single,
-				new SingleResourceDefinition(BROKEN_RESOURCE_ID, brokenResourceListener, mandatory, writable));
+				new SingleResourceDefinition(BROKEN_RESOURCE_ID, brokenResourceListener, mandatory));
 		final LwM2mObjectDefinition objectThree = new LwM2mObjectDefinition(MULTIPLE_OBJECT_ID, !mandatory, !single,
-				new SingleResourceDefinition(MULTIPLE_RESOURCE_ID, multipleResource, !mandatory, !writable));
+				new SingleResourceDefinition(MULTIPLE_RESOURCE_ID, multipleResource, !mandatory));
 		final LwM2mObjectDefinition objectFour = new LwM2mObjectDefinition(INT_OBJECT_ID, !mandatory, !single,
-				new SingleResourceDefinition(INT_RESOURCE_ID, intResource, !mandatory, !writable));
+				new SingleResourceDefinition(INT_RESOURCE_ID, intResource, !mandatory));
 		final LwM2mObjectDefinition mandatoryMultipleObject = new LwM2mObjectDefinition(MANDATORY_MULTIPLE_OBJECT_ID, mandatory, !single,
-				new SingleResourceDefinition(MANDATORY_MULTIPLE_RESOURCE_ID, intResource, !mandatory, !writable));
+				new SingleResourceDefinition(MANDATORY_MULTIPLE_RESOURCE_ID, intResource, !mandatory));
 		final LwM2mObjectDefinition mandatorySingleObject = new LwM2mObjectDefinition(MANDATORY_SINGLE_OBJECT_ID, mandatory, single,
-				new SingleResourceDefinition(MANDATORY_SINGLE_RESOURCE_ID, intResource, !mandatory, !writable));
+				new SingleResourceDefinition(MANDATORY_SINGLE_RESOURCE_ID, intResource, !mandatory));
 		final LwM2mObjectDefinition optionalSingleObject = new LwM2mObjectDefinition(OPTIONAL_SINGLE_OBJECT_ID, !mandatory, single,
-				new SingleResourceDefinition(OPTIONAL_SINGLE_RESOURCE_ID, intResource, !mandatory, !writable));
+				new SingleResourceDefinition(OPTIONAL_SINGLE_RESOURCE_ID, intResource, !mandatory));
 		return new LwM2mClient(objectOne, objectTwo, objectThree, objectFour, mandatoryMultipleObject, mandatorySingleObject, optionalSingleObject);
 	}
 
