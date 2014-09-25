@@ -1,119 +1,131 @@
 package leshan.server.client;
 
-import static leshan.server.lwm2m.message.ResponseCode.CREATED;
 import static org.junit.Assert.assertEquals;
-import leshan.server.lwm2m.message.ClientResponse;
-import leshan.server.lwm2m.message.ResponseCode;
-import leshan.server.lwm2m.tlv.Tlv;
-import leshan.server.lwm2m.tlv.TlvType;
+import leshan.server.lwm2m.node.LwM2mObjectInstance;
+import leshan.server.lwm2m.node.LwM2mResource;
+import leshan.server.lwm2m.node.Value;
+import leshan.server.lwm2m.request.CreateResponse;
+import leshan.server.lwm2m.request.ResponseCode;
 
 import org.junit.Test;
 
 public class CreateTest extends LwM2mClientServerIntegrationTest {
 
-	@Test
-	public void canCreateInstanceOfObject() {
-		register();
+    @Test
+    public void canCreateInstanceOfObject() {
+        register();
 
-		final ClientResponse response = sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
-		assertEmptyResponse(response, ResponseCode.CREATED);
-		assertEquals(GOOD_OBJECT_ID + "/0", response.getLocation());
-	}
+        final CreateResponse response = sendCreate(createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
+        assertEmptyResponse(response, ResponseCode.CREATED);
+        assertEquals(GOOD_OBJECT_ID + "/0", response.getLocation());
+    }
 
-	@Test
-	public void canCreateSpecificInstanceOfObject() {
-		register();
+    @Test
+    public void canCreateSpecificInstanceOfObject() {
+        register();
 
-		final ClientResponse response = sendCreate(createGoodResourcesTlv("one", "two"), GOOD_OBJECT_ID, 14);
-		assertEmptyResponse(response, ResponseCode.CREATED);
-		assertEquals(GOOD_OBJECT_ID + "/14", response.getLocation());
-	}
+        final CreateResponse response = sendCreate(createGoodObjectInstance("one", "two"), GOOD_OBJECT_ID, 14);
+        assertEmptyResponse(response, ResponseCode.CREATED);
+        assertEquals(GOOD_OBJECT_ID + "/14", response.getLocation());
+    }
 
-	@Test
-	public void canCreateMultipleInstanceOfObject() {
-		register();
+    @Test
+    public void canCreateMultipleInstanceOfObject() {
+        register();
 
-		final ClientResponse response = sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
-		assertEmptyResponse(response, ResponseCode.CREATED);
-		assertEquals(GOOD_OBJECT_ID + "/0", response.getLocation());
+        final CreateResponse response = sendCreate(createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
+        assertEmptyResponse(response, ResponseCode.CREATED);
+        assertEquals(GOOD_OBJECT_ID + "/0", response.getLocation());
 
-		final ClientResponse responseTwo = sendCreate(createGoodResourcesTlv("hello", "goodbye"), GOOD_OBJECT_ID);
-		assertEmptyResponse(responseTwo, ResponseCode.CREATED);
-		assertEquals(GOOD_OBJECT_ID + "/1", responseTwo.getLocation());
-	}
+        final CreateResponse responseTwo = sendCreate(createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
+        assertEmptyResponse(responseTwo, ResponseCode.CREATED);
+        assertEquals(GOOD_OBJECT_ID + "/1", responseTwo.getLocation());
+    }
 
-	@Test
-	public void cannotCreateInstanceOfObject() {
-		register();
+    @Test
+    public void cannotCreateInstanceOfObject() {
+        register();
 
-		final ClientResponse response = sendCreate(createGoodResourcesTlv("hello", "goodbye"), BAD_OBJECT_ID);
-		assertEmptyResponse(response, ResponseCode.NOT_FOUND);
-	}
+        final CreateResponse response = sendCreate(createGoodObjectInstance("hello", "goodbye"), BAD_OBJECT_ID);
+        assertEmptyResponse(response, ResponseCode.NOT_FOUND);
+    }
 
-	@Test
-	public void cannotCreateInstanceWithoutAllRequiredResources() {
-		register();
-		final Tlv[] values = new Tlv[1];
-		values[0] = new Tlv(TlvType.RESOURCE_VALUE, null, "hello".getBytes(), FIRST_RESOURCE_ID);
+    @Test
+    public void cannotCreateInstanceWithoutAllRequiredResources() {
+        register();
 
-		final ClientResponse response = sendCreate(values, GOOD_OBJECT_ID);
-		assertEmptyResponse(response, ResponseCode.BAD_REQUEST);
+        LwM2mObjectInstance instance = new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
+                new LwM2mResource(FIRST_RESOURCE_ID, Value.newStringValue("hello"))
+        });
 
-		assertEmptyResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.NOT_FOUND);
-	}
+        final CreateResponse response = sendCreate(instance, GOOD_OBJECT_ID);
+        assertEmptyResponse(response, ResponseCode.BAD_REQUEST);
 
-	@Test
-	public void cannotCreateInstanceWithExtraneousResources() {
-		register();
-		final Tlv[] values = new Tlv[3];
-		values[0] = new Tlv(TlvType.RESOURCE_VALUE, null, "hello".getBytes(), FIRST_RESOURCE_ID);
-		values[1] = new Tlv(TlvType.RESOURCE_VALUE, null, "goodbye".getBytes(), SECOND_RESOURCE_ID);
-		values[2] = new Tlv(TlvType.RESOURCE_VALUE, null, "lolz".getBytes(), INVALID_RESOURCE_ID);
+        assertEmptyResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.NOT_FOUND);
+    }
 
-		final ClientResponse response = sendCreate(values, GOOD_OBJECT_ID);
-		assertEmptyResponse(response, ResponseCode.METHOD_NOT_ALLOWED);
+    @Test
+    public void cannotCreateInstanceWithExtraneousResources() {
+        register();
 
-		assertEmptyResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.NOT_FOUND);
-	}
+        LwM2mObjectInstance instance = new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
+                new LwM2mResource(FIRST_RESOURCE_ID, Value.newStringValue("hello")),
+                new LwM2mResource(SECOND_RESOURCE_ID, Value.newStringValue("goodbye")),
+                new LwM2mResource(INVALID_RESOURCE_ID, Value.newStringValue("lolz"))
+        });
 
-	@Test
-	public void cannotCreateInstanceWithNonWritableResource() {
-		register();
-		final Tlv[] values = new Tlv[3];
-		values[0] = new Tlv(TlvType.RESOURCE_VALUE, null, "hello".getBytes(), FIRST_RESOURCE_ID);
-		values[1] = new Tlv(TlvType.RESOURCE_VALUE, null, "goodbye".getBytes(), SECOND_RESOURCE_ID);
-		values[2] = new Tlv(TlvType.RESOURCE_VALUE, null, "lolz".getBytes(), EXECUTABLE_RESOURCE_ID);
+        final CreateResponse response = sendCreate(instance, GOOD_OBJECT_ID);
+        assertEmptyResponse(response, ResponseCode.METHOD_NOT_ALLOWED);
 
-		final ClientResponse response = sendCreate(values, GOOD_OBJECT_ID);
-		assertEmptyResponse(response, ResponseCode.METHOD_NOT_ALLOWED);
+        assertEmptyResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.NOT_FOUND);
+    }
 
-		assertEmptyResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.NOT_FOUND);
-	}
+    @Test
+    public void cannotCreateInstanceWithNonWritableResource() {
+        register();
 
-	@Test
-	public void canCreateObjectInstanceWithEmptyPayload() {
-		register();
-		assertEmptyResponse(sendCreate(new Tlv[0], MULTIPLE_OBJECT_ID), CREATED);
-	}
+        LwM2mObjectInstance instance = new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
+                new LwM2mResource(FIRST_RESOURCE_ID, Value.newStringValue("hello")),
+                new LwM2mResource(SECOND_RESOURCE_ID, Value.newStringValue("goodbye")),
+                new LwM2mResource(EXECUTABLE_RESOURCE_ID, Value.newStringValue("lolz"))
+        });
 
-	@Test
-	public void cannotCreateMandatorySingleObject() {
-		register();
-		assertEmptyResponse(sendCreate(new Tlv[0], MANDATORY_SINGLE_OBJECT_ID), ResponseCode.BAD_REQUEST);
-	}
+        final CreateResponse response = sendCreate(instance, GOOD_OBJECT_ID);
+        assertEmptyResponse(response, ResponseCode.METHOD_NOT_ALLOWED);
 
-	@Test
-	public void canCreateMandatoryMultipleObject() {
-		register();
-		assertEmptyResponse(sendCreate(new Tlv[0], MANDATORY_MULTIPLE_OBJECT_ID), ResponseCode.CREATED);
-		assertEmptyResponse(sendCreate(new Tlv[0], MANDATORY_MULTIPLE_OBJECT_ID), ResponseCode.CREATED);
-	}
+        assertEmptyResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.NOT_FOUND);
+    }
 
-	@Test
-	public void cannotCreateMoreThanOneSingleObject() {
-		register();
-		assertEmptyResponse(sendCreate(new Tlv[0], OPTIONAL_SINGLE_OBJECT_ID), ResponseCode.CREATED);
-		assertEmptyResponse(sendCreate(new Tlv[0], OPTIONAL_SINGLE_OBJECT_ID), ResponseCode.BAD_REQUEST);
-	}
+    @Test
+    public void canCreateObjectInstanceWithEmptyPayload() {
+        register();
+        assertEmptyResponse(sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), MULTIPLE_OBJECT_ID),
+                ResponseCode.CREATED);
+    }
+
+    @Test
+    public void cannotCreateMandatorySingleObject() {
+        register();
+        assertEmptyResponse(sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), MANDATORY_SINGLE_OBJECT_ID),
+                ResponseCode.BAD_REQUEST);
+    }
+
+    @Test
+    public void canCreateMandatoryMultipleObject() {
+        register();
+        assertEmptyResponse(sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), MANDATORY_MULTIPLE_OBJECT_ID),
+                ResponseCode.CREATED);
+        assertEmptyResponse(sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), MANDATORY_MULTIPLE_OBJECT_ID),
+                ResponseCode.CREATED);
+    }
+
+    @Test
+    public void cannotCreateMoreThanOneSingleObject() {
+        register();
+        assertEmptyResponse(sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), OPTIONAL_SINGLE_OBJECT_ID),
+                ResponseCode.CREATED);
+        assertEmptyResponse(sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), OPTIONAL_SINGLE_OBJECT_ID),
+                ResponseCode.BAD_REQUEST);
+    }
 
 }

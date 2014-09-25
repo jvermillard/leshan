@@ -1,6 +1,6 @@
 package leshan.client.lwm2m.resource;
 
-import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
+import org.eclipse.californium.core.server.resources.CoapExchange;
 
 public interface ClientObservable {
 

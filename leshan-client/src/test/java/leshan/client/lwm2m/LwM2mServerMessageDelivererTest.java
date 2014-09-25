@@ -1,7 +1,5 @@
 package leshan.client.lwm2m;
 
-import static ch.ethz.inf.vs.californium.coap.CoAP.Code.GET;
-import static ch.ethz.inf.vs.californium.coap.CoAP.Code.POST;
 import static leshan.client.lwm2m.response.OperationResponseCode.NOT_FOUND;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
@@ -19,18 +17,17 @@ import java.util.concurrent.Executor;
 
 import leshan.client.lwm2m.response.ResponseMatcher;
 
+import org.eclipse.californium.core.coap.CoAP.Code;
+import org.eclipse.californium.core.coap.OptionSet;
+import org.eclipse.californium.core.coap.Request;
+import org.eclipse.californium.core.network.Endpoint;
+import org.eclipse.californium.core.network.Exchange;
+import org.eclipse.californium.core.observe.ObserveRelation;
+import org.eclipse.californium.core.server.resources.Resource;
+import org.eclipse.californium.core.server.resources.ResourceAttributes;
+import org.eclipse.californium.core.server.resources.ResourceObserver;
 import org.junit.Before;
 import org.junit.Test;
-
-import ch.ethz.inf.vs.californium.coap.CoAP.Code;
-import ch.ethz.inf.vs.californium.coap.OptionSet;
-import ch.ethz.inf.vs.californium.coap.Request;
-import ch.ethz.inf.vs.californium.network.Endpoint;
-import ch.ethz.inf.vs.californium.network.Exchange;
-import ch.ethz.inf.vs.californium.observe.ObserveRelation;
-import ch.ethz.inf.vs.californium.server.resources.Resource;
-import ch.ethz.inf.vs.californium.server.resources.ResourceAttributes;
-import ch.ethz.inf.vs.californium.server.resources.ResourceObserver;
 
 public class LwM2mServerMessageDelivererTest {
 
@@ -64,7 +61,7 @@ public class LwM2mServerMessageDelivererTest {
 		parent.add(child);
 		root.add(parent);
 
-		deliver(GET, "3", "4", "5");
+		deliver(Code.GET, "3", "4", "5");
 		verify(grandchild).handleRequest(exchange);
 		verifyNoErrorMessage();
 	}
@@ -77,7 +74,7 @@ public class LwM2mServerMessageDelivererTest {
 		parent.add(child);
 		root.add(parent);
 
-		deliver(POST, "3", "4", "5");
+		deliver(Code.POST, "3", "4", "5");
 		verifyErrorMessage();
 	}
 
@@ -87,7 +84,7 @@ public class LwM2mServerMessageDelivererTest {
 
 		root.add(resource);
 
-		deliver(GET, "3", "4");
+		deliver(Code.GET, "3", "4");
 		verifyErrorMessage();
 		verify(resource, never()).handleRequest(any(Exchange.class));
 	}
@@ -98,7 +95,7 @@ public class LwM2mServerMessageDelivererTest {
 
 		root.add(resource);
 
-		deliver(POST, "3", "4");
+		deliver(Code.POST, "3", "4");
 		verify(resource).handleRequest(exchange);
 		verifyNoErrorMessage();
 	}

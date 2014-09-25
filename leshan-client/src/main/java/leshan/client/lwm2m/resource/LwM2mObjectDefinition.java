@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import leshan.server.lwm2m.tlv.Tlv;
+import leshan.server.lwm2m.impl.tlv.Tlv;
 
 public class LwM2mObjectDefinition {
 

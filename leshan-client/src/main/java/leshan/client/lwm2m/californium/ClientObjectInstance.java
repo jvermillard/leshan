@@ -1,20 +1,19 @@
 package leshan.client.lwm2m.californium;
 
-import static ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT;
-import static ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.DELETED;
-
 import java.util.Map.Entry;
 
 import leshan.client.lwm2m.resource.LinkFormattable;
 import leshan.client.lwm2m.resource.LwM2mObjectInstance;
 import leshan.client.lwm2m.resource.LwM2mResource;
-import ch.ethz.inf.vs.californium.coap.LinkFormat;
-import ch.ethz.inf.vs.californium.coap.MediaTypeRegistry;
-import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
-import ch.ethz.inf.vs.californium.server.resources.Resource;
-import ch.ethz.inf.vs.californium.server.resources.ResourceBase;
 
-public class ClientObjectInstance extends ResourceBase implements LinkFormattable {
+import org.eclipse.californium.core.CoapResource;
+import org.eclipse.californium.core.coap.CoAP.ResponseCode;
+import org.eclipse.californium.core.coap.LinkFormat;
+import org.eclipse.californium.core.coap.MediaTypeRegistry;
+import org.eclipse.californium.core.server.resources.CoapExchange;
+import org.eclipse.californium.core.server.resources.Resource;
+
+public class ClientObjectInstance extends CoapResource implements LinkFormattable {
 
 	private final LwM2mObjectInstance lwm2mObjectInstance;
 
@@ -38,14 +37,14 @@ public class ClientObjectInstance extends ResourceBase implements LinkFormattabl
 	}
 
 	private void handleDiscover(final CoapExchange exchange) {
-		exchange.respond(CONTENT, asLinkFormat());
+		exchange.respond(ResponseCode.CONTENT, asLinkFormat());
 	}
 
 	@Override
 	public void handleDELETE(final CoapExchange exchange) {
 		getParent().remove(this);
 
-		exchange.respond(DELETED);
+		exchange.respond(ResponseCode.DELETED);
 	}
 
 	@Override

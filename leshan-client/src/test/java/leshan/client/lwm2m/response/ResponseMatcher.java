@@ -2,12 +2,9 @@ package leshan.client.lwm2m.response;
 
 import java.util.Arrays;
 
-import leshan.client.lwm2m.response.OperationResponseCode;
-
+import org.eclipse.californium.core.coap.Response;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
-
-import ch.ethz.inf.vs.californium.coap.Response;
 
 public class ResponseMatcher extends BaseMatcher<Response> {
 

@@ -1,8 +1,14 @@
 package leshan.client.lwm2m.register;
 
 import static com.jayway.awaitility.Awaitility.await;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.net.InetSocketAddress;
 import java.util.UUID;
@@ -14,6 +20,10 @@ import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.response.OperationResponseCode;
 import leshan.client.lwm2m.util.ResponseCallback;
 
+import org.eclipse.californium.core.coap.CoAP.ResponseCode;
+import org.eclipse.californium.core.coap.Request;
+import org.eclipse.californium.core.coap.Response;
+import org.eclipse.californium.core.network.CoAPEndpoint;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,11 +32,6 @@ import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-
-import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
-import ch.ethz.inf.vs.californium.coap.Request;
-import ch.ethz.inf.vs.californium.coap.Response;
-import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DeregisterUplinkTest {

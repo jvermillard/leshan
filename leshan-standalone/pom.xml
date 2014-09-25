@@ -55,11 +55,16 @@
 
         <dependency>
             <groupId>org.github.leshan</groupId>
-            <artifactId>leshan-client</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <artifactId>leshan-bs-server</artifactId>
+            <version>${project.version}</version>
         </dependency>
-        
-                
+
+        <dependency>
+            <groupId>org.github.leshan</groupId>
+            <artifactId>leshan-client</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>

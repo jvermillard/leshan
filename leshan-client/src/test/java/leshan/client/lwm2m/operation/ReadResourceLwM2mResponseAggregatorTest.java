@@ -3,9 +3,9 @@ package leshan.client.lwm2m.operation;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import leshan.server.lwm2m.tlv.Tlv;
-import leshan.server.lwm2m.tlv.TlvEncoder;
-import leshan.server.lwm2m.tlv.TlvType;
+import leshan.server.lwm2m.impl.tlv.Tlv;
+import leshan.server.lwm2m.impl.tlv.Tlv.TlvType;
+import leshan.server.lwm2m.impl.tlv.TlvEncoder;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

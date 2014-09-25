@@ -15,9 +15,9 @@ import java.util.Set;
 import leshan.client.lwm2m.operation.LwM2mExchange;
 import leshan.client.lwm2m.operation.ReadResponse;
 import leshan.client.lwm2m.operation.WriteResponse;
-import leshan.server.lwm2m.tlv.Tlv;
-import leshan.server.lwm2m.tlv.TlvEncoder;
-import leshan.server.lwm2m.tlv.TlvType;
+import leshan.server.lwm2m.impl.tlv.Tlv;
+import leshan.server.lwm2m.impl.tlv.Tlv.TlvType;
+import leshan.server.lwm2m.impl.tlv.TlvEncoder;
 
 import org.junit.Test;
 

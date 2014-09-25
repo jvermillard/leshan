@@ -1,16 +1,14 @@
 package leshan.server.client;
 
-import static leshan.server.lwm2m.message.ResponseCode.CONTENT;
-import static leshan.server.lwm2m.message.ResponseCode.METHOD_NOT_ALLOWED;
-import static leshan.server.lwm2m.message.ResponseCode.NOT_FOUND;
-import static leshan.server.lwm2m.tlv.TlvType.MULTIPLE_RESOURCE;
-import static leshan.server.lwm2m.tlv.TlvType.RESOURCE_INSTANCE;
-
 import java.util.HashMap;
 import java.util.Map;
 
-import leshan.server.lwm2m.tlv.Tlv;
-import leshan.server.lwm2m.tlv.TlvEncoder;
+import leshan.server.lwm2m.node.LwM2mNode;
+import leshan.server.lwm2m.node.LwM2mObject;
+import leshan.server.lwm2m.node.LwM2mObjectInstance;
+import leshan.server.lwm2m.node.LwM2mResource;
+import leshan.server.lwm2m.node.Value;
+import leshan.server.lwm2m.request.ResponseCode;
 
 import org.junit.Test;
 
@@ -22,68 +20,79 @@ public class ReadTest extends LwM2mClientServerIntegrationTest {
 	@Test
 	public void canReadObject() {
 		register();
-		assertResponse(sendRead(GOOD_OBJECT_ID), CONTENT, new byte[0]);
+		assertEmptyResponse(sendRead(GOOD_OBJECT_ID), ResponseCode.CONTENT);
 	}
 
 	@Test
 	public void canReadObjectWithCreatedInstance() {
 		register();
-		sendCreate(createGoodResourcesTlv(HELLO, GOODBYE), GOOD_OBJECT_ID);
+		sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);
 
-		assertResponse(sendRead(GOOD_OBJECT_ID), CONTENT, TlvEncoder.encode(createGoodObjectInstaceTlv(HELLO, GOODBYE)).array());
+		LwM2mNode objectNode = new LwM2mObject(GOOD_OBJECT_ID, new LwM2mObjectInstance[] {
+				new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
+						new LwM2mResource(FIRST_RESOURCE_ID, Value.newStringValue(HELLO)),
+						new LwM2mResource(SECOND_RESOURCE_ID, Value.newStringValue(GOODBYE))
+				})	
+		});
+		assertResponse(sendRead(GOOD_OBJECT_ID), ResponseCode.CONTENT, objectNode);
 	}
 
 	@Test
 	public void canReadObjectInstance() {
 		register();
-		sendCreate(createGoodResourcesTlv(HELLO, GOODBYE), GOOD_OBJECT_ID);
+		sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);
 
-		assertResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), CONTENT, TlvEncoder.encode(createGoodResourcesTlv(HELLO, GOODBYE)).array());
+		LwM2mObjectInstance objectInstanceNode = new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
+				new LwM2mResource(FIRST_RESOURCE_ID, Value.newStringValue(HELLO)),
+				new LwM2mResource(SECOND_RESOURCE_ID, Value.newStringValue(GOODBYE))
+		});
+		assertResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.CONTENT, objectInstanceNode);
 	}
 
 	@Test
 	public void canReadResource() {
 		register();
-		sendCreate(createGoodResourcesTlv(HELLO, GOODBYE), GOOD_OBJECT_ID);
+		sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);
 
-		assertResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, FIRST_RESOURCE_ID), CONTENT, HELLO.getBytes());
-		assertResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID), CONTENT, GOODBYE.getBytes());
+		assertResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, FIRST_RESOURCE_ID),
+				ResponseCode.CONTENT, new LwM2mResource(FIRST_RESOURCE_ID, Value.newStringValue(HELLO)));
+		assertResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
+				ResponseCode.CONTENT, new LwM2mResource(SECOND_RESOURCE_ID, Value.newStringValue(GOODBYE)));
 	}
 
 	@Test
 	public void cannotReadNonReadableResource() {
 		register();
-		sendCreate(createGoodResourcesTlv(HELLO, GOODBYE), GOOD_OBJECT_ID);
+		sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);
 
-		assertEmptyResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, EXECUTABLE_RESOURCE_ID), METHOD_NOT_ALLOWED);
+		assertEmptyResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, EXECUTABLE_RESOURCE_ID), ResponseCode.METHOD_NOT_ALLOWED);
 	}
 
 	@Test
 	public void cannotReadNonExistentResource() {
 		register();
-		sendCreate(createGoodResourcesTlv(HELLO, GOODBYE), GOOD_OBJECT_ID);
+		sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);
 
-		assertEmptyResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INVALID_RESOURCE_ID), NOT_FOUND);
+		assertEmptyResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INVALID_RESOURCE_ID), ResponseCode.NOT_FOUND);
 	}
 
 	@Test
 	public void canReadMultipleResource() {
 		register();
-		sendCreate(new Tlv[0], MULTIPLE_OBJECT_ID);
-
-		final Tlv[] tlvs = new Tlv[] {
-			new Tlv(RESOURCE_INSTANCE, null, HELLO.getBytes(), 0),
-			new Tlv(RESOURCE_INSTANCE, null, GOODBYE.getBytes(), 1)
-		};
+		sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), MULTIPLE_OBJECT_ID);
 
 		final Map<Integer, byte[]> map = new HashMap<Integer, byte[]>();
 		map.put(0, HELLO.getBytes());
 		map.put(1, GOODBYE.getBytes());
-
 		multipleResource.setValue(map);
 
-		final byte[] payload = TlvEncoder.encode(tlvs).array();
-		assertResponse(sendRead(MULTIPLE_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, MULTIPLE_RESOURCE_ID), CONTENT, payload);
+		LwM2mNode resource = new LwM2mResource(MULTIPLE_RESOURCE_ID, new Value<?>[] {
+				Value.newStringValue(HELLO),
+				Value.newStringValue(GOODBYE)		
+		});
+
+		assertResponse(sendRead(MULTIPLE_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, MULTIPLE_RESOURCE_ID),
+				ResponseCode.CONTENT, resource);
 	}
 
 
@@ -92,14 +101,7 @@ public class ReadTest extends LwM2mClientServerIntegrationTest {
 	@Test
 	public void canReadObjectInstanceWithMultipleResource() {
 		register();
-		sendCreate(new Tlv[0], MULTIPLE_OBJECT_ID);
-
-		final Tlv[] tlvs = new Tlv[] {
-			new Tlv(RESOURCE_INSTANCE, null, HELLO.getBytes(), 0),
-			new Tlv(RESOURCE_INSTANCE, null, GOODBYE.getBytes(), 1)
-		};
-
-		final Tlv tlv = new Tlv(MULTIPLE_RESOURCE, tlvs, null, MULTIPLE_RESOURCE_ID);
+		sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), MULTIPLE_OBJECT_ID);
 
 		final Map<Integer, byte[]> map = new HashMap<Integer, byte[]>();
 		map.put(0, HELLO.getBytes());
@@ -107,8 +109,14 @@ public class ReadTest extends LwM2mClientServerIntegrationTest {
 
 		multipleResource.setValue(map);
 
-		final byte[] payload = TlvEncoder.encode(new Tlv[]{tlv}).array();
-		assertResponse(sendRead(MULTIPLE_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), CONTENT, payload);
+		LwM2mObjectInstance objectInstance = new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
+				new LwM2mResource(MULTIPLE_RESOURCE_ID, new Value<?>[] {
+						Value.newStringValue(HELLO),
+						Value.newStringValue(GOODBYE)		
+				})
+		});
+
+		assertResponse(sendRead(MULTIPLE_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.CONTENT, objectInstance);
 	}
 
 }

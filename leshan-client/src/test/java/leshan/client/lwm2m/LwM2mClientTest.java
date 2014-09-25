@@ -3,13 +3,12 @@ package leshan.client.lwm2m;
 import static org.junit.Assert.assertNull;
 import leshan.client.lwm2m.bootstrap.BootstrapDownlink;
 
+import org.eclipse.californium.core.CoapServer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-
-import ch.ethz.inf.vs.californium.server.Server;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LwM2mClientTest {
@@ -17,7 +16,7 @@ public class LwM2mClientTest {
 	private BootstrapDownlink fakeBootstrapDownlink;
 
 	@Mock
-	private Server server;
+	private CoapServer server;
 
 	@Before
 	public void setup() {

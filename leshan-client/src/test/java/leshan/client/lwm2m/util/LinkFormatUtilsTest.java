@@ -1,9 +1,7 @@
 package leshan.client.lwm2m.util;
 
-import static org.junit.Assert.*;
-
+import static org.junit.Assert.assertEquals;
 import leshan.server.lwm2m.client.LinkObject;
-import leshan.server.lwm2m.linkformat.LinkFormatParser;
 
 import org.junit.Test;
 
@@ -39,7 +37,7 @@ public class LinkFormatUtilsTest {
 	
 
 	private LinkObject[] generateLinksFromPayload(final String payload) {
-		return LinkFormatParser.parse(payload.getBytes());
+		return LinkObject.parse(payload.getBytes());
 	}
 
 }

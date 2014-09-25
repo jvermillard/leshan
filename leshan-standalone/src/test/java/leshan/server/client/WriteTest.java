@@ -1,20 +1,14 @@
 package leshan.server.client;
 
-import static leshan.server.lwm2m.message.ResponseCode.BAD_REQUEST;
-import static leshan.server.lwm2m.message.ResponseCode.CHANGED;
-import static leshan.server.lwm2m.message.ResponseCode.CONTENT;
-import static leshan.server.lwm2m.message.ResponseCode.METHOD_NOT_ALLOWED;
-import static leshan.server.lwm2m.tlv.TlvType.RESOURCE_INSTANCE;
-import static leshan.server.lwm2m.tlv.TlvType.RESOURCE_VALUE;
 import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import leshan.server.lwm2m.message.ClientResponse;
-import leshan.server.lwm2m.message.ContentFormat;
-import leshan.server.lwm2m.message.WriteRequest;
-import leshan.server.lwm2m.tlv.Tlv;
+import leshan.server.lwm2m.node.LwM2mObjectInstance;
+import leshan.server.lwm2m.node.LwM2mResource;
+import leshan.server.lwm2m.node.Value;
+import leshan.server.lwm2m.request.ResponseCode;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -28,14 +22,12 @@ public class WriteTest extends LwM2mClientServerIntegrationTest {
 	public void canWriteReplaceToResource() {
 		register();
 
-		sendCreate(createGoodResourcesTlv(HELLO, GOODBYE), GOOD_OBJECT_ID);
+		sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);
 
-		final ClientResponse response = WriteRequest.newReplaceRequest(getClient(), GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID,
-				"world", ContentFormat.TEXT).send(server.getRequestHandler());
-
-		assertResponse(response, CHANGED, new byte[0]);
+		assertEmptyResponse(sendReplace("world", GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
+				ResponseCode.CHANGED);
 		assertResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
-				CONTENT, "world".getBytes());
+				ResponseCode.CONTENT, new LwM2mResource(SECOND_RESOURCE_ID, Value.newStringValue("world")));
 		assertEquals("world", secondResource.getValue());
 	}
 
@@ -43,37 +35,33 @@ public class WriteTest extends LwM2mClientServerIntegrationTest {
 	public void badWriteReplaceToResource() {
 		register();
 
-		sendCreate(createBrokenResourcesTlv("i'm broken!"), BROKEN_OBJECT_ID);
+		sendCreate(createUnwritableResource("i'm broken!"), BROKEN_OBJECT_ID);
 
-		final ClientResponse response = WriteRequest.newReplaceRequest(getClient(), BROKEN_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, BROKEN_RESOURCE_ID,
-				"fix me!", ContentFormat.TEXT).send(server.getRequestHandler());
-
-		assertEmptyResponse(response, BAD_REQUEST);
+		assertEmptyResponse(sendReplace("fix me!", BROKEN_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, BROKEN_RESOURCE_ID),
+				ResponseCode.BAD_REQUEST);
 		assertResponse(sendRead(BROKEN_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, BROKEN_RESOURCE_ID),
-				CONTENT, "i'm broken!".getBytes());
+				ResponseCode.CONTENT,  new LwM2mResource(SECOND_RESOURCE_ID, Value.newStringValue("i'm broken!")));
 	}
 
 	@Test
 	public void cannotWriteToNonWritableResource() {
 		register();
 
-		sendCreate(createGoodResourcesTlv(HELLO, GOODBYE), GOOD_OBJECT_ID);
+		sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);
 
-		final ClientResponse response = WriteRequest.newReplaceRequest(getClient(), GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, EXECUTABLE_RESOURCE_ID,
-				"world", ContentFormat.TEXT).send(server.getRequestHandler());
-
-		assertEmptyResponse(response, METHOD_NOT_ALLOWED);
+		assertEmptyResponse(sendReplace("world", GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, EXECUTABLE_RESOURCE_ID),
+				ResponseCode.METHOD_NOT_ALLOWED);
 	}
 
 	@Test
 	public void canWriteToWritableMultipleResource() {
 		register();
-		sendCreate(new Tlv[0], MULTIPLE_OBJECT_ID);
+		sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), MULTIPLE_OBJECT_ID);
 
-		final Tlv[] tlvs = new Tlv[] {
-			new Tlv(RESOURCE_INSTANCE, null, HELLO.getBytes(), 0),
-			new Tlv(RESOURCE_INSTANCE, null, GOODBYE.getBytes(), 1)
-		};
+		final LwM2mResource newValues = new LwM2mResource(MULTIPLE_OBJECT_ID, new Value<?>[] {
+				Value.newStringValue(HELLO),
+                Value.newStringValue(GOODBYE)
+		});
 
 		final Map<Integer, byte[]> map = new HashMap<Integer, byte[]>();
 		map.put(0, HELLO.getBytes());
@@ -81,7 +69,8 @@ public class WriteTest extends LwM2mClientServerIntegrationTest {
 
 		multipleResource.setValue(map);
 
-		assertEmptyResponse(sendReplace(tlvs, MULTIPLE_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, MULTIPLE_RESOURCE_ID), CHANGED);
+		assertEmptyResponse(sendReplace(newValues, MULTIPLE_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, MULTIPLE_RESOURCE_ID),
+		        ResponseCode.CHANGED);
 	}
 
 	// TODO: This test tests something that is untestable by the LWM2M spec and should
@@ -91,20 +80,19 @@ public class WriteTest extends LwM2mClientServerIntegrationTest {
 	public void canWritePartialUpdateToResource() {
 		register();
 
-		sendCreate(createGoodResourcesTlv(HELLO, GOODBYE), GOOD_OBJECT_ID);
+		sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);
 
-		final ClientResponse response = WriteRequest.newUpdateRequest(getClient(), GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID,
-				"world", ContentFormat.TEXT).send(server.getRequestHandler());
-
-		assertResponse(response, CHANGED, new byte[0]);
+		assertEmptyResponse(sendUpdate("world", GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
+				ResponseCode.CHANGED);
 		assertResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
-				CONTENT, "world".getBytes());
+				ResponseCode.CONTENT, new LwM2mResource(SECOND_RESOURCE_ID, Value.newStringValue("world")));
+		assertEquals("world", secondResource.getValue());
 	}
 
-	protected Tlv[] createBrokenResourcesTlv(final String value) {
-		final Tlv[] values = new Tlv[1];
-		values[0] = new Tlv(RESOURCE_VALUE, null, value.getBytes(), BROKEN_RESOURCE_ID);
-		return values;
+	protected LwM2mObjectInstance createUnwritableResource(final String value) {
+	    return new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
+	            new LwM2mResource(BROKEN_RESOURCE_ID, Value.newStringValue(value))
+	    });
 	}
 
 }

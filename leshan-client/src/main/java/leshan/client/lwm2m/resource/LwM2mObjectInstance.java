@@ -12,8 +12,8 @@ import leshan.client.lwm2m.operation.LwM2mExchange;
 import leshan.client.lwm2m.operation.LwM2mObjectInstanceCreateResponseAggregator;
 import leshan.client.lwm2m.operation.LwM2mObjectInstanceReadResponseAggregator;
 import leshan.client.lwm2m.operation.LwM2mResponseAggregator;
-import leshan.server.lwm2m.tlv.Tlv;
-import leshan.server.lwm2m.tlv.TlvDecoder;
+import leshan.server.lwm2m.impl.tlv.Tlv;
+import leshan.server.lwm2m.impl.tlv.TlvDecoder;
 
 public class LwM2mObjectInstance {
 

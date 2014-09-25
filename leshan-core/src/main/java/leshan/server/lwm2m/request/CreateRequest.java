@@ -37,7 +37,7 @@ import leshan.server.lwm2m.node.LwM2mPath;
 /**
  * A Lightweight M2M request for creating resources on a client.
  */
-public class CreateRequest extends AbstractLwM2mRequest<ClientResponse> {
+public class CreateRequest extends AbstractLwM2mRequest<CreateResponse> {
 
     private final LwM2mObjectInstance instance;
 

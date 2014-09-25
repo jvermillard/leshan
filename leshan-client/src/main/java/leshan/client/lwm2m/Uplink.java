@@ -5,12 +5,13 @@ import java.net.InetSocketAddress;
 
 import leshan.client.lwm2m.response.Callback;
 import leshan.client.lwm2m.response.OperationResponse;
-import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
-import ch.ethz.inf.vs.californium.coap.MessageObserver;
-import ch.ethz.inf.vs.californium.coap.Request;
-import ch.ethz.inf.vs.californium.coap.Response;
-import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
-import ch.ethz.inf.vs.californium.network.Exchange;
+
+import org.eclipse.californium.core.coap.CoAP.ResponseCode;
+import org.eclipse.californium.core.coap.MessageObserver;
+import org.eclipse.californium.core.coap.Request;
+import org.eclipse.californium.core.coap.Response;
+import org.eclipse.californium.core.network.CoAPEndpoint;
+import org.eclipse.californium.core.network.Exchange;
 
 public abstract class Uplink {
 
@@ -126,7 +127,7 @@ public abstract class Uplink {
 		exchange.sendResponse(response);
 	}
 
-	protected OperationResponse sendSyncRequest(final long timeout, final ch.ethz.inf.vs.californium.coap.Request request) {
+	protected OperationResponse sendSyncRequest(final long timeout, final Request request) {
 		checkStarted(origin);
 		origin.sendRequest(request);
 

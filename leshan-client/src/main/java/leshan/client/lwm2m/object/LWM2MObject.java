@@ -10,9 +10,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import org.eclipse.californium.core.coap.Request;
 import org.eclipse.jetty.util.ConcurrentHashSet;
-
-import ch.ethz.inf.vs.californium.coap.Request;
 
 public final class LWM2MObject {
 

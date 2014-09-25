@@ -6,8 +6,8 @@ import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.TreeMap;
 
-import leshan.server.lwm2m.tlv.Tlv;
-import leshan.server.lwm2m.tlv.TlvEncoder;
+import leshan.server.lwm2m.impl.tlv.Tlv;
+import leshan.server.lwm2m.impl.tlv.TlvEncoder;
 
 public abstract class LwM2mReadResponseAggregator extends LwM2mResponseAggregator {
 

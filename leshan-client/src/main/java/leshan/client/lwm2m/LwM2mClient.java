@@ -9,20 +9,20 @@ import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.resource.LinkFormattable;
 import leshan.client.lwm2m.resource.LwM2mObjectDefinition;
 import leshan.server.lwm2m.client.LinkObject;
-import leshan.server.lwm2m.linkformat.LinkFormatParser;
-import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
-import ch.ethz.inf.vs.californium.server.Server;
-import ch.ethz.inf.vs.californium.server.resources.Resource;
+
+import org.eclipse.californium.core.CoapServer;
+import org.eclipse.californium.core.network.CoAPEndpoint;
+import org.eclipse.californium.core.server.resources.Resource;
 
 public class LwM2mClient {
 
-	private final Server clientSideServer;
+	private final CoapServer clientSideServer;
 
 	public LwM2mClient(final LwM2mObjectDefinition... defs) {
-		this(new Server(), defs);
+		this(new CoapServer(), defs);
 	}
 
-	public LwM2mClient(final Server server, final LwM2mObjectDefinition... defs) {
+	public LwM2mClient(final CoapServer server, final LwM2mObjectDefinition... defs) {
 		if(defs == null || defs.length == 0){
 			throw new IllegalArgumentException("LWM2M Clients must support minimum required Objects defined in the LWM2M Specification.");
 		}
@@ -79,7 +79,7 @@ public class LwM2mClient {
 
 			registrationMasterLinkObject.deleteCharAt(registrationMasterLinkObject.length() - 1);
 
-			return LinkFormatParser.parse(registrationMasterLinkObject.toString().getBytes());
+			return LinkObject.parse(registrationMasterLinkObject.toString().getBytes());
 		}
 
 		final Resource clientObject = clientSideServer.getRoot().getChild(Integer.toString(ids[0]));
@@ -88,7 +88,7 @@ public class LwM2mClient {
 			return new LinkObject[]{};
 		}
 		else if(ids.length == 1){
-			return LinkFormatParser.parse(((LinkFormattable) clientObject).asLinkFormat().getBytes());
+			return LinkObject.parse(((LinkFormattable) clientObject).asLinkFormat().getBytes());
 		}
 
 		final Resource clientObjectInstance = clientObject.getChild(Integer.toString(ids[1]));
@@ -97,7 +97,7 @@ public class LwM2mClient {
 			return new LinkObject[]{};
 		}
 		else if(ids.length == 2){
-			return LinkFormatParser.parse(((LinkFormattable) clientObjectInstance).asLinkFormat().getBytes());
+			return LinkObject.parse(((LinkFormattable) clientObjectInstance).asLinkFormat().getBytes());
 		}
 
 		final Resource clientResource = clientObjectInstance.getChild(Integer.toString(ids[2]));
@@ -106,7 +106,7 @@ public class LwM2mClient {
 			return new LinkObject[]{};
 		}
 
-		return LinkFormatParser.parse(((LinkFormattable) clientResource).asLinkFormat().getBytes());
+		return LinkObject.parse(((LinkFormattable) clientResource).asLinkFormat().getBytes());
 	}
 
 }

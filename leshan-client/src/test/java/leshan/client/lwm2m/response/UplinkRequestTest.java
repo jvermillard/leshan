@@ -14,8 +14,12 @@ import java.util.UUID;
 
 import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.register.RegisterUplink;
-import leshan.server.lwm2m.linkformat.LinkFormatParser;
+import leshan.server.lwm2m.client.LinkObject;
 
+import org.eclipse.californium.core.coap.CoAP.ResponseCode;
+import org.eclipse.californium.core.coap.Request;
+import org.eclipse.californium.core.coap.Response;
+import org.eclipse.californium.core.network.CoAPEndpoint;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,11 +29,6 @@ import org.mockito.stubbing.Answer;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-
-import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
-import ch.ethz.inf.vs.californium.coap.Request;
-import ch.ethz.inf.vs.californium.coap.Response;
-import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(Request.class)
@@ -62,7 +61,7 @@ public class UplinkRequestTest {
 		when(Request.newPut()).thenReturn(request);
 		when(Request.newDelete()).thenReturn(request);
 
-		when(client.getObjectModel()).thenReturn(LinkFormatParser.parse(VALID_REQUEST_PAYLOAD.getBytes()));
+		when(client.getObjectModel()).thenReturn(LinkObject.parse(VALID_REQUEST_PAYLOAD.getBytes()));
 
 		doAnswer(new Answer<Void>(){
 

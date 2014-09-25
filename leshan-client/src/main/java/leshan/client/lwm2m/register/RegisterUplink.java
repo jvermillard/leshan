@@ -3,14 +3,16 @@ package leshan.client.lwm2m.register;
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Map;
+
 import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.Uplink;
 import leshan.client.lwm2m.response.Callback;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.util.LinkFormatUtils;
-import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
-import ch.ethz.inf.vs.californium.coap.Request;
-import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
+
+import org.eclipse.californium.core.coap.CoAP.ResponseCode;
+import org.eclipse.californium.core.coap.Request;
+import org.eclipse.californium.core.network.CoAPEndpoint;
 
 public class RegisterUplink extends Uplink{
 	private static final String MESSAGE_NULL_ENDPOINT = "Provided Endpoint was Null";
@@ -36,7 +38,7 @@ public class RegisterUplink extends Uplink{
 		if(payload == null || payload.equals("<>")){
 			return OperationResponse.failure(ResponseCode.BAD_REQUEST, MESSAGE_BAD_OBJECTS);
 		}
-		final ch.ethz.inf.vs.californium.coap.Request request = createRegisterRequest(
+		final Request request = createRegisterRequest(
 				endpointName, payload);
 		request.setURI(request.getURI() + "&" + leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
 
@@ -55,7 +57,7 @@ public class RegisterUplink extends Uplink{
 			return;
 		}
 
-		final ch.ethz.inf.vs.californium.coap.Request request = createRegisterRequest(
+		final Request request = createRegisterRequest(
 				endpointName, payload);
 		request.setURI(request.getURI() + "&" + leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
 
@@ -103,7 +105,7 @@ public class RegisterUplink extends Uplink{
 			return OperationResponse.failure(ResponseCode.NOT_FOUND, MESSAGE_NULL_ENDPOINT);
 		}
 
-		final ch.ethz.inf.vs.californium.coap.Request request = createDeregisterRequest(endpointLocation);
+		final Request request = createDeregisterRequest(endpointLocation);
 
 		final OperationResponse response = sendSyncRequest(timeout, request);
 
@@ -117,7 +119,7 @@ public class RegisterUplink extends Uplink{
 			callback.onFailure(OperationResponse.failure(ResponseCode.NOT_FOUND, MESSAGE_NULL_ENDPOINT));
 		}
 
-		final ch.ethz.inf.vs.californium.coap.Request request = createDeregisterRequest(endpointLocation);
+		final Request request = createDeregisterRequest(endpointLocation);
 
 		sendAsyncRequest(new Callback(){
 			final Callback initializingCallback = callback;
@@ -141,9 +143,9 @@ public class RegisterUplink extends Uplink{
 		return null;
 	}
 
-	private ch.ethz.inf.vs.californium.coap.Request createRegisterRequest(
+	private Request createRegisterRequest(
 			final String endpointName, final String payload) {
-		final ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newPost();
+		final Request request = Request.newPost();
 		final RegisterEndpoint registerEndpoint = new RegisterEndpoint(getDestination(), Collections.singletonMap(ENDPOINT, endpointName));
 		request.setURI(registerEndpoint.toString());
 		request.setPayload(payload);
@@ -160,9 +162,9 @@ public class RegisterUplink extends Uplink{
 		return request;
 	}
 
-	private ch.ethz.inf.vs.californium.coap.Request createDeregisterRequest(
+	private Request createDeregisterRequest(
 			final String endpointLocation) {
-		final ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newDelete();
+		final Request request = Request.newDelete();
 		final RegisteredEndpoint deregisterEndpoint = new RegisteredEndpoint(getDestination(), endpointLocation);
 		request.getOptions().setLocationPath(endpointLocation);
 		request.setURI(deregisterEndpoint.toString());

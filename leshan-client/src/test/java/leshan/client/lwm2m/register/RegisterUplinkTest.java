@@ -19,8 +19,13 @@ import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.InterfaceTypes;
 import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.OperationTypes;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.util.ResponseCallback;
-import leshan.server.lwm2m.linkformat.LinkFormatParser;
+import leshan.server.lwm2m.client.LinkObject;
 
+import org.eclipse.californium.core.coap.CoAP.Code;
+import org.eclipse.californium.core.coap.CoAP.ResponseCode;
+import org.eclipse.californium.core.coap.Request;
+import org.eclipse.californium.core.coap.Response;
+import org.eclipse.californium.core.network.CoAPEndpoint;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,12 +35,6 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
-
-import ch.ethz.inf.vs.californium.coap.CoAP.Code;
-import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
-import ch.ethz.inf.vs.californium.coap.Request;
-import ch.ethz.inf.vs.californium.coap.Response;
-import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
 
 /*
  * Requirements for this part of the interface can be found on Table 3.
@@ -92,7 +91,7 @@ public class RegisterUplinkTest {
 		tearDownEndpointStops = 1;
 		
 		if(objectsAndInstances != null){
-			Mockito.when(client.getObjectModel()).thenReturn(LinkFormatParser.parse(objectsAndInstances.getBytes()));
+			Mockito.when(client.getObjectModel()).thenReturn(LinkObject.parse(objectsAndInstances.getBytes()));
 		}
 
 		doAnswer(new Answer<Void>(){

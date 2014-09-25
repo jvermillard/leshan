@@ -7,9 +7,10 @@ import leshan.client.lwm2m.operation.LwM2mExchange;
 import leshan.client.lwm2m.operation.LwM2mResponse;
 import leshan.client.lwm2m.util.ObserveSpecParser;
 import leshan.server.lwm2m.observation.ObserveSpec;
-import ch.ethz.inf.vs.californium.coap.CoAP;
-import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
-import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
+
+import org.eclipse.californium.core.coap.CoAP;
+import org.eclipse.californium.core.coap.CoAP.ResponseCode;
+import org.eclipse.californium.core.server.resources.CoapExchange;
 
 public class CaliforniumBasedLwM2mExchange implements LwM2mExchange {
 

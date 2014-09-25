@@ -1,17 +1,18 @@
 package leshan.client.lwm2m.californium;
 
-import static ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT;
 import leshan.client.lwm2m.resource.LinkFormattable;
 import leshan.client.lwm2m.resource.LwM2mObject;
 import leshan.client.lwm2m.resource.LwM2mObjectDefinition;
 import leshan.client.lwm2m.resource.LwM2mObjectInstance;
-import ch.ethz.inf.vs.californium.coap.LinkFormat;
-import ch.ethz.inf.vs.californium.coap.MediaTypeRegistry;
-import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
-import ch.ethz.inf.vs.californium.server.resources.Resource;
-import ch.ethz.inf.vs.californium.server.resources.ResourceBase;
 
-public class ClientObject extends ResourceBase implements LinkFormattable {
+import org.eclipse.californium.core.CoapResource;
+import org.eclipse.californium.core.coap.CoAP.ResponseCode;
+import org.eclipse.californium.core.coap.LinkFormat;
+import org.eclipse.californium.core.coap.MediaTypeRegistry;
+import org.eclipse.californium.core.server.resources.CoapExchange;
+import org.eclipse.californium.core.server.resources.Resource;
+
+public class ClientObject extends CoapResource implements LinkFormattable {
 
 	private final LwM2mObject lwm2mObject;
 
@@ -31,7 +32,7 @@ public class ClientObject extends ResourceBase implements LinkFormattable {
 	}
 
 	private void handleDiscover(final CoapExchange exchange) {
-		exchange.respond(CONTENT, asLinkFormat());
+		exchange.respond(ResponseCode.CONTENT, asLinkFormat());
 	}
 
 	private void handleRead(final CoapExchange exchange) {

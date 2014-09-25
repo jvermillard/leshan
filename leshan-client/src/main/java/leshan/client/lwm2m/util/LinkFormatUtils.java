@@ -3,7 +3,8 @@ package leshan.client.lwm2m.util;
 import java.util.Map;
 
 import leshan.server.lwm2m.client.LinkObject;
-import ch.ethz.inf.vs.californium.coap.LinkFormat;
+
+import org.eclipse.californium.core.coap.LinkFormat;
 
 public class LinkFormatUtils {
 	public static final String INVALID_LINK_PAYLOAD = "<>";

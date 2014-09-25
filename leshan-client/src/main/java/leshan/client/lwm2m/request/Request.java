@@ -22,7 +22,7 @@ public class Request {
 		return builder.toString();
 	}
 	
-	public static ch.ethz.inf.vs.californium.coap.Request toCaliforniumRequest(final Request r) {
+	public static org.eclipse.californium.core.coap.Request toCaliforniumRequest(final Request r) {
 		
 		return null;
 	}

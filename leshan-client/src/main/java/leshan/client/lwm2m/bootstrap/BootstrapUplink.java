@@ -6,7 +6,9 @@ import java.util.Collections;
 import leshan.client.lwm2m.Uplink;
 import leshan.client.lwm2m.response.Callback;
 import leshan.client.lwm2m.response.OperationResponse;
-import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
+
+import org.eclipse.californium.core.coap.Request;
+import org.eclipse.californium.core.network.CoAPEndpoint;
 
 public class BootstrapUplink extends Uplink {
 	private static final String ENDPOINT = "ep";
@@ -19,7 +21,7 @@ public class BootstrapUplink extends Uplink {
 	}
 
 	public OperationResponse bootstrap(final String endpointName, final long timeout) {
-		final ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newPost();
+		final Request request = Request.newPost();
 		final BootstrapEndpoint bootstrapEndpoint = new BootstrapEndpoint(Collections.singletonMap(ENDPOINT, endpointName));
 		request.setURI(bootstrapEndpoint.toString());
 		checkStarted(origin);
@@ -28,7 +30,7 @@ public class BootstrapUplink extends Uplink {
 	}
 
 	public void bootstrap(final String endpointName, final Callback callback) {
-		final ch.ethz.inf.vs.californium.coap.Request request = ch.ethz.inf.vs.californium.coap.Request.newPost();
+		final Request request = Request.newPost();
 		final BootstrapEndpoint bootstrapEndpoint = new BootstrapEndpoint(Collections.singletonMap(ENDPOINT, endpointName));
 		request.setURI(bootstrapEndpoint.toString());
 
