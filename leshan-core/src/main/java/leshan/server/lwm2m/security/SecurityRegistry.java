@@ -201,8 +201,6 @@ public class SecurityRegistry implements SecurityStore {
                     LOG.info("{} security infos loaded", infos.length);
                 }
             }
-        } catch (FileNotFoundException e) {
-            // fine
         } catch (Exception e) {
             LOG.debug("Could not load security infos from file", e);
         } finally {

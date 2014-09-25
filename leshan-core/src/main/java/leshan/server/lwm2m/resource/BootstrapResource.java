@@ -209,7 +209,7 @@ public class BootstrapResource extends ResourceBase {
         if (value.disableTimeout != null) {
             resources.add(Tlv.newIntegerValue(TlvType.RESOURCE_INSTANCE, value.disableTimeout, 5));
         }
-        resources.add(Tlv.newBooleanValue(TlvType.RESOURCE_INSTANCE, value.notifIfDisbled, 6));
+        resources.add(Tlv.newBooleanValue(TlvType.RESOURCE_INSTANCE, value.notifIfDisabled, 6));
         resources.add(Tlv.newStringValue(TlvType.RESOURCE_INSTANCE, value.binding.name(), 7));
 
         return new Tlv(TlvType.OBJECT_INSTANCE, resources.toArray(new Tlv[] {}), null, key);

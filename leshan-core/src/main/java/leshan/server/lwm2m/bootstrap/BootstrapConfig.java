@@ -50,7 +50,7 @@ public class BootstrapConfig {
         public int defaultMinPeriod = 1;
         public Integer defaultMaxPeriod = null;
         public Integer disableTimeout = null;
-        public boolean notifIfDisbled = true;
+        public boolean notifIfDisabled = true;
         public BindingMode binding = BindingMode.U;
     }
 
