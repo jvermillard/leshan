@@ -30,6 +30,7 @@
 package leshan.server.lwm2m.message.californium;
 
 import java.net.InetSocketAddress;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -115,7 +116,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
      * @param timeoutMillis timeout for CoAP request
      */
     public CaliforniumBasedRequestHandler(Set<Endpoint> endpoints, ObservationRegistry observationRegistry,
-            int timeoutMillis) {
+                                          int timeoutMillis) {
         Validate.notNull(endpoints);
         if (observationRegistry == null) {
             this.observationRegistry = new ObservationRegistryImpl();
@@ -203,7 +204,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
             if (MediaTypeRegistry.APPLICATION_LINK_FORMAT != coapResponse.getOptions().getContentFormat()) {
                 LOG.debug("Expected LWM2M Client [{}] to return application/link-format [{}] content but got [{}]",
                         request.getClient().getEndpoint(), MediaTypeRegistry.APPLICATION_LINK_FORMAT, coapResponse
-                                .getOptions().getContentFormat());
+                        .getOptions().getContentFormat());
             }
             return new DiscoverResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value),
                     coapResponse.getPayload());
@@ -405,7 +406,7 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
     }
 
     private ClientResponse buildWriteAttributeResponse(WriteAttributesRequest request, Request coapRequest,
-            Response coapResponse) {
+                                                       Response coapResponse) {
         switch (coapResponse.getCode()) {
         case CHANGED:
             return new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value),
@@ -571,17 +572,33 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
         endpoint.sendRequest(coapRequest);
     }
 
+    /**
+     * Sends a LWM2M request.
+     * 
+     * @param request the request
+     * @param coapRequest the corresponding <em>Californium</em> CoAP request
+     * @param ignoreCode result codes to ignore or <code>null</code> if all
+     *            possible result codes should be processed
+     * @return the response
+     * @throws ResourceAccessException if the request could not be processed by
+     *             the client
+     */
     protected final Response send(LwM2mRequest request, Request coapRequest, final Set<CoAP.ResponseCode> ignoreCode) {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Sending {}", request);
         }
-
+        final Set<CoAP.ResponseCode> codesToIgnore;
+        if (ignoreCode != null) {
+            codesToIgnore = ignoreCode;
+        } else {
+            codesToIgnore = Collections.emptySet();
+        }
         final CountDownLatch latch = new CountDownLatch(1);
         final AtomicReference<Response> ref = new AtomicReference<Response>(null);
         coapRequest.addMessageObserver(new MessageObserverAdapter() {
             @Override
             public void onResponse(Response response) {
-                if (!ignoreCode.contains(response.getCode())) {
+                if (!codesToIgnore.contains(response.getCode())) {
                     ref.set(response);
                     latch.countDown();
                 }
@@ -637,22 +654,25 @@ public final class CaliforniumBasedRequestHandler implements RequestHandler, Reg
     }
 
     /**
-     * Gets the CoAP endpoint that should be used to communicate with a given client.
+     * Gets the <em>Californium</em> <code>Endpoint</code> that should be used
+     * to communicate with a given client.
      * 
      * @param client the client
-     * @return the CoAP endpoint bound to the same network address and port that the client connected to during
-     *         registration. If no such CoAP endpoint is available, the first CoAP endpoint from the list of registered
-     *         endpoints is returned
+     * @return the endpoint bound to the network address and port that the
+     *         client connected to during registration
+     * @throws ResourceAccessException if the endpoint the client registered to
+     *             is not available anymore, e.g. because the underlying
+     *             <em>Californium</em> server has been stopped or re-configured
      */
-    private Endpoint getEndpointForClient(Client client) {
+    protected Endpoint getEndpointForClient(Client client) {
         for (Endpoint ep : endpoints) {
             InetSocketAddress endpointAddress = ep.getAddress();
             if (endpointAddress.equals(client.getRegistrationEndpointAddress())) {
                 return ep;
             }
         }
-        throw new IllegalStateException("can't find the client endpoint for address : "
-                + client.getRegistrationEndpointAddress());
+        throw new ResourceAccessException(ResponseCode.NOT_FOUND, "", String.format(
+                "Could not find Endpoint for client %s", client.getRegistrationId()));
     }
 
     @Override

@@ -34,10 +34,14 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.message.ClientResponse;
 import leshan.server.lwm2m.message.ContentFormat;
 import leshan.server.lwm2m.message.CreateRequest;
@@ -46,6 +50,7 @@ import leshan.server.lwm2m.message.DiscoverRequest;
 import leshan.server.lwm2m.message.DiscoverResponse;
 import leshan.server.lwm2m.message.ReadRequest;
 import leshan.server.lwm2m.message.RequestTimeoutException;
+import leshan.server.lwm2m.message.ResourceAccessException;
 import leshan.server.lwm2m.message.ResponseCode;
 import leshan.server.lwm2m.message.WriteAttributesRequest;
 import leshan.server.lwm2m.message.WriteRequest;
@@ -181,6 +186,19 @@ public class CaliforniumBasedRequestHandlerTest extends BasicTestSupport {
         ReadRequest request = ReadRequest.newRequest(client, OBJECT_ID_DEVICE);
         requestHandler.send(request);
         Assert.fail("Request should have timed out with exception");
+    }
+
+    @Test(expected = ResourceAccessException.class)
+    public void testGetEndpointForClientThrowsException() throws IOException {
+        Client clientWithoutEndpoint = new Client("ID", "urn:client", InetAddress.getLocalHost(), 10000, "1.0", 10000L,
+                null, null, null, new Date(), InetSocketAddress.createUnresolved("192.168.34.17", 10000));
+        requestHandler.getEndpointForClient(clientWithoutEndpoint);
+    }
+
+    @Test
+    public void testGetEndpointForClientFindsEndpoint() {
+        Endpoint ep = requestHandler.getEndpointForClient(client);
+        Assert.assertNotNull(ep);
     }
 
     private void ifTheClientReturns(final Response coapResponse) {
