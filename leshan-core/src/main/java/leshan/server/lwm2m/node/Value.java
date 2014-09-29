@@ -29,6 +29,7 @@
  */
 package leshan.server.lwm2m.node;
 
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -127,11 +128,10 @@ public class Value<T> {
         if (type != other.type)
             return false;
         if (value == null) {
-            if (other.value != null)
-                return false;
-        } else if (!value.equals(other.value))
-            return false;
-        return true;
+            return other.value == null;
+        } else {
+            return type == DataType.OPAQUE ? Arrays.equals((byte[])value, (byte[])other.value) : value.equals(other.value);
+        }
     }
 
 }

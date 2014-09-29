@@ -8,12 +8,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import leshan.client.lwm2m.response.OperationResponseCode;
-import leshan.server.lwm2m.impl.tlvcodec.TlvDecoder;
-import leshan.server.lwm2m.impl.tlvcodec.TlvEncoder;
-import leshan.server.lwm2m.tlv.Tlv;
-import leshan.server.lwm2m.tlv.TlvType;
+import leshan.server.lwm2m.impl.tlv.Tlv;
+import leshan.server.lwm2m.impl.tlv.Tlv.TlvType;
+import leshan.server.lwm2m.impl.tlv.TlvDecoder;
+import leshan.server.lwm2m.impl.tlv.TlvEncoder;
 
 public class ReadResponse extends BaseLwM2mResponse {
 
@@ -61,7 +62,7 @@ public class ReadResponse extends BaseLwM2mResponse {
 
 	private static byte[] getPayload(Map<Integer, byte[]> readValues) {
 		List<Tlv> children = new ArrayList<Tlv>();
-		for(Entry<Integer, byte[]> entry : readValues.entrySet()) {
+		for(Entry<Integer, byte[]> entry : new TreeMap<>(readValues).entrySet()) {
 			children.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, entry.getValue(), entry.getKey()));
 		}
 		return TlvEncoder.encode(children.toArray(new Tlv[0])).array();

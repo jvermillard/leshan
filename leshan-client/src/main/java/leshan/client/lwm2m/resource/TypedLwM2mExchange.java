@@ -29,7 +29,7 @@ public abstract class TypedLwM2mExchange<T> {
 		return convertFromBytes(requestPayload);
 	}
 
-	public final void respondContent(final T value) {
+	public void respondContent(final T value) {
 		exchange.respond(ReadResponse.success(convertToBytes(value)));
 	}
 

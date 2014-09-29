@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.Objects;
 
 import leshan.client.lwm2m.response.OperationResponseCode;
-import leshan.server.lwm2m.tlv.Tlv;
-import leshan.server.lwm2m.tlv.TlvType;
+import leshan.server.lwm2m.impl.tlv.Tlv;
+import leshan.server.lwm2m.impl.tlv.Tlv.TlvType;
 
 public abstract class BaseLwM2mResponse implements LwM2mResponse {
 
@@ -53,7 +53,7 @@ public abstract class BaseLwM2mResponse implements LwM2mResponse {
 
 	@Override
 	public String toString() {
-		String payloadString = (payload == null) ? "" : ", \"" + new String(payload) + "\"";
+		String payloadString = (payload == null) ? "" : ", \"" + Arrays.toString(payload) + "\"";
 		return "[" + getClass().getSimpleName() + ": " + code + payloadString + "]";
 	}
 

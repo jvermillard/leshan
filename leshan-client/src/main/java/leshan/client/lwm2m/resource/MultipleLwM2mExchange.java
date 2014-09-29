@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import leshan.client.lwm2m.operation.LwM2mExchange;
+import leshan.client.lwm2m.operation.ReadResponse;
 import leshan.server.lwm2m.impl.tlv.Tlv;
 import leshan.server.lwm2m.impl.tlv.Tlv.TlvType;
 import leshan.server.lwm2m.impl.tlv.TlvDecoder;
@@ -18,6 +19,11 @@ public class MultipleLwM2mExchange extends TypedLwM2mExchange<Map<Integer, byte[
 
 	public MultipleLwM2mExchange(final LwM2mExchange exchange) {
 		super(exchange);
+	}
+
+	@Override
+	public void respondContent(final Map<Integer, byte[]> value) {
+		advanced().respond(ReadResponse.successMultiple(value));
 	}
 
 	@Override

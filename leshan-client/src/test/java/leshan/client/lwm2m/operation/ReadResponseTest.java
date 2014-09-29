@@ -7,9 +7,9 @@ import static org.junit.Assert.assertNotEquals;
 import java.util.HashMap;
 import java.util.Map;
 
-import leshan.server.lwm2m.impl.tlvcodec.TlvEncoder;
-import leshan.server.lwm2m.tlv.Tlv;
-import leshan.server.lwm2m.tlv.TlvType;
+import leshan.server.lwm2m.impl.tlv.Tlv;
+import leshan.server.lwm2m.impl.tlv.Tlv.TlvType;
+import leshan.server.lwm2m.impl.tlv.TlvEncoder;
 
 import org.junit.Test;
 

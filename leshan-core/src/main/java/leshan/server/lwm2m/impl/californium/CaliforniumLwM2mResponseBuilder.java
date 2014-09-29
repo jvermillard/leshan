@@ -36,21 +36,7 @@ import leshan.server.lwm2m.impl.node.LwM2mNodeDecoder;
 import leshan.server.lwm2m.node.LwM2mNode;
 import leshan.server.lwm2m.node.LwM2mPath;
 import leshan.server.lwm2m.observation.ObservationRegistry;
-import leshan.server.lwm2m.request.ClientResponse;
-import leshan.server.lwm2m.request.ContentFormat;
-import leshan.server.lwm2m.request.CreateRequest;
-import leshan.server.lwm2m.request.DeleteRequest;
-import leshan.server.lwm2m.request.DiscoverRequest;
-import leshan.server.lwm2m.request.DiscoverResponse;
-import leshan.server.lwm2m.request.ExecuteRequest;
-import leshan.server.lwm2m.request.LwM2mRequestVisitor;
-import leshan.server.lwm2m.request.ObserveRequest;
-import leshan.server.lwm2m.request.ReadRequest;
-import leshan.server.lwm2m.request.ResourceAccessException;
-import leshan.server.lwm2m.request.ResponseCode;
-import leshan.server.lwm2m.request.ValueResponse;
-import leshan.server.lwm2m.request.WriteAttributesRequest;
-import leshan.server.lwm2m.request.WriteRequest;
+import leshan.server.lwm2m.request.*;
 
 import org.apache.commons.lang.Validate;
 import org.eclipse.californium.core.coap.CoAP;
@@ -200,13 +186,14 @@ public class CaliforniumLwM2mResponseBuilder<T extends ClientResponse> implement
     public void visit(CreateRequest request) {
         switch (coapResponse.getCode()) {
         case CREATED:
-            lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new CreateResponse(fromCoapCode(coapResponse.getCode().value),
+                    coapResponse.getOptions().getLocationPathString());
             break;
         case BAD_REQUEST:
         case UNAUTHORIZED:
         case NOT_FOUND:
         case METHOD_NOT_ALLOWED:
-            lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new CreateResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         default:
             handleUnexpectedResponseCode(request.getClient(), coapRequest, coapResponse);
