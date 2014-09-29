@@ -1,20 +1,39 @@
 package leshan.server.client;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import leshan.server.lwm2m.node.LwM2mNode;
 import leshan.server.lwm2m.node.LwM2mObjectInstance;
 import leshan.server.lwm2m.node.LwM2mResource;
 import leshan.server.lwm2m.node.Value;
+import leshan.server.lwm2m.observation.Observation;
+import leshan.server.lwm2m.observation.ObservationRegistryListener;
 import leshan.server.lwm2m.observation.ObserveSpec;
 import leshan.server.lwm2m.request.ResponseCode;
 import leshan.server.lwm2m.request.ValueResponse;
 
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import com.jayway.awaitility.Awaitility;
 
 public class ObserveTest extends LwM2mClientServerIntegrationTest {
 
 	private static final String HELLO = "hello";
 	private static final String GOODBYE = "goodbye";
 	private static final String WORLD = "world";
+	private SampleObservation observer;
+
+	@Before
+	public void setupObservation() {
+		observer = new SampleObservation();
+		observationRegistry.addListener(observer);
+	}
 
 	@Test
 	public void canObserveResource() {
@@ -23,11 +42,12 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 		sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);
 
 		final ValueResponse response = sendObserve(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, FIRST_RESOURCE_ID);
-		assertResponse(response, ResponseCode.CONTENT, new LwM2mResource(INT_RESOURCE_ID, Value.newStringValue(HELLO)));
+		assertResponse(response, ResponseCode.CONTENT, new LwM2mResource(FIRST_RESOURCE_ID, Value.newStringValue(HELLO)));
 
 		firstResource.setValue(WORLD);
-//		Awaitility.await().untilTrue(observer.receievedNotify());
-//		assertArrayEquals(WORLD.getBytes(), observer.getContent());
+
+		Awaitility.await().untilTrue(observer.receievedNotify());
+		assertEquals(new LwM2mResource(FIRST_RESOURCE_ID, Value.newStringValue(WORLD)), observer.getContent());
 	}
 
 	@Test
@@ -37,11 +57,11 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 		sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), INT_OBJECT_ID);
 
 		final ValueResponse response = sendObserve(INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
-		assertResponse(response, ResponseCode.CONTENT, new LwM2mResource(INT_RESOURCE_ID, Value.newIntegerValue(0)));
+		assertResponse(response, ResponseCode.CONTENT, new LwM2mResource(INT_RESOURCE_ID, Value.newStringValue("0")));
 
 		intResource.setValue(2);
-//		Awaitility.await().untilTrue(observer.receievedNotify());
-//		assertArrayEquals("2".getBytes(), observer.getContent());
+		Awaitility.await().untilTrue(observer.receievedNotify());
+		assertEquals(new LwM2mResource(INT_RESOURCE_ID, Value.newStringValue("2")), observer.getContent());
 	}
 
 	@Ignore
@@ -54,11 +74,11 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 		sendWriteAttributes(new ObserveSpec.Builder().greaterThan(6).build(), INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
 
 		final ValueResponse response = sendObserve(INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
-		assertResponse(response, ResponseCode.CONTENT, new LwM2mResource(INT_RESOURCE_ID, Value.newIntegerValue(0)));
+		assertResponse(response, ResponseCode.CONTENT, new LwM2mResource(INT_RESOURCE_ID, Value.newStringValue("0")));
 
 		intResource.setValue(20);
-//		Awaitility.await().untilTrue(observer.receievedNotify());
-//		assertArrayEquals("20".getBytes(), observer.getContent());
+		Awaitility.await().untilTrue(observer.receievedNotify());
+		assertEquals(new LwM2mResource(INT_RESOURCE_ID, Value.newStringValue("20")), observer.getContent());
 	}
 
 	@Ignore
@@ -71,11 +91,11 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 		sendWriteAttributes(new ObserveSpec.Builder().greaterThan(6).build(), INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
 
 		final ValueResponse response = sendObserve(INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
-		assertResponse(response, ResponseCode.CONTENT, new LwM2mResource(INT_RESOURCE_ID, Value.newIntegerValue(0)));
+		assertResponse(response, ResponseCode.CONTENT, new LwM2mResource(INT_RESOURCE_ID, Value.newStringValue("0")));
 
 		intResource.setValue(2);
-//		sleep(500);
-//		assertFalse(observer.receievedNotify().get());
+		sleep(500);
+		assertFalse(observer.receievedNotify().get());
 	}
 
 	@Ignore
@@ -88,11 +108,11 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 		sendWriteAttributes(new ObserveSpec.Builder().lessThan(6).build(), INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
 
 		final ValueResponse response = sendObserve(INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
-		assertResponse(response, ResponseCode.CONTENT, new LwM2mResource(INT_RESOURCE_ID, Value.newIntegerValue(0)));
+		assertResponse(response, ResponseCode.CONTENT, new LwM2mResource(INT_RESOURCE_ID, Value.newStringValue("0")));
 
 		intResource.setValue(2);
-//		Awaitility.await().untilTrue(observer.receievedNotify());
-//		assertArrayEquals("2".getBytes(), observer.getContent());
+		Awaitility.await().untilTrue(observer.receievedNotify());
+		assertEquals(new LwM2mResource(INT_RESOURCE_ID, Value.newStringValue("2")), observer.getContent());
 	}
 
 	@Ignore
@@ -105,11 +125,11 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 		sendWriteAttributes(new ObserveSpec.Builder().lessThan(6).build(), INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
 
 		final ValueResponse response = sendObserve(INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
-		assertResponse(response, ResponseCode.CONTENT, new LwM2mResource(INT_RESOURCE_ID, Value.newIntegerValue(0)));
+		assertResponse(response, ResponseCode.CONTENT, new LwM2mResource(INT_RESOURCE_ID, Value.newStringValue("0")));
 
 		intResource.setValue(20);
-//		sleep(500);
-//		assertFalse(observer.receievedNotify().get());
+		sleep(500);
+		assertFalse(observer.receievedNotify().get());
 	}
 
 	@Ignore
@@ -122,11 +142,11 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 		sendWriteAttributes(new ObserveSpec.Builder().greaterThan(10).lessThan(6).build(), INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
 
 		final ValueResponse response = sendObserve(INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
-		assertResponse(response, ResponseCode.CONTENT, new LwM2mResource(INT_RESOURCE_ID, Value.newIntegerValue(0)));
+		assertResponse(response, ResponseCode.CONTENT, new LwM2mResource(INT_RESOURCE_ID, Value.newStringValue("0")));
 
 		intResource.setValue(20);
-//		Awaitility.await().untilTrue(observer.receievedNotify());
-//		assertArrayEquals("20".getBytes(), observer.getContent());
+		Awaitility.await().untilTrue(observer.receievedNotify());
+		assertEquals(new LwM2mResource(INT_RESOURCE_ID, Value.newStringValue("20")), observer.getContent());
 	}
 
 	@Test
@@ -138,11 +158,11 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 		sendWriteAttributes(new ObserveSpec.Builder().maxPeriod(2).build(), INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
 
 		final ValueResponse response = sendObserve(INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
-		assertResponse(response, ResponseCode.CONTENT, new LwM2mResource(INT_RESOURCE_ID, Value.newIntegerValue(0)));
+		assertResponse(response, ResponseCode.CONTENT, new LwM2mResource(INT_RESOURCE_ID, Value.newStringValue("0")));
 
 		sleep(3000);
-//		assertTrue(observer.receievedNotify().get());
-//		assertArrayEquals("0".getBytes(), observer.getContent());
+		assertTrue(observer.receievedNotify().get());
+		assertEquals(new LwM2mResource(INT_RESOURCE_ID, Value.newStringValue("0")), observer.getContent());
 	}
 
 	@Test
@@ -154,10 +174,10 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 		sendWriteAttributes(new ObserveSpec.Builder().maxPeriod(2).build(), INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
 
 		final ValueResponse response = sendObserve(INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
-		assertResponse(response, ResponseCode.CONTENT, new LwM2mResource(INT_RESOURCE_ID, Value.newIntegerValue(0)));
+		assertResponse(response, ResponseCode.CONTENT, new LwM2mResource(INT_RESOURCE_ID, Value.newStringValue("0")));
 
-//		sleep(1000);
-//		assertFalse(observer.receievedNotify().get());
+		sleep(1000);
+		assertFalse(observer.receievedNotify().get());
 	}
 
 	private void sleep(final long time) {
@@ -167,4 +187,35 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 		}
 	}
 
+	private final class SampleObservation implements ObservationRegistryListener {
+		private AtomicBoolean receivedNotify = new AtomicBoolean();
+		private LwM2mNode content;
+
+		@Override
+		public void newValue(Observation observation, LwM2mNode value) {
+			System.out.println("NEW VALUE");
+			receivedNotify.set(true);
+			content = value;
+		}
+
+		@Override
+		public void cancelled(Observation observation) {
+
+		}
+
+		@Override
+		public void newObservation(Observation observation) {
+
+		}
+
+		public AtomicBoolean receievedNotify() {
+			return receivedNotify;
+		}
+
+		public LwM2mNode getContent() {
+			return content;
+		}
+	}
+
 }
+

@@ -85,7 +85,7 @@ public abstract class LwM2mClientServerIntegrationTest {
     protected ValueResource secondResource;
     protected MultipleResource multipleResource;
     protected IntValueResource intResource;
-    private ObservationRegistry observationRegistry;
+    protected ObservationRegistry observationRegistry;
 
     @Before
     public void setup() {
