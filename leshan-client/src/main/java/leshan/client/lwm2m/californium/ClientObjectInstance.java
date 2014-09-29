@@ -37,7 +37,7 @@ public class ClientObjectInstance extends CoapResource implements LinkFormattabl
 	}
 
 	private void handleDiscover(final CoapExchange exchange) {
-		exchange.respond(ResponseCode.CONTENT, asLinkFormat());
+		exchange.respond(ResponseCode.CONTENT, asLinkFormat(), MediaTypeRegistry.APPLICATION_LINK_FORMAT);
 	}
 
 	@Override

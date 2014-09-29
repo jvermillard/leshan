@@ -40,7 +40,7 @@ class ClientResource extends CoapResource implements LinkFormattable {
 	}
 
 	private void handleDiscover(final CoapExchange exchange) {
-		exchange.respond(ResponseCode.CONTENT, asLinkFormat());
+		exchange.respond(ResponseCode.CONTENT, asLinkFormat(), MediaTypeRegistry.APPLICATION_LINK_FORMAT);
 	}
 
 	private void handleRead(final CoapExchange exchange) {

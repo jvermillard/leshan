@@ -1,7 +1,8 @@
 package leshan.server.client;
 
+import static org.junit.Assert.assertEquals;
 import leshan.server.lwm2m.client.LinkObject;
-import leshan.server.lwm2m.request.ClientResponse;
+import leshan.server.lwm2m.request.DiscoverResponse;
 import leshan.server.lwm2m.request.ResponseCode;
 
 import org.junit.Test;
@@ -12,7 +13,7 @@ public class DiscoverTest extends LwM2mClientServerIntegrationTest {
 	public void testDiscoverObject() {
 		register();
 
-		final ClientResponse response = sendDiscover(GOOD_OBJECT_ID);
+		final DiscoverResponse response = sendDiscover(GOOD_OBJECT_ID);
 		assertLinkFormatResponse(response, ResponseCode.CONTENT, client.getObjectModel(GOOD_OBJECT_ID));
 	}
 
@@ -20,12 +21,12 @@ public class DiscoverTest extends LwM2mClientServerIntegrationTest {
 	public void testIllegalObjectLinksRequestTwo() {
 		register();
 
-		final ClientResponse response = sendDiscover(GOOD_OBJECT_ID);
+		final DiscoverResponse response = sendDiscover(GOOD_OBJECT_ID);
 		assertLinkFormatResponse(response, ResponseCode.CONTENT, client.getObjectModel(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, FIRST_RESOURCE_ID, SECOND_RESOURCE_ID));
 	}
 
 	@Test
-	public void testDiscoverObjectAndObjectInstance() {
+	public void testDiscoverObjectInstance() {
 		register();
 
 		sendCreate(createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
@@ -34,7 +35,7 @@ public class DiscoverTest extends LwM2mClientServerIntegrationTest {
 	}
 
 	@Test
-	public void testDiscoverObjectAndObjectInstanceAndResource() {
+	public void testDiscoverResource() {
 		register();
 
 		sendCreate(createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
@@ -43,7 +44,7 @@ public class DiscoverTest extends LwM2mClientServerIntegrationTest {
 	}
 
 	@Test
-	public void testCantDiscoverNonExistentObjectAndObjectInstanceAndResource() {
+	public void testCantDiscoverNonExistentResource() {
 		register();
 
 		sendCreate(createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
@@ -51,17 +52,16 @@ public class DiscoverTest extends LwM2mClientServerIntegrationTest {
 		assertEmptyResponse(sendDiscover(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, 1234231), ResponseCode.NOT_FOUND);
 	}
 
-	private void assertLinkFormatResponse(final ClientResponse response,
+	private void assertLinkFormatResponse(final DiscoverResponse response,
 			final ResponseCode responseCode, final LinkObject[] expectedObjects) {
-		//FIXME: This needs to actually test something!
-		//		assertEquals(responseCode, response.getCode());
-		//
-		//		final LinkObject[] actualObjects = LinkFormatParser.parse(response.getContent());
-		//
-		//		assertEquals(expectedObjects.length, actualObjects.length);
-		//		for(int i = 0; i < expectedObjects.length; i++){
-		//			assertEquals(expectedObjects[i].toString(), actualObjects[i].toString());
-		//		}
+		assertEquals(responseCode, response.getCode());
+
+		final LinkObject[] actualObjects = response.getObjectLinks();
+
+		assertEquals(expectedObjects.length, actualObjects.length);
+		for(int i = 0; i < expectedObjects.length; i++){
+			assertEquals(expectedObjects[i].toString(), actualObjects[i].toString());
+		}
 	}
 
 }
