@@ -1,7 +1,15 @@
 package leshan.client.lwm2m.operation;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import leshan.server.lwm2m.impl.tlvcodec.TlvEncoder;
+import leshan.server.lwm2m.tlv.Tlv;
+import leshan.server.lwm2m.tlv.TlvType;
 
 import org.junit.Test;
 
@@ -33,6 +41,42 @@ public class ReadResponseTest {
 	public void testHashCodeRobustnessForFailures() {
 		assertEquals(ReadResponse.failure().hashCode(), ReadResponse.failure().hashCode());
 		assertNotEquals(ReadResponse.failure(), ReadResponse.success("goodbye".getBytes()).hashCode());
+	}
+
+	@Test
+	public void testSuccessSinglePayload() {
+		ReadResponse response = ReadResponse.success("value".getBytes());
+		assertArrayEquals("value".getBytes(), response.getResponsePayload());
+	}
+
+	@Test
+	public void testSuccessSingleTlv() {
+		ReadResponse response = ReadResponse.success("value".getBytes());
+		assertEquals(new Tlv(TlvType.RESOURCE_VALUE, null, "value".getBytes(), 0),
+				response.getResponsePayloadAsTlv());
+	}
+
+	@Test
+	public void testSuccessMultiplePayload() {
+		Map<Integer, byte[]> readValues = new HashMap<>();
+		readValues.put(55, "value".getBytes());
+		ReadResponse response = ReadResponse.successMultiple(readValues);
+		Tlv[] instances = new Tlv[] {
+				new Tlv(TlvType.RESOURCE_INSTANCE, null, "value".getBytes(), 55)
+		};
+		assertArrayEquals(TlvEncoder.encode(instances).array(), response.getResponsePayload());
+	}
+
+	@Test
+	public void testSuccessMultipleTlv() {
+		Map<Integer, byte[]> readValues = new HashMap<>();
+		readValues.put(55, "value".getBytes());
+		ReadResponse response = ReadResponse.successMultiple(readValues);
+		Tlv[] instances = new Tlv[] {
+				new Tlv(TlvType.RESOURCE_INSTANCE, null, "value".getBytes(), 55)
+		};
+		assertEquals(new Tlv(TlvType.MULTIPLE_RESOURCE, instances, null, 0),
+				response.getResponsePayloadAsTlv());
 	}
 
 }
