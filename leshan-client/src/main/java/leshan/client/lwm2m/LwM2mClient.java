@@ -11,7 +11,11 @@ import leshan.client.lwm2m.resource.LwM2mObjectDefinition;
 import leshan.server.lwm2m.client.LinkObject;
 
 import org.eclipse.californium.core.CoapServer;
+import org.eclipse.californium.core.coap.EmptyMessage;
+import org.eclipse.californium.core.coap.Request;
+import org.eclipse.californium.core.coap.Response;
 import org.eclipse.californium.core.network.CoAPEndpoint;
+import org.eclipse.californium.core.network.interceptors.MessageInterceptor;
 import org.eclipse.californium.core.server.resources.Resource;
 
 public class LwM2mClient {
@@ -34,7 +38,9 @@ public class LwM2mClient {
 				throw new IllegalArgumentException("Trying to load Client Object of name '" + def.getId() + "' when one was already added.");
 			}
 
-			clientSideServer.add(new ClientObject(def));
+			final ClientObject clientObject = new ClientObject(def);
+
+			clientSideServer.add(clientObject);
 		}
 	}
 
@@ -57,6 +63,64 @@ public class LwM2mClient {
 		if(endpoint == null){
 			endpoint = new CoAPEndpoint(port);
 		}
+
+		clientSideServer.addEndpoint(endpoint);
+		clientSideServer.start();
+
+		return new RegisterUplink(destination, endpoint, this);
+	}
+
+	public RegisterUplink startRegistration(final InetSocketAddress local, final InetSocketAddress destination){
+		CoAPEndpoint endpoint = (CoAPEndpoint) clientSideServer.getEndpoint(local);
+		if(endpoint == null){
+			endpoint = new CoAPEndpoint(local);
+		}
+		System.out.println("Endpoint: " + endpoint);
+		System.out.println("Destination: " + destination);
+
+		// TODO: EDGEBOX-3507 Andrew Summers 9/29/14
+		// This shouldn't be necessary. Figure out if we
+		// need to do this further down the stack
+		endpoint.addInterceptor(new MessageInterceptor() {
+
+			@Override
+			public void sendResponse(final Response response) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void sendRequest(final Request request) {
+				request.setDestination(destination.getAddress());
+				request.setDestinationPort(destination.getPort());
+				request.setSource(local.getAddress());
+				request.setSourcePort(local.getPort());
+				System.out.println("Sending request to: " + request.getDestination() + " from " + request.getSource());
+			}
+
+			@Override
+			public void sendEmptyMessage(final EmptyMessage message) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void receiveResponse(final Response response) {
+				System.out.println("Received response: " + response.getCode());
+			}
+
+			@Override
+			public void receiveRequest(final Request request) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void receiveEmptyMessage(final EmptyMessage message) {
+				// TODO Auto-generated method stub
+
+			}
+		});
 
 		clientSideServer.addEndpoint(endpoint);
 		clientSideServer.start();

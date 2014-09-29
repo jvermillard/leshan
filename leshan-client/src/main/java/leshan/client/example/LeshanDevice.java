@@ -28,22 +28,23 @@ public class LeshanDevice {
 	private static RegisterUplink registerUplink;
 
 	public static void main(final String[] args) {
-		if(args.length < 3){
-			System.out.println("Usage:\njava -jar target/leshan-client-*-SNAPSHOT-jar-with-dependencies.jar [Server IP] [Server Port] [This Client's Port]");
+		if(args.length < 4){
+			System.out.println("Usage:\njava -jar target/leshan-client-*-SNAPSHOT-jar-with-dependencies.jar [Client IP] [Client port] [Server IP] [Server Port]");
 		}
 		else{
-			new LeshanDevice(args[0], Integer.parseInt(args[1]), Integer.parseInt(args[2]));
+			new LeshanDevice(args[0], Integer.parseInt(args[1]), args[2], Integer.parseInt(args[3]));
 		}
 	}
 
 
-	public LeshanDevice(final String serverHostname, final int serverPort, final int clientPort){
+	public LeshanDevice(final String localHostName, final int localPort, final String serverHostName, final int serverPort){
 		final LwM2mObjectDefinition objectDevice = createObjectDefinition();
 		final LwM2mClient client = new LwM2mClient(objectDevice);
 		
 		//Connect to the server provided
-		final InetSocketAddress serverAddress = new InetSocketAddress(serverHostname, serverPort);
-		registerUplink = client.startRegistration(clientPort, serverAddress);
+		final InetSocketAddress clientAddress = new InetSocketAddress(localHostName, localPort);
+		final InetSocketAddress serverAddress = new InetSocketAddress(serverHostName, serverPort);
+		registerUplink = client.startRegistration(clientAddress, serverAddress);
 		final OperationResponse operationResponse = registerUplink.register(UUID.randomUUID().toString(), new HashMap<String, String>(), TIMEOUT_MS);
 		
 		//Report registration response.
@@ -54,6 +55,7 @@ public class LeshanDevice {
 		}
 		else{
 			System.err.println("\tDevice: " + operationResponse.getErrorMessage());
+			System.err.println("If you're having issues connecting to the LWM2M endpoint, try using the DTLS port instead");
 		}
 		
 		//Deregister on shutdown.
