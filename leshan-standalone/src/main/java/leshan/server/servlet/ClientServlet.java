@@ -40,7 +40,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import leshan.server.lwm2m.Lwm2mServer;
+import leshan.server.lwm2m.LwM2mServer;
 import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.node.LwM2mNode;
 import leshan.server.lwm2m.node.LwM2mObjectInstance;
@@ -81,11 +81,11 @@ public class ClientServlet extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 
-    private final Lwm2mServer server;
+    private final LwM2mServer server;
 
     private final Gson gson;
 
-    public ClientServlet(Lwm2mServer server) {
+    public ClientServlet(LwM2mServer server) {
         this.server = server;
 
         GsonBuilder gsonBuilder = new GsonBuilder();

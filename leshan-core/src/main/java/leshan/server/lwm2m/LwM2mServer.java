@@ -36,10 +36,24 @@ import leshan.server.lwm2m.request.LwM2mRequest;
 import leshan.server.lwm2m.request.ResponseCallback;
 import leshan.server.lwm2m.security.SecurityRegistry;
 
-public interface Lwm2mServer {
+/**
+ * An OMA Lightweight M2M device management server.
+ * 
+ * Will receive client registration through the "/rd" resource.
+ * Is able to send requests (Read, Write, Create, Delete, Execute, Discover, Observer) to specified clients.
+ * 
+ * It's your main entry point for using the Leshan-core API.
+ */
+public interface LwM2mServer {
 
+    /**
+     * Start the server (bind port, start to listen CoAP messages.
+     */
     void start();
 
+    /**
+     * Stop the server, release the resources (like UDP ports). 
+     */
     void stop();
 
     /**

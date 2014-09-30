@@ -34,7 +34,7 @@ import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.Set;
 
-import leshan.server.lwm2m.Lwm2mServer;
+import leshan.server.lwm2m.LwM2mServer;
 import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.client.ClientRegistryListener;
@@ -69,7 +69,7 @@ import ch.ethz.inf.vs.californium.server.Server;
  * A {@link RequestHandler} is provided to perform server-initiated requests to LW-M2M clients.
  * </p>
  */
-public class LwM2mServerImpl implements Lwm2mServer {
+public class LwM2mServerImpl implements LwM2mServer {
 
     private final Server coapServer;
 

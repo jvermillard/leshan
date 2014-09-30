@@ -40,7 +40,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import leshan.server.lwm2m.Lwm2mServer;
+import leshan.server.lwm2m.LwM2mServer;
 import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.ClientRegistryListener;
 import leshan.server.lwm2m.node.LwM2mNode;
@@ -132,7 +132,7 @@ public class EventServlet extends HttpServlet {
         }
     };
 
-    public EventServlet(Lwm2mServer server) {
+    public EventServlet(LwM2mServer server) {
         server.getClientRegistry().addListener(this.clientRegistryListener);
         server.getObservationRegistry().addListener(this.observationRegistryListener);
 
