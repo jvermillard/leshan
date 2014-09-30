@@ -78,9 +78,7 @@ public class LwM2mObjectInstance implements LwM2mNode {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("LwM2mObjectInstance [id=").append(id).append(", resources=").append(resources).append("]");
-        return builder.toString();
+        return String.format("LwM2mObjectInstance [id=%s, resources=%s]", id, resources);
     }
 
     public String prettyPrint() {
