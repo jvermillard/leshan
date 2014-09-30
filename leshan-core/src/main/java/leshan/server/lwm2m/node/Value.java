@@ -103,9 +103,7 @@ public class Value<T> {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("Value [value=").append(value).append(", type=").append(type).append("]");
-        return builder.toString();
+        return String.format("Value [value=%s, type=%s]", value, type);
     }
 
     @Override

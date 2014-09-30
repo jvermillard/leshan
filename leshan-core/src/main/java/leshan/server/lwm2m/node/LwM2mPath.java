@@ -32,31 +32,43 @@ package leshan.server.lwm2m.node;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 
+/**
+ * A path pointing to a LwM2M node (object, object instance or resource).
+ */
 public class LwM2mPath {
 
     private final int objectId;
     private final Integer objectInstanceId;
     private final Integer resourceId;
 
+    /**
+     * Create a path to an object
+     * @param objectId the object identifier
+     */
     public LwM2mPath(int objectId) {
         this.objectId = objectId;
         this.objectInstanceId = null;
         this.resourceId = null;
     }
 
+    /**
+     * Create a path to an object instance
+     * @param objectId the object identifier
+     * @param objectInstanceId the instance
+     */
     public LwM2mPath(int objectId, int objectInstanceId) {
         this.objectId = objectId;
         this.objectInstanceId = objectInstanceId;
         this.resourceId = null;
     }
 
+    /**
+     * Create a path to a resource of a given object instance 
+     * @param objectId the object identifier
+     * @param objectInstanceId 
+     * @param resourceIdthe resource identifier
+     */
     public LwM2mPath(int objectId, int objectInstanceId, int resourceId) {
-        this.objectId = objectId;
-        this.objectInstanceId = objectInstanceId;
-        this.resourceId = resourceId;
-    }
-
-    public LwM2mPath(Integer objectId, Integer objectInstanceId, Integer resourceId) {
         this.objectId = objectId;
         this.objectInstanceId = objectInstanceId;
         this.resourceId = resourceId;
@@ -65,7 +77,7 @@ public class LwM2mPath {
     /**
      * Constructs a {@link LwM2mPath} from a string representation
      * 
-     * @param path the path (e.g. /3/0/1)
+     * @param path the path (e.g. "/3/0/1" or "/3")
      */
     public LwM2mPath(String path) {
         Validate.notEmpty(path);
@@ -150,4 +162,39 @@ public class LwM2mPath {
         return b.toString();
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + objectId;
+        result = prime * result + ((objectInstanceId == null) ? 0 : objectInstanceId.hashCode());
+        result = prime * result + ((resourceId == null) ? 0 : resourceId.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        LwM2mPath other = (LwM2mPath) obj;
+        if (objectId != other.objectId)
+            return false;
+        if (objectInstanceId == null) {
+            if (other.objectInstanceId != null)
+                return false;
+        } else if (!objectInstanceId.equals(other.objectInstanceId))
+            return false;
+        if (resourceId == null) {
+            if (other.resourceId != null)
+                return false;
+        } else if (!resourceId.equals(other.resourceId))
+            return false;
+        return true;
+    }
+
+    
 }

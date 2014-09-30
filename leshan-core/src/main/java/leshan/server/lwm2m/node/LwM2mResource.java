@@ -103,10 +103,8 @@ public class LwM2mResource implements LwM2mNode {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("LwM2mResource [id=").append(id).append(", values=").append(Arrays.toString(values))
-                .append(", isMultiInstances=").append(isMultiInstances).append("]");
-        return builder.toString();
+        return String.format("LwM2mResource [id=%s, values=%s, isMultiInstances=%s]", id, Arrays.toString(values),
+                isMultiInstances);
     }
 
     @Override

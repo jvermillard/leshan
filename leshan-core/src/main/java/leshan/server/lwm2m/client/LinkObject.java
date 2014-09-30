@@ -38,6 +38,9 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.lang.StringUtils;
 
+/**
+ * A LwM2M path description given at the registration time by the client.
+ */
 public class LinkObject {
 
     private final String url;
