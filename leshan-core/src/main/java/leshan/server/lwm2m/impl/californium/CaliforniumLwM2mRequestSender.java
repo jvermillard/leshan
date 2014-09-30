@@ -122,7 +122,7 @@ public class CaliforniumLwM2mRequestSender implements LwM2mRequestSender {
         final Request coapRequest = CoapRequestBuilder.getRequest();
 
         // Add CoAP request callback
-        coapRequest.addMessageObserver(new AsynRequestObserver<T>(coapRequest, request.getClient(), callback) {
+        coapRequest.addMessageObserver(new AsyncRequestObserver<T>(coapRequest, request.getClient(), callback) {
             @Override
             public T buildResponse(Response coapResponse) {
                 // Build LwM2m response
@@ -171,11 +171,11 @@ public class CaliforniumLwM2mRequestSender implements LwM2mRequestSender {
         public abstract T buildResponse(Response coapResponse);
     }
 
-    private abstract class AsynRequestObserver<T extends ClientResponse> extends AbstractRequestObserver<T> {
+    private abstract class AsyncRequestObserver<T extends ClientResponse> extends AbstractRequestObserver<T> {
 
         ResponseCallback<T> callback;
 
-        AsynRequestObserver(Request coapRequest, Client client, ResponseCallback<T> callback) {
+        AsyncRequestObserver(Request coapRequest, Client client, ResponseCallback<T> callback) {
             super(coapRequest, client);
             this.callback = callback;
         }
