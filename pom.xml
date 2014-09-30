@@ -54,6 +54,7 @@
         <module>leshan-standalone</module>
         <module>leshan-bs-server</module>
         <module>leshan-client</module>
+        <module>leshan-client-standalone</module>
     </modules>
 
     <scm>
