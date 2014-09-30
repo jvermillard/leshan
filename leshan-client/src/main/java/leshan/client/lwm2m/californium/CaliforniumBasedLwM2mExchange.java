@@ -46,7 +46,8 @@ public class CaliforniumBasedLwM2mExchange implements LwM2mExchange {
 
 	@Override
 	public int getObjectInstanceId() {
-		return Integer.parseInt(getUriPaths().get(1));
+		List<String> paths = getUriPaths();
+		return paths.size() >= 2 ? Integer.parseInt(paths.get(1)) : 0;
 	}
 
 	private List<String> getUriPaths() {
