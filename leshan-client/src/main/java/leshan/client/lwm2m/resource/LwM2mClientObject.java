@@ -23,12 +23,24 @@ public class LwM2mClientObject {
 		this.definition = definition;
 		this.instanceCounter = new AtomicInteger(0);
 		this.instances = new ConcurrentHashMap<>();
-
-//		if(definition.isMandatory()) {
-//			handleCreate(new MandatoryObjectExchange());
-//		}
 	}
 
+	public LwM2mClientObjectInstance createMandatoryInstance() {
+		LwM2mClientObjectInstance instance = createNewInstance(false, 0);
+		instance.createMandatory();
+		return instance;
+	}
+	
+	public void handleCreate(final LwM2mCreateExchange exchange) {
+		if(instanceCounter.get() >= 1 && definition.isSingle()) {
+			exchange.respond(CreateResponse.invalidResource());
+		}
+		
+		final LwM2mClientObjectInstance instance = createNewInstance(exchange.hasObjectInstanceId(), exchange.getObjectInstanceId());
+		exchange.setObjectInstance(instance);
+		instance.handleCreate(exchange);
+	}
+	
 	public void handleRead(final LwM2mExchange exchange) {
 		final Collection<LwM2mClientObjectInstance> instances = this.instances.values();
 
@@ -45,24 +57,19 @@ public class LwM2mClientObject {
 		}
 	}
 
-	public void handleCreate(final LwM2mCreateExchange exchange) {
-		if(instanceCounter.get() >= 1 && definition.isSingle()) {
-			exchange.respond(CreateResponse.invalidResource());
-		}
-
-		final int newInstanceId = getNewInstanceId(exchange);
+	private LwM2mClientObjectInstance createNewInstance(boolean hasObjectInstanceId, int objectInstanceId) {
+		final int newInstanceId = getNewInstanceId(hasObjectInstanceId, objectInstanceId);
 		final LwM2mClientObjectInstance instance = new LwM2mClientObjectInstance(newInstanceId, definition);
-		exchange.setObjectInstance(instance);
-		instance.handleCreate(exchange);
+		return instance;
 	}
 
 	public void onSuccessfulCreate(final LwM2mClientObjectInstance instance) {
 		instances.put(instance.getId(), instance);
 	}
 
-	private int getNewInstanceId(final LwM2mExchange exchange) {
-		if (exchange.hasObjectInstanceId()) {
-			return exchange.getObjectInstanceId();
+	private int getNewInstanceId(boolean hasObjectInstanceId, int objectInstanceId) {
+		if (hasObjectInstanceId) {
+			return objectInstanceId;
 		} else {
 			return instanceCounter.getAndIncrement();
 		}

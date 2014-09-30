@@ -31,6 +31,12 @@ public class LwM2mClientObjectInstance {
 		return id;
 	}
 
+	public void createMandatory() {
+		for (final LwM2mClientResourceDefinition def : definition.getResourceDefinitions()) {
+			resources.put(def.getId(), def.createResource());
+		}
+	}
+	
 	public void handleCreate(final LwM2mCreateExchange exchange) {
 		final byte[] payload = exchange.getRequestPayload();
 		final Tlv[] tlvs = TlvDecoder.decode(ByteBuffer.wrap(payload));

@@ -7,7 +7,6 @@ import leshan.server.lwm2m.node.Value;
 import leshan.server.lwm2m.request.CreateResponse;
 import leshan.server.lwm2m.request.ResponseCode;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class CreateTest extends LwM2mClientServerIntegrationTest {
@@ -127,6 +126,14 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
                 ResponseCode.CREATED);
         assertEmptyResponse(sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), OPTIONAL_SINGLE_OBJECT_ID),
                 ResponseCode.BAD_REQUEST);
+    }
+
+    @Test
+    public void canAccessMandatoryObjectWithoutCreate() {
+        register();
+        assertResponse(sendRead(MANDATORY_SINGLE_OBJECT_ID, 0, MANDATORY_SINGLE_RESOURCE_ID),
+                ResponseCode.CONTENT,
+                new LwM2mResource(MANDATORY_SINGLE_RESOURCE_ID, Value.newStringValue(Integer.toString(intResource.getValue()))));
     }
 
 }

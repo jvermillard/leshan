@@ -128,7 +128,7 @@ public abstract class LwM2mClientServerIntegrationTest {
         final LwM2mClientObjectDefinition mandatoryMultipleObject = new LwM2mClientObjectDefinition(MANDATORY_MULTIPLE_OBJECT_ID, mandatory, !single,
                 new SingleResourceDefinition(MANDATORY_MULTIPLE_RESOURCE_ID, intResource, !mandatory));
         final LwM2mClientObjectDefinition mandatorySingleObject = new LwM2mClientObjectDefinition(MANDATORY_SINGLE_OBJECT_ID, mandatory, single,
-                new SingleResourceDefinition(MANDATORY_SINGLE_RESOURCE_ID, intResource, !mandatory));
+                new SingleResourceDefinition(MANDATORY_SINGLE_RESOURCE_ID, intResource, mandatory));
         final LwM2mClientObjectDefinition optionalSingleObject = new LwM2mClientObjectDefinition(OPTIONAL_SINGLE_OBJECT_ID, !mandatory, single,
                 new SingleResourceDefinition(OPTIONAL_SINGLE_RESOURCE_ID, intResource, !mandatory));
         return new LwM2mClient(objectOne, objectTwo, objectThree, objectFour, mandatoryMultipleObject, mandatorySingleObject, optionalSingleObject);

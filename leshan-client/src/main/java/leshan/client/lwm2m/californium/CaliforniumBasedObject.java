@@ -1,6 +1,5 @@
 package leshan.client.lwm2m.californium;
 
-import leshan.client.lwm2m.operation.LwM2mCreateExchange;
 import leshan.client.lwm2m.resource.LinkFormattable;
 import leshan.client.lwm2m.resource.LwM2mClientObject;
 import leshan.client.lwm2m.resource.LwM2mClientObjectDefinition;
@@ -21,6 +20,14 @@ public class CaliforniumBasedObject extends CoapResource implements LinkFormatta
 		super(Integer.toString(def.getId()));
 
 		lwm2mObject = new LwM2mClientObject(def);
+		if(def.isMandatory()) {
+			createMandatoryObjectInstance(def);
+		}
+	}
+
+	private void createMandatoryObjectInstance(final LwM2mClientObjectDefinition def) {
+		LwM2mClientObjectInstance instance = lwm2mObject.createMandatoryInstance();
+		onSuccessfulCreate(instance);
 	}
 
 	@Override
@@ -42,11 +49,7 @@ public class CaliforniumBasedObject extends CoapResource implements LinkFormatta
 
 	@Override
 	public void handlePOST(final CoapExchange exchange) {
-		createInstance(new CaliforniumBasedLwM2mCreateExchange(exchange, getCreateCallback()));
-	}
-
-	private void createInstance(LwM2mCreateExchange lExchange) {
-		lwm2mObject.handleCreate(lExchange);
+		lwm2mObject.handleCreate(new CaliforniumBasedLwM2mCreateExchange(exchange, getCreateCallback()));
 	}
 
 	private Callback<LwM2mClientObjectInstance> getCreateCallback() {
