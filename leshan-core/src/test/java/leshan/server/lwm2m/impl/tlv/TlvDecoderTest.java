@@ -32,8 +32,6 @@ package leshan.server.lwm2m.impl.tlv;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import leshan.server.lwm2m.tlv.Tlv;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;

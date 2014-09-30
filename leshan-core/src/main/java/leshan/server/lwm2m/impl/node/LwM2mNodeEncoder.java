@@ -38,6 +38,8 @@ import java.util.Map.Entry;
 import leshan.server.lwm2m.impl.objectspec.ResourceSpec;
 import leshan.server.lwm2m.impl.objectspec.ResourceSpec.Type;
 import leshan.server.lwm2m.impl.objectspec.Resources;
+import leshan.server.lwm2m.impl.tlv.Tlv;
+import leshan.server.lwm2m.impl.tlv.Tlv.TlvType;
 import leshan.server.lwm2m.impl.tlv.TlvEncoder;
 import leshan.server.lwm2m.node.LwM2mNode;
 import leshan.server.lwm2m.node.LwM2mNodeVisitor;
@@ -48,8 +50,6 @@ import leshan.server.lwm2m.node.LwM2mResource;
 import leshan.server.lwm2m.node.Value;
 import leshan.server.lwm2m.node.Value.DataType;
 import leshan.server.lwm2m.request.ContentFormat;
-import leshan.server.lwm2m.tlv.Tlv;
-import leshan.server.lwm2m.tlv.TlvType;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;

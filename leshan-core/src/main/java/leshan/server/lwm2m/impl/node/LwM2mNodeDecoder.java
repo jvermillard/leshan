@@ -35,6 +35,7 @@ import java.util.Date;
 import leshan.server.lwm2m.impl.objectspec.ResourceSpec;
 import leshan.server.lwm2m.impl.objectspec.ResourceSpec.Type;
 import leshan.server.lwm2m.impl.objectspec.Resources;
+import leshan.server.lwm2m.impl.tlv.Tlv;
 import leshan.server.lwm2m.impl.tlv.TlvDecoder;
 import leshan.server.lwm2m.node.LwM2mNode;
 import leshan.server.lwm2m.node.LwM2mObject;
@@ -43,7 +44,6 @@ import leshan.server.lwm2m.node.LwM2mPath;
 import leshan.server.lwm2m.node.LwM2mResource;
 import leshan.server.lwm2m.node.Value;
 import leshan.server.lwm2m.request.ContentFormat;
-import leshan.server.lwm2m.tlv.Tlv;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.lang.NotImplementedException;

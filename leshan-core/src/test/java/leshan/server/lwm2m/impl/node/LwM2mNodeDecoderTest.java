@@ -33,17 +33,15 @@ import static org.junit.Assert.*;
 
 import java.util.Date;
 
-import leshan.server.lwm2m.impl.node.InvalidValueException;
-import leshan.server.lwm2m.impl.node.LwM2mNodeDecoder;
 import leshan.server.lwm2m.impl.objectspec.Resources;
+import leshan.server.lwm2m.impl.tlv.Tlv;
+import leshan.server.lwm2m.impl.tlv.Tlv.TlvType;
 import leshan.server.lwm2m.impl.tlv.TlvEncoder;
 import leshan.server.lwm2m.node.LwM2mObjectInstance;
 import leshan.server.lwm2m.node.LwM2mPath;
 import leshan.server.lwm2m.node.LwM2mResource;
 import leshan.server.lwm2m.node.Value.DataType;
 import leshan.server.lwm2m.request.ContentFormat;
-import leshan.server.lwm2m.tlv.Tlv;
-import leshan.server.lwm2m.tlv.TlvType;
 
 import org.apache.commons.io.Charsets;
 import org.junit.BeforeClass;

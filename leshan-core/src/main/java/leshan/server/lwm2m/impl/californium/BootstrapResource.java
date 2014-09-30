@@ -38,9 +38,9 @@ import leshan.server.lwm2m.bootstrap.BootstrapConfig;
 import leshan.server.lwm2m.bootstrap.BootstrapConfig.ServerConfig;
 import leshan.server.lwm2m.bootstrap.BootstrapConfig.ServerSecurity;
 import leshan.server.lwm2m.bootstrap.BootstrapStore;
+import leshan.server.lwm2m.impl.tlv.Tlv;
+import leshan.server.lwm2m.impl.tlv.Tlv.TlvType;
 import leshan.server.lwm2m.impl.tlv.TlvEncoder;
-import leshan.server.lwm2m.tlv.Tlv;
-import leshan.server.lwm2m.tlv.TlvType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -35,8 +35,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import leshan.server.lwm2m.tlv.Tlv;
-import leshan.server.lwm2m.tlv.TlvType;
+import leshan.server.lwm2m.impl.tlv.Tlv.TlvType;
 
 import org.apache.commons.io.Charsets;
 import org.slf4j.Logger;

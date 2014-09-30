@@ -27,7 +27,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.lwm2m.tlv;
+package leshan.server.lwm2m.impl.tlv;
 
 import java.util.Arrays;
 
@@ -109,6 +109,10 @@ public class Tlv {
         this.identifier = identifier;
     }
 
+    public enum TlvType {
+        OBJECT_INSTANCE, RESOURCE_INSTANCE, MULTIPLE_RESOURCE, RESOURCE_VALUE;
+    }
+    
     @Override
     public String toString() {
         return String.format(
