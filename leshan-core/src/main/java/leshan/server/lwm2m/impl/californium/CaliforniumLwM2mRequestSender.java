@@ -218,7 +218,7 @@ public class CaliforniumLwM2mRequestSender implements LwM2mRequestSender {
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<T> ref = new AtomicReference<T>(null);
         AtomicBoolean coapTimeout = new AtomicBoolean(false);
-        AtomicReference<ResourceAccessException> exception = new AtomicReference<>();
+        AtomicReference<RuntimeException> exception = new AtomicReference<>();
 
         long timeout;
 
@@ -235,7 +235,7 @@ public class CaliforniumLwM2mRequestSender implements LwM2mRequestSender {
                 if (lwM2mResponseT != null) {
                     ref.set(lwM2mResponseT);
                 }
-            } catch (ResourceAccessException e) {
+            } catch (RuntimeException e) {
                 exception.set(e);
             } finally {
                 latch.countDown();
@@ -264,7 +264,11 @@ public class CaliforniumLwM2mRequestSender implements LwM2mRequestSender {
                 if (!latchTimeout || coapTimeout.get()) {
                     client.markLastRequestTimedout();
                     coapRequest.cancel();
-                    throw new RequestTimeoutException(coapRequest.getURI(), timeout);
+                    if (exception.get() != null) {
+                        throw exception.get();
+                    } else {       
+                        throw new RequestTimeoutException(coapRequest.getURI(), timeout);
+                    }
                 }
             } catch (InterruptedException e) {
                 // no idea why some other thread should have interrupted this thread

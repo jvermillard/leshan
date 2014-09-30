@@ -50,6 +50,7 @@ import leshan.server.lwm2m.request.CreateRequest;
 import leshan.server.lwm2m.request.DeleteRequest;
 import leshan.server.lwm2m.request.DiscoverRequest;
 import leshan.server.lwm2m.request.DiscoverResponse;
+import leshan.server.lwm2m.request.LwM2mRequestVisitor;
 import leshan.server.lwm2m.request.ReadRequest;
 import leshan.server.lwm2m.request.RequestTimeoutException;
 import leshan.server.lwm2m.request.ResponseCode;
@@ -117,7 +118,7 @@ public class CaliforniumLwM2mRequestServerTest extends BasicTestSupport {
         LinkObject link = response.getObjectLinks()[0];
         assertEquals("/3/0/1", link.getUrl());
     }
-
+    
     @Test
     public void testSendDeleteRequestSucceeds() throws Exception {
 
@@ -191,6 +192,28 @@ public class CaliforniumLwM2mRequestServerTest extends BasicTestSupport {
         ReadRequest request = new ReadRequest(client, OBJECT_ID_DEVICE);
         requestSender.send(request);
         fail("Request should have timed out with exception");
+    }
+
+    @Test
+    public void try_send_but_generate_unexpected_exception_in_the_response_visitor() {
+        DeleteRequest rq = new DeleteRequest(client, "/1/0/4") {
+            @Override
+            public void accept(LwM2mRequestVisitor visitor) {
+               if (visitor instanceof CaliforniumLwM2mResponseBuilder) {
+                     throw new RuntimeException("meh");
+               } else {
+                    super.accept(visitor);
+               }
+            }
+        };
+        ifTheClientReturns(new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.DELETED));
+        
+        try {
+            requestSender.send(rq);
+            fail("no exception reported");
+        } catch (RuntimeException e) {
+            assertEquals("meh", e.getMessage());
+        }
     }
 
     private void ifTheClientReturns(final Response coapResponse) {
