@@ -1,16 +1,16 @@
 package leshan.client.lwm2m.operation;
 
 import leshan.client.lwm2m.californium.Callback;
-import leshan.client.lwm2m.resource.LwM2mObjectInstance;
+import leshan.client.lwm2m.resource.LwM2mClientObjectInstance;
 import leshan.server.lwm2m.observation.ObserveSpec;
 
 public class MandatoryObjectExchange implements LwM2mCreateExchange {
 
-	private final Callback<LwM2mObjectInstance> callback;
-	private LwM2mObjectInstance instance;
+	private final Callback<LwM2mClientObjectInstance> callback;
+	private LwM2mClientObjectInstance instance;
 	private final byte[] payload;
 
-	public MandatoryObjectExchange(final Callback<LwM2mObjectInstance> callback, final byte[] payload) {
+	public MandatoryObjectExchange(final Callback<LwM2mClientObjectInstance> callback, final byte[] payload) {
 		this.callback = callback;
 		this.payload = payload;
 	}
@@ -52,7 +52,7 @@ public class MandatoryObjectExchange implements LwM2mCreateExchange {
 	}
 
 	@Override
-	public void setObjectInstance(final LwM2mObjectInstance instance) {
+	public void setObjectInstance(final LwM2mClientObjectInstance instance) {
 		this.instance = instance;
 	}
 

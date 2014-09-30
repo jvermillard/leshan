@@ -22,7 +22,7 @@ public class LwM2mObjectInstanceTest {
 	private static final boolean REQUIRED = true;
 	private static final boolean MANDATORY = true;
 	private static final boolean SINGLE = true;
-	private LwM2mObjectDefinition definition;
+	private LwM2mClientObjectDefinition definition;
 
 	@Test
 	public void testSingleResource() {
@@ -64,24 +64,24 @@ public class LwM2mObjectInstanceTest {
 	}
 
 	private void initializeObjectWithSingleResource(int resourceId, String value) {
-		definition = new LwM2mObjectDefinition(100, MANDATORY, SINGLE,
+		definition = new LwM2mClientObjectDefinition(100, MANDATORY, SINGLE,
 				new SingleResourceDefinition(resourceId, new SampleSingleResource(value), !REQUIRED));
 	}
 
 	private void initializeObjectWithMultipleResource(int resourceId, Map<Integer, byte[]> values) {
-		definition = new LwM2mObjectDefinition(101, MANDATORY, SINGLE,
+		definition = new LwM2mClientObjectDefinition(101, MANDATORY, SINGLE,
 				new SingleResourceDefinition(resourceId, new SampleMultipleResource(values), !REQUIRED));
 	}
 
-	private void assertCorrectRead(LwM2mObjectInstance instance, Tlv... tlvs) {
+	private void assertCorrectRead(LwM2mClientObjectInstance instance, Tlv... tlvs) {
 		LwM2mExchange exchange = mock(LwM2mExchange.class);
 		instance.handleRead(exchange);
 		byte[] bytes = TlvEncoder.encode(tlvs).array();
 		verify(exchange).respond(ReadResponse.success(bytes));
 	}
 
-	private LwM2mObjectInstance createInstance(LwM2mObjectDefinition definition, byte[] payload) {
-		LwM2mObjectInstance instance = new LwM2mObjectInstance(0, definition);
+	private LwM2mClientObjectInstance createInstance(LwM2mClientObjectDefinition definition, byte[] payload) {
+		LwM2mClientObjectInstance instance = new LwM2mClientObjectInstance(0, definition);
 		LwM2mCreateExchange createExchange = mock(LwM2mCreateExchange.class);
 		when(createExchange.getRequestPayload()).thenReturn(payload);
 		instance.handleCreate(createExchange);

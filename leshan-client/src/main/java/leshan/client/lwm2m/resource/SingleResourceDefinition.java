@@ -1,12 +1,12 @@
 package leshan.client.lwm2m.resource;
 
-public class SingleResourceDefinition implements LwM2mResourceDefinition {
+public class SingleResourceDefinition implements LwM2mClientResourceDefinition {
 
 	private final int id;
-	private final LwM2mResource resource;
+	private final LwM2mClientResource resource;
 	private final boolean required;
 
-	public SingleResourceDefinition(final int id, final LwM2mResource resource, final boolean required) {
+	public SingleResourceDefinition(final int id, final LwM2mClientResource resource, final boolean required) {
 		this.id = id;
 		this.resource = resource;
 		this.required = required;
@@ -18,7 +18,7 @@ public class SingleResourceDefinition implements LwM2mResourceDefinition {
 	}
 
 	@Override
-	public LwM2mResource createResource() {
+	public LwM2mClientResource createResource() {
 		return resource;
 	}
 

@@ -1,9 +1,10 @@
 package leshan.client.lwm2m.californium;
 
+import leshan.client.lwm2m.operation.LwM2mCreateExchange;
 import leshan.client.lwm2m.resource.LinkFormattable;
-import leshan.client.lwm2m.resource.LwM2mObject;
-import leshan.client.lwm2m.resource.LwM2mObjectDefinition;
-import leshan.client.lwm2m.resource.LwM2mObjectInstance;
+import leshan.client.lwm2m.resource.LwM2mClientObject;
+import leshan.client.lwm2m.resource.LwM2mClientObjectDefinition;
+import leshan.client.lwm2m.resource.LwM2mClientObjectInstance;
 
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
@@ -12,14 +13,14 @@ import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 import org.eclipse.californium.core.server.resources.Resource;
 
-public class ClientObject extends CoapResource implements LinkFormattable {
+public class CaliforniumBasedObject extends CoapResource implements LinkFormattable {
 
-	private final LwM2mObject lwm2mObject;
+	private final LwM2mClientObject lwm2mObject;
 
-	public ClientObject(final LwM2mObjectDefinition def) {
+	public CaliforniumBasedObject(final LwM2mClientObjectDefinition def) {
 		super(Integer.toString(def.getId()));
 
-		lwm2mObject = new LwM2mObject(def);
+		lwm2mObject = new LwM2mClientObject(def);
 	}
 
 	@Override
@@ -41,10 +42,18 @@ public class ClientObject extends CoapResource implements LinkFormattable {
 
 	@Override
 	public void handlePOST(final CoapExchange exchange) {
-		final Callback<LwM2mObjectInstance> callback = new Callback<LwM2mObjectInstance>() {
+		createInstance(new CaliforniumBasedLwM2mCreateExchange(exchange, getCreateCallback()));
+	}
+
+	private void createInstance(LwM2mCreateExchange lExchange) {
+		lwm2mObject.handleCreate(lExchange);
+	}
+
+	private Callback<LwM2mClientObjectInstance> getCreateCallback() {
+		return new Callback<LwM2mClientObjectInstance>() {
 
 			@Override
-			public void onSuccess(final LwM2mObjectInstance newInstance) {
+			public void onSuccess(final LwM2mClientObjectInstance newInstance) {
 				onSuccessfulCreate(newInstance);
 			}
 
@@ -53,11 +62,10 @@ public class ClientObject extends CoapResource implements LinkFormattable {
 			}
 
 		};
-		lwm2mObject.handleCreate(new CaliforniumBasedLwM2mCreateExchange(exchange, callback));
 	}
 
-	public void onSuccessfulCreate(final LwM2mObjectInstance instance) {
-		add(new ClientObjectInstance(instance.getId(), instance));
+	public void onSuccessfulCreate(final LwM2mClientObjectInstance instance) {
+		add(new CaliforniumBasedObjectInstance(instance.getId(), instance));
 		lwm2mObject.onSuccessfulCreate(instance);
 	}
 

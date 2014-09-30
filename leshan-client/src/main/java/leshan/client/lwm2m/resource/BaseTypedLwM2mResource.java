@@ -13,7 +13,7 @@ import leshan.client.lwm2m.operation.ReadResponse;
 import leshan.client.lwm2m.operation.WriteResponse;
 import leshan.server.lwm2m.observation.ObserveSpec;
 
-public abstract class BaseTypedLwM2mResource<E extends TypedLwM2mExchange<?>> implements LwM2mResource {
+public abstract class BaseTypedLwM2mResource<E extends TypedLwM2mExchange<?>> implements LwM2mClientResource {
 
 	protected abstract E createSpecificExchange(final LwM2mExchange exchange);
 

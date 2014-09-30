@@ -3,8 +3,8 @@ package leshan.client.lwm2m.californium;
 import java.util.Map.Entry;
 
 import leshan.client.lwm2m.resource.LinkFormattable;
-import leshan.client.lwm2m.resource.LwM2mObjectInstance;
-import leshan.client.lwm2m.resource.LwM2mResource;
+import leshan.client.lwm2m.resource.LwM2mClientObjectInstance;
+import leshan.client.lwm2m.resource.LwM2mClientResource;
 
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
@@ -13,17 +13,17 @@ import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 import org.eclipse.californium.core.server.resources.Resource;
 
-public class ClientObjectInstance extends CoapResource implements LinkFormattable {
+public class CaliforniumBasedObjectInstance extends CoapResource implements LinkFormattable {
 
-	private final LwM2mObjectInstance lwm2mObjectInstance;
+	private final LwM2mClientObjectInstance lwm2mObjectInstance;
 
-	public ClientObjectInstance(final int instanceId, final LwM2mObjectInstance lwm2mObjectInstance) {
+	public CaliforniumBasedObjectInstance(final int instanceId, final LwM2mClientObjectInstance lwm2mObjectInstance) {
 		super(Integer.toString(instanceId));
 		this.lwm2mObjectInstance = lwm2mObjectInstance;
-		for (final Entry<Integer, LwM2mResource> entry : lwm2mObjectInstance.getAllResources().entrySet()) {
+		for (final Entry<Integer, LwM2mClientResource> entry : lwm2mObjectInstance.getAllResources().entrySet()) {
 			final Integer resourceId = entry.getKey();
-			final LwM2mResource resource = entry.getValue();
-			add(new ClientResource(resourceId, resource));
+			final LwM2mClientResource resource = entry.getValue();
+			add(new CaliforniumBasedResource(resourceId, resource));
 		}
 	}
 

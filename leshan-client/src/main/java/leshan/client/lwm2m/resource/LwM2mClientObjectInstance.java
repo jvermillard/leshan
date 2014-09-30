@@ -15,13 +15,13 @@ import leshan.client.lwm2m.operation.LwM2mResponseAggregator;
 import leshan.server.lwm2m.impl.tlv.Tlv;
 import leshan.server.lwm2m.impl.tlv.TlvDecoder;
 
-public class LwM2mObjectInstance {
+public class LwM2mClientObjectInstance {
 
-	private final LwM2mObjectDefinition definition;
-	private final Map<Integer, LwM2mResource> resources;
+	private final LwM2mClientObjectDefinition definition;
+	private final Map<Integer, LwM2mClientResource> resources;
 	private final int id;
 
-	public LwM2mObjectInstance(final int id, final LwM2mObjectDefinition definition) {
+	public LwM2mClientObjectInstance(final int id, final LwM2mClientObjectDefinition definition) {
 		this.id = id;
 		this.resources = new HashMap<>();
 		this.definition = definition;
@@ -40,17 +40,17 @@ public class LwM2mObjectInstance {
 			return;
 		}
 
-		for (final LwM2mResourceDefinition def : definition.getResourceDefinitions()) {
+		for (final LwM2mClientResourceDefinition def : definition.getResourceDefinitions()) {
 			resources.put(def.getId(), def.createResource());
 		}
 
 		final LwM2mResponseAggregator aggr = new LwM2mObjectInstanceCreateResponseAggregator(exchange, tlvs.length, id);
 		for (final Tlv tlv : tlvs) {
-			final LwM2mResourceDefinition def = definition.getResourceDefinition(tlv.getIdentifier());
+			final LwM2mClientResourceDefinition def = definition.getResourceDefinition(tlv.getIdentifier());
 			if (def == null) {
 				aggr.respond(tlv.getIdentifier(), CreateResponse.invalidResource());
 			} else {
-				final LwM2mResource res = def.createResource();
+				final LwM2mClientResource res = def.createResource();
 				final AggregatedLwM2mExchange partialExchange = new AggregatedLwM2mExchange(aggr, tlv.getIdentifier());
 				partialExchange.setRequestPayload(tlv.getValue());
 				resources.put(tlv.getIdentifier(), res);
@@ -63,18 +63,18 @@ public class LwM2mObjectInstance {
 		final LwM2mResponseAggregator aggr = new LwM2mObjectInstanceReadResponseAggregator(
 				exchange,
 				resources.size());
-		for (final Entry<Integer, LwM2mResource> entry : resources.entrySet()) {
-			final LwM2mResource res = entry.getValue();
+		for (final Entry<Integer, LwM2mClientResource> entry : resources.entrySet()) {
+			final LwM2mClientResource res = entry.getValue();
 			final int id = entry.getKey();
 			res.read(new AggregatedLwM2mExchange(aggr, id));
 		}
 	}
 
-	public void addResource(final Integer resourceId, final LwM2mResource resource) {
+	public void addResource(final Integer resourceId, final LwM2mClientResource resource) {
 		resources.put(resourceId, resource);
 	}
 
-	public Map<Integer, LwM2mResource> getAllResources() {
+	public Map<Integer, LwM2mClientResource> getAllResources() {
 		return new HashMap<>(resources);
 	}
 

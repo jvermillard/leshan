@@ -13,13 +13,13 @@ import leshan.client.lwm2m.operation.LwM2mObjectReadResponseAggregator;
 import leshan.client.lwm2m.operation.LwM2mResponseAggregator;
 import leshan.client.lwm2m.operation.ReadResponse;
 
-public class LwM2mObject {
+public class LwM2mClientObject {
 
-	private final LwM2mObjectDefinition definition;
+	private final LwM2mClientObjectDefinition definition;
 	private final AtomicInteger instanceCounter;
-	private final Map<Integer, LwM2mObjectInstance> instances;
+	private final Map<Integer, LwM2mClientObjectInstance> instances;
 
-	public LwM2mObject(final LwM2mObjectDefinition definition) {
+	public LwM2mClientObject(final LwM2mClientObjectDefinition definition) {
 		this.definition = definition;
 		this.instanceCounter = new AtomicInteger(0);
 		this.instances = new ConcurrentHashMap<>();
@@ -30,7 +30,7 @@ public class LwM2mObject {
 	}
 
 	public void handleRead(final LwM2mExchange exchange) {
-		final Collection<LwM2mObjectInstance> instances = this.instances.values();
+		final Collection<LwM2mClientObjectInstance> instances = this.instances.values();
 
 		if (instances.isEmpty()) {
 			exchange.respond(ReadResponse.success(new byte[0]));
@@ -40,7 +40,7 @@ public class LwM2mObject {
 		final LwM2mResponseAggregator aggr = new LwM2mObjectReadResponseAggregator(
 				exchange,
 				instances.size());
-		for (final LwM2mObjectInstance inst : instances) {
+		for (final LwM2mClientObjectInstance inst : instances) {
 			inst.handleRead(new AggregatedLwM2mExchange(aggr, inst.getId()));
 		}
 	}
@@ -51,12 +51,12 @@ public class LwM2mObject {
 		}
 
 		final int newInstanceId = getNewInstanceId(exchange);
-		final LwM2mObjectInstance instance = new LwM2mObjectInstance(newInstanceId, definition);
+		final LwM2mClientObjectInstance instance = new LwM2mClientObjectInstance(newInstanceId, definition);
 		exchange.setObjectInstance(instance);
 		instance.handleCreate(exchange);
 	}
 
-	public void onSuccessfulCreate(final LwM2mObjectInstance instance) {
+	public void onSuccessfulCreate(final LwM2mClientObjectInstance instance) {
 		instances.put(instance.getId(), instance);
 	}
 

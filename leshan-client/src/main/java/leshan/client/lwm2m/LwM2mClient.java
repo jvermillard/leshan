@@ -4,10 +4,10 @@ import java.net.InetSocketAddress;
 
 import leshan.client.lwm2m.bootstrap.BootstrapDownlink;
 import leshan.client.lwm2m.bootstrap.BootstrapUplink;
-import leshan.client.lwm2m.californium.ClientObject;
+import leshan.client.lwm2m.californium.CaliforniumBasedObject;
 import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.resource.LinkFormattable;
-import leshan.client.lwm2m.resource.LwM2mObjectDefinition;
+import leshan.client.lwm2m.resource.LwM2mClientObjectDefinition;
 import leshan.server.lwm2m.client.LinkObject;
 
 import org.eclipse.californium.core.CoapServer;
@@ -22,23 +22,23 @@ public class LwM2mClient {
 
 	private final CoapServer clientSideServer;
 
-	public LwM2mClient(final LwM2mObjectDefinition... defs) {
+	public LwM2mClient(final LwM2mClientObjectDefinition... defs) {
 		this(new CoapServer(), defs);
 	}
 
-	public LwM2mClient(final CoapServer server, final LwM2mObjectDefinition... defs) {
+	public LwM2mClient(final CoapServer server, final LwM2mClientObjectDefinition... defs) {
 		if(defs == null || defs.length == 0){
 			throw new IllegalArgumentException("LWM2M Clients must support minimum required Objects defined in the LWM2M Specification.");
 		}
 		server.setMessageDeliverer(new LwM2mServerMessageDeliverer(server.getRoot()));
 		clientSideServer = server;
 
-		for (final LwM2mObjectDefinition def : defs) {
+		for (final LwM2mClientObjectDefinition def : defs) {
 			if(clientSideServer.getRoot().getChild(Integer.toString(def.getId())) != null){
 				throw new IllegalArgumentException("Trying to load Client Object of name '" + def.getId() + "' when one was already added.");
 			}
 
-			final ClientObject clientObject = new ClientObject(def);
+			final CaliforniumBasedObject clientObject = new CaliforniumBasedObject(def);
 
 			clientSideServer.add(clientObject);
 		}

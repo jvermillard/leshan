@@ -1,7 +1,7 @@
 package leshan.client.lwm2m.californium;
 
 import leshan.client.lwm2m.resource.LinkFormattable;
-import leshan.client.lwm2m.resource.LwM2mResource;
+import leshan.client.lwm2m.resource.LwM2mClientResource;
 
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
@@ -9,12 +9,12 @@ import org.eclipse.californium.core.coap.LinkFormat;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 
-class ClientResource extends CoapResource implements LinkFormattable {
+class CaliforniumBasedResource extends CoapResource implements LinkFormattable {
 
-	private final LwM2mResource lwm2mResource;
+	private final LwM2mClientResource lwm2mResource;
 	private final int id;
 
-	public ClientResource(final int id, final LwM2mResource lwM2mResource) {
+	public CaliforniumBasedResource(final int id, final LwM2mClientResource lwM2mResource) {
 		super(Integer.toString(id));
 		this.id = id;
 		setObservable(true);

@@ -10,7 +10,7 @@ import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.operation.ExecuteResponse;
 import leshan.client.lwm2m.operation.LwM2mExchange;
 import leshan.client.lwm2m.register.RegisterUplink;
-import leshan.client.lwm2m.resource.LwM2mObjectDefinition;
+import leshan.client.lwm2m.resource.LwM2mClientObjectDefinition;
 import leshan.client.lwm2m.resource.SingleResourceDefinition;
 import leshan.client.lwm2m.resource.StringLwM2mExchange;
 import leshan.client.lwm2m.resource.StringLwM2mResource;
@@ -38,7 +38,7 @@ public class LeshanDevice {
 
 
 	public LeshanDevice(final String localHostName, final int localPort, final String serverHostName, final int serverPort){
-		final LwM2mObjectDefinition objectDevice = createObjectDefinition();
+		final LwM2mClientObjectDefinition objectDevice = createObjectDefinition();
 		final LwM2mClient client = new LwM2mClient(objectDevice);
 		
 		//Connect to the server provided
@@ -70,7 +70,7 @@ public class LeshanDevice {
 		});
 	}
 
-	private LwM2mObjectDefinition createObjectDefinition() {
+	private LwM2mClientObjectDefinition createObjectDefinition() {
 		final TimeZone timeZone = TimeZone.getTimeZone("America/Los_Angeles");
 		//Create an object model
 		final StringValueResource manufacturerResource = new StringValueResource("Leshan Example Device", 0);
@@ -88,7 +88,7 @@ public class LeshanDevice {
 		final StringValueResource timezoneResource = new StringValueResource(timeZone.getDisplayName(), 15);
 		final StringValueResource bindingsResource = new StringValueResource("U", 16);
 		
-		final LwM2mObjectDefinition objectDevice = new LwM2mObjectDefinition(3, true, true,
+		final LwM2mClientObjectDefinition objectDevice = new LwM2mClientObjectDefinition(3, true, true,
 				new SingleResourceDefinition(0, manufacturerResource, true),
 				new SingleResourceDefinition(1, modelResource, true),
 				new SingleResourceDefinition(2, serialNumberResource, true),

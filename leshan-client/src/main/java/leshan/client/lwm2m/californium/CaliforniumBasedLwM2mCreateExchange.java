@@ -2,16 +2,16 @@ package leshan.client.lwm2m.californium;
 
 import leshan.client.lwm2m.operation.LwM2mCreateExchange;
 import leshan.client.lwm2m.operation.LwM2mResponse;
-import leshan.client.lwm2m.resource.LwM2mObjectInstance;
+import leshan.client.lwm2m.resource.LwM2mClientObjectInstance;
 
 import org.eclipse.californium.core.server.resources.CoapExchange;
 
 public class CaliforniumBasedLwM2mCreateExchange extends CaliforniumBasedLwM2mExchange implements LwM2mCreateExchange {
 
-	private final Callback<LwM2mObjectInstance> callback;
-	private LwM2mObjectInstance objectInstance;
+	private final Callback<LwM2mClientObjectInstance> callback;
+	private LwM2mClientObjectInstance objectInstance;
 
-	public CaliforniumBasedLwM2mCreateExchange(final CoapExchange exchange, final Callback<LwM2mObjectInstance> callback) {
+	public CaliforniumBasedLwM2mCreateExchange(final CoapExchange exchange, final Callback<LwM2mClientObjectInstance> callback) {
 		super(exchange);
 		this.callback = callback;
 	}
@@ -27,7 +27,7 @@ public class CaliforniumBasedLwM2mCreateExchange extends CaliforniumBasedLwM2mEx
 	}
 
 	@Override
-	public void setObjectInstance(final LwM2mObjectInstance objectInstance) {
+	public void setObjectInstance(final LwM2mClientObjectInstance objectInstance) {
 		this.objectInstance = objectInstance;
 	}
 
