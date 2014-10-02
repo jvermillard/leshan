@@ -65,4 +65,20 @@ Get the instace 0 of the object 3 of a registered client: http://localhost:8080/
 
 ![Leshan](https://raw.github.com/msangoi/leshan/master/lw-clients.png)
 
+Code with eclipse
+-----------------
+You need to add the M2_REPO to your java classpath variables. To do that you can execute the following command:
 
+```
+mvn -Declipse.workspace=<path-to-eclipse-workspace> eclipse:add-maven-repo
+```
+An eclipse restart is needed (if you already have it open).
+
+You can also do that inside eclipse: From the menu bar, select Window > Preferences. Select the *Java > Build Path > Classpath Variables* page.
+
+Now, you need to eclipsify leshan java projects,so run:
+
+```
+mvn eclipse:eclipse
+```
+We advise you to activate *Format source code* and *Organized imports* on *Save Actions*.
