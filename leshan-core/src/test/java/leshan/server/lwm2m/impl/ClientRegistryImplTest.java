@@ -29,11 +29,15 @@
  */
 package leshan.server.lwm2m.impl;
 
+import static org.mockito.Mockito.mock;
+
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.concurrent.atomic.AtomicReference;
 
 import leshan.server.lwm2m.client.BindingMode;
 import leshan.server.lwm2m.client.Client;
+import leshan.server.lwm2m.client.ClientRegistryListener;
 import leshan.server.lwm2m.client.ClientUpdate;
 import leshan.server.lwm2m.client.LinkObject;
 
@@ -41,6 +45,7 @@ import org.apache.commons.io.Charsets;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 public class ClientRegistryImplTest {
 
@@ -64,6 +69,8 @@ public class ClientRegistryImplTest {
 
     @Test
     public void testUpdateClientKeepsUnchangedProperties() {
+        ClientRegistryListener crl = mock(ClientRegistryListener.class);
+        registry.addListener(crl);
         givenASimpleClient(lifetime);
         registry.registerClient(client);
 
@@ -74,6 +81,7 @@ public class ClientRegistryImplTest {
         Assert.assertEquals((long) lifetime, registeredClient.getLifeTimeInSec());
         Assert.assertSame(binding, registeredClient.getBindingMode());
         Assert.assertEquals(sms, registeredClient.getSmsNumber());
+        Mockito.verify(crl).updated(registeredClient);
     }
 
     @Test

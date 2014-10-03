@@ -108,6 +108,9 @@ public class ClientRegistryImpl implements ClientRegistry {
             return null;
         } else {
             clientUpdated.apply(client);
+            for (ClientRegistryListener l : listeners) {
+                l.updated(client);
+            }
             return client;
         }
     }
