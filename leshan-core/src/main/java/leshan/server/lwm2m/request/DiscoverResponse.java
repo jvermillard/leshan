@@ -47,8 +47,10 @@ public class DiscoverResponse extends ClientResponse {
         super(code);
         if (ResponseCode.CONTENT.equals(code)) {
             Validate.notNull(links);
+            this.links = Arrays.copyOf(links, links.length);
+        } else {
+            this.links = null;
         }
-        this.links = Arrays.copyOf(links, links.length);
     }
 
     /**

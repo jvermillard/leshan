@@ -132,7 +132,7 @@ public class ObservationRegistryImpl implements ObservationRegistry, Observation
 
     @Override
     public Set<Observation> getObservations(Client client) {
-        Map<String, Observation> observations = observationsByClientAndResource.get(client);
+        Map<String, Observation> observations = observationsByClientAndResource.get(client.getRegistrationId());
         if (observations == null)
             return Collections.emptySet();
         else
