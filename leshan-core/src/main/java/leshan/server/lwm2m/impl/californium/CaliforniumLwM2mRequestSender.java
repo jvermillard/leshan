@@ -31,19 +31,23 @@ package leshan.server.lwm2m.impl.californium;
 
 import java.net.InetSocketAddress;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.observation.ObservationRegistry;
 import leshan.server.lwm2m.request.ClientResponse;
+import leshan.server.lwm2m.request.ExceptionConsumer;
 import leshan.server.lwm2m.request.LwM2mRequest;
 import leshan.server.lwm2m.request.LwM2mRequestSender;
+import leshan.server.lwm2m.request.RejectionException;
 import leshan.server.lwm2m.request.RequestTimeoutException;
 import leshan.server.lwm2m.request.ResourceAccessException;
-import leshan.server.lwm2m.request.ResponseCallback;
+import leshan.server.lwm2m.request.ResponseConsumer;
 
 import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
@@ -115,14 +119,16 @@ public class CaliforniumLwM2mRequestSender implements LwM2mRequestSender {
     }
 
     @Override
-    public <T extends ClientResponse> void send(final LwM2mRequest<T> request, ResponseCallback<T> callback) {
+    public <T extends ClientResponse> void send(final LwM2mRequest<T> request, ResponseConsumer<T> responseCallback,
+            ExceptionConsumer errorCallback) {
         // Create the CoAP request from LwM2m request
         CaliforniumCoapRequestBuilder CoapRequestBuilder = new CaliforniumCoapRequestBuilder();
         request.accept(CoapRequestBuilder);
         final Request coapRequest = CoapRequestBuilder.getRequest();
 
         // Add CoAP request callback
-        coapRequest.addMessageObserver(new AsyncRequestObserver<T>(coapRequest, request.getClient(), callback) {
+        coapRequest.addMessageObserver(new AsyncRequestObserver<T>(coapRequest, request.getClient(), responseCallback,
+                errorCallback) {
             @Override
             public T buildResponse(Response coapResponse) {
                 // Build LwM2m response
@@ -173,11 +179,14 @@ public class CaliforniumLwM2mRequestSender implements LwM2mRequestSender {
 
     private abstract class AsyncRequestObserver<T extends ClientResponse> extends AbstractRequestObserver<T> {
 
-        ResponseCallback<T> callback;
+        ResponseConsumer<T> responseCallback;
+        ExceptionConsumer errorCallback;
 
-        AsyncRequestObserver(Request coapRequest, Client client, ResponseCallback<T> callback) {
+        AsyncRequestObserver(Request coapRequest, Client client, ResponseConsumer<T> responseCallback,
+                ExceptionConsumer errorCallback) {
             super(coapRequest, client);
-            this.callback = callback;
+            this.responseCallback = responseCallback;
+            this.errorCallback = errorCallback;
         }
 
         @Override
@@ -186,10 +195,10 @@ public class CaliforniumLwM2mRequestSender implements LwM2mRequestSender {
             try {
                 T lwM2mResponseT = buildResponse(coapResponse);
                 if (lwM2mResponseT != null) {
-                    callback.onResponse(lwM2mResponseT);
+                    responseCallback.accept(lwM2mResponseT);
                 }
             } catch (ResourceAccessException e) {
-                callback.onError(e);
+                errorCallback.accept(e);
             } finally {
                 coapRequest.removeMessageObserver(this);
             }
@@ -198,17 +207,17 @@ public class CaliforniumLwM2mRequestSender implements LwM2mRequestSender {
         @Override
         public void onTimeout() {
             client.markLastRequestTimedout();
-            callback.onTimeout();
+            errorCallback.accept(new TimeoutException());
         }
 
         @Override
         public void onCancel() {
-            callback.onCancel();
+            errorCallback.accept(new CancellationException());
         }
 
         @Override
         public void onReject() {
-            callback.onReject();
+            errorCallback.accept(new RejectionException());
         }
 
     }
@@ -266,7 +275,7 @@ public class CaliforniumLwM2mRequestSender implements LwM2mRequestSender {
                     coapRequest.cancel();
                     if (exception.get() != null) {
                         throw exception.get();
-                    } else {       
+                    } else {
                         throw new RequestTimeoutException(coapRequest.getURI(), timeout);
                     }
                 }

@@ -45,9 +45,10 @@ import leshan.server.lwm2m.impl.security.SecureEndpoint;
 import leshan.server.lwm2m.impl.security.SecurityRegistryImpl;
 import leshan.server.lwm2m.observation.ObservationRegistry;
 import leshan.server.lwm2m.request.ClientResponse;
+import leshan.server.lwm2m.request.ExceptionConsumer;
 import leshan.server.lwm2m.request.LwM2mRequest;
 import leshan.server.lwm2m.request.LwM2mRequestSender;
-import leshan.server.lwm2m.request.ResponseCallback;
+import leshan.server.lwm2m.request.ResponseConsumer;
 import leshan.server.lwm2m.security.SecurityRegistry;
 
 import org.apache.commons.lang.Validate;
@@ -248,7 +249,8 @@ public class LwM2mServerImpl implements LwM2mServer {
     }
 
     @Override
-    public <T extends ClientResponse> void send(LwM2mRequest<T> request, ResponseCallback<T> callback) {
-        requestSender.send(request, callback);
+    public <T extends ClientResponse> void send(LwM2mRequest<T> request, ResponseConsumer<T> responseCallback,
+            ExceptionConsumer errorCallback) {
+        requestSender.send(request, responseCallback, errorCallback);
     }
 }

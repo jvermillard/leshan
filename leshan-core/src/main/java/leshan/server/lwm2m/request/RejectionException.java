@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Sierra Wireless
+ * Copyright (c) 2014, Sierra Wireless
  *
  * All rights reserved.
  *
@@ -29,37 +29,8 @@
  */
 package leshan.server.lwm2m.request;
 
-/**
- * A callback to be notified of client responses.
- */
-public interface ResponseCallback<T extends ClientResponse> {
+public class RejectionException extends RuntimeException {
 
-    /**
-     * A response from the remote client
-     * 
-     * @param response the response
-     */
-    void onResponse(T response);
+    private static final long serialVersionUID = 1L;
 
-    /**
-     * An exception was raised while accessing a resource
-     * 
-     * @param e the raised exception
-     */
-    void onError(ResourceAccessException e);
-
-    /**
-     * No response received and all retransmissions failed.
-     */
-    void onTimeout();
-
-    /**
-     * No response received and the client rejected the request.
-     */
-    void onReject();
-
-    /**
-     * No response received and the request was cancelled.
-     */
-    void onCancel();
 }

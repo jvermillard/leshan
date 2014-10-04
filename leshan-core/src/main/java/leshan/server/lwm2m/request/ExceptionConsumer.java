@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Sierra Wireless
+ * Copyright (c) 2014, Sierra Wireless
  *
  * All rights reserved.
  *
@@ -29,15 +29,14 @@
  */
 package leshan.server.lwm2m.request;
 
-public interface LwM2mRequestSender {
-    /**
-     * Send a Lightweight M2M request synchronously. Will block until a response is received from the remote client.
-     */
-    <T extends ClientResponse> T send(LwM2mRequest<T> request);
+/**
+ * Functional interface receiving errors produced by a LWM2M request
+ */
+public interface ExceptionConsumer {
 
     /**
-     * Send a Lightweight M2M request asynchronously.
+     * Called when a exception occurs during a request
+     * @param e the produced exception
      */
-    <T extends ClientResponse> void send(LwM2mRequest<T> request, ResponseConsumer<T> responseCallback,
-            ExceptionConsumer errorCallback);
+    void accept(Exception e);
 }
