@@ -56,12 +56,18 @@ public class Resources {
 
                 // load OMA objects definitions from XML resource files
                 URL omaObjects = Resources.class.getResource("/omaobjects");
-                if (omaObjects == null) {
+                if (omaObjects == null || omaObjects.getFile() == null) {
                     return;
                 }
 
                 DDFFileParser ddfParser = new DDFFileParser();
-                for (File file : new File(omaObjects.getFile()).listFiles()) {
+                
+                File[] listFiles = new File(omaObjects.getFile()).listFiles();
+                
+                if (listFiles == null) {
+                    return;
+                }
+                for (File file : listFiles) {
                     ObjectSpec object = ddfParser.parse(file);
                     if (object != null) {
                         LOG.info("Resources descriptions loaded for object {} ({})", object.name, object.id);
