@@ -29,7 +29,7 @@ public abstract class BaseTypedLwM2mResource<E extends TypedLwM2mExchange<?>> im
 				notifyResourceUpdated();
 			}
 
-		}, 0, 1, TimeUnit.SECONDS);
+		}, 0, 500, TimeUnit.MILLISECONDS);
 
 		this.observeSpec = new ObserveSpec.Builder().build();
 	}

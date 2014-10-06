@@ -92,14 +92,14 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 	public void canObserveResourceWithPmaxAttributeWithNotify() {
 		observe(attributes().maxPeriod(1));
 
-		assertObserved(3000, "0");
+		assertObserved(2000, "0");
 	}
 
 	@Test
 	public void canObserveResourceWithPmaxAttributeNoNotify() {
-		observe(attributes().maxPeriod(2));
+		observe(attributes().maxPeriod(1));
 
-		assertNoObservation(1000);
+		assertNoObservation(500);
 	}
 
 	private void create() {
@@ -110,7 +110,7 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 		final ValueResponse response = sendObserve(INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
 		assertResponse(response, ResponseCode.CONTENT, new LwM2mResource(INT_RESOURCE_ID, Value.newStringValue("0")));
 	}
-	
+
 	private ObserveSpec.Builder attributes() {
 		return new ObserveSpec.Builder();
 	}
@@ -147,7 +147,6 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 
 		@Override
 		public void newValue(Observation observation, LwM2mNode value) {
-			System.out.println("NEW VALUE");
 			receivedNotify.set(true);
 			content = value;
 		}

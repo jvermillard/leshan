@@ -34,11 +34,6 @@ public class ObserveNotifyExchange extends ForwardingLwM2mExchange {
 		previousTime = new Date();
 	}
 
-	private void sendNotify(final LwM2mResponse response) {
-		updatePrevious(response);
-		exchange.respond(ObserveResponse.notifyWithContent(response.getResponsePayload()));
-	}
-
 	private boolean shouldNotify(final LwM2mResponse response) {
 		final long diff = new Date().getTime() - previousTime.getTime();
 		final Integer pmax = observeSpec.getMaxPeriod();
@@ -46,6 +41,11 @@ public class ObserveNotifyExchange extends ForwardingLwM2mExchange {
 			return true;
 		}
 		return !Arrays.equals(response.getResponsePayload(), previousValue);
+	}
+
+	private void sendNotify(final LwM2mResponse response) {
+		updatePrevious(response);
+		exchange.respond(ObserveResponse.notifyWithContent(response.getResponsePayload()));
 	}
 
 	public void setObserveSpec(final ObserveSpec observeSpec) {
