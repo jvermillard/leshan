@@ -5,9 +5,7 @@ import java.util.Date;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import leshan.client.lwm2m.exchange.ForwardingLwM2mExchange;
-import leshan.client.lwm2m.exchange.LwM2mExchange;
-import leshan.client.lwm2m.resource.LwM2mClientResource;
+import leshan.client.lwm2m.resource.LwM2mClientNode;
 import leshan.client.lwm2m.response.LwM2mResponse;
 import leshan.client.lwm2m.response.ObserveResponse;
 import leshan.server.lwm2m.observation.ObserveSpec;
@@ -19,16 +17,16 @@ public class ObserveNotifyExchange extends ForwardingLwM2mExchange implements Ru
 	private ObserveSpec observeSpec;
 
 	private ScheduledExecutorService service;
-	private LwM2mClientResource resource;
+	private LwM2mClientNode node;
 	private byte[] previousValue;
 	private Date previousTime;
 
 	public ObserveNotifyExchange(final LwM2mExchange exchange,
-			LwM2mClientResource resource,
+			LwM2mClientNode node,
 			ObserveSpec observeSpec,
 			ScheduledExecutorService service) {
 		super(exchange);
-		this.resource = resource;
+		this.node = node;
 		this.observeSpec = observeSpec;
 		this.service = service;
 		updatePrevious(null);
@@ -81,7 +79,7 @@ public class ObserveNotifyExchange extends ForwardingLwM2mExchange implements Ru
 
 	@Override
 	public void run() {
-		resource.read(this);
+		node.read(this);
 	}
 	
 }

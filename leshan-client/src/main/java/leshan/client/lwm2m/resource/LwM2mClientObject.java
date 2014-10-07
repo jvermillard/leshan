@@ -53,7 +53,7 @@ public class LwM2mClientObject {
 				exchange,
 				instances.size());
 		for (final LwM2mClientObjectInstance inst : instances) {
-			inst.handleRead(new AggregatedLwM2mExchange(aggr, inst.getId()));
+			inst.read(new AggregatedLwM2mExchange(aggr, inst.getId()));
 		}
 	}
 

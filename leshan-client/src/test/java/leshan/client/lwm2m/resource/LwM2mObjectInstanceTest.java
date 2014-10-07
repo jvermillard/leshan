@@ -79,7 +79,7 @@ public class LwM2mObjectInstanceTest {
 
 	private void assertCorrectRead(LwM2mClientObjectInstance instance, Tlv... tlvs) {
 		LwM2mExchange exchange = mock(LwM2mExchange.class);
-		instance.handleRead(exchange);
+		instance.read(exchange);
 		byte[] bytes = TlvEncoder.encode(tlvs).array();
 		verify(exchange).respond(ReadResponse.success(bytes));
 	}

@@ -227,6 +227,14 @@ public abstract class LwM2mClientServerIntegrationTest {
         return server.send(new WriteRequest(getClient(), objectId, objectInstanceId, resourceId, resource, ContentFormat.TEXT, isReplace));
     }
 
+    protected ClientResponse sendWriteAttributes(final ObserveSpec observeSpec, final int objectId) {
+        return server.send(new WriteAttributesRequest(getClient(), objectId, observeSpec));
+    }
+
+    protected ClientResponse sendWriteAttributes(final ObserveSpec observeSpec, final int objectId, final int objectInstanceId) {
+        return server.send(new WriteAttributesRequest(getClient(), objectId, objectInstanceId, observeSpec));
+    }
+
     protected ClientResponse sendWriteAttributes(final ObserveSpec observeSpec, final int objectId, final int objectInstanceId, final int resourceId) {
         return server.send(new WriteAttributesRequest(getClient(), objectId, objectInstanceId, resourceId, observeSpec));
     }
