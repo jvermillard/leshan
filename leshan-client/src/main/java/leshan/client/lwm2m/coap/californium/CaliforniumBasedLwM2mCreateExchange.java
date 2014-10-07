@@ -1,4 +1,4 @@
-package leshan.client.lwm2m.californium;
+package leshan.client.lwm2m.coap.californium;
 
 import leshan.client.lwm2m.operation.LwM2mCreateExchange;
 import leshan.client.lwm2m.operation.LwM2mResponse;

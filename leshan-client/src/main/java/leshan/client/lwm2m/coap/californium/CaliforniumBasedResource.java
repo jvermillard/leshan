@@ -1,4 +1,4 @@
-package leshan.client.lwm2m.californium;
+package leshan.client.lwm2m.coap.californium;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;

@@ -4,7 +4,7 @@ import java.net.InetSocketAddress;
 
 import leshan.client.lwm2m.bootstrap.BootstrapDownlink;
 import leshan.client.lwm2m.bootstrap.BootstrapUplink;
-import leshan.client.lwm2m.californium.CaliforniumBasedObject;
+import leshan.client.lwm2m.coap.californium.CaliforniumBasedObject;
 import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.resource.LinkFormattable;
 import leshan.client.lwm2m.resource.LwM2mClientObjectDefinition;

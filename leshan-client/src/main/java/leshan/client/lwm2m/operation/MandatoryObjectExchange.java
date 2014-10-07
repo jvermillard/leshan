@@ -1,6 +1,6 @@
 package leshan.client.lwm2m.operation;
 
-import leshan.client.lwm2m.californium.Callback;
+import leshan.client.lwm2m.coap.californium.Callback;
 import leshan.client.lwm2m.resource.LwM2mClientObjectInstance;
 import leshan.server.lwm2m.observation.ObserveSpec;
 

@@ -1,4 +1,4 @@
-package leshan.client.lwm2m.californium;
+package leshan.client.lwm2m.coap.californium;
 
 import java.util.Map.Entry;
 

@@ -1,4 +1,4 @@
-package leshan.client.lwm2m.californium;
+package leshan.client.lwm2m.coap.californium;
 
 import leshan.client.lwm2m.resource.LinkFormattable;
 import leshan.client.lwm2m.resource.LwM2mClientObject;
