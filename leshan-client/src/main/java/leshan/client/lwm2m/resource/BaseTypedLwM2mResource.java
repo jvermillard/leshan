@@ -1,10 +1,6 @@
 package leshan.client.lwm2m.resource;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import leshan.client.lwm2m.operation.ExecuteResponse;
 import leshan.client.lwm2m.operation.LwM2mExchange;
@@ -17,32 +13,21 @@ public abstract class BaseTypedLwM2mResource<E extends TypedLwM2mExchange<?>> im
 
 	protected abstract E createSpecificExchange(final LwM2mExchange exchange);
 
-	private final Set<ObserveNotifyExchange> observers = new HashSet<>();
+	private ObserveNotifyExchange observer;
 	private ObserveSpec observeSpec;
 
 	public BaseTypedLwM2mResource() {
-		final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
-		service.scheduleWithFixedDelay(new Runnable() {
-
-			@Override
-			public void run() {
-				notifyResourceUpdated();
-			}
-
-		}, 0, 500, TimeUnit.MILLISECONDS);
-
 		this.observeSpec = new ObserveSpec.Builder().build();
 	}
 
 	@Override
 	public final void read(final LwM2mExchange exchange) {
-		if(exchange.isObserve() && !observers.contains(exchange)) {
-			final ObserveNotifyExchange observeNotifyExchange = new ObserveNotifyExchange(exchange);
-			observers.add(observeNotifyExchange);
-			handleRead(createSpecificExchange(observeNotifyExchange));
-		} else {
-			handleRead(createSpecificExchange(exchange));
-		}
+		handleRead(createSpecificExchange(exchange));
+	}
+
+	@Override
+	public final void observe(final LwM2mExchange exchange, final ScheduledExecutorService service) {
+		observer = new ObserveNotifyExchange(exchange, this, observeSpec, service);
 	}
 
 	protected void handleRead(final E exchange) {
@@ -82,20 +67,15 @@ public abstract class BaseTypedLwM2mResource<E extends TypedLwM2mExchange<?>> im
 	}
 
 	@Override
-	public void observe(final Notifier notifier) {
-
-	}
-
-	@Override
 	public boolean isReadable() {
 		return false;
 	}
 
 	@Override
 	public final void notifyResourceUpdated() {
-		for(final ObserveNotifyExchange exchange : observers) {
-			exchange.setObserveSpec(observeSpec);
-			read(exchange);
+		if (observer != null) {
+			observer.setObserveSpec(observeSpec);
+			read(observer);
 		}
 	}
 

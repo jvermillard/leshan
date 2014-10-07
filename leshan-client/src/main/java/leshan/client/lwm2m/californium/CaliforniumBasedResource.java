@@ -1,5 +1,9 @@
 package leshan.client.lwm2m.californium;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
+import leshan.client.lwm2m.operation.LwM2mExchange;
 import leshan.client.lwm2m.resource.LinkFormattable;
 import leshan.client.lwm2m.resource.LwM2mClientResource;
 
@@ -13,6 +17,7 @@ class CaliforniumBasedResource extends CoapResource implements LinkFormattable {
 
 	private final LwM2mClientResource lwm2mResource;
 	private final int id;
+	private final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
 
 	public CaliforniumBasedResource(final int id, final LwM2mClientResource lwM2mResource) {
 		super(Integer.toString(id));
@@ -43,10 +48,14 @@ class CaliforniumBasedResource extends CoapResource implements LinkFormattable {
 		exchange.respond(ResponseCode.CONTENT, asLinkFormat(), MediaTypeRegistry.APPLICATION_LINK_FORMAT);
 	}
 
-	private void handleRead(final CoapExchange exchange) {
+	private void handleRead(final CoapExchange coapExchange) {
 		// TODO: Put resource check for permissions
 		// TODO: Put resource check for valid op
-		lwm2mResource.read(new CaliforniumBasedLwM2mExchange(exchange));
+		LwM2mExchange exchange = new CaliforniumBasedLwM2mExchange(coapExchange);
+		if (exchange.isObserve()) {
+			lwm2mResource.observe(exchange, service);
+		}
+		lwm2mResource.read(exchange);
 	}
 
 	@Override
