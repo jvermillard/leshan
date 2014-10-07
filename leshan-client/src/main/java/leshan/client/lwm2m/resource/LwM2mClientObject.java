@@ -5,13 +5,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import leshan.client.lwm2m.operation.AggregatedLwM2mExchange;
-import leshan.client.lwm2m.operation.CreateResponse;
-import leshan.client.lwm2m.operation.LwM2mCreateExchange;
-import leshan.client.lwm2m.operation.LwM2mExchange;
-import leshan.client.lwm2m.operation.LwM2mObjectReadResponseAggregator;
-import leshan.client.lwm2m.operation.LwM2mResponseAggregator;
-import leshan.client.lwm2m.operation.ReadResponse;
+import leshan.client.lwm2m.exchange.LwM2mCreateExchange;
+import leshan.client.lwm2m.exchange.LwM2mExchange;
+import leshan.client.lwm2m.exchange.aggregate.AggregatedLwM2mExchange;
+import leshan.client.lwm2m.exchange.aggregate.LwM2mObjectReadResponseAggregator;
+import leshan.client.lwm2m.exchange.aggregate.LwM2mResponseAggregator;
+import leshan.client.lwm2m.response.CreateResponse;
+import leshan.client.lwm2m.response.ReadResponse;
 
 public class LwM2mClientObject {
 

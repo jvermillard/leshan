@@ -7,13 +7,13 @@ import java.util.TimeZone;
 import java.util.UUID;
 
 import leshan.client.lwm2m.LwM2mClient;
-import leshan.client.lwm2m.operation.ExecuteResponse;
-import leshan.client.lwm2m.operation.LwM2mExchange;
+import leshan.client.lwm2m.exchange.LwM2mExchange;
 import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.resource.LwM2mClientObjectDefinition;
 import leshan.client.lwm2m.resource.SingleResourceDefinition;
-import leshan.client.lwm2m.resource.StringLwM2mExchange;
-import leshan.client.lwm2m.resource.StringLwM2mResource;
+import leshan.client.lwm2m.resource.string.StringLwM2mExchange;
+import leshan.client.lwm2m.resource.string.StringLwM2mResource;
+import leshan.client.lwm2m.response.ExecuteResponse;
 import leshan.client.lwm2m.response.OperationResponse;
 
 /*

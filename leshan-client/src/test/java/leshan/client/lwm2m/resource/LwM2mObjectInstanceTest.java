@@ -8,9 +8,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import leshan.client.lwm2m.operation.LwM2mCreateExchange;
-import leshan.client.lwm2m.operation.LwM2mExchange;
-import leshan.client.lwm2m.operation.ReadResponse;
+import leshan.client.lwm2m.exchange.LwM2mCreateExchange;
+import leshan.client.lwm2m.exchange.LwM2mExchange;
+import leshan.client.lwm2m.resource.multiple.MultipleLwM2mExchange;
+import leshan.client.lwm2m.resource.multiple.MultipleLwM2mResource;
+import leshan.client.lwm2m.resource.string.StringLwM2mExchange;
+import leshan.client.lwm2m.resource.string.StringLwM2mResource;
+import leshan.client.lwm2m.response.ReadResponse;
 import leshan.server.lwm2m.impl.tlv.Tlv;
 import leshan.server.lwm2m.impl.tlv.Tlv.TlvType;
 import leshan.server.lwm2m.impl.tlv.TlvEncoder;

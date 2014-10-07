@@ -1,8 +1,8 @@
 package leshan.client.lwm2m.resource;
 
-import leshan.client.lwm2m.operation.LwM2mExchange;
-import leshan.client.lwm2m.operation.ReadResponse;
-import leshan.client.lwm2m.operation.WriteResponse;
+import leshan.client.lwm2m.exchange.LwM2mExchange;
+import leshan.client.lwm2m.response.ReadResponse;
+import leshan.client.lwm2m.response.WriteResponse;
 
 public abstract class TypedLwM2mExchange<T> {
 

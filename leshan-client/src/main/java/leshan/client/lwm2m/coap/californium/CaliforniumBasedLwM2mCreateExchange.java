@@ -1,9 +1,9 @@
 package leshan.client.lwm2m.coap.californium;
 
-import leshan.client.lwm2m.operation.LwM2mCreateExchange;
-import leshan.client.lwm2m.operation.LwM2mResponse;
+import leshan.client.lwm2m.exchange.LwM2mCreateExchange;
 import leshan.client.lwm2m.resource.LwM2mClientObjectInstance;
-
+import leshan.client.lwm2m.response.LwM2mResponse;
+ 
 import org.eclipse.californium.core.server.resources.CoapExchange;
 
 public class CaliforniumBasedLwM2mCreateExchange extends CaliforniumBasedLwM2mExchange implements LwM2mCreateExchange {

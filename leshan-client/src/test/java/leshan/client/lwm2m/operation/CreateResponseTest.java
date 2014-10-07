@@ -2,6 +2,7 @@ package leshan.client.lwm2m.operation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import leshan.client.lwm2m.response.CreateResponse;
 
 import org.junit.Test;
 

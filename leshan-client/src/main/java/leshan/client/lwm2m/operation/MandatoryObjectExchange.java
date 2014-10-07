@@ -1,7 +1,9 @@
 package leshan.client.lwm2m.operation;
 
 import leshan.client.lwm2m.coap.californium.Callback;
+import leshan.client.lwm2m.exchange.LwM2mCreateExchange;
 import leshan.client.lwm2m.resource.LwM2mClientObjectInstance;
+import leshan.client.lwm2m.response.LwM2mResponse;
 import leshan.server.lwm2m.observation.ObserveSpec;
 
 public class MandatoryObjectExchange implements LwM2mCreateExchange {

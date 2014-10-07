@@ -2,9 +2,9 @@ package leshan.client.lwm2m.coap.californium;
 
 import java.util.List;
 
-import leshan.client.lwm2m.operation.CreateResponse;
-import leshan.client.lwm2m.operation.LwM2mExchange;
-import leshan.client.lwm2m.operation.LwM2mResponse;
+import leshan.client.lwm2m.exchange.LwM2mExchange;
+import leshan.client.lwm2m.response.CreateResponse;
+import leshan.client.lwm2m.response.LwM2mResponse;
 import leshan.client.lwm2m.util.ObserveSpecParser;
 import leshan.server.lwm2m.observation.ObserveSpec;
 

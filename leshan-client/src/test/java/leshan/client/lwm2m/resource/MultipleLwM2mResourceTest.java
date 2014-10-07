@@ -12,9 +12,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import leshan.client.lwm2m.operation.LwM2mExchange;
-import leshan.client.lwm2m.operation.ReadResponse;
-import leshan.client.lwm2m.operation.WriteResponse;
+import leshan.client.lwm2m.exchange.LwM2mExchange;
+import leshan.client.lwm2m.resource.multiple.MultipleLwM2mExchange;
+import leshan.client.lwm2m.resource.multiple.MultipleLwM2mResource;
+import leshan.client.lwm2m.response.ReadResponse;
+import leshan.client.lwm2m.response.WriteResponse;
 import leshan.server.lwm2m.impl.tlv.Tlv;
 import leshan.server.lwm2m.impl.tlv.Tlv.TlvType;
 import leshan.server.lwm2m.impl.tlv.TlvEncoder;

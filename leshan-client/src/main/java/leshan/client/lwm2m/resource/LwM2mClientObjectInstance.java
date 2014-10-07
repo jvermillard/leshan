@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import leshan.client.lwm2m.operation.AggregatedLwM2mExchange;
-import leshan.client.lwm2m.operation.CreateResponse;
-import leshan.client.lwm2m.operation.LwM2mCreateExchange;
-import leshan.client.lwm2m.operation.LwM2mExchange;
-import leshan.client.lwm2m.operation.LwM2mObjectInstanceCreateResponseAggregator;
-import leshan.client.lwm2m.operation.LwM2mObjectInstanceReadResponseAggregator;
-import leshan.client.lwm2m.operation.LwM2mResponseAggregator;
+import leshan.client.lwm2m.exchange.LwM2mCreateExchange;
+import leshan.client.lwm2m.exchange.LwM2mExchange;
+import leshan.client.lwm2m.exchange.aggregate.AggregatedLwM2mExchange;
+import leshan.client.lwm2m.exchange.aggregate.LwM2mObjectInstanceCreateResponseAggregator;
+import leshan.client.lwm2m.exchange.aggregate.LwM2mObjectInstanceReadResponseAggregator;
+import leshan.client.lwm2m.exchange.aggregate.LwM2mResponseAggregator;
+import leshan.client.lwm2m.response.CreateResponse;
 import leshan.server.lwm2m.impl.tlv.Tlv;
 import leshan.server.lwm2m.impl.tlv.TlvDecoder;
 

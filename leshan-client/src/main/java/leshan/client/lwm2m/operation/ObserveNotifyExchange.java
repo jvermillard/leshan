@@ -5,7 +5,11 @@ import java.util.Date;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import leshan.client.lwm2m.exchange.ForwardingLwM2mExchange;
+import leshan.client.lwm2m.exchange.LwM2mExchange;
 import leshan.client.lwm2m.resource.LwM2mClientResource;
+import leshan.client.lwm2m.response.LwM2mResponse;
+import leshan.client.lwm2m.response.ObserveResponse;
 import leshan.server.lwm2m.observation.ObserveSpec;
 
 public class ObserveNotifyExchange extends ForwardingLwM2mExchange implements Runnable {
@@ -24,7 +28,6 @@ public class ObserveNotifyExchange extends ForwardingLwM2mExchange implements Ru
 			ObserveSpec observeSpec,
 			ScheduledExecutorService service) {
 		super(exchange);
-		this.observeSpec = new ObserveSpec.Builder().build();
 		this.resource = resource;
 		this.observeSpec = observeSpec;
 		this.service = service;

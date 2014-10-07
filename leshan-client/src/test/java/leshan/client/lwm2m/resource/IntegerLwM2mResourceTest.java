@@ -4,9 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import leshan.client.lwm2m.operation.LwM2mExchange;
-import leshan.client.lwm2m.operation.ReadResponse;
-import leshan.client.lwm2m.operation.WriteResponse;
+import leshan.client.lwm2m.exchange.LwM2mExchange;
+import leshan.client.lwm2m.resource.integer.IntegerLwM2mExchange;
+import leshan.client.lwm2m.resource.integer.IntegerLwM2mResource;
+import leshan.client.lwm2m.response.ReadResponse;
+import leshan.client.lwm2m.response.WriteResponse;
 
 import org.junit.Test;
 
