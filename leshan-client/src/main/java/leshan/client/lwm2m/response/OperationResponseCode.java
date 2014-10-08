@@ -6,6 +6,7 @@ import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.OperationTypes;
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 
 // TODO: Rename me to ResponseCode after CaliforniumResponseCode is purged from client visible layer
+// TODO: Remove Californium-specific response codes from this class
 public enum OperationResponseCode {
 	// Success
 	CREATED(ResponseCode.CREATED),

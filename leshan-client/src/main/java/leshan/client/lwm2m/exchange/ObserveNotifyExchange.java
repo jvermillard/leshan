@@ -1,4 +1,4 @@
-package leshan.client.lwm2m.operation;
+package leshan.client.lwm2m.exchange;
 
 import java.util.Arrays;
 import java.util.Date;
