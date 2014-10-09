@@ -4,19 +4,19 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import leshan.client.lwm2m.exchange.LwM2mExchange;
 
-public interface LwM2mClientResource extends LwM2mClientNode {
+public abstract class LwM2mClientResource extends LwM2mClientNode {
 
 	@Override
-	public void read(LwM2mExchange exchange);
+	public abstract void read(LwM2mExchange exchange);
 
 	@Override
-	public void observe(LwM2mExchange exchange, ScheduledExecutorService service);
+	public abstract void observe(LwM2mExchange exchange, ScheduledExecutorService service);
 
-	public void write(LwM2mExchange exchange);
+	public abstract void write(LwM2mExchange exchange);
 
-	public void execute(LwM2mExchange exchange);
+	public abstract void execute(LwM2mExchange exchange);
 
-	public boolean isReadable();
+	public abstract boolean isReadable();
 
-	public void notifyResourceUpdated();
+	public abstract void notifyResourceUpdated();
 }

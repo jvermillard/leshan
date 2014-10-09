@@ -19,7 +19,7 @@ import leshan.server.lwm2m.impl.tlv.Tlv;
 import leshan.server.lwm2m.impl.tlv.TlvDecoder;
 import leshan.server.lwm2m.observation.ObserveSpec;
 
-public class LwM2mClientObjectInstance implements LwM2mClientNode {
+public class LwM2mClientObjectInstance extends LwM2mClientNode {
 
 	private final LwM2mClientObjectDefinition definition;
 	private final Map<Integer, LwM2mClientResource> resources;
@@ -71,6 +71,7 @@ public class LwM2mClientObjectInstance implements LwM2mClientNode {
 		}
 	}
 
+	@Override
 	public void read(final LwM2mExchange exchange) {
 		final LwM2mResponseAggregator aggr = new LwM2mObjectInstanceReadResponseAggregator(
 				exchange,
@@ -85,6 +86,11 @@ public class LwM2mClientObjectInstance implements LwM2mClientNode {
 	@Override
 	public void observe(LwM2mExchange exchange, ScheduledExecutorService service) {
 		new ObserveNotifyExchange(exchange, this, observeSpec, service);
+	}
+
+	@Override
+	public void write(LwM2mExchange exchange) {
+		exchange.respond(WriteResponse.notAllowed());
 	}
 
 	public void writeAttributes(LwM2mExchange exchange, ObserveSpec spec) {

@@ -17,7 +17,7 @@ import leshan.client.lwm2m.response.ReadResponse;
 import leshan.client.lwm2m.response.WriteResponse;
 import leshan.server.lwm2m.observation.ObserveSpec;
 
-public class LwM2mClientObject implements LwM2mClientNode {
+public class LwM2mClientObject extends LwM2mClientNode {
 
 	private final LwM2mClientObjectDefinition definition;
 	private final AtomicInteger instanceCounter;
@@ -66,6 +66,11 @@ public class LwM2mClientObject implements LwM2mClientNode {
 	@Override
 	public void observe(LwM2mExchange exchange, ScheduledExecutorService service) {
 		new ObserveNotifyExchange(exchange, this, observeSpec, service);
+	}
+
+	@Override
+	public void write(LwM2mExchange exchange) {
+		exchange.respond(WriteResponse.notAllowed());
 	}
 
 	private LwM2mClientObjectInstance createNewInstance(boolean hasObjectInstanceId, int objectInstanceId) {

@@ -9,7 +9,7 @@ import leshan.client.lwm2m.response.ReadResponse;
 import leshan.client.lwm2m.response.WriteResponse;
 import leshan.server.lwm2m.observation.ObserveSpec;
 
-public abstract class BaseTypedLwM2mResource<E extends TypedLwM2mExchange<?>> implements LwM2mClientResource {
+public abstract class BaseTypedLwM2mResource<E extends TypedLwM2mExchange<?>> extends LwM2mClientResource {
 
 	protected abstract E createSpecificExchange(final LwM2mExchange exchange);
 
@@ -37,12 +37,7 @@ public abstract class BaseTypedLwM2mResource<E extends TypedLwM2mExchange<?>> im
 	@Override
 	public final void write(final LwM2mExchange exchange) {
 		try {
-			final ObserveSpec spec = exchange.getObserveSpec();
-			if (spec != null) {
-				writeAttributes(exchange, spec);
-			} else {
-				handleWrite(createSpecificExchange(exchange));
-			}
+			handleWrite(createSpecificExchange(exchange));
 		} catch(final Exception e) {
 			exchange.respond(WriteResponse.badRequest());
 		}
