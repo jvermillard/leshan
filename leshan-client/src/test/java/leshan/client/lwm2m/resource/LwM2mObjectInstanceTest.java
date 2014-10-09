@@ -88,7 +88,7 @@ public class LwM2mObjectInstanceTest {
 		LwM2mClientObjectInstance instance = new LwM2mClientObjectInstance(0, definition);
 		LwM2mCreateExchange createExchange = mock(LwM2mCreateExchange.class);
 		when(createExchange.getRequestPayload()).thenReturn(payload);
-		instance.handleCreate(createExchange);
+		instance.createInstance(createExchange);
 		return instance;
 	}
 

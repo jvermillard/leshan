@@ -3,26 +3,22 @@ package leshan.client.lwm2m.resource;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import leshan.client.lwm2m.exchange.LwM2mCreateExchange;
 import leshan.client.lwm2m.exchange.LwM2mExchange;
-import leshan.client.lwm2m.exchange.ObserveNotifyExchange;
 import leshan.client.lwm2m.exchange.aggregate.AggregatedLwM2mExchange;
 import leshan.client.lwm2m.exchange.aggregate.LwM2mObjectReadResponseAggregator;
 import leshan.client.lwm2m.exchange.aggregate.LwM2mResponseAggregator;
 import leshan.client.lwm2m.response.CreateResponse;
 import leshan.client.lwm2m.response.ReadResponse;
 import leshan.client.lwm2m.response.WriteResponse;
-import leshan.server.lwm2m.observation.ObserveSpec;
 
 public class LwM2mClientObject extends LwM2mClientNode {
 
 	private final LwM2mClientObjectDefinition definition;
 	private final AtomicInteger instanceCounter;
 	private final Map<Integer, LwM2mClientObjectInstance> instances;
-	private ObserveSpec observeSpec;
 
 	public LwM2mClientObject(final LwM2mClientObjectDefinition definition) {
 		this.definition = definition;
@@ -36,14 +32,14 @@ public class LwM2mClientObject extends LwM2mClientNode {
 		return instance;
 	}
 
-	public void handleCreate(final LwM2mCreateExchange exchange) {
+	public void createInstance(final LwM2mCreateExchange exchange) {
 		if(instanceCounter.get() >= 1 && definition.isSingle()) {
 			exchange.respond(CreateResponse.invalidResource());
 		}
 
 		final LwM2mClientObjectInstance instance = createNewInstance(exchange.hasObjectInstanceId(), exchange.getObjectInstanceId());
 		exchange.setObjectInstance(instance);
-		instance.handleCreate(exchange);
+		instance.createInstance(exchange);
 	}
 
 	@Override
@@ -61,11 +57,6 @@ public class LwM2mClientObject extends LwM2mClientNode {
 		for (final LwM2mClientObjectInstance inst : instances) {
 			inst.read(new AggregatedLwM2mExchange(aggr, inst.getId()));
 		}
-	}
-
-	@Override
-	public void observe(LwM2mExchange exchange, ScheduledExecutorService service) {
-		new ObserveNotifyExchange(exchange, this, observeSpec, service);
 	}
 
 	@Override
@@ -89,12 +80,6 @@ public class LwM2mClientObject extends LwM2mClientNode {
 		} else {
 			return instanceCounter.getAndIncrement();
 		}
-	}
-
-	@Override
-	public void writeAttributes(LwM2mExchange exchange, ObserveSpec spec) {
-		this.observeSpec = spec;
-		exchange.respond(WriteResponse.success());
 	}
 
 }
