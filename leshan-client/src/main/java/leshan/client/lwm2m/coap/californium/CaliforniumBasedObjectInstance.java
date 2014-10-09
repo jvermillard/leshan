@@ -31,6 +31,8 @@ public class CaliforniumBasedObjectInstance extends CoapResource implements Link
 			final LwM2mClientResource resource = entry.getValue();
 			add(new CaliforniumBasedResource(resourceId, resource));
 		}
+
+		setObservable(true);
 	}
 
 	@Override

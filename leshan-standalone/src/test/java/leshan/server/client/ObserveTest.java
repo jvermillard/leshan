@@ -151,8 +151,8 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 
 	private void assertObservedObjectInstance(long timeoutInSeconds, String resourceValue) {
 		Awaitility.await().atMost(timeoutInSeconds, TimeUnit.MILLISECONDS).untilTrue(observer.receievedNotify());
-		assertEquals(new LwM2mObjectInstance(GOOD_OBJECT_ID, new LwM2mResource[] {
-				new LwM2mResource(INT_RESOURCE_ID, Value.newStringValue(resourceValue))		
+		assertEquals(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
+				new LwM2mResource(INT_RESOURCE_ID, Value.newBinaryValue(resourceValue.getBytes()))		
 		}), observer.getContent());
 	}
 
