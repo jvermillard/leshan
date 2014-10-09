@@ -39,7 +39,7 @@ public abstract class BaseTypedLwM2mResource<E extends TypedLwM2mExchange<?>> im
 		try {
 			final ObserveSpec spec = exchange.getObserveSpec();
 			if (spec != null) {
-				handleWriteAttributes(exchange, spec);
+				writeAttributes(exchange, spec);
 			} else {
 				handleWrite(createSpecificExchange(exchange));
 			}
@@ -48,7 +48,8 @@ public abstract class BaseTypedLwM2mResource<E extends TypedLwM2mExchange<?>> im
 		}
 	}
 
-	private void handleWriteAttributes(final LwM2mExchange exchange, final ObserveSpec spec) {
+	@Override
+	public void writeAttributes(final LwM2mExchange exchange, final ObserveSpec spec) {
 		observeSpec = spec;
 		exchange.respond(WriteResponse.success());
 	}

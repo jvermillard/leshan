@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import leshan.server.lwm2m.node.LwM2mNode;
+import leshan.server.lwm2m.node.LwM2mObject;
 import leshan.server.lwm2m.node.LwM2mObjectInstance;
 import leshan.server.lwm2m.node.LwM2mResource;
 import leshan.server.lwm2m.node.Value;
@@ -110,6 +111,14 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 		assertObservedObjectInstance(2000, "2");
 	}
 
+	@Test
+	public void canObserveObjectWithPmaxWithNotify() {
+		observeObject(attributes().maxPeriod(1));
+
+		intResource.setValue(2);
+		assertObservedObject(2000, "2");
+	}
+
 	private void create() {
 		sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), INT_OBJECT_ID);
 	}
@@ -134,10 +143,24 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 				new LwM2mResource(INT_RESOURCE_ID, Value.newBinaryValue("0".getBytes()))
 		}));
 	}
-	
+
 	private void observeObjectInstance(ObserveSpec.Builder observeSpecBuilder) {
 		sendWriteAttributes(observeSpecBuilder.build(), INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID);
 		observeObjectInstance();
+	}
+
+	private void observeObject() {
+		final ValueResponse response = sendObserve(INT_OBJECT_ID);
+		assertResponse(response, ResponseCode.CONTENT, new LwM2mObject(INT_OBJECT_ID, new LwM2mObjectInstance[] {
+				new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
+						new LwM2mResource(INT_RESOURCE_ID, Value.newBinaryValue("0".getBytes()))		
+				})
+		}));
+	}
+
+	private void observeObject(ObserveSpec.Builder observeSpecBuilder) {
+		sendWriteAttributes(observeSpecBuilder.build(), INT_OBJECT_ID);
+		observeObject();
 	}
 
 	private void assertObservedResource(String value) {
@@ -153,6 +176,15 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 		Awaitility.await().atMost(timeoutInSeconds, TimeUnit.MILLISECONDS).untilTrue(observer.receievedNotify());
 		assertEquals(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
 				new LwM2mResource(INT_RESOURCE_ID, Value.newBinaryValue(resourceValue.getBytes()))		
+		}), observer.getContent());
+	}
+
+	private void assertObservedObject(long timeoutInSeconds, String resourceValue) {
+		Awaitility.await().atMost(timeoutInSeconds, TimeUnit.MILLISECONDS).untilTrue(observer.receievedNotify());
+		assertEquals(new LwM2mObject(INT_OBJECT_ID, new LwM2mObjectInstance[] {
+				new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
+						new LwM2mResource(INT_RESOURCE_ID, Value.newBinaryValue(resourceValue.getBytes()))		
+				})
 		}), observer.getContent());
 	}
 
