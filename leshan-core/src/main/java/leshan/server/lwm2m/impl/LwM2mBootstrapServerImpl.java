@@ -84,7 +84,7 @@ public class LwM2mBootstrapServerImpl implements LwM2mBootstrapServer {
 
         // init DTLS server
         DTLSConnector connector = new DTLSConnector(localAddressSecure, null);
-        connector.getConfig().setServerPsk(securityStore);
+        connector.getConfig().setPskStore(securityStore);
 
         Endpoint secureEndpoint = new SecureEndpoint(connector);
         coapServer.addEndpoint(secureEndpoint);

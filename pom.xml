@@ -84,7 +84,7 @@
     </developers>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <californium.version>1.0.0-M1</californium.version>
+        <californium.version>1.0.0-M2</californium.version>
     </properties>
 
     <distributionManagement>
@@ -277,7 +277,12 @@
         <dependencies>
             <dependency>
                 <groupId>org.eclipse.californium</groupId>
-                <artifactId>californium-core</artifactId>            
+                <artifactId>californium-core</artifactId>
+                <version>${californium.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.californium</groupId>
+                <artifactId>scandium</artifactId>
                 <version>${californium.version}</version>
             </dependency>
             <dependency>
@@ -343,11 +348,4 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-    <repositories>
-        <repository>
-            <id>repo.eclipse.org</id>
-            <name>Californium Repository</name>
-            <url>https://repo.eclipse.org/content/repositories/californium/</url>
-        </repository>
-    </repositories>
 </project>

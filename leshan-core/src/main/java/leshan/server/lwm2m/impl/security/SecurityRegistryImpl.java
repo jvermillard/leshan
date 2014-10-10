@@ -34,6 +34,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -136,11 +137,8 @@ public class SecurityRegistryImpl implements SecurityRegistry {
 
     // /////// PSK store
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public byte[] getPsk(String identity) {
+    public byte[] getKey(String identity) {
         SecurityInfo info = securityByIdentity.get(identity);
         if (info == null || info.getPreSharedKey() == null) {
             return null;
@@ -148,6 +146,12 @@ public class SecurityRegistryImpl implements SecurityRegistry {
             // defensive copy
             return Arrays.copyOf(info.getPreSharedKey(), info.getPreSharedKey().length);
         }
+    }
+
+    @Override
+    public String getIdentity(InetSocketAddress inetAddress) {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     // /////// File persistence
@@ -211,5 +215,4 @@ public class SecurityRegistryImpl implements SecurityRegistry {
             IOUtils.closeQuietly(out);
         }
     }
-
 }

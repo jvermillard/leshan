@@ -166,7 +166,7 @@ public class LwM2mServerImpl implements LwM2mServer {
 
         // init DTLS server
         DTLSConnector connector = new DTLSConnector(localAddressSecure, null);
-        connector.getConfig().setServerPsk(this.securityRegistry);
+        connector.getConfig().setPskStore(this.securityRegistry);
 
         Endpoint secureEndpoint = new SecureEndpoint(connector);
         coapServer.addEndpoint(secureEndpoint);
