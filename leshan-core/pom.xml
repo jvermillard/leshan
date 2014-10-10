@@ -108,15 +108,21 @@
                     <instructions>
                         <Export-Package>
                             leshan.server.lwm2m,
+                            leshan.server.lwm2m.bootstrap,
                             leshan.server.lwm2m.client,
-                            leshan.server.lwm2m.message,
-                            leshan.server.lwm2m.message.californium,
+                            leshan.server.lwm2m.impl,
+                            leshan.server.lwm2m.impl.californium,
+                            leshan.server.lwm2m.impl.node,
+                            leshan.server.lwm2m.impl.objectspec,
+                            leshan.server.lwm2m.impl.security,
+                            leshan.server.lwm2m.impl.tlv,
+                            leshan.server.lwm2m.node,
                             leshan.server.lwm2m.observation,
-                            leshan.server.lwm2m.resource,
-                            leshan.server.lwm2m.tlv
+                            leshan.server.lwm2m.request,
+                            leshan.server.lwm2m.security,
                         </Export-Package>
                         <Import-Package>
-                            ch.ethz.inf.vs.californium.*;version="[0.18.2, 0.19)",
+                            org.eclipse.californium.*;version="[1.0.0, 1.1)",
                             org.apache.commons.lang.*;version="[2.6, 3)",
                             *
                         </Import-Package>
