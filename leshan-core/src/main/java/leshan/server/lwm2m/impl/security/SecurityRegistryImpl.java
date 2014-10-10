@@ -41,6 +41,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import leshan.server.lwm2m.client.Client;
+import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.security.NonUniqueSecurityInfoException;
 import leshan.server.lwm2m.security.SecurityInfo;
 import leshan.server.lwm2m.security.SecurityRegistry;
@@ -73,18 +75,30 @@ public class SecurityRegistryImpl implements SecurityRegistry {
     // default location for persistence
     private static final String DEFAULT_FILE = "data/security.data";
 
+    private ClientRegistry clientRegistry;
+
     public SecurityRegistryImpl() {
         this(DEFAULT_FILE);
+    }
+
+    public SecurityRegistryImpl(ClientRegistry clientRegistry) {
+        this(DEFAULT_FILE, clientRegistry);
     }
 
     /**
      * @param file the file path to persist the registry
      */
     public SecurityRegistryImpl(String file) {
+        this(file, null);
+    }
+
+    public SecurityRegistryImpl(String file, ClientRegistry clientRegistry) {
         Validate.notEmpty(file);
 
         this.filename = file;
         this.loadFromFile();
+
+        this.clientRegistry = clientRegistry;
     }
 
     /**
@@ -150,7 +164,18 @@ public class SecurityRegistryImpl implements SecurityRegistry {
 
     @Override
     public String getIdentity(InetSocketAddress inetAddress) {
-        // TODO Auto-generated method stub
+        if (clientRegistry == null)
+            return null;
+
+        for (Client c : clientRegistry.allClients()) {
+            if (inetAddress.getPort() == c.getPort() && inetAddress.getAddress().equals(c.getAddress())) {
+                SecurityInfo securityInfo = get(c.getEndpoint());
+                if (securityInfo != null) {
+                    return securityInfo.getIdentity();
+                }
+                return null;
+            }
+        }
         return null;
     }
 

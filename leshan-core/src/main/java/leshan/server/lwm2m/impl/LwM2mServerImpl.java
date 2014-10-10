@@ -138,7 +138,7 @@ public class LwM2mServerImpl implements LwM2mServer {
             this.observationRegistry = observationRegistry;
 
         if (securityRegistry == null)
-            this.securityRegistry = new SecurityRegistryImpl();
+            this.securityRegistry = new SecurityRegistryImpl(this.clientRegistry);
         else
             this.securityRegistry = securityRegistry;
 
