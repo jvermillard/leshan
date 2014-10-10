@@ -50,13 +50,12 @@ import leshan.server.lwm2m.request.ResourceAccessException;
 import leshan.server.lwm2m.request.ResponseConsumer;
 
 import org.apache.commons.lang.Validate;
+import org.eclipse.californium.core.coap.MessageObserverAdapter;
+import org.eclipse.californium.core.coap.Request;
+import org.eclipse.californium.core.coap.Response;
+import org.eclipse.californium.core.network.Endpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ch.ethz.inf.vs.californium.coap.MessageObserverAdapter;
-import ch.ethz.inf.vs.californium.coap.Request;
-import ch.ethz.inf.vs.californium.coap.Response;
-import ch.ethz.inf.vs.californium.network.Endpoint;
 
 public class CaliforniumLwM2mRequestSender implements LwM2mRequestSender {
 

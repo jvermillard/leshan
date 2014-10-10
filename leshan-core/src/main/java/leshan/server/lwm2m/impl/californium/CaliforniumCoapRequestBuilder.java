@@ -41,8 +41,9 @@ import leshan.server.lwm2m.request.ObserveRequest;
 import leshan.server.lwm2m.request.ReadRequest;
 import leshan.server.lwm2m.request.WriteAttributesRequest;
 import leshan.server.lwm2m.request.WriteRequest;
-import ch.ethz.inf.vs.californium.coap.MediaTypeRegistry;
-import ch.ethz.inf.vs.californium.coap.Request;
+
+import org.eclipse.californium.core.coap.MediaTypeRegistry;
+import org.eclipse.californium.core.coap.Request;
 
 public class CaliforniumCoapRequestBuilder implements LwM2mRequestVisitor {
 

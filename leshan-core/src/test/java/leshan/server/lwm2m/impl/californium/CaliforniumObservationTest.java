@@ -38,14 +38,13 @@ import leshan.server.lwm2m.node.LwM2mResource;
 import leshan.server.lwm2m.observation.Observation;
 import leshan.server.lwm2m.observation.ObservationListener;
 
+import org.eclipse.californium.core.coap.CoAP.ResponseCode;
+import org.eclipse.californium.core.coap.MediaTypeRegistry;
+import org.eclipse.californium.core.coap.Request;
+import org.eclipse.californium.core.coap.Response;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
-import ch.ethz.inf.vs.californium.coap.MediaTypeRegistry;
-import ch.ethz.inf.vs.californium.coap.Request;
-import ch.ethz.inf.vs.californium.coap.Response;
 
 public class CaliforniumObservationTest {
 

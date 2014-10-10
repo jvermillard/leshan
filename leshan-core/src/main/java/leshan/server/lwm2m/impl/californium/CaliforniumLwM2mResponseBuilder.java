@@ -52,12 +52,11 @@ import leshan.server.lwm2m.request.ValueResponse;
 import leshan.server.lwm2m.request.WriteAttributesRequest;
 import leshan.server.lwm2m.request.WriteRequest;
 
+import org.eclipse.californium.core.coap.MediaTypeRegistry;
+import org.eclipse.californium.core.coap.Request;
+import org.eclipse.californium.core.coap.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ch.ethz.inf.vs.californium.coap.MediaTypeRegistry;
-import ch.ethz.inf.vs.californium.coap.Request;
-import ch.ethz.inf.vs.californium.coap.Response;
 
 public class CaliforniumLwM2mResponseBuilder<T extends ClientResponse> implements LwM2mRequestVisitor {
 

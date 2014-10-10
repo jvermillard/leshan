@@ -33,6 +33,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.eclipse.californium.elements.Connector;
+import org.eclipse.californium.elements.ConnectorBase;
+import org.eclipse.californium.elements.RawData;
 import org.eclipse.californium.scandium.dtls.AlertMessage;
 import org.eclipse.californium.scandium.dtls.AlertMessage.AlertDescription;
 import org.eclipse.californium.scandium.dtls.AlertMessage.AlertLevel;
@@ -53,10 +56,6 @@ import org.eclipse.californium.scandium.dtls.ResumingServerHandshaker;
 import org.eclipse.californium.scandium.dtls.ServerHandshaker;
 import org.eclipse.californium.scandium.dtls.ServerHello;
 import org.eclipse.californium.scandium.util.ByteArrayUtils;
-
-import ch.ethz.inf.vs.elements.Connector;
-import ch.ethz.inf.vs.elements.ConnectorBase;
-import ch.ethz.inf.vs.elements.RawData;
 
 /**
  * A {@link Connector} implementation for securing the inner datagrams using the DTLS standard.

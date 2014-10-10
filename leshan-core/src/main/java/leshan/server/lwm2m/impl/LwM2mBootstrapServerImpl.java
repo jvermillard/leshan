@@ -39,13 +39,12 @@ import leshan.server.lwm2m.impl.security.SecureEndpoint;
 import leshan.server.lwm2m.security.SecurityStore;
 
 import org.apache.commons.lang.Validate;
+import org.eclipse.californium.core.CoapServer;
+import org.eclipse.californium.core.network.CoAPEndpoint;
+import org.eclipse.californium.core.network.Endpoint;
 import org.eclipse.californium.scandium.DTLSConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
-import ch.ethz.inf.vs.californium.network.Endpoint;
-import ch.ethz.inf.vs.californium.server.Server;
 
 /**
  * A Lightweight M2M server, serving bootstrap information on /bs.
@@ -60,7 +59,7 @@ public class LwM2mBootstrapServerImpl implements LwM2mBootstrapServer {
     /** IANA assigned UDP port for CoAP with DTLS (so for LWM2M) */
     public static final int PORT_DTLS = 5684;
 
-    private final Server coapServer;
+    private final CoapServer coapServer;
 
     private final BootstrapStore bsStore;
 
@@ -79,7 +78,7 @@ public class LwM2mBootstrapServerImpl implements LwM2mBootstrapServer {
         this.bsStore = bsStore;
         this.securityStore = securityStore;
         // init CoAP server
-        coapServer = new Server();
+        coapServer = new CoapServer();
         Endpoint endpoint = new CoAPEndpoint(localAddress);
         coapServer.addEndpoint(endpoint);
 

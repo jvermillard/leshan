@@ -31,12 +31,11 @@ package leshan.server.lwm2m.impl.security;
 
 import java.net.InetSocketAddress;
 
+import org.eclipse.californium.core.coap.Request;
+import org.eclipse.californium.core.network.CoAPEndpoint;
+import org.eclipse.californium.core.network.config.NetworkConfig;
 import org.eclipse.californium.scandium.DTLSConnector;
 import org.eclipse.californium.scandium.dtls.DTLSSession;
-
-import ch.ethz.inf.vs.californium.coap.Request;
-import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
-import ch.ethz.inf.vs.californium.network.config.NetworkConfig;
 
 /**
  * A {@link CoAPEndpoint} for communications using DTLS security.

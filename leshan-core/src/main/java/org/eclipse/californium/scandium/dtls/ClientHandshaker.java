@@ -26,6 +26,7 @@ import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.util.logging.Level;
 
+import org.eclipse.californium.elements.RawData;
 import org.eclipse.californium.scandium.dtls.AlertMessage.AlertDescription;
 import org.eclipse.californium.scandium.dtls.AlertMessage.AlertLevel;
 import org.eclipse.californium.scandium.dtls.CertificateTypeExtension.CertificateType;
@@ -33,8 +34,6 @@ import org.eclipse.californium.scandium.dtls.cfg.ClientConnectorConfig;
 import org.eclipse.californium.scandium.dtls.cipher.CipherSuite;
 import org.eclipse.californium.scandium.dtls.cipher.ECDHECryptography;
 import org.eclipse.californium.scandium.util.ByteArrayUtils;
-
-import ch.ethz.inf.vs.elements.RawData;
 
 /**
  * ClientHandshaker does the protocol handshaking from the point of view of a client. It is driven by handshake messages

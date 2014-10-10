@@ -43,15 +43,14 @@ import leshan.server.lwm2m.security.SecurityInfo;
 import leshan.server.lwm2m.security.SecurityStore;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.eclipse.californium.core.CoapResource;
+import org.eclipse.californium.core.coap.CoAP.ResponseCode;
+import org.eclipse.californium.core.coap.CoAP.Type;
+import org.eclipse.californium.core.coap.Request;
+import org.eclipse.californium.core.server.resources.CoapExchange;
+import org.eclipse.californium.core.server.resources.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode;
-import ch.ethz.inf.vs.californium.coap.CoAP.Type;
-import ch.ethz.inf.vs.californium.coap.Request;
-import ch.ethz.inf.vs.californium.server.resources.CoapExchange;
-import ch.ethz.inf.vs.californium.server.resources.Resource;
-import ch.ethz.inf.vs.californium.server.resources.ResourceBase;
 
 /**
  * A CoAP {@link Resource} in charge of handling clients registration requests.
@@ -60,7 +59,7 @@ import ch.ethz.inf.vs.californium.server.resources.ResourceBase;
  * {@link ClientRegistry}.
  * </p>
  */
-public class RegisterResource extends ResourceBase {
+public class RegisterResource extends CoapResource {
 
     private static final String QUERY_PARAM_ENDPOINT = "ep=";
 

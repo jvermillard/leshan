@@ -37,13 +37,12 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.eclipse.californium.core.coap.Message;
+import org.eclipse.californium.elements.RawData;
 import org.eclipse.californium.scandium.dtls.cipher.CipherSuite;
 import org.eclipse.californium.scandium.dtls.cipher.CipherSuite.KeyExchangeAlgorithm;
 import org.eclipse.californium.scandium.dtls.cipher.ECDHECryptography;
 import org.eclipse.californium.scandium.util.ByteArrayUtils;
-
-import ch.ethz.inf.vs.californium.coap.Message;
-import ch.ethz.inf.vs.elements.RawData;
 
 /**
  * The base class for the handshake protocol logic. Contains all the functionality and fields which is needed by all

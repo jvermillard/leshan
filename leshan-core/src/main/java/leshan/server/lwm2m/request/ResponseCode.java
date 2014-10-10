@@ -30,8 +30,7 @@
 package leshan.server.lwm2m.request;
 
 import org.apache.commons.lang.Validate;
-
-import ch.ethz.inf.vs.californium.coap.CoAP;
+import org.eclipse.californium.core.coap.CoAP;
 
 /**
  * Response codes defined for LWM2M enabler

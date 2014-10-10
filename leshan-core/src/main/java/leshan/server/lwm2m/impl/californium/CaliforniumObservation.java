@@ -44,13 +44,12 @@ import leshan.server.lwm2m.request.ResponseCode;
 import leshan.server.lwm2m.request.ValueResponse;
 
 import org.apache.commons.lang.Validate;
+import org.eclipse.californium.core.coap.CoAP;
+import org.eclipse.californium.core.coap.MessageObserverAdapter;
+import org.eclipse.californium.core.coap.Request;
+import org.eclipse.californium.core.coap.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ch.ethz.inf.vs.californium.coap.CoAP;
-import ch.ethz.inf.vs.californium.coap.MessageObserverAdapter;
-import ch.ethz.inf.vs.californium.coap.Request;
-import ch.ethz.inf.vs.californium.coap.Response;
 
 public final class CaliforniumObservation extends MessageObserverAdapter implements Observation {
     private final Logger LOG = LoggerFactory.getLogger(CaliforniumObservation.class);

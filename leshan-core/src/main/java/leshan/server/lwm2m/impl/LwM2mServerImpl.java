@@ -52,13 +52,12 @@ import leshan.server.lwm2m.request.ResponseConsumer;
 import leshan.server.lwm2m.security.SecurityRegistry;
 
 import org.apache.commons.lang.Validate;
+import org.eclipse.californium.core.CoapServer;
+import org.eclipse.californium.core.network.CoAPEndpoint;
+import org.eclipse.californium.core.network.Endpoint;
 import org.eclipse.californium.scandium.DTLSConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ch.ethz.inf.vs.californium.network.CoAPEndpoint;
-import ch.ethz.inf.vs.californium.network.Endpoint;
-import ch.ethz.inf.vs.californium.server.Server;
 
 /**
  * A Lightweight M2M server.
@@ -72,7 +71,7 @@ import ch.ethz.inf.vs.californium.server.Server;
  */
 public class LwM2mServerImpl implements LwM2mServer {
 
-    private final Server coapServer;
+    private final CoapServer coapServer;
 
     private static final Logger LOG = LoggerFactory.getLogger(LwM2mServerImpl.class);
 
@@ -161,7 +160,7 @@ public class LwM2mServerImpl implements LwM2mServer {
         });
 
         // init CoAP server
-        coapServer = new Server();
+        coapServer = new CoapServer();
         Endpoint endpoint = new CoAPEndpoint(localAddress);
         coapServer.addEndpoint(endpoint);
 

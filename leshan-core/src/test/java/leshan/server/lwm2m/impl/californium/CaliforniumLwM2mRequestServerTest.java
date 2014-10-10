@@ -29,9 +29,13 @@
  */
 package leshan.server.lwm2m.impl.californium;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.net.InetAddress;
 import java.util.HashSet;
@@ -58,15 +62,14 @@ import leshan.server.lwm2m.request.ValueResponse;
 import leshan.server.lwm2m.request.WriteAttributesRequest;
 import leshan.server.lwm2m.request.WriteRequest;
 
+import org.eclipse.californium.core.coap.MediaTypeRegistry;
+import org.eclipse.californium.core.coap.Request;
+import org.eclipse.californium.core.coap.Response;
+import org.eclipse.californium.core.network.Endpoint;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-
-import ch.ethz.inf.vs.californium.coap.MediaTypeRegistry;
-import ch.ethz.inf.vs.californium.coap.Request;
-import ch.ethz.inf.vs.californium.coap.Response;
-import ch.ethz.inf.vs.californium.network.Endpoint;
 
 public class CaliforniumLwM2mRequestServerTest extends BasicTestSupport {
 
@@ -94,7 +97,7 @@ public class CaliforniumLwM2mRequestServerTest extends BasicTestSupport {
     public void testSendReadRequestReturnsContentResponse() throws Exception {
 
         ReadRequest request = new ReadRequest(client, OBJECT_ID_DEVICE, 0, 1);
-        ifTheClientReturns(newTextContentResponse(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT,
+        ifTheClientReturns(newTextContentResponse(org.eclipse.californium.core.coap.CoAP.ResponseCode.CONTENT,
                 TEXT_PAYLOAD));
 
         ValueResponse response = requestSender.send(request);
@@ -108,7 +111,7 @@ public class CaliforniumLwM2mRequestServerTest extends BasicTestSupport {
 
         String coreLinkPayload = "/3/0/1;pmin=10";
         DiscoverRequest request = new DiscoverRequest(client, OBJECT_ID_DEVICE);
-        Response coapResponse = new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CONTENT);
+        Response coapResponse = new Response(org.eclipse.californium.core.coap.CoAP.ResponseCode.CONTENT);
         coapResponse.setPayload(coreLinkPayload, MediaTypeRegistry.APPLICATION_LINK_FORMAT);
         ifTheClientReturns(coapResponse);
 
@@ -123,7 +126,7 @@ public class CaliforniumLwM2mRequestServerTest extends BasicTestSupport {
     public void testSendDeleteRequestSucceeds() throws Exception {
 
         DeleteRequest request = new DeleteRequest(client, 10, 1);
-        ifTheClientReturns(new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.DELETED));
+        ifTheClientReturns(new Response(org.eclipse.californium.core.coap.CoAP.ResponseCode.DELETED));
 
         ClientResponse response = requestSender.send(request);
         assertEquals(ResponseCode.DELETED, response.getCode());
@@ -134,7 +137,7 @@ public class CaliforniumLwM2mRequestServerTest extends BasicTestSupport {
 
         ObserveSpec spec = new ObserveSpec.Builder().maxPeriod(20).minPeriod(10).build();
         WriteAttributesRequest request = new WriteAttributesRequest(client, OBJECT_ID_DEVICE, spec);
-        ifTheClientReturns(new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CHANGED));
+        ifTheClientReturns(new Response(org.eclipse.californium.core.coap.CoAP.ResponseCode.CHANGED));
 
         ClientResponse response = requestSender.send(request);
         assertEquals(ResponseCode.CHANGED, response.getCode());
@@ -144,7 +147,7 @@ public class CaliforniumLwM2mRequestServerTest extends BasicTestSupport {
     public void testSendWriteRequestReturnsChangedResponse() throws Exception {
         WriteRequest request = new WriteRequest(client, "/15/3/1", new LwM2mResource(1, Value.newStringValue("TEST")),
                 ContentFormat.TEXT, true);
-        ifTheClientReturns(newTextContentResponse(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CHANGED, null));
+        ifTheClientReturns(newTextContentResponse(org.eclipse.californium.core.coap.CoAP.ResponseCode.CHANGED, null));
 
         ClientResponse response = requestSender.send(request);
         assertEquals(ResponseCode.CHANGED, response.getCode());
@@ -153,7 +156,7 @@ public class CaliforniumLwM2mRequestServerTest extends BasicTestSupport {
     @Test
     public void testSendCreateRequestReturnsCreatedResponse() throws Exception {
         CreateRequest request = new CreateRequest(client, 15, mock(LwM2mObjectInstance.class), ContentFormat.TLV);
-        ifTheClientReturns(newTextContentResponse(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.CREATED, null));
+        ifTheClientReturns(newTextContentResponse(org.eclipse.californium.core.coap.CoAP.ResponseCode.CREATED, null));
 
         ClientResponse response = requestSender.send(request);
         assertEquals(ResponseCode.CREATED, response.getCode());
@@ -162,7 +165,7 @@ public class CaliforniumLwM2mRequestServerTest extends BasicTestSupport {
     @Test
     public void testSendRequestReturnsNotAuthorized() throws Exception {
         ReadRequest request = new ReadRequest(client, OBJECT_ID_DEVICE);
-        ifTheClientReturns(new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.UNAUTHORIZED));
+        ifTheClientReturns(new Response(org.eclipse.californium.core.coap.CoAP.ResponseCode.UNAUTHORIZED));
 
         ClientResponse response = requestSender.send(request);
         assertEquals(ResponseCode.UNAUTHORIZED, response.getCode());
@@ -171,7 +174,7 @@ public class CaliforniumLwM2mRequestServerTest extends BasicTestSupport {
     @Test
     public void testSendRequestReturnsNotFound() throws Exception {
         ReadRequest request = new ReadRequest(client, OBJECT_ID_DEVICE);
-        ifTheClientReturns(new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.NOT_FOUND));
+        ifTheClientReturns(new Response(org.eclipse.californium.core.coap.CoAP.ResponseCode.NOT_FOUND));
 
         ClientResponse response = requestSender.send(request);
         assertEquals(ResponseCode.NOT_FOUND, response.getCode());
@@ -181,7 +184,7 @@ public class CaliforniumLwM2mRequestServerTest extends BasicTestSupport {
     public void testCreateRequestReturnsMethodNotAllowed() throws Exception {
         CreateRequest request = new CreateRequest(client, OBJECT_ID_DEVICE, mock(LwM2mObjectInstance.class),
                 ContentFormat.TLV);
-        ifTheClientReturns(new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.METHOD_NOT_ALLOWED));
+        ifTheClientReturns(new Response(org.eclipse.californium.core.coap.CoAP.ResponseCode.METHOD_NOT_ALLOWED));
 
         ClientResponse response = requestSender.send(request);
         assertEquals(ResponseCode.METHOD_NOT_ALLOWED, response.getCode());
@@ -206,7 +209,7 @@ public class CaliforniumLwM2mRequestServerTest extends BasicTestSupport {
                }
             }
         };
-        ifTheClientReturns(new Response(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode.DELETED));
+        ifTheClientReturns(new Response(org.eclipse.californium.core.coap.CoAP.ResponseCode.DELETED));
         
         try {
             requestSender.send(rq);
@@ -229,7 +232,7 @@ public class CaliforniumLwM2mRequestServerTest extends BasicTestSupport {
         }).when(coapEndpoint).sendRequest(any(Request.class));
     }
 
-    private Response newTextContentResponse(ch.ethz.inf.vs.californium.coap.CoAP.ResponseCode responseCode,
+    private Response newTextContentResponse(org.eclipse.californium.core.coap.CoAP.ResponseCode responseCode,
             String payload) {
         Response response = new Response(responseCode);
         if (payload != null) {

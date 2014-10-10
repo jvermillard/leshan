@@ -21,11 +21,10 @@ import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.security.cert.Certificate;
 
+import org.eclipse.californium.elements.RawData;
 import org.eclipse.californium.scandium.dtls.AlertMessage.AlertDescription;
 import org.eclipse.californium.scandium.dtls.AlertMessage.AlertLevel;
 import org.eclipse.californium.scandium.dtls.cfg.ClientConnectorConfig;
-
-import ch.ethz.inf.vs.elements.RawData;
 
 /**
  * The resuming client handshaker executes a abbreviated handshake by adding a valid session identifier into its

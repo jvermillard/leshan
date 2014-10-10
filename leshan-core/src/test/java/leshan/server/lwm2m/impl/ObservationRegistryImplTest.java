@@ -35,11 +35,10 @@ import leshan.server.lwm2m.impl.californium.CaliforniumObservation;
 import leshan.server.lwm2m.node.LwM2mPath;
 import leshan.server.lwm2m.observation.Observation;
 
+import org.eclipse.californium.core.coap.Request;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import ch.ethz.inf.vs.californium.coap.Request;
 
 public class ObservationRegistryImplTest extends BasicTestSupport {
 
