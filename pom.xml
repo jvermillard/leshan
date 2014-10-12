@@ -252,8 +252,8 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>ch.ethz.inf.vs</groupId>
-                <artifactId>californium</artifactId>            
+                <groupId>org.eclipse.californium</groupId>
+                <artifactId>californium-core</artifactId>            
                 <version>${californium.version}</version>
             </dependency>
             <dependency>
