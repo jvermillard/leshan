@@ -84,7 +84,7 @@
     </developers>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <californium.version>0.18.7-final</californium.version>
+        <californium.version>1.0.0-M1</californium.version>
     </properties>
 
     <distributionManagement>
