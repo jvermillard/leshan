@@ -52,6 +52,8 @@ import leshan.server.lwm2m.request.ValueResponse;
 import leshan.server.lwm2m.request.WriteAttributesRequest;
 import leshan.server.lwm2m.request.WriteRequest;
 
+import org.apache.commons.lang.Validate;
+import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.core.coap.Response;
@@ -66,6 +68,32 @@ public class CaliforniumLwM2mResponseBuilder<T extends ClientResponse> implement
     private Request coapRequest;
     private Response coapResponse;
     private ObservationRegistry observationRegistry;
+
+    public static ResponseCode fromCoapCode(int code) {
+        Validate.notNull(code);
+
+        if (code == CoAP.ResponseCode.CREATED.value) {
+            return ResponseCode.CREATED;
+        } else if (code == CoAP.ResponseCode.DELETED.value) {
+            return ResponseCode.DELETED;
+        } else if (code == CoAP.ResponseCode.CHANGED.value) {
+            return ResponseCode.CHANGED;
+        } else if (code == CoAP.ResponseCode.CONTENT.value) {
+            return ResponseCode.CONTENT;
+        } else if (code == CoAP.ResponseCode.BAD_REQUEST.value) {
+            return ResponseCode.BAD_REQUEST;
+        } else if (code == CoAP.ResponseCode.UNAUTHORIZED.value) {
+            return ResponseCode.UNAUTHORIZED;
+        } else if (code == CoAP.ResponseCode.NOT_FOUND.value) {
+            return ResponseCode.NOT_FOUND;
+        } else if (code == CoAP.ResponseCode.METHOD_NOT_ALLOWED.value) {
+            return ResponseCode.METHOD_NOT_ALLOWED;
+        } else if (code == 137) {
+            return ResponseCode.CONFLICT;
+        } else {
+            throw new IllegalArgumentException("Invalid CoAP code for LWM2M response: " + code);
+        }
+    }
 
     public CaliforniumLwM2mResponseBuilder(Request coapRequest, Response coapResponse,
             ObservationRegistry observationRegistry) {
@@ -84,7 +112,7 @@ public class CaliforniumLwM2mResponseBuilder<T extends ClientResponse> implement
         case UNAUTHORIZED:
         case NOT_FOUND:
         case METHOD_NOT_ALLOWED:
-            lwM2mresponse = new ValueResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new ValueResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         default:
             handleUnexpectedResponseCode(request.getClient(), coapRequest, coapResponse);
@@ -104,12 +132,12 @@ public class CaliforniumLwM2mResponseBuilder<T extends ClientResponse> implement
             } else {
                 links = LinkObject.parse(coapResponse.getPayload());
             }
-            lwM2mresponse = new DiscoverResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value), links);
+            lwM2mresponse = new DiscoverResponse(fromCoapCode(coapResponse.getCode().value), links);
             break;
         case NOT_FOUND:
         case UNAUTHORIZED:
         case METHOD_NOT_ALLOWED:
-            lwM2mresponse = new DiscoverResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new DiscoverResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         default:
             handleUnexpectedResponseCode(request.getClient(), coapRequest, coapResponse);
@@ -120,13 +148,13 @@ public class CaliforniumLwM2mResponseBuilder<T extends ClientResponse> implement
     public void visit(WriteRequest request) {
         switch (coapResponse.getCode()) {
         case CHANGED:
-            lwM2mresponse = new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         case BAD_REQUEST:
         case NOT_FOUND:
         case UNAUTHORIZED:
         case METHOD_NOT_ALLOWED:
-            lwM2mresponse = new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         default:
             handleUnexpectedResponseCode(request.getClient(), coapRequest, coapResponse);
@@ -137,13 +165,13 @@ public class CaliforniumLwM2mResponseBuilder<T extends ClientResponse> implement
     public void visit(WriteAttributesRequest request) {
         switch (coapResponse.getCode()) {
         case CHANGED:
-            lwM2mresponse = new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         case BAD_REQUEST:
         case NOT_FOUND:
         case UNAUTHORIZED:
         case METHOD_NOT_ALLOWED:
-            lwM2mresponse = new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         default:
             handleUnexpectedResponseCode(request.getClient(), coapRequest, coapResponse);
@@ -154,13 +182,13 @@ public class CaliforniumLwM2mResponseBuilder<T extends ClientResponse> implement
     public void visit(ExecuteRequest request) {
         switch (coapResponse.getCode()) {
         case CHANGED:
-            lwM2mresponse = new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         case BAD_REQUEST:
         case UNAUTHORIZED:
         case NOT_FOUND:
         case METHOD_NOT_ALLOWED:
-            lwM2mresponse = new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         default:
             handleUnexpectedResponseCode(request.getClient(), coapRequest, coapResponse);
@@ -172,13 +200,13 @@ public class CaliforniumLwM2mResponseBuilder<T extends ClientResponse> implement
     public void visit(CreateRequest request) {
         switch (coapResponse.getCode()) {
         case CREATED:
-            lwM2mresponse = new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         case BAD_REQUEST:
         case UNAUTHORIZED:
         case NOT_FOUND:
         case METHOD_NOT_ALLOWED:
-            lwM2mresponse = new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         default:
             handleUnexpectedResponseCode(request.getClient(), coapRequest, coapResponse);
@@ -189,12 +217,12 @@ public class CaliforniumLwM2mResponseBuilder<T extends ClientResponse> implement
     public void visit(DeleteRequest request) {
         switch (coapResponse.getCode()) {
         case DELETED:
-            lwM2mresponse = new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         case UNAUTHORIZED:
         case NOT_FOUND:
         case METHOD_NOT_ALLOWED:
-            lwM2mresponse = new ClientResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         default:
             handleUnexpectedResponseCode(request.getClient(), coapRequest, coapResponse);
@@ -220,7 +248,7 @@ public class CaliforniumLwM2mResponseBuilder<T extends ClientResponse> implement
             break;
         case NOT_FOUND:
         case METHOD_NOT_ALLOWED:
-            lwM2mresponse = new ValueResponse(ResponseCode.fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new ValueResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         default:
             handleUnexpectedResponseCode(request.getClient(), coapRequest, coapResponse);
@@ -255,7 +283,7 @@ public class CaliforniumLwM2mResponseBuilder<T extends ClientResponse> implement
     private void handleUnexpectedResponseCode(Client client, Request coapRequest, Response coapResponse) {
         String msg = String.format("Client [%s] returned unexpected response code [%s]", client.getEndpoint(),
                 coapResponse.getCode());
-        throw new ResourceAccessException(ResponseCode.fromCoapCode(coapResponse.getCode().value),
+        throw new ResourceAccessException(fromCoapCode(coapResponse.getCode().value),
                 coapRequest.getURI(), msg);
     }
 }

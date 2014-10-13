@@ -29,14 +29,10 @@
  */
 package leshan.server.lwm2m.request;
 
-import org.apache.commons.lang.Validate;
-import org.eclipse.californium.core.coap.CoAP;
-
 /**
  * Response codes defined for LWM2M enabler
  */
 public enum ResponseCode {
-
     /** Resource correctly created */
     CREATED,
     /** Resource correctly deleted */
@@ -55,30 +51,4 @@ public enum ResponseCode {
     CONFLICT,
     /** Resource not found */
     NOT_FOUND;
-
-    public static ResponseCode fromCoapCode(int code) {
-        Validate.notNull(code);
-
-        if (code == CoAP.ResponseCode.CREATED.value) {
-            return CREATED;
-        } else if (code == CoAP.ResponseCode.DELETED.value) {
-            return DELETED;
-        } else if (code == CoAP.ResponseCode.CHANGED.value) {
-            return CHANGED;
-        } else if (code == CoAP.ResponseCode.CONTENT.value) {
-            return CONTENT;
-        } else if (code == CoAP.ResponseCode.BAD_REQUEST.value) {
-            return BAD_REQUEST;
-        } else if (code == CoAP.ResponseCode.UNAUTHORIZED.value) {
-            return UNAUTHORIZED;
-        } else if (code == CoAP.ResponseCode.NOT_FOUND.value) {
-            return NOT_FOUND;
-        } else if (code == CoAP.ResponseCode.METHOD_NOT_ALLOWED.value) {
-            return METHOD_NOT_ALLOWED;
-        } else if (code == 137) {
-            return CONFLICT;
-        } else {
-            throw new IllegalArgumentException("Invalid CoAP code for LWM2M response: " + code);
-        }
-    }
 }
