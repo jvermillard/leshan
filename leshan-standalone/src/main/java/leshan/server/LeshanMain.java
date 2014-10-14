@@ -31,7 +31,7 @@ package leshan.server;
 
 import java.net.InetSocketAddress;
 
-import leshan.server.lwm2m.impl.LwM2mServerImpl;
+import leshan.server.lwm2m.LeshanServer;
 import leshan.server.servlet.ClientServlet;
 import leshan.server.servlet.EventServlet;
 import leshan.server.servlet.SecurityServlet;
@@ -47,7 +47,7 @@ public class LeshanMain {
     private static final Logger LOG = LoggerFactory.getLogger(LeshanMain.class);
 
     private Server server;
-    private LwM2mServerImpl lwServer;
+    private LeshanServer lwServer;
 
     public void start() {
         // use those ENV variables for specifying the interface to be bound for coap and coaps
@@ -56,12 +56,12 @@ public class LeshanMain {
 
         // LWM2M server
         if (iface == null || iface.isEmpty() || ifaces == null || ifaces.isEmpty()) {
-            lwServer = new LwM2mServerImpl();
+            lwServer = new LeshanServer();
         } else {
             String[] add = iface.split(":");
             String[] adds = ifaces.split(":");
             // user specified the iface to be bound
-            lwServer = new LwM2mServerImpl(new InetSocketAddress(add[0], Integer.parseInt(add[1])),
+            lwServer = new LeshanServer(new InetSocketAddress(add[0], Integer.parseInt(add[1])),
                     new InetSocketAddress(adds[0], Integer.parseInt(adds[1])));
         }
         lwServer.start();

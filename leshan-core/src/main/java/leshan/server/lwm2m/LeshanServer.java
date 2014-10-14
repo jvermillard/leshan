@@ -27,17 +27,18 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.lwm2m.impl;
+package leshan.server.lwm2m;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.Set;
 
-import leshan.server.lwm2m.LwM2mServer;
 import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.client.ClientRegistryListener;
+import leshan.server.lwm2m.impl.ClientRegistryImpl;
+import leshan.server.lwm2m.impl.ObservationRegistryImpl;
 import leshan.server.lwm2m.impl.californium.CaliforniumLwM2mRequestSender;
 import leshan.server.lwm2m.impl.californium.CaliforniumPskStore;
 import leshan.server.lwm2m.impl.californium.RegisterResource;
@@ -70,11 +71,11 @@ import org.slf4j.LoggerFactory;
  * A {@link RequestHandler} is provided to perform server-initiated requests to LW-M2M clients.
  * </p>
  */
-public class LwM2mServerImpl implements LwM2mServer {
+public class LeshanServer implements LwM2mServer {
 
     private final CoapServer coapServer;
 
-    private static final Logger LOG = LoggerFactory.getLogger(LwM2mServerImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LeshanServer.class);
 
     /** IANA assigned UDP port for CoAP (so for LWM2M) */
     public static final int PORT = 5683;
@@ -93,7 +94,7 @@ public class LwM2mServerImpl implements LwM2mServer {
     /**
      * Initialize a server which will bind to default UDP port for CoAP (5684).
      */
-    public LwM2mServerImpl() {
+    public LeshanServer() {
         this(null, null, null);
     }
 
@@ -103,14 +104,14 @@ public class LwM2mServerImpl implements LwM2mServer {
      * @param localAddress the address to bind the CoAP server.
      * @param localAddressSecure the address to bind the CoAP server for DTLS connection.
      */
-    public LwM2mServerImpl(InetSocketAddress localAddress, InetSocketAddress localAddressSecure) {
+    public LeshanServer(InetSocketAddress localAddress, InetSocketAddress localAddressSecure) {
         this(localAddress, localAddressSecure, null, null, null);
     }
 
     /**
      * Initialize a server which will bind to default UDP port for CoAP (5684).
      */
-    public LwM2mServerImpl(ClientRegistry clientRegistry, SecurityRegistry securityRegistry,
+    public LeshanServer(ClientRegistry clientRegistry, SecurityRegistry securityRegistry,
             ObservationRegistry observationRegistry) {
         this(new InetSocketAddress((InetAddress) null, PORT), new InetSocketAddress((InetAddress) null, PORT_DTLS),
                 clientRegistry, securityRegistry, observationRegistry);
@@ -122,7 +123,7 @@ public class LwM2mServerImpl implements LwM2mServer {
      * @param localAddress the address to bind the CoAP server.
      * @param localAddressSecure the address to bind the CoAP server for DTLS connection.
      */
-    public LwM2mServerImpl(InetSocketAddress localAddress, InetSocketAddress localAddressSecure,
+    public LeshanServer(InetSocketAddress localAddress, InetSocketAddress localAddressSecure,
             ClientRegistry clientRegistry, SecurityRegistry securityRegistry, ObservationRegistry observationRegistry) {
         Validate.notNull(localAddress, "IP address cannot be null");
         Validate.notNull(localAddressSecure, "Secure IP address cannot be null");
@@ -152,7 +153,7 @@ public class LwM2mServerImpl implements LwM2mServer {
 
             @Override
             public void unregistered(Client client) {
-                LwM2mServerImpl.this.observationRegistry.cancelObservations(client);
+                LeshanServer.this.observationRegistry.cancelObservations(client);
             }
 
             @Override
