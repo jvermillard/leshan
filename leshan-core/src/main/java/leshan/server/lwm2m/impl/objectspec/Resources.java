@@ -29,13 +29,21 @@
  */
 package leshan.server.lwm2m.impl.objectspec;
 
-import java.io.File;
-import java.net.URL;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
 
+import leshan.server.lwm2m.impl.objectspec.json.ObjectSpecDeserializer;
+import leshan.server.lwm2m.impl.objectspec.json.ResourceSpecDeserializer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 /**
  * The resource descriptions for registered LWM2M objects (only OMA objects for now).
@@ -55,24 +63,23 @@ public class Resources {
             if (OBJECTS.isEmpty()) {
 
                 // load OMA objects definitions from XML resource files
-                URL omaObjects = Resources.class.getResource("/omaobjects");
-                if (omaObjects == null || omaObjects.getFile() == null) {
+                InputStream input = Resources.class.getResourceAsStream("/objectspec.json");
+                if (input == null) {
                     return;
                 }
 
-                DDFFileParser ddfParser = new DDFFileParser();
-                
-                File[] listFiles = new File(omaObjects.getFile()).listFiles();
-                
-                if (listFiles == null) {
-                    return;
-                }
-                for (File file : listFiles) {
-                    ObjectSpec object = ddfParser.parse(file);
-                    if (object != null) {
-                        LOG.info("Resources descriptions loaded for object {} ({})", object.name, object.id);
-                        OBJECTS.put(object.id, object);
+                GsonBuilder gsonBuilder = new GsonBuilder();
+                gsonBuilder.registerTypeAdapter(ObjectSpec.class, new ObjectSpecDeserializer());
+                gsonBuilder.registerTypeAdapter(ResourceSpec.class, new ResourceSpecDeserializer());
+                Gson gson = gsonBuilder.create();
+
+                try (Reader reader = new InputStreamReader(input)) {
+                    ObjectSpec[] objectSpecs = gson.fromJson(reader, ObjectSpec[].class);
+                    for (ObjectSpec objectSpec : objectSpecs) {
+                        OBJECTS.put(objectSpec.id, objectSpec);
                     }
+                } catch (IOException e) {
+                    LOG.error("Unable to load object specification", e);
                 }
             }
         }
@@ -92,5 +99,4 @@ public class Resources {
         }
         return null;
     }
-
 }

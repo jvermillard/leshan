@@ -27,51 +27,30 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.lwm2m.impl.objectspec;
+package leshan.server.lwm2m.impl.objectspec.json;
 
-/**
- * A resource description
- */
-public class ResourceSpec {
+import java.lang.reflect.Type;
 
-    public enum Operations {
-        NONE, R, W, RW, E, RE, WE, RWE
-    }
+import leshan.server.lwm2m.impl.objectspec.ObjectSpec;
 
-    public enum Type {
-        STRING, INTEGER, FLOAT, BOOLEAN, OPAQUE, TIME
-    }
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
-    public final int id;
-    public final String name;
-    public final Operations operations;
-    public final boolean multiple;
-    public final boolean mandatory;
-    public final Type type;
-    public final String rangeEnumeration;
-    public final String units;
-    public final String description;
-
-    public ResourceSpec(int id, String name, Operations operations, boolean multiple, boolean mandatory, Type type,
-            String rangeEnumeration, String units, String description) {
-        this.id = id;
-        this.name = name;
-        this.operations = operations;
-        this.multiple = multiple;
-        this.mandatory = mandatory;
-        this.type = type;
-        this.rangeEnumeration = rangeEnumeration;
-        this.units = units;
-        this.description = description;
-    }
+public class ObjectSpecSerializer implements JsonSerializer<ObjectSpec> {
 
     @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("ResourceDesc [id=").append(id).append(", name=").append(name).append(", operations=")
-                .append(operations).append(", multiple=").append(multiple).append(", mandatory=").append(mandatory)
-                .append(", type=").append(type).append(", rangeEnumeration=").append(rangeEnumeration)
-                .append(", units=").append(units).append(", description=").append(description).append("]");
-        return builder.toString();
+    public JsonElement serialize(ObjectSpec object, Type typeOfSrc, JsonSerializationContext context) {
+        JsonObject element = new JsonObject();
+
+        element.addProperty("name", object.name);
+        element.addProperty("id", object.id);
+        element.addProperty("instances", object.multiple ? "mutiple" : "single");
+        element.addProperty("mandatory", object.mandatory);
+        element.addProperty("description", object.description);
+        element.add("resourcedefs", context.serialize(object.resources.values()));
+        return element;
     }
+
 }
