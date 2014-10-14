@@ -5,12 +5,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import leshan.client.lwm2m.exchange.LwM2mCreateExchange;
+import leshan.client.lwm2m.exchange.LwM2mCallbackExchange;
 import leshan.client.lwm2m.exchange.LwM2mExchange;
 import leshan.client.lwm2m.exchange.aggregate.AggregatedLwM2mExchange;
 import leshan.client.lwm2m.exchange.aggregate.LwM2mObjectReadResponseAggregator;
 import leshan.client.lwm2m.exchange.aggregate.LwM2mResponseAggregator;
 import leshan.client.lwm2m.response.CreateResponse;
+import leshan.client.lwm2m.response.DeleteResponse;
 import leshan.client.lwm2m.response.ReadResponse;
 import leshan.client.lwm2m.response.WriteResponse;
 
@@ -32,13 +33,13 @@ public class LwM2mClientObject extends LwM2mClientNode {
 		return instance;
 	}
 
-	public void createInstance(final LwM2mCreateExchange exchange) {
+	public void createInstance(final LwM2mCallbackExchange<LwM2mClientObjectInstance> exchange) {
 		if(instanceCounter.get() >= 1 && definition.isSingle()) {
 			exchange.respond(CreateResponse.invalidResource());
 		}
 
 		final LwM2mClientObjectInstance instance = createNewInstance(exchange.hasObjectInstanceId(), exchange.getObjectInstanceId());
-		exchange.setObjectInstance(instance);
+		exchange.setNode(instance);
 		instance.createInstance(exchange);
 	}
 
@@ -66,7 +67,7 @@ public class LwM2mClientObject extends LwM2mClientNode {
 
 	private LwM2mClientObjectInstance createNewInstance(boolean hasObjectInstanceId, int objectInstanceId) {
 		final int newInstanceId = getNewInstanceId(hasObjectInstanceId, objectInstanceId);
-		final LwM2mClientObjectInstance instance = new LwM2mClientObjectInstance(newInstanceId, definition);
+		final LwM2mClientObjectInstance instance = new LwM2mClientObjectInstance(newInstanceId, this, definition);
 		return instance;
 	}
 
@@ -80,6 +81,11 @@ public class LwM2mClientObject extends LwM2mClientNode {
 		} else {
 			return instanceCounter.getAndIncrement();
 		}
+	}
+
+	public void delete(LwM2mExchange exchange, int id) {
+		instances.remove(id);
+		exchange.respond(DeleteResponse.success());
 	}
 
 }

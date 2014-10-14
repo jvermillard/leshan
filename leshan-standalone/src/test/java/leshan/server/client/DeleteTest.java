@@ -1,5 +1,7 @@
 package leshan.server.client;
 
+import leshan.server.lwm2m.node.LwM2mObject;
+import leshan.server.lwm2m.node.LwM2mObjectInstance;
 import leshan.server.lwm2m.request.ClientResponse;
 import leshan.server.lwm2m.request.ResponseCode;
 
@@ -21,6 +23,16 @@ public class DeleteTest extends LwM2mClientServerIntegrationTest {
 		createAndThenAssertDeleted();
 
 		assertEmptyResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.NOT_FOUND);
+	}
+
+	@Test
+	public void deleteAndReadObjectIsEmpty(){
+		register();
+
+		createAndThenAssertDeleted();
+
+		assertResponse(sendRead(GOOD_OBJECT_ID), ResponseCode.CONTENT,
+				new LwM2mObject(GOOD_OBJECT_ID, new LwM2mObjectInstance[0]));
 	}
 
 	@Test

@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import leshan.client.lwm2m.exchange.LwM2mCreateExchange;
 import leshan.client.lwm2m.exchange.LwM2mExchange;
 import leshan.client.lwm2m.exchange.aggregate.AggregatedLwM2mExchange;
 import leshan.client.lwm2m.exchange.aggregate.LwM2mObjectInstanceCreateResponseAggregator;
@@ -20,11 +19,13 @@ public class LwM2mClientObjectInstance extends LwM2mClientNode {
 	private final LwM2mClientObjectDefinition definition;
 	private final Map<Integer, LwM2mClientResource> resources;
 	private final int id;
+	private final LwM2mClientObject parent;
 
-	public LwM2mClientObjectInstance(final int id, final LwM2mClientObjectDefinition definition) {
+	public LwM2mClientObjectInstance(final int id, final LwM2mClientObject parent, final LwM2mClientObjectDefinition definition) {
 		this.id = id;
 		this.resources = new HashMap<>();
 		this.definition = definition;
+		this.parent = parent;
 	}
 
 	public int getId() {
@@ -37,7 +38,7 @@ public class LwM2mClientObjectInstance extends LwM2mClientNode {
 		}
 	}
 
-	public void createInstance(final LwM2mCreateExchange exchange) {
+	public void createInstance(final LwM2mExchange exchange) {
 		final byte[] payload = exchange.getRequestPayload();
 		final Tlv[] tlvs = TlvDecoder.decode(ByteBuffer.wrap(payload));
 
@@ -83,6 +84,10 @@ public class LwM2mClientObjectInstance extends LwM2mClientNode {
 
 	public Map<Integer, LwM2mClientResource> getAllResources() {
 		return new HashMap<>(resources);
+	}
+
+	public void delete(LwM2mExchange exchange) {
+		parent.delete(exchange, id);
 	}
 
 }

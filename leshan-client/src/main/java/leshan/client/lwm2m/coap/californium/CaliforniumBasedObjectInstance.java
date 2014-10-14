@@ -3,6 +3,7 @@ package leshan.client.lwm2m.coap.californium;
 import java.util.Map.Entry;
 
 import leshan.client.lwm2m.resource.LinkFormattable;
+import leshan.client.lwm2m.resource.LwM2mClientObject;
 import leshan.client.lwm2m.resource.LwM2mClientObjectInstance;
 import leshan.client.lwm2m.resource.LwM2mClientResource;
 
@@ -24,7 +25,18 @@ public class CaliforniumBasedObjectInstance extends CaliforniumBasedLwM2mNode<Lw
 
 	@Override
 	public void handleDELETE(final CoapExchange exchange) {
-		getParent().remove(this);
+		node.delete(new CaliforniumBasedLwM2mCallbackExchange<LwM2mClientObject>(exchange, new Callback<LwM2mClientObject>() {
+
+			@Override
+			public void onSuccess(LwM2mClientObject object) {
+				getParent().remove(CaliforniumBasedObjectInstance.this);
+			}
+
+			@Override
+			public void onFailure() {
+			}
+
+		}));
 
 		exchange.respond(ResponseCode.DELETED);
 	}

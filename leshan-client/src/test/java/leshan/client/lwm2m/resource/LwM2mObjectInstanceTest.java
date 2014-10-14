@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import leshan.client.lwm2m.exchange.LwM2mCreateExchange;
+import leshan.client.lwm2m.exchange.LwM2mCallbackExchange;
 import leshan.client.lwm2m.exchange.LwM2mExchange;
 import leshan.client.lwm2m.resource.multiple.MultipleLwM2mExchange;
 import leshan.client.lwm2m.resource.multiple.MultipleLwM2mResource;
@@ -85,8 +85,9 @@ public class LwM2mObjectInstanceTest {
 	}
 
 	private LwM2mClientObjectInstance createInstance(LwM2mClientObjectDefinition definition, byte[] payload) {
-		LwM2mClientObjectInstance instance = new LwM2mClientObjectInstance(0, definition);
-		LwM2mCreateExchange createExchange = mock(LwM2mCreateExchange.class);
+		LwM2mClientObject obj = mock(LwM2mClientObject.class);
+		LwM2mClientObjectInstance instance = new LwM2mClientObjectInstance(0, obj, definition);
+		LwM2mCallbackExchange<LwM2mClientObjectInstance> createExchange = mock(LwM2mCallbackExchange.class);
 		when(createExchange.getRequestPayload()).thenReturn(payload);
 		instance.createInstance(createExchange);
 		return instance;

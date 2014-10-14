@@ -25,7 +25,7 @@ public class CaliforniumBasedObject extends CaliforniumBasedLwM2mNode<LwM2mClien
 
 	@Override
 	public void handlePOST(final CoapExchange exchange) {
-		node.createInstance(new CaliforniumBasedLwM2mCreateExchange(exchange, getCreateCallback()));
+		node.createInstance(new CaliforniumBasedLwM2mCallbackExchange<LwM2mClientObjectInstance>(exchange, getCreateCallback()));
 	}
 
 	private Callback<LwM2mClientObjectInstance> getCreateCallback() {
