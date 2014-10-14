@@ -35,6 +35,7 @@ import java.net.InetSocketAddress;
 import leshan.server.lwm2m.bootstrap.BootstrapStore;
 import leshan.server.lwm2m.bootstrap.LwM2mBootstrapServer;
 import leshan.server.lwm2m.impl.californium.BootstrapResource;
+import leshan.server.lwm2m.impl.californium.CaliforniumPskStore;
 import leshan.server.lwm2m.impl.security.SecureEndpoint;
 import leshan.server.lwm2m.security.SecurityStore;
 
@@ -84,7 +85,7 @@ public class LwM2mBootstrapServerImpl implements LwM2mBootstrapServer {
 
         // init DTLS server
         DTLSConnector connector = new DTLSConnector(localAddressSecure, null);
-        connector.getConfig().setPskStore(securityStore);
+        connector.getConfig().setPskStore(new CaliforniumPskStore(this.securityStore));
 
         Endpoint secureEndpoint = new SecureEndpoint(connector);
         coapServer.addEndpoint(secureEndpoint);

@@ -39,6 +39,7 @@ import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.client.ClientRegistryListener;
 import leshan.server.lwm2m.impl.californium.CaliforniumLwM2mRequestSender;
+import leshan.server.lwm2m.impl.californium.CaliforniumPskStore;
 import leshan.server.lwm2m.impl.californium.RegisterResource;
 import leshan.server.lwm2m.impl.objectspec.Resources;
 import leshan.server.lwm2m.impl.security.SecureEndpoint;
@@ -138,7 +139,7 @@ public class LwM2mServerImpl implements LwM2mServer {
             this.observationRegistry = observationRegistry;
 
         if (securityRegistry == null)
-            this.securityRegistry = new SecurityRegistryImpl(this.clientRegistry);
+            this.securityRegistry = new SecurityRegistryImpl();
         else
             this.securityRegistry = securityRegistry;
 
@@ -166,7 +167,7 @@ public class LwM2mServerImpl implements LwM2mServer {
 
         // init DTLS server
         DTLSConnector connector = new DTLSConnector(localAddressSecure, null);
-        connector.getConfig().setPskStore(this.securityRegistry);
+        connector.getConfig().setPskStore(new CaliforniumPskStore(this.securityRegistry, this.clientRegistry));
 
         Endpoint secureEndpoint = new SecureEndpoint(connector);
         coapServer.addEndpoint(secureEndpoint);

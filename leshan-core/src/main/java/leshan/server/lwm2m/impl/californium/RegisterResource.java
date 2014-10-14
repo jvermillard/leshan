@@ -134,7 +134,7 @@ public class RegisterResource extends CoapResource {
                 }
 
                 // do we have security information for this client?
-                SecurityInfo securityInfo = securityStore.get(endpoint);
+                SecurityInfo securityInfo = securityStore.getByEndpoint(endpoint);
 
                 // which end point did the client post this request to?
                 InetSocketAddress registrationEndpoint = exchange.advanced().getEndpoint().getAddress();

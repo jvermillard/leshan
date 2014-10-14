@@ -34,15 +34,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.InetSocketAddress;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import leshan.server.lwm2m.client.Client;
-import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.security.NonUniqueSecurityInfoException;
 import leshan.server.lwm2m.security.SecurityInfo;
 import leshan.server.lwm2m.security.SecurityRegistry;
@@ -75,38 +71,34 @@ public class SecurityRegistryImpl implements SecurityRegistry {
     // default location for persistence
     private static final String DEFAULT_FILE = "data/security.data";
 
-    private ClientRegistry clientRegistry;
-
     public SecurityRegistryImpl() {
         this(DEFAULT_FILE);
-    }
-
-    public SecurityRegistryImpl(ClientRegistry clientRegistry) {
-        this(DEFAULT_FILE, clientRegistry);
     }
 
     /**
      * @param file the file path to persist the registry
      */
     public SecurityRegistryImpl(String file) {
-        this(file, null);
-    }
-
-    public SecurityRegistryImpl(String file, ClientRegistry clientRegistry) {
         Validate.notEmpty(file);
 
         this.filename = file;
         this.loadFromFile();
-
-        this.clientRegistry = clientRegistry;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public SecurityInfo get(String endpoint) {
+    public SecurityInfo getByEndpoint(String endpoint) {
         return securityByEp.get(endpoint);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public SecurityInfo getByIdentity(String identity) {
+        return securityByIdentity.get(identity);
     }
 
     @Override
@@ -147,36 +139,6 @@ public class SecurityRegistryImpl implements SecurityRegistry {
             this.saveToFile();
         }
         return info;
-    }
-
-    // /////// PSK store
-
-    @Override
-    public byte[] getKey(String identity) {
-        SecurityInfo info = securityByIdentity.get(identity);
-        if (info == null || info.getPreSharedKey() == null) {
-            return null;
-        } else {
-            // defensive copy
-            return Arrays.copyOf(info.getPreSharedKey(), info.getPreSharedKey().length);
-        }
-    }
-
-    @Override
-    public String getIdentity(InetSocketAddress inetAddress) {
-        if (clientRegistry == null)
-            return null;
-
-        for (Client c : clientRegistry.allClients()) {
-            if (inetAddress.getPort() == c.getPort() && inetAddress.getAddress().equals(c.getAddress())) {
-                SecurityInfo securityInfo = get(c.getEndpoint());
-                if (securityInfo != null) {
-                    return securityInfo.getIdentity();
-                }
-                return null;
-            }
-        }
-        return null;
     }
 
     // /////// File persistence

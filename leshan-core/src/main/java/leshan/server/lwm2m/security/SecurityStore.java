@@ -29,12 +29,10 @@
  */
 package leshan.server.lwm2m.security;
 
-import org.eclipse.californium.scandium.dtls.pskstore.PskStore;
-
 /**
  * A store for {@link SecurityInfo}.
  */
-public interface SecurityStore extends PskStore {
+public interface SecurityStore {
 
     /**
      * Returns the security information for a given end-point.
@@ -42,6 +40,14 @@ public interface SecurityStore extends PskStore {
      * @param endpoint the client end-point
      * @return the security information of <code>null</code> if not found.
      */
-    SecurityInfo get(String endpoint);
+    SecurityInfo getByEndpoint(String endpoint);
+
+    /**
+     * Returns the security information for a identity.
+     * 
+     * @param identity of the client
+     * @return the security information of <code>null</code> if not found.
+     */
+    SecurityInfo getByIdentity(String Identity);
 
 }

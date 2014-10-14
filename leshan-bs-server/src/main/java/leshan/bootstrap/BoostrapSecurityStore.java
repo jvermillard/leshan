@@ -1,6 +1,5 @@
 package leshan.bootstrap;
 
-import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -24,13 +23,13 @@ public class BoostrapSecurityStore implements SecurityStore {
     }
 
     @Override
-    public byte[] getKey(String identity) {
+    public SecurityInfo getByIdentity(String identity) {
         byte[] identityBytes = identity.getBytes(Charsets.UTF_8);
         for (Map.Entry<String, BootstrapConfig> e : bsStore.getBootstrapConfigs().entrySet()) {
             for (Map.Entry<Integer, BootstrapConfig.ServerSecurity> ec : e.getValue().security.entrySet()) {
                 if (ec.getValue().bootstrapServer && ec.getValue().securityMode == SecurityMode.PSK
                         && Arrays.equals(ec.getValue().publicKeyOrId, identityBytes)) {
-                    return ec.getValue().secretKey;
+                    return SecurityInfo.newPreSharedKeyInfo(e.getKey(), identity, ec.getValue().secretKey);
                 }
             }
         }
@@ -38,13 +37,7 @@ public class BoostrapSecurityStore implements SecurityStore {
     }
 
     @Override
-    public String getIdentity(InetSocketAddress inetAddress) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-    
-    @Override
-    public SecurityInfo get(String endpoint) {
+    public SecurityInfo getByEndpoint(String endpoint) {
         BootstrapConfig bootstrap = bsStore.getBootstrap(endpoint);
 
         for (Map.Entry<Integer, BootstrapConfig.ServerSecurity> e : bootstrap.security.entrySet()) {
