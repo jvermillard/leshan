@@ -33,6 +33,7 @@ import java.lang.reflect.Type;
 
 import leshan.server.lwm2m.LeshanServer;
 import leshan.server.lwm2m.client.Client;
+import leshan.server.lwm2m.impl.bridge.server.CoapServerImplementor;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -55,7 +56,7 @@ public class ClientSerializer implements JsonSerializer<Client> {
         element.addProperty("bindingMode", src.getBindingMode().toString());
         element.add("objectLinks", context.serialize(src.getObjectLinks()));
         element.add("secure",
-                context.serialize(src.getRegistrationEndpointAddress().getPort() == LeshanServer.PORT_DTLS));
+                context.serialize(src.getRegistrationEndpointAddress().getPort() == CoapServerImplementor.PORT_DTLS));
 
         return element;
     }

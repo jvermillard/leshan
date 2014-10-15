@@ -29,6 +29,8 @@
  */
 package leshan.server.lwm2m.request;
 
+import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
+
 /**
  * An exception indicating a problem while accessing a resource on a LWM2M Client.
  */

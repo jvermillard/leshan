@@ -39,8 +39,8 @@ import leshan.server.lwm2m.node.LwM2mNode;
 import leshan.server.lwm2m.node.LwM2mPath;
 import leshan.server.lwm2m.observation.Observation;
 import leshan.server.lwm2m.observation.ObservationListener;
+import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
 import leshan.server.lwm2m.request.ContentFormat;
-import leshan.server.lwm2m.request.ResponseCode;
 import leshan.server.lwm2m.request.ValueResponse;
 
 import org.apache.commons.lang.Validate;

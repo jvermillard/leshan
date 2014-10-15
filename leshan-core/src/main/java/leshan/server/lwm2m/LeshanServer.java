@@ -29,21 +29,13 @@
  */
 package leshan.server.lwm2m;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.util.HashSet;
-import java.util.Set;
-
 import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.client.ClientRegistryListener;
 import leshan.server.lwm2m.impl.ClientRegistryImpl;
 import leshan.server.lwm2m.impl.ObservationRegistryImpl;
-import leshan.server.lwm2m.impl.californium.CaliforniumLwM2mRequestSender;
-import leshan.server.lwm2m.impl.californium.CaliforniumPskStore;
-import leshan.server.lwm2m.impl.californium.RegisterResource;
+import leshan.server.lwm2m.impl.bridge.server.CoapServerImplementor;
 import leshan.server.lwm2m.impl.objectspec.Resources;
-import leshan.server.lwm2m.impl.security.SecureEndpoint;
 import leshan.server.lwm2m.impl.security.SecurityRegistryImpl;
 import leshan.server.lwm2m.observation.ObservationRegistry;
 import leshan.server.lwm2m.request.ClientResponse;
@@ -53,11 +45,6 @@ import leshan.server.lwm2m.request.LwM2mRequestSender;
 import leshan.server.lwm2m.request.ResponseConsumer;
 import leshan.server.lwm2m.security.SecurityRegistry;
 
-import org.apache.commons.lang.Validate;
-import org.eclipse.californium.core.CoapServer;
-import org.eclipse.californium.core.network.CoAPEndpoint;
-import org.eclipse.californium.core.network.Endpoint;
-import org.eclipse.californium.scandium.DTLSConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,15 +60,9 @@ import org.slf4j.LoggerFactory;
  */
 public class LeshanServer implements LwM2mServer {
 
-    private final CoapServer coapServer;
-
     private static final Logger LOG = LoggerFactory.getLogger(LeshanServer.class);
 
-    /** IANA assigned UDP port for CoAP (so for LWM2M) */
-    public static final int PORT = 5683;
-
-    /** IANA assigned UDP port for CoAP with DTLS (so for LWM2M) */
-    public static final int PORT_DTLS = 5684;
+	private final CoapServerImplementor coapServerImplementor;
 
     private final LwM2mRequestSender requestSender;
 
@@ -94,8 +75,8 @@ public class LeshanServer implements LwM2mServer {
     /**
      * Initialize a server which will bind to default UDP port for CoAP (5684).
      */
-    public LeshanServer() {
-        this(null, null, null);
+    public LeshanServer(CoapServerImplementor coapServerImplementor) {
+        this(coapServerImplementor, null, null, null);
     }
 
     /**
@@ -104,30 +85,8 @@ public class LeshanServer implements LwM2mServer {
      * @param localAddress the address to bind the CoAP server.
      * @param localAddressSecure the address to bind the CoAP server for DTLS connection.
      */
-    public LeshanServer(InetSocketAddress localAddress, InetSocketAddress localAddressSecure) {
-        this(localAddress, localAddressSecure, null, null, null);
-    }
-
-    /**
-     * Initialize a server which will bind to default UDP port for CoAP (5684).
-     */
-    public LeshanServer(ClientRegistry clientRegistry, SecurityRegistry securityRegistry,
-            ObservationRegistry observationRegistry) {
-        this(new InetSocketAddress((InetAddress) null, PORT), new InetSocketAddress((InetAddress) null, PORT_DTLS),
-                clientRegistry, securityRegistry, observationRegistry);
-    }
-
-    /**
-     * Initialize a server which will bind to the specified address and port.
-     * 
-     * @param localAddress the address to bind the CoAP server.
-     * @param localAddressSecure the address to bind the CoAP server for DTLS connection.
-     */
-    public LeshanServer(InetSocketAddress localAddress, InetSocketAddress localAddressSecure,
-            ClientRegistry clientRegistry, SecurityRegistry securityRegistry, ObservationRegistry observationRegistry) {
-        Validate.notNull(localAddress, "IP address cannot be null");
-        Validate.notNull(localAddressSecure, "Secure IP address cannot be null");
-
+    public LeshanServer(CoapServerImplementor coapServerImplementor, ClientRegistry clientRegistry, SecurityRegistry securityRegistry, ObservationRegistry observationRegistry) {
+    	this.coapServerImplementor = coapServerImplementor;
         // init registry
         if (clientRegistry == null)
             this.clientRegistry = new ClientRegistryImpl();
@@ -162,26 +121,14 @@ public class LeshanServer implements LwM2mServer {
         });
 
         // init CoAP server
-        coapServer = new CoapServer();
-        Endpoint endpoint = new CoAPEndpoint(localAddress);
-        coapServer.addEndpoint(endpoint);
-
-        // init DTLS server
-        DTLSConnector connector = new DTLSConnector(localAddressSecure, null);
-        connector.getConfig().setPskStore(new CaliforniumPskStore(this.securityRegistry, this.clientRegistry));
-
-        Endpoint secureEndpoint = new SecureEndpoint(connector);
-        coapServer.addEndpoint(secureEndpoint);
+        coapServerImplementor.createCoAPServer(clientRegistry, observationRegistry, securityRegistry);
+        coapServerImplementor.bindEndpoints();
 
         // define /rd resource
-        RegisterResource rdResource = new RegisterResource(this.clientRegistry, this.securityRegistry);
-        coapServer.add(rdResource);
+        coapServerImplementor.bindResource();
 
         // create sender
-        Set<Endpoint> endpoints = new HashSet<>();
-        endpoints.add(endpoint);
-        endpoints.add(secureEndpoint);
-        requestSender = new CaliforniumLwM2mRequestSender(endpoints, this.observationRegistry);
+        requestSender = coapServerImplementor.getLWM2MRequestSender();
     }
 
     /**
@@ -191,7 +138,7 @@ public class LeshanServer implements LwM2mServer {
         // load resource definitions
         Resources.load();
 
-        coapServer.start();
+        coapServerImplementor.start();
         LOG.info("LW-M2M server started");
 
         // start client registry
@@ -203,7 +150,7 @@ public class LeshanServer implements LwM2mServer {
      * Stops the server and unbinds it from assigned ports (can be restarted).
      */
     public void stop() {
-        coapServer.stop();
+    	coapServerImplementor.stop();
 
         if (clientRegistry instanceof ClientRegistryImpl) {
             try {
@@ -218,7 +165,7 @@ public class LeshanServer implements LwM2mServer {
      * Stops the server and unbinds it from assigned ports.
      */
     public void destroy() {
-        coapServer.destroy();
+    	coapServerImplementor.destroy();
 
         if (clientRegistry instanceof ClientRegistryImpl) {
             try {

@@ -32,6 +32,8 @@ package leshan.server;
 import java.net.InetSocketAddress;
 
 import leshan.server.lwm2m.LeshanServer;
+import leshan.server.lwm2m.impl.bridge.server.CoapServerImplementor;
+import leshan.server.lwm2m.impl.californium.CaliforniumServerImplementor;
 import leshan.server.servlet.ClientServlet;
 import leshan.server.servlet.EventServlet;
 import leshan.server.servlet.SecurityServlet;
@@ -55,15 +57,17 @@ public class LeshanMain {
         String ifaces = System.getenv("COAPSIFACE");
 
         // LWM2M server
+        CoapServerImplementor serverImplementation;
         if (iface == null || iface.isEmpty() || ifaces == null || ifaces.isEmpty()) {
-            lwServer = new LeshanServer();
+        	serverImplementation = new CaliforniumServerImplementor();
         } else {
             String[] add = iface.split(":");
             String[] adds = ifaces.split(":");
             // user specified the iface to be bound
-            lwServer = new LeshanServer(new InetSocketAddress(add[0], Integer.parseInt(add[1])),
-                    new InetSocketAddress(adds[0], Integer.parseInt(adds[1])));
+            serverImplementation = new CaliforniumServerImplementor(new InetSocketAddress(add[0], Integer.parseInt(add[1])),
+	 				new InetSocketAddress(adds[0], Integer.parseInt(adds[1])));
         }
+        lwServer = new LeshanServer(serverImplementation);
         lwServer.start();
 
         // now prepare and start jetty

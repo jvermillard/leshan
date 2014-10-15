@@ -29,6 +29,8 @@
  */
 package leshan.server.lwm2m.request;
 
+import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
+
 import org.apache.commons.lang.Validate;
 
 /**
