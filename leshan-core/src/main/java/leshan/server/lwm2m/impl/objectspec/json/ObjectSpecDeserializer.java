@@ -59,7 +59,7 @@ public class ObjectSpecDeserializer implements JsonDeserializer<ObjectSpec> {
 
         int id = jsonObject.get("id").getAsInt();
         String name = jsonObject.get("name").getAsString();
-        String instances = jsonObject.get("instances").getAsString();
+        String instancetype = jsonObject.get("instancetype").getAsString();
         boolean mandatory = jsonObject.get("mandatory").getAsBoolean();
         String description = jsonObject.get("description").getAsString();
         ResourceSpec[] resourceSpecs = context.deserialize(jsonObject.get("resourcedefs"), ResourceSpec[].class);
@@ -68,6 +68,6 @@ public class ObjectSpecDeserializer implements JsonDeserializer<ObjectSpec> {
             resources.put(resourceSpec.id, resourceSpec);
         }
 
-        return new ObjectSpec(id, name, description, "multiple".equals(instances), mandatory, resources);
+        return new ObjectSpec(id, name, description, "multiple".equals(instancetype), mandatory, resources);
     }
 }

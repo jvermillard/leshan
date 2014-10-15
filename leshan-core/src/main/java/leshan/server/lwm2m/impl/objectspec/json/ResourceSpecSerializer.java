@@ -47,7 +47,7 @@ public class ResourceSpecSerializer implements JsonSerializer<ResourceSpec> {
         element.addProperty("id", resource.id);
         element.addProperty("name", resource.name);
         element.addProperty("operations", resource.operations.toString());
-        element.addProperty("instances", resource.multiple ? "mutiple" : "single");
+        element.addProperty("instancetype", resource.multiple ? "mutiple" : "single");
         element.addProperty("mandatory", resource.mandatory);
         element.addProperty("type", resource.type.toString().toLowerCase());
         element.addProperty("range", resource.rangeEnumeration);

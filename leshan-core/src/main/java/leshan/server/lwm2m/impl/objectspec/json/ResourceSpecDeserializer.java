@@ -57,14 +57,14 @@ public class ResourceSpecDeserializer implements JsonDeserializer<ResourceSpec> 
         int id = jsonObject.get("id").getAsInt();
         String name = jsonObject.get("name").getAsString();
         Operations operations = Operations.valueOf(jsonObject.get("operations").getAsString());
-        String instances = jsonObject.get("instances").getAsString();
+        String instancetype = jsonObject.get("instancetype").getAsString();
         boolean mandatory = jsonObject.get("mandatory").getAsBoolean();
         Type type = Type.valueOf(jsonObject.get("type").getAsString().toUpperCase());
         String range = jsonObject.get("range").getAsString();
         String units = jsonObject.get("units").getAsString();
         String description = jsonObject.get("description").getAsString();
 
-        return new ResourceSpec(id, name, operations, "multiple".equals(instances), mandatory, type, range, units,
+        return new ResourceSpec(id, name, operations, "multiple".equals(instancetype), mandatory, type, range, units,
                 description);
     }
 }

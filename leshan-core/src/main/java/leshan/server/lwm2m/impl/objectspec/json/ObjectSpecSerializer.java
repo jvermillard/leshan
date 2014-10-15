@@ -46,7 +46,7 @@ public class ObjectSpecSerializer implements JsonSerializer<ObjectSpec> {
 
         element.addProperty("name", object.name);
         element.addProperty("id", object.id);
-        element.addProperty("instances", object.multiple ? "mutiple" : "single");
+        element.addProperty("instancetype", object.multiple ? "mutiple" : "single");
         element.addProperty("mandatory", object.mandatory);
         element.addProperty("description", object.description);
         element.add("resourcedefs", context.serialize(object.resources.values()));
