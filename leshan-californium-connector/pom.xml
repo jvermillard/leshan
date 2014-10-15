@@ -36,129 +36,111 @@
         <artifactId>leshan-server</artifactId>
         <version>0.1.8-SNAPSHOT</version>
     </parent>
-    <artifactId>leshan-standalone</artifactId>
-    <name>leshan - standalone server</name>
-    <description>A LWM2M server running an embedded Jetty server</description>
+    <artifactId>leshan-californium-connector</artifactId>
+    <packaging>bundle</packaging>
+    <name>leshan - californium - connector</name>
+    <description>a leshan connector to californium</description>
 
     <properties>
         <internal.repo.path>file://${basedir}/../../leshan-repo</internal.repo.path>
     </properties>
 
     <dependencies>
-
         <dependency>
             <groupId>org.github.leshan</groupId>
             <artifactId>leshan-core</artifactId>
             <version>${project.version}</version>
             <type>jar</type>
         </dependency>
-        
         <dependency>
-            <groupId>org.github.leshan</groupId>
-            <artifactId>leshan-californium-connector</artifactId>
-            <version>${project.version}</version>
-            <type>jar</type>
+            <groupId>org.eclipse.californium</groupId>
+            <artifactId>californium-core</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
+            <groupId>org.eclipse.californium</groupId>
+            <artifactId>scandium</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-webapp</artifactId>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-continuation</artifactId>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-        </dependency>
-
-       <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-
-        <!-- test dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
-    
+
     <build>
+        <testResources>
+            <testResource>
+                <directory>src/main/resources</directory>
+            </testResource>
+            <testResource>
+                <directory>src/test/resources</directory>
+            </testResource>
+        </testResources>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.4</version>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.3.7</version>
+                <extensions>true</extensions>
                 <configuration>
-                    <archive>
-                        <manifest>
-                            <mainClass>leshan.server.LeshanMain</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
-                <executions>
-                  <execution>
-                    <id>make-assembly</id> <!-- this is used for inheritance merges -->
-                    <phase>package</phase> <!-- bind to the packaging phase -->
-                    <goals>
-                      <goal>single</goal>
-                    </goals>
-                  </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>com.google.code.maven-replacer-plugin</groupId>
-                <artifactId>replacer</artifactId>
-                <version>1.5.3</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>replace</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <file>${project.build.directory}/classes/webapp/index.html</file>
-                    <replacements>
-                        <replacement>
-                            <token>@commit-id@</token>
-                            <value>${buildNumber}</value>
-                        </replacement>
-                        <replacement>
-                            <token>@version@</token>
-                            <value>${project.version}</value>
-                        </replacement>
-                    </replacements>
+                    <instructions>
+                        <Export-Package>
+                            leshan.server.lwm2m,
+                            leshan.server.lwm2m.bootstrap,
+                            leshan.server.lwm2m.client,
+                            leshan.server.lwm2m.impl,
+                            leshan.server.lwm2m.impl.californium,
+                            leshan.server.lwm2m.impl.node,
+                            leshan.server.lwm2m.impl.objectspec,
+                            leshan.server.lwm2m.impl.security,
+                            leshan.server.lwm2m.impl.tlv,
+                            leshan.server.lwm2m.node,
+                            leshan.server.lwm2m.observation,
+                            leshan.server.lwm2m.request,
+                            leshan.server.lwm2m.security,
+                        </Export-Package>
+                        <Import-Package>
+                            org.eclipse.californium.*;version="[1.0.0, 1.1)",
+                            org.apache.commons.lang.*;version="[2.6, 3)",
+                            *
+                        </Import-Package>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                    </instructions>
                 </configuration>
             </plugin>
         </plugins>

@@ -53,6 +53,7 @@
         <module>leshan-core</module>
         <module>leshan-standalone</module>
         <module>leshan-bs-server</module>
+        <module>leshan-californium-connector</module>
     </modules>
 
     <scm>

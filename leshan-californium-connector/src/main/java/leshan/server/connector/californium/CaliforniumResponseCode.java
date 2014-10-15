@@ -1,4 +1,4 @@
-package leshan.server.lwm2m.impl.californium;
+package leshan.server.connector.californium;
 
 import org.apache.commons.lang.Validate;
 import org.eclipse.californium.core.coap.CoAP;

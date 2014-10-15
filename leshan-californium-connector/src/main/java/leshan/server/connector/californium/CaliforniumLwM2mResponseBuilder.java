@@ -27,7 +27,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.lwm2m.impl.californium;
+package leshan.server.connector.californium;
 
 import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.LinkObject;

@@ -1,4 +1,4 @@
-package leshan.server.lwm2m.impl.californium;
+package leshan.server.connector.californium;
 
 import java.net.InetSocketAddress;
 import java.util.HashSet;
