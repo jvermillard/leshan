@@ -214,7 +214,6 @@ var getTypedValue = function(strValue, type) {
     if(type != undefined) {
         switch(type) {
             case "integer":
-            case "time":
                 val = parseInt(strValue);
                 break;
             case "float":

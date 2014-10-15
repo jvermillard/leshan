@@ -57,6 +57,8 @@ import org.apache.commons.io.Charsets;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -266,6 +268,15 @@ public class LwM2mNodeEncoder {
                 LOG.debug("Trying to convert long value {} to date", value.value);
                 // let's assume we received the millisecond since 1970/1/1
                 return Value.newDateValue(new Date((Long) value.value));
+            } else if (value.type == DataType.STRING) {
+                LOG.debug("Trying to convert string value {} to date", value.value);
+                // let's assume we received an ISO 8601 format date
+                DateTimeFormatter parser = ISODateTimeFormat.dateTimeParser();
+                try {
+                    return Value.newDateValue(parser.parseDateTime((String) value.value).toDate());
+                } catch (IllegalArgumentException e) {
+                    LOG.debug("Unable to convert string to date", e);
+                }
             }
             break;
 
