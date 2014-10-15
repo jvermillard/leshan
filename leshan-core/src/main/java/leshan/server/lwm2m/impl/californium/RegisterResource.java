@@ -32,6 +32,8 @@ package leshan.server.lwm2m.impl.californium;
 import java.net.InetSocketAddress;
 import java.util.List;
 
+import javax.annotation.Resource;
+
 import leshan.server.lwm2m.client.BindingMode;
 import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.ClientRegistrationException;
@@ -39,16 +41,14 @@ import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.client.ClientUpdate;
 import leshan.server.lwm2m.client.LinkObject;
 import leshan.server.lwm2m.impl.security.SecureEndpoint;
+import leshan.server.lwm2m.request.ResponseCode;
+import leshan.server.lwm2m.resource.CoapResource;
+import leshan.server.lwm2m.resource.proxy.CoapResourceProxy;
 import leshan.server.lwm2m.security.SecurityInfo;
 import leshan.server.lwm2m.security.SecurityStore;
 
 import org.apache.commons.lang.RandomStringUtils;
-import org.eclipse.californium.core.CoapResource;
-import org.eclipse.californium.core.coap.CoAP.ResponseCode;
-import org.eclipse.californium.core.coap.CoAP.Type;
-import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.core.server.resources.CoapExchange;
-import org.eclipse.californium.core.server.resources.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +61,9 @@ import org.slf4j.LoggerFactory;
  */
 public class RegisterResource extends CoapResource {
 
-    private static final String QUERY_PARAM_ENDPOINT = "ep=";
+    private static final String RESOURCE_TYPE = "core.rd";
+
+	private static final String QUERY_PARAM_ENDPOINT = "ep=";
 
     private static final String QUERY_PARAM_BINDING_MODE = "b=";
 
@@ -79,17 +81,17 @@ public class RegisterResource extends CoapResource {
 
     private final SecurityStore securityStore;
 
-    public RegisterResource(ClientRegistry clientRegistry, SecurityStore securityStore) {
-        super(RESOURCE_NAME);
+    public RegisterResource(final ClientRegistry clientRegistry, final SecurityStore securityStore, final CoapResourceProxy coapResourceProxy) {
+    	super(coapResourceProxy, RESOURCE_NAME); //super(RESOURCE_NAME); //SHIM
 
         this.clientRegistry = clientRegistry;
         this.securityStore = securityStore;
-        getAttributes().addResourceType("core.rd");
+        getCoapResourceProxy().setResourceType(RESOURCE_TYPE);//getAttributes().addResourceType(RESOURCE_TYPE); //SHIM
     }
 
     @Override
-    public void handlePOST(CoapExchange exchange) {
-        Request request = exchange.advanced().getRequest();
+    public void handlePOST(final CoapExchange exchange) {
+        final Request request = exchange.advanced().getRequest();
 
         LOG.debug("POST received : {}", request);
 
@@ -110,7 +112,7 @@ public class RegisterResource extends CoapResource {
         LinkObject[] objectLinks = null;
         try {
 
-            for (String param : request.getOptions().getURIQueries()) {
+            for (final String param : request.getOptions().getURIQueries()) {
                 if (param.startsWith(QUERY_PARAM_ENDPOINT)) {
                     endpoint = param.substring(3);
                 } else if (param.startsWith(QUERY_PARAM_LIFETIME)) {
@@ -128,20 +130,20 @@ public class RegisterResource extends CoapResource {
                 exchange.respond(ResponseCode.BAD_REQUEST, "Client must specify an endpoint identifier");
             } else {
                 // register
-                String registrationId = RegisterResource.createRegistrationId();
+                final String registrationId = RegisterResource.createRegistrationId();
                 if (request.getPayload() != null) {
                     objectLinks = LinkObject.parse(request.getPayload());
                 }
 
                 // do we have security information for this client?
-                SecurityInfo securityInfo = securityStore.getByEndpoint(endpoint);
+                final SecurityInfo securityInfo = securityStore.getByEndpoint(endpoint);
 
                 // which end point did the client post this request to?
-                InetSocketAddress registrationEndpoint = exchange.advanced().getEndpoint().getAddress();
+                final InetSocketAddress registrationEndpoint = exchange.advanced().getEndpoint().getAddress();
 
                 // if this is a secure end-point, we must check that the registering client is using the right identity.
                 if (exchange.advanced().getEndpoint() instanceof SecureEndpoint) {
-                    String pskIdentity = ((SecureEndpoint) exchange.advanced().getEndpoint()).getPskIdentity(request);
+                    final String pskIdentity = ((SecureEndpoint) exchange.advanced().getEndpoint()).getPskIdentity(request);
                     LOG.debug("Registration request received using the secure endpoint {} with identity {}",
                             registrationEndpoint, pskIdentity);
 
@@ -166,7 +168,7 @@ public class RegisterResource extends CoapResource {
                     }
                 }
 
-                Client client = new Client(registrationId, endpoint, request.getSource(), request.getSourcePort(),
+                final Client client = new Client(registrationId, endpoint, request.getSource(), request.getSourcePort(),
                         lwVersion, lifetime, smsNumber, binding, objectLinks, registrationEndpoint);
 
                 clientRegistry.registerClient(client);
@@ -175,9 +177,9 @@ public class RegisterResource extends CoapResource {
                 exchange.setLocationPath(RESOURCE_NAME + "/" + client.getRegistrationId());
                 exchange.respond(ResponseCode.CREATED);
             }
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             exchange.respond(ResponseCode.BAD_REQUEST, "Lifetime parameter must be a valid number");
-        } catch (ClientRegistrationException e) {
+        } catch (final ClientRegistrationException e) {
             LOG.debug("Registration failed for client " + endpoint, e);
             exchange.respond(ResponseCode.BAD_REQUEST);
         }
@@ -189,8 +191,8 @@ public class RegisterResource extends CoapResource {
      * @param exchange the CoAP request containing the updated regsitration properties
      */
     @Override
-    public void handlePUT(CoapExchange exchange) {
-        Request request = exchange.advanced().getRequest();
+    public void handlePUT(final CoapExchange exchange) {
+        final Request request = exchange.advanced().getRequest();
 
         LOG.debug("UPDATE received : {}", request);
         if (!Type.CON.equals(request.getType())) {
@@ -198,20 +200,20 @@ public class RegisterResource extends CoapResource {
             return;
         }
 
-        List<String> uri = exchange.getRequestOptions().getURIPaths();
+        final List<String> uri = exchange.getRequestOptions().getURIPaths();
         if (uri == null || uri.size() != 2 || !RESOURCE_NAME.equals(uri.get(0))) {
             exchange.respond(ResponseCode.NOT_FOUND);
             return;
         }
 
-        String registrationId = uri.get(1);
+        final String registrationId = uri.get(1);
 
         Long lifetime = null;
         String smsNumber = null;
         BindingMode binding = null;
         LinkObject[] objectLinks = null;
 
-        for (String param : request.getOptions().getURIQueries()) {
+        for (final String param : request.getOptions().getURIQueries()) {
             if (param.startsWith(QUERY_PARAM_LIFETIME)) {
                 lifetime = Long.valueOf(param.substring(3));
             } else if (param.startsWith(QUERY_PARAM_SMS)) {
@@ -225,17 +227,17 @@ public class RegisterResource extends CoapResource {
             objectLinks = LinkObject.parse(request.getPayload());
         }
 
-        ClientUpdate client = new ClientUpdate(registrationId, request.getSource(), request.getSourcePort(), lifetime,
+        final ClientUpdate client = new ClientUpdate(registrationId, request.getSource(), request.getSourcePort(), lifetime,
                 smsNumber, binding, objectLinks);
 
         try {
-            Client c = clientRegistry.updateClient(client);
+            final Client c = clientRegistry.updateClient(client);
             if (c == null) {
                 exchange.respond(ResponseCode.NOT_FOUND);
             } else {
                 exchange.respond(ResponseCode.CHANGED);
             }
-        } catch (ClientRegistrationException e) {
+        } catch (final ClientRegistrationException e) {
             LOG.debug("Registration update failed: " + client, e);
             exchange.respond(ResponseCode.BAD_REQUEST);
         }
@@ -243,11 +245,11 @@ public class RegisterResource extends CoapResource {
     }
 
     @Override
-    public void handleDELETE(CoapExchange exchange) {
+    public void handleDELETE(final CoapExchange exchange) {
         LOG.debug("DELETE received : {}", exchange.advanced().getRequest());
 
         Client unregistered = null;
-        List<String> uri = exchange.getRequestOptions().getURIPaths();
+        final List<String> uri = exchange.getRequestOptions().getURIPaths();
 
         try {
             if (uri != null && uri.size() == 2 && RESOURCE_NAME.equals(uri.get(0))) {
@@ -261,7 +263,7 @@ public class RegisterResource extends CoapResource {
                 exchange.respond(ResponseCode.BAD_REQUEST);
             }
 
-        } catch (ClientRegistrationException e) {
+        } catch (final ClientRegistrationException e) {
             LOG.debug("Deregistration failed", e);
             exchange.respond(ResponseCode.BAD_REQUEST);
         }
@@ -273,7 +275,7 @@ public class RegisterResource extends CoapResource {
      * /rd resource.
      */
     @Override
-    public Resource getChild(String name) {
+    public Resource getChild(final String name) {
         return this;
     }
 
