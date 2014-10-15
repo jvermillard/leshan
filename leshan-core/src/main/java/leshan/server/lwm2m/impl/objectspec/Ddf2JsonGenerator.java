@@ -93,7 +93,7 @@ public class Ddf2JsonGenerator {
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
         // default value
-        String DDFFilesPath = "src/main/resources/omaobjects";
+        String DDFFilesPath = "ddffiles";
         String outputPath = "src/main/resources/objectspec.json";
 
         // use arguments if they exit

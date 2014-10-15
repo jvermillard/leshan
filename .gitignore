@@ -8,3 +8,4 @@ leshan-bs-server/data
 *.jar
 *.war
 *.ear
+leshan-core/ddffiles
