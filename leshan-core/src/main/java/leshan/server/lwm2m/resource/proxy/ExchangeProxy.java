@@ -5,6 +5,6 @@ public abstract class ExchangeProxy {
 
 	public abstract RequestProxy getRequest();
 
-	public abstract void respondWithBadRequest();
+	public abstract void respondWithBadRequest(String... message);
 
 }

@@ -1,5 +1,7 @@
 package leshan.connector.californium.resource;
 
+import java.util.List;
+
 import leshan.server.lwm2m.resource.proxy.RequestProxy;
 
 import org.eclipse.californium.core.coap.CoAP.Type;
@@ -16,6 +18,11 @@ public class CaliforniumRequestProxy extends RequestProxy {
 	@Override
 	public boolean isConfirmable() {
 		return Type.CON.equals(request.getType());
+	}
+
+	@Override
+	public List<String> getURIQueries() {
+		return request.getOptions().getURIQueries();
 	}
 
 }

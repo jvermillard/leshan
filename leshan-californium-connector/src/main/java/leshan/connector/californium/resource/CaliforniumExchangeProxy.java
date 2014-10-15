@@ -22,8 +22,13 @@ public class CaliforniumExchangeProxy extends ExchangeProxy {
 	}
 
 	@Override
-	public void respondWithBadRequest() {
-		exchange.respond(ResponseCode.BAD_REQUEST);
+	public void respondWithBadRequest(final String... errorMessage) {
+		if(errorMessage == null || errorMessage.length == 0){
+			exchange.respond(ResponseCode.BAD_REQUEST);
+		}
+		else{
+			exchange.respond(ResponseCode.BAD_REQUEST, errorMessage[0]);
+		}
 		
 	}
 

@@ -61,66 +61,66 @@ import org.slf4j.LoggerFactory;
  */
 public class RegisterResource extends CoapResource {
 
-    private static final String RESOURCE_TYPE = "core.rd";
+	private static final String RESOURCE_TYPE = "core.rd";
 
 	private static final String QUERY_PARAM_ENDPOINT = "ep=";
 
-    private static final String QUERY_PARAM_BINDING_MODE = "b=";
+	private static final String QUERY_PARAM_BINDING_MODE = "b=";
 
-    private static final String QUERY_PARAM_LWM2M_VERSION = "lwm2m=";
+	private static final String QUERY_PARAM_LWM2M_VERSION = "lwm2m=";
 
-    private static final String QUERY_PARAM_SMS = "sms=";
+	private static final String QUERY_PARAM_SMS = "sms=";
 
-    private static final String QUERY_PARAM_LIFETIME = "lt=";
+	private static final String QUERY_PARAM_LIFETIME = "lt=";
 
-    private static final Logger LOG = LoggerFactory.getLogger(RegisterResource.class);
+	private static final Logger LOG = LoggerFactory.getLogger(RegisterResource.class);
 
-    public static final String RESOURCE_NAME = "rd";
+	public static final String RESOURCE_NAME = "rd";
 
-    private final ClientRegistry clientRegistry;
+	private final ClientRegistry clientRegistry;
 
-    private final SecurityStore securityStore;
+	private final SecurityStore securityStore;
 
-    public RegisterResource(final ClientRegistry clientRegistry, final SecurityStore securityStore, final CoapResourceProxy coapResourceProxy) {
-    	super(coapResourceProxy, RESOURCE_NAME); //super(RESOURCE_NAME); //SHIM
+	public RegisterResource(final ClientRegistry clientRegistry, final SecurityStore securityStore, final CoapResourceProxy coapResourceProxy) {
+		super(coapResourceProxy, RESOURCE_NAME); //super(RESOURCE_NAME); //SHIM
 
-        this.clientRegistry = clientRegistry;
-        this.securityStore = securityStore;
-        getCoapResourceProxy().setResourceType(RESOURCE_TYPE);//getAttributes().addResourceType(RESOURCE_TYPE); //SHIM
-    }
-    
-    @Override
+		this.clientRegistry = clientRegistry;
+		this.securityStore = securityStore;
+		getCoapResourceProxy().setResourceType(RESOURCE_TYPE);//getAttributes().addResourceType(RESOURCE_TYPE); //SHIM
+	}
+
+	@Override
 	public void onPOST(final ExchangeProxy exchangeProxy){
-    	/* SHIM
+		/* SHIM
     	final Request request = exchange.advanced().getRequest();
-    	*/
+		 */
 
-    	/*
+		/*
         LOG.debug("POST received : {}", request);
-        */
-        LOG.debug("POST received : {}", exchangeProxy.getRequest());
+		 */
+		LOG.debug("POST received : {}", exchangeProxy.getRequest());
 
-        // The LW M2M spec (section 8.2) mandates the usage of Confirmable
-        // messages
-        /*
+		// The LW M2M spec (section 8.2) mandates the usage of Confirmable
+		// messages
+		/*
         if (!Type.CON.equals(request.getType())) {
             exchange.respond(ResponseCode.BAD_REQUEST);
             return;
         }
-    	 */
-    	if(!exchangeProxy.getRequest().isConfirmable()){
-    		exchangeProxy.respondWithBadRequest();
-    		return;
-    	}
-        // TODO: assert content media type is APPLICATION LINK FORMAT?
+		 */
+		if(!exchangeProxy.getRequest().isConfirmable()){
+			exchangeProxy.respondWithBadRequest();
+			return;
+		}
+		// TODO: assert content media type is APPLICATION LINK FORMAT?
 
-        final String endpoint = null;
-        final Long lifetime = null;
-        final String smsNumber = null;
-        final String lwVersion = null;
-        final BindingMode binding = null;
-        final LinkObject[] objectLinks = null;
-        /* SHIM
+		final String endpoint = null;
+		final Long lifetime = null;
+		final String smsNumber = null;
+		final String lwVersion = null;
+		final BindingMode binding = null;
+		final LinkObject[] objectLinks = null;
+		/* SHIM
         try {
 
             for (final String param : request.getOptions().getURIQueries()) {
@@ -137,206 +137,231 @@ public class RegisterResource extends CoapResource {
                 }
             }
 
-    	 */
-        try{
-	        for (final String param : exchangeProxy.getRequest().getURIQueries()) {
-	        	
-	        }
-        }
-    }
+		 */
+		try{
+			for (final String param : exchangeProxy.getRequest().getURIQueries()) {
+				if (param.startsWith(QUERY_PARAM_ENDPOINT)) {
+					endpoint = param.substring(3);
+				} else if (param.startsWith(QUERY_PARAM_LIFETIME)) {
+					lifetime = Long.valueOf(param.substring(3));
+				} else if (param.startsWith(QUERY_PARAM_SMS)) {
+					smsNumber = param.substring(4);
+				} else if (param.startsWith(QUERY_PARAM_LWM2M_VERSION)) {
+					lwVersion = param.substring(6);
+				} else if (param.startsWith(QUERY_PARAM_BINDING_MODE)) {
+					binding = BindingMode.valueOf(param.substring(2));
+				}
+			}
+			/*
+			} catch (final NumberFormatException e) {
+				exchange.respond(ResponseCode.BAD_REQUEST, "Lifetime parameter must be a valid number");
+			} catch (final ClientRegistrationException e) {
+				LOG.debug("Registration failed for client " + endpoint, e);
+				exchange.respond(ResponseCode.BAD_REQUEST);
+			}
+			}
+			 */
+		} catch (final NumberFormatException e) {
+//			exchange.respond(ResponseCode.BAD_REQUEST, "Lifetime parameter must be a valid number");
+			exchangeProxy.respondWithBadRequest("Lifetime parameter must be a valid number");
+		} catch (final ClientRegistrationException e) {
+			LOG.debug("Registration failed for client " + endpoint, e);
+//			exchange.respond(ResponseCode.BAD_REQUEST);
+			exchangeProxy.respondWithBadRequest();
+		}
 
-    @Override
-    public void handlePOST(final CoapExchange exchange) {
-        final Request request = exchange.advanced().getRequest();
+		@Override
+		public void handlePOST(final CoapExchange exchange) {
+			final Request request = exchange.advanced().getRequest();
 
-        LOG.debug("POST received : {}", request);
+			LOG.debug("POST received : {}", request);
 
-        // The LW M2M spec (section 8.2) mandates the usage of Confirmable
-        // messages
-        if (!Type.CON.equals(request.getType())) {
-            exchange.respond(ResponseCode.BAD_REQUEST);
-            return;
-        }
+			// The LW M2M spec (section 8.2) mandates the usage of Confirmable
+			// messages
+			if (!Type.CON.equals(request.getType())) {
+				exchange.respond(ResponseCode.BAD_REQUEST);
+				return;
+			}
 
-        // TODO: assert content media type is APPLICATION LINK FORMAT?
+			// TODO: assert content media type is APPLICATION LINK FORMAT?
 
-        String endpoint = null;
-        Long lifetime = null;
-        String smsNumber = null;
-        String lwVersion = null;
-        BindingMode binding = null;
-        LinkObject[] objectLinks = null;
-        try {
+			String endpoint = null;
+			Long lifetime = null;
+			String smsNumber = null;
+			String lwVersion = null;
+			BindingMode binding = null;
+			LinkObject[] objectLinks = null;
+			try {
 
-            for (final String param : request.getOptions().getURIQueries()) {
-                if (param.startsWith(QUERY_PARAM_ENDPOINT)) {
-                    endpoint = param.substring(3);
-                } else if (param.startsWith(QUERY_PARAM_LIFETIME)) {
-                    lifetime = Long.valueOf(param.substring(3));
-                } else if (param.startsWith(QUERY_PARAM_SMS)) {
-                    smsNumber = param.substring(4);
-                } else if (param.startsWith(QUERY_PARAM_LWM2M_VERSION)) {
-                    lwVersion = param.substring(6);
-                } else if (param.startsWith(QUERY_PARAM_BINDING_MODE)) {
-                    binding = BindingMode.valueOf(param.substring(2));
-                }
-            }
+				for (final String param : request.getOptions().getURIQueries()) {
+					if (param.startsWith(QUERY_PARAM_ENDPOINT)) {
+						endpoint = param.substring(3);
+					} else if (param.startsWith(QUERY_PARAM_LIFETIME)) {
+						lifetime = Long.valueOf(param.substring(3));
+					} else if (param.startsWith(QUERY_PARAM_SMS)) {
+						smsNumber = param.substring(4);
+					} else if (param.startsWith(QUERY_PARAM_LWM2M_VERSION)) {
+						lwVersion = param.substring(6);
+					} else if (param.startsWith(QUERY_PARAM_BINDING_MODE)) {
+						binding = BindingMode.valueOf(param.substring(2));
+					}
+				}
 
-            if (endpoint == null || endpoint.isEmpty()) {
-                exchange.respond(ResponseCode.BAD_REQUEST, "Client must specify an endpoint identifier");
-            } else {
-                // register
-                final String registrationId = RegisterResource.createRegistrationId();
-                if (request.getPayload() != null) {
-                    objectLinks = LinkObject.parse(request.getPayload());
-                }
+				if (endpoint == null || endpoint.isEmpty()) {
+					exchange.respond(ResponseCode.BAD_REQUEST, "Client must specify an endpoint identifier");
+				} else {
+					// register
+					final String registrationId = RegisterResource.createRegistrationId();
+					if (request.getPayload() != null) {
+						objectLinks = LinkObject.parse(request.getPayload());
+					}
 
-                // do we have security information for this client?
-                final SecurityInfo securityInfo = securityStore.getByEndpoint(endpoint);
+					// do we have security information for this client?
+					final SecurityInfo securityInfo = securityStore.getByEndpoint(endpoint);
 
-                // which end point did the client post this request to?
-                final InetSocketAddress registrationEndpoint = exchange.advanced().getEndpoint().getAddress();
+					// which end point did the client post this request to?
+					final InetSocketAddress registrationEndpoint = exchange.advanced().getEndpoint().getAddress();
 
-                // if this is a secure end-point, we must check that the registering client is using the right identity.
-                if (exchange.advanced().getEndpoint() instanceof SecureEndpoint) {
-                    final String pskIdentity = ((SecureEndpoint) exchange.advanced().getEndpoint()).getPskIdentity(request);
-                    LOG.debug("Registration request received using the secure endpoint {} with identity {}",
-                            registrationEndpoint, pskIdentity);
+					// if this is a secure end-point, we must check that the registering client is using the right identity.
+					if (exchange.advanced().getEndpoint() instanceof SecureEndpoint) {
+						final String pskIdentity = ((SecureEndpoint) exchange.advanced().getEndpoint()).getPskIdentity(request);
+						LOG.debug("Registration request received using the secure endpoint {} with identity {}",
+								registrationEndpoint, pskIdentity);
 
-                    if (securityInfo == null || pskIdentity == null || !pskIdentity.equals(securityInfo.getIdentity())) {
-                        LOG.warn("Invalid identity for client {}: expected '{}' but was '{}'", endpoint,
-                                securityInfo == null ? null : securityInfo.getIdentity(), pskIdentity);
-                        exchange.respond(ResponseCode.BAD_REQUEST, "Invalid identity");
+						if (securityInfo == null || pskIdentity == null || !pskIdentity.equals(securityInfo.getIdentity())) {
+							LOG.warn("Invalid identity for client {}: expected '{}' but was '{}'", endpoint,
+									securityInfo == null ? null : securityInfo.getIdentity(), pskIdentity);
+							exchange.respond(ResponseCode.BAD_REQUEST, "Invalid identity");
 
-                        // kill the TLS Session
-                        ((SecureEndpoint) exchange.advanced().getEndpoint()).getDTLSConnector().close(
-                                new InetSocketAddress(request.getSource(), request.getSourcePort()));
-                        return;
+							// kill the TLS Session
+							((SecureEndpoint) exchange.advanced().getEndpoint()).getDTLSConnector().close(
+									new InetSocketAddress(request.getSource(), request.getSourcePort()));
+							return;
 
-                    } else {
-                        LOG.debug("authenticated client {} using DTLS PSK", endpoint);
-                    }
-                } else {
-                    if (securityInfo != null) {
-                        LOG.warn("client {} must connect using DTLS PSK", endpoint);
-                        exchange.respond(ResponseCode.BAD_REQUEST, "Client must connect thru DTLS (port 5684)");
-                        return;
-                    }
-                }
+						} else {
+							LOG.debug("authenticated client {} using DTLS PSK", endpoint);
+						}
+					} else {
+						if (securityInfo != null) {
+							LOG.warn("client {} must connect using DTLS PSK", endpoint);
+							exchange.respond(ResponseCode.BAD_REQUEST, "Client must connect thru DTLS (port 5684)");
+							return;
+						}
+					}
 
-                final Client client = new Client(registrationId, endpoint, request.getSource(), request.getSourcePort(),
-                        lwVersion, lifetime, smsNumber, binding, objectLinks, registrationEndpoint);
+					final Client client = new Client(registrationId, endpoint, request.getSource(), request.getSourcePort(),
+							lwVersion, lifetime, smsNumber, binding, objectLinks, registrationEndpoint);
 
-                clientRegistry.registerClient(client);
-                LOG.debug("New registered client: {}", client);
+					clientRegistry.registerClient(client);
+					LOG.debug("New registered client: {}", client);
 
-                exchange.setLocationPath(RESOURCE_NAME + "/" + client.getRegistrationId());
-                exchange.respond(ResponseCode.CREATED);
-            }
-        } catch (final NumberFormatException e) {
-            exchange.respond(ResponseCode.BAD_REQUEST, "Lifetime parameter must be a valid number");
-        } catch (final ClientRegistrationException e) {
-            LOG.debug("Registration failed for client " + endpoint, e);
-            exchange.respond(ResponseCode.BAD_REQUEST);
-        }
-    }
+					exchange.setLocationPath(RESOURCE_NAME + "/" + client.getRegistrationId());
+					exchange.respond(ResponseCode.CREATED);
+				}
+			} catch (final NumberFormatException e) {
+				exchange.respond(ResponseCode.BAD_REQUEST, "Lifetime parameter must be a valid number");
+			} catch (final ClientRegistrationException e) {
+				LOG.debug("Registration failed for client " + endpoint, e);
+				exchange.respond(ResponseCode.BAD_REQUEST);
+			}
+		}
 
-    /**
-     * Updates an existing Client registration.
-     * 
-     * @param exchange the CoAP request containing the updated regsitration properties
-     */
-    @Override
-    public void handlePUT(final CoapExchange exchange) {
-        final Request request = exchange.advanced().getRequest();
+		/**
+		 * Updates an existing Client registration.
+		 * 
+		 * @param exchange the CoAP request containing the updated regsitration properties
+		 */
+		@Override
+		public void handlePUT(final CoapExchange exchange) {
+			final Request request = exchange.advanced().getRequest();
 
-        LOG.debug("UPDATE received : {}", request);
-        if (!Type.CON.equals(request.getType())) {
-            exchange.respond(ResponseCode.BAD_REQUEST);
-            return;
-        }
+			LOG.debug("UPDATE received : {}", request);
+			if (!Type.CON.equals(request.getType())) {
+				exchange.respond(ResponseCode.BAD_REQUEST);
+				return;
+			}
 
-        final List<String> uri = exchange.getRequestOptions().getURIPaths();
-        if (uri == null || uri.size() != 2 || !RESOURCE_NAME.equals(uri.get(0))) {
-            exchange.respond(ResponseCode.NOT_FOUND);
-            return;
-        }
+			final List<String> uri = exchange.getRequestOptions().getURIPaths();
+			if (uri == null || uri.size() != 2 || !RESOURCE_NAME.equals(uri.get(0))) {
+				exchange.respond(ResponseCode.NOT_FOUND);
+				return;
+			}
 
-        final String registrationId = uri.get(1);
+			final String registrationId = uri.get(1);
 
-        Long lifetime = null;
-        String smsNumber = null;
-        BindingMode binding = null;
-        LinkObject[] objectLinks = null;
+			Long lifetime = null;
+			String smsNumber = null;
+			BindingMode binding = null;
+			LinkObject[] objectLinks = null;
 
-        for (final String param : request.getOptions().getURIQueries()) {
-            if (param.startsWith(QUERY_PARAM_LIFETIME)) {
-                lifetime = Long.valueOf(param.substring(3));
-            } else if (param.startsWith(QUERY_PARAM_SMS)) {
-                smsNumber = param.substring(4);
-            } else if (param.startsWith(QUERY_PARAM_BINDING_MODE)) {
-                binding = BindingMode.valueOf(param.substring(2));
-            }
-        }
+			for (final String param : request.getOptions().getURIQueries()) {
+				if (param.startsWith(QUERY_PARAM_LIFETIME)) {
+					lifetime = Long.valueOf(param.substring(3));
+				} else if (param.startsWith(QUERY_PARAM_SMS)) {
+					smsNumber = param.substring(4);
+				} else if (param.startsWith(QUERY_PARAM_BINDING_MODE)) {
+					binding = BindingMode.valueOf(param.substring(2));
+				}
+			}
 
-        if (request.getPayload() != null && request.getPayload().length > 0) {
-            objectLinks = LinkObject.parse(request.getPayload());
-        }
+			if (request.getPayload() != null && request.getPayload().length > 0) {
+				objectLinks = LinkObject.parse(request.getPayload());
+			}
 
-        final ClientUpdate client = new ClientUpdate(registrationId, request.getSource(), request.getSourcePort(), lifetime,
-                smsNumber, binding, objectLinks);
+			final ClientUpdate client = new ClientUpdate(registrationId, request.getSource(), request.getSourcePort(), lifetime,
+					smsNumber, binding, objectLinks);
 
-        try {
-            final Client c = clientRegistry.updateClient(client);
-            if (c == null) {
-                exchange.respond(ResponseCode.NOT_FOUND);
-            } else {
-                exchange.respond(ResponseCode.CHANGED);
-            }
-        } catch (final ClientRegistrationException e) {
-            LOG.debug("Registration update failed: " + client, e);
-            exchange.respond(ResponseCode.BAD_REQUEST);
-        }
+			try {
+				final Client c = clientRegistry.updateClient(client);
+				if (c == null) {
+					exchange.respond(ResponseCode.NOT_FOUND);
+				} else {
+					exchange.respond(ResponseCode.CHANGED);
+				}
+			} catch (final ClientRegistrationException e) {
+				LOG.debug("Registration update failed: " + client, e);
+				exchange.respond(ResponseCode.BAD_REQUEST);
+			}
 
-    }
+		}
 
-    @Override
-    public void handleDELETE(final CoapExchange exchange) {
-        LOG.debug("DELETE received : {}", exchange.advanced().getRequest());
+		@Override
+		public void handleDELETE(final CoapExchange exchange) {
+			LOG.debug("DELETE received : {}", exchange.advanced().getRequest());
 
-        Client unregistered = null;
-        final List<String> uri = exchange.getRequestOptions().getURIPaths();
+			Client unregistered = null;
+			final List<String> uri = exchange.getRequestOptions().getURIPaths();
 
-        try {
-            if (uri != null && uri.size() == 2 && RESOURCE_NAME.equals(uri.get(0))) {
-                unregistered = clientRegistry.deregisterClient(uri.get(1));
-            }
+			try {
+				if (uri != null && uri.size() == 2 && RESOURCE_NAME.equals(uri.get(0))) {
+					unregistered = clientRegistry.deregisterClient(uri.get(1));
+				}
 
-            if (unregistered != null) {
-                exchange.respond(ResponseCode.DELETED);
-            } else {
-                LOG.debug("Invalid deregistration");
-                exchange.respond(ResponseCode.BAD_REQUEST);
-            }
+				if (unregistered != null) {
+					exchange.respond(ResponseCode.DELETED);
+				} else {
+					LOG.debug("Invalid deregistration");
+					exchange.respond(ResponseCode.BAD_REQUEST);
+				}
 
-        } catch (final ClientRegistrationException e) {
-            LOG.debug("Deregistration failed", e);
-            exchange.respond(ResponseCode.BAD_REQUEST);
-        }
+			} catch (final ClientRegistrationException e) {
+				LOG.debug("Deregistration failed", e);
+				exchange.respond(ResponseCode.BAD_REQUEST);
+			}
 
-    }
+		}
 
-    /*
-     * Override the default behavior so that requests to sub resources (typically /rd/{client-reg-id}) are handled by
-     * /rd resource.
-     */
-    @Override
-    public Resource getChild(final String name) {
-        return this;
-    }
+		/*
+		 * Override the default behavior so that requests to sub resources (typically /rd/{client-reg-id}) are handled by
+		 * /rd resource.
+		 */
+		@Override
+		public Resource getChild(final String name) {
+			return this;
+		}
 
-    private static String createRegistrationId() {
-        return RandomStringUtils.random(10, true, true);
-    }
+		private static String createRegistrationId() {
+			return RandomStringUtils.random(10, true, true);
+		}
 
-}
+	}
