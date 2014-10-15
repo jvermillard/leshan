@@ -37,6 +37,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import leshan.server.lwm2m.impl.objectspec.json.ObjectSpecSerializer;
 import leshan.server.lwm2m.impl.objectspec.json.ResourceSpecSerializer;
@@ -76,7 +79,7 @@ public class Ddf2JsonGenerator {
         }
 
         // parse DDF file
-        Collection<ObjectSpec> objectSpecs = new ArrayList<ObjectSpec>();
+        List<ObjectSpec> objectSpecs = new ArrayList<ObjectSpec>();
         DDFFileParser ddfParser = new DDFFileParser();
         for (File f : files) {
             if (f.canRead()) {
@@ -86,6 +89,14 @@ public class Ddf2JsonGenerator {
                 }
             }
         }
+
+        // sort object by id
+        Collections.sort(objectSpecs, new Comparator<ObjectSpec>() {
+            @Override
+            public int compare(ObjectSpec o1, ObjectSpec o2) {
+                return o1.id - o2.id;
+            }
+        });
 
         // generate json
         generate(objectSpecs, output);

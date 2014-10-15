@@ -30,8 +30,13 @@
 package leshan.server.lwm2m.impl.objectspec.json;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 import leshan.server.lwm2m.impl.objectspec.ObjectSpec;
+import leshan.server.lwm2m.impl.objectspec.ResourceSpec;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -44,12 +49,23 @@ public class ObjectSpecSerializer implements JsonSerializer<ObjectSpec> {
     public JsonElement serialize(ObjectSpec object, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject element = new JsonObject();
 
+        // sort resources value
+        List<ResourceSpec> resourceSpecs = new ArrayList<ResourceSpec>(object.resources.values());
+        Collections.sort(resourceSpecs, new Comparator<ResourceSpec>() {
+            @Override
+            public int compare(ResourceSpec r1, ResourceSpec r2) {
+                return r1.id - r2.id;
+            }
+        });
+
+        // serialize fields
         element.addProperty("name", object.name);
         element.addProperty("id", object.id);
         element.addProperty("instancetype", object.multiple ? "mutiple" : "single");
         element.addProperty("mandatory", object.mandatory);
         element.addProperty("description", object.description);
-        element.add("resourcedefs", context.serialize(object.resources.values()));
+        element.add("resourcedefs", context.serialize(resourceSpecs));
+
         return element;
     }
 
