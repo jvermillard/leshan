@@ -17,7 +17,7 @@ angular.module('resourceFormDirectives', [])
         templateUrl: "partials/resource-form.html",
         link: function (scope, element, attrs) {
             scope.writable = function() {
-                if(scope.resource.def.instances != "multiple") {
+                if(scope.resource.def.instancetype != "multiple") {
                     if(scope.resource.def.hasOwnProperty("operations")) {
                         return scope.resource.def.operations.indexOf("W") != -1;
                     }
