@@ -4,18 +4,19 @@ import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.lang.Validate;
-import org.eclipse.californium.core.CoapServer;
-import org.eclipse.californium.core.network.CoAPEndpoint;
-import org.eclipse.californium.core.network.Endpoint;
-import org.eclipse.californium.scandium.DTLSConnector;
-
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.impl.bridge.server.CoapServerImplementor;
 import leshan.server.lwm2m.impl.security.SecureEndpoint;
 import leshan.server.lwm2m.observation.ObservationRegistry;
 import leshan.server.lwm2m.request.LwM2mRequestSender;
+import leshan.server.lwm2m.resource.californium.CaliforniumCoapResourceProxy;
 import leshan.server.lwm2m.security.SecurityRegistry;
+
+import org.apache.commons.lang.Validate;
+import org.eclipse.californium.core.CoapServer;
+import org.eclipse.californium.core.network.CoAPEndpoint;
+import org.eclipse.californium.core.network.Endpoint;
+import org.eclipse.californium.scandium.DTLSConnector;
 
 public class CaliforniumServerImplementor implements CoapServerImplementor {
 
@@ -31,7 +32,7 @@ public class CaliforniumServerImplementor implements CoapServerImplementor {
 		this(new InetSocketAddress(PORT), new InetSocketAddress(PORT_DTLS));
 	}
 
-	public CaliforniumServerImplementor(InetSocketAddress localAddress,	InetSocketAddress secureLocalAddress) {
+	public CaliforniumServerImplementor(final InetSocketAddress localAddress,	final InetSocketAddress secureLocalAddress) {
         Validate.notNull(localAddress, "IP address cannot be null");
         Validate.notNull(secureLocalAddress, "Secure IP address cannot be null");
 		this.localAddress = localAddress;
@@ -39,7 +40,7 @@ public class CaliforniumServerImplementor implements CoapServerImplementor {
 	}
 
 	@Override
-	public void createCoAPServer(ClientRegistry clientRegistry, ObservationRegistry observationRegistry, SecurityRegistry securityRegistry) {
+	public void createCoAPServer(final ClientRegistry clientRegistry, final ObservationRegistry observationRegistry, final SecurityRegistry securityRegistry) {
         coapServer = new CoapServer();		
         this.clientRegistry = clientRegistry;
         this.observationRegistry  = observationRegistry;
@@ -48,15 +49,15 @@ public class CaliforniumServerImplementor implements CoapServerImplementor {
 
 	@Override
 	public void bindEndpoints() {
-		Set<Endpoint> endpoints = new HashSet<Endpoint>();
-		Endpoint endpoint = new CoAPEndpoint(localAddress);
+		final Set<Endpoint> endpoints = new HashSet<Endpoint>();
+		final Endpoint endpoint = new CoAPEndpoint(localAddress);
 		endpoints.add(endpoint);
 		
 		if(secureLocalAddress != null) {
-	        DTLSConnector connector = new DTLSConnector(secureLocalAddress, null);
+	        final DTLSConnector connector = new DTLSConnector(secureLocalAddress, null);
 	        connector.getConfig().setPskStore(new CaliforniumPskStore(this.securityRegistry, this.clientRegistry));
 	
-	        Endpoint secureEndpoint = new SecureEndpoint(connector);
+	        final Endpoint secureEndpoint = new SecureEndpoint(connector);
 	        coapServer.addEndpoint(secureEndpoint);
 	        endpoints.add(endpoint);
 		}
@@ -65,8 +66,9 @@ public class CaliforniumServerImplementor implements CoapServerImplementor {
 
 	@Override
 	public void bindResource() {
-		RegisterResource rdResource = new RegisterResource(clientRegistry, securityRegistry);
-		coapServer.add(rdResource);
+		final CaliforniumCoapResourceProxy rdResourceProxy = new CaliforniumCoapResourceProxy();
+		final RegisterResource rdResource = new RegisterResource(clientRegistry, securityRegistry, rdResourceProxy);
+		coapServer.add(rdResourceProxy.getCoapResource());
 		
 	}
 

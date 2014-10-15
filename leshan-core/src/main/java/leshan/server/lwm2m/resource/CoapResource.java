@@ -1,6 +1,7 @@
 package leshan.server.lwm2m.resource;
 
 import leshan.server.lwm2m.resource.proxy.CoapResourceProxy;
+import leshan.server.lwm2m.resource.proxy.ExchangeProxy;
 
 import org.apache.commons.lang.Validate;
 
@@ -10,7 +11,7 @@ public abstract class CoapResource {
 
 	public CoapResource(final CoapResourceProxy factory, final String resourceName) {
 		this.coapResourceProxy = factory;
-		coapResourceProxy.initialize(resourceName);
+		coapResourceProxy.initialize(this, resourceName);
 	}
 	
 	public CoapResourceProxy getCoapResourceProxy() {
@@ -19,4 +20,5 @@ public abstract class CoapResource {
 		return coapResourceProxy;
 	}
 
+	public abstract void onPOST(ExchangeProxy exchangeProxy);
 }

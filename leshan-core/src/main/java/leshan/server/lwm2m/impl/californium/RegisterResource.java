@@ -41,9 +41,9 @@ import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.client.ClientUpdate;
 import leshan.server.lwm2m.client.LinkObject;
 import leshan.server.lwm2m.impl.security.SecureEndpoint;
-import leshan.server.lwm2m.request.ResponseCode;
 import leshan.server.lwm2m.resource.CoapResource;
 import leshan.server.lwm2m.resource.proxy.CoapResourceProxy;
+import leshan.server.lwm2m.resource.proxy.ExchangeProxy;
 import leshan.server.lwm2m.security.SecurityInfo;
 import leshan.server.lwm2m.security.SecurityStore;
 
@@ -87,6 +87,62 @@ public class RegisterResource extends CoapResource {
         this.clientRegistry = clientRegistry;
         this.securityStore = securityStore;
         getCoapResourceProxy().setResourceType(RESOURCE_TYPE);//getAttributes().addResourceType(RESOURCE_TYPE); //SHIM
+    }
+    
+    @Override
+	public void onPOST(final ExchangeProxy exchangeProxy){
+    	/* SHIM
+    	final Request request = exchange.advanced().getRequest();
+    	*/
+
+    	/*
+        LOG.debug("POST received : {}", request);
+        */
+        LOG.debug("POST received : {}", exchangeProxy.getRequest());
+
+        // The LW M2M spec (section 8.2) mandates the usage of Confirmable
+        // messages
+        /*
+        if (!Type.CON.equals(request.getType())) {
+            exchange.respond(ResponseCode.BAD_REQUEST);
+            return;
+        }
+    	 */
+    	if(!exchangeProxy.getRequest().isConfirmable()){
+    		exchangeProxy.respondWithBadRequest();
+    		return;
+    	}
+        // TODO: assert content media type is APPLICATION LINK FORMAT?
+
+        final String endpoint = null;
+        final Long lifetime = null;
+        final String smsNumber = null;
+        final String lwVersion = null;
+        final BindingMode binding = null;
+        final LinkObject[] objectLinks = null;
+        /* SHIM
+        try {
+
+            for (final String param : request.getOptions().getURIQueries()) {
+                if (param.startsWith(QUERY_PARAM_ENDPOINT)) {
+                    endpoint = param.substring(3);
+                } else if (param.startsWith(QUERY_PARAM_LIFETIME)) {
+                    lifetime = Long.valueOf(param.substring(3));
+                } else if (param.startsWith(QUERY_PARAM_SMS)) {
+                    smsNumber = param.substring(4);
+                } else if (param.startsWith(QUERY_PARAM_LWM2M_VERSION)) {
+                    lwVersion = param.substring(6);
+                } else if (param.startsWith(QUERY_PARAM_BINDING_MODE)) {
+                    binding = BindingMode.valueOf(param.substring(2));
+                }
+            }
+
+    	 */
+        try{
+	        for (final String param : exchangeProxy.getRequest().getURIQueries()) {
+	        	
+	        }
+        }
     }
 
     @Override
