@@ -1,4 +1,4 @@
-package leshan.server.connector.californium;
+package leshan.connector.californium.server;
 
 import java.net.InetSocketAddress;
 import java.util.HashSet;
@@ -6,6 +6,7 @@ import java.util.Set;
 
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.impl.bridge.server.CoapServerImplementor;
+import leshan.server.lwm2m.impl.californium.RegisterResource;
 import leshan.server.lwm2m.impl.security.SecureEndpoint;
 import leshan.server.lwm2m.observation.ObservationRegistry;
 import leshan.server.lwm2m.request.LwM2mRequestSender;

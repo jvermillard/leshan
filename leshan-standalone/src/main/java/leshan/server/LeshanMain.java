@@ -31,7 +31,7 @@ package leshan.server;
 
 import java.net.InetSocketAddress;
 
-import leshan.server.connector.californium.CaliforniumServerImplementor;
+import leshan.connector.californium.server.CaliforniumServerImplementor;
 import leshan.server.lwm2m.LeshanServer;
 import leshan.server.lwm2m.impl.bridge.server.CoapServerImplementor;
 import leshan.server.servlet.ClientServlet;

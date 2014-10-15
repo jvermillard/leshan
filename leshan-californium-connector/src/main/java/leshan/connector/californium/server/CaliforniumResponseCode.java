@@ -1,4 +1,4 @@
-package leshan.server.connector.californium;
+package leshan.connector.californium.server;
 
 import org.apache.commons.lang.Validate;
 import org.eclipse.californium.core.coap.CoAP;

@@ -27,7 +27,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.connector.californium;
+package leshan.connector.californium.server;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
