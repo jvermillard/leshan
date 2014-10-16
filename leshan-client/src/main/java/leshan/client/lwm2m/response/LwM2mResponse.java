@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
- * 
+ *
  *
  * All rights reserved.
  *
@@ -32,10 +32,11 @@
 package leshan.client.lwm2m.response;
 
 import leshan.server.lwm2m.impl.tlv.Tlv;
+import leshan.server.lwm2m.request.ResponseCode;
 
 public interface LwM2mResponse {
 
-	public OperationResponseCode getCode();
+	public ResponseCode getCode();
 
 	public byte[] getResponsePayload();
 

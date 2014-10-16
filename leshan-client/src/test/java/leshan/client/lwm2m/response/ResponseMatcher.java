@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
- * 
+ *
  *
  * All rights reserved.
  *
@@ -33,23 +33,24 @@ package leshan.client.lwm2m.response;
 
 import java.util.Arrays;
 
+import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 import org.eclipse.californium.core.coap.Response;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 
 public class ResponseMatcher extends BaseMatcher<Response> {
 
-	private final OperationResponseCode code;
+	private final ResponseCode code;
 	private final byte[] payload;
 
-	public ResponseMatcher(final OperationResponseCode code, final byte[] payload) {
+	public ResponseMatcher(final ResponseCode code, final byte[] payload) {
 		this.code = code;
 		this.payload = payload;
 	}
 
 	@Override
 	public boolean matches(final Object arg0) {
-		final OperationResponseCode responseCode = OperationResponseCode.valueOf(((Response)arg0).getCode().value);		
+		final ResponseCode responseCode = ResponseCode.valueOf(((Response)arg0).getCode().value);
 		return responseCode == code && Arrays.equals(payload, ((Response)arg0).getPayload());
 	}
 

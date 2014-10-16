@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
- * 
+ *
  *
  * All rights reserved.
  *
@@ -45,59 +45,82 @@ import org.eclipse.californium.core.server.resources.CoapExchange;
 
 public class CaliforniumBasedLwM2mExchange implements LwM2mExchange {
 
-	private final CoapExchange exchange;
+    private final CoapExchange exchange;
 
-	public CaliforniumBasedLwM2mExchange(final CoapExchange exchange) {
-		this.exchange = exchange;
-	}
+    public CaliforniumBasedLwM2mExchange(final CoapExchange exchange) {
+        this.exchange = exchange;
+    }
 
-	@Override
-	public void respond(final LwM2mResponse response) {
-		if (response instanceof CreateResponse) {
-			final String objectId = getObjectId();
-			exchange.setLocationPath(objectId  + "/" + ((CreateResponse)response).getLocation());
-		}
+    @Override
+    public void respond(final LwM2mResponse response) {
+        if (response instanceof CreateResponse) {
+            final String objectId = getObjectId();
+            exchange.setLocationPath(objectId  + "/" + ((CreateResponse)response).getLocation());
+        }
 
-		exchange.respond(ResponseCode.valueOf(response.getCode().getValue()), response.getResponsePayload());
-	}
+        exchange.respond(leshanToCalifornium(response.getCode()), response.getResponsePayload());
+    }
 
-	@Override
-	public byte[] getRequestPayload() {
-		return exchange.getRequestPayload();
-	}
+    private ResponseCode leshanToCalifornium(final leshan.server.lwm2m.request.ResponseCode code) {
+        switch(code) {
+        case BAD_REQUEST:
+            return ResponseCode.BAD_REQUEST;
+        case CHANGED:
+            return ResponseCode.CHANGED;
+        case CONTENT:
+            return ResponseCode.CONTENT;
+        case CREATED:
+            return ResponseCode.CREATED;
+        case DELETED:
+            return ResponseCode.DELETED;
+        case METHOD_NOT_ALLOWED:
+            return ResponseCode.METHOD_NOT_ALLOWED;
+        case NOT_FOUND:
+            return ResponseCode.NOT_FOUND;
+        case UNAUTHORIZED:
+            return ResponseCode.UNAUTHORIZED;
+        default:
+            throw new IllegalArgumentException();
+        }
+    }
 
-	private String getObjectId() {
-		return getUriPaths().get(0);
-	}
+    @Override
+    public byte[] getRequestPayload() {
+        return exchange.getRequestPayload();
+    }
 
-	@Override
-	public boolean hasObjectInstanceId() {
-		return getUriPaths().size() > 1;
-	}
+    private String getObjectId() {
+        return getUriPaths().get(0);
+    }
 
-	@Override
-	public int getObjectInstanceId() {
-		List<String> paths = getUriPaths();
-		return paths.size() >= 2 ? Integer.parseInt(paths.get(1)) : 0;
-	}
+    @Override
+    public boolean hasObjectInstanceId() {
+        return getUriPaths().size() > 1;
+    }
 
-	private List<String> getUriPaths() {
-		return exchange.getRequestOptions().getURIPaths();
-	}
+    @Override
+    public int getObjectInstanceId() {
+        final List<String> paths = getUriPaths();
+        return paths.size() >= 2 ? Integer.parseInt(paths.get(1)) : 0;
+    }
 
-	@Override
-	public boolean isObserve() {
-		return exchange.getRequestOptions().hasObserve() && exchange.getRequestCode() == CoAP.Code.GET;
-	}
+    private List<String> getUriPaths() {
+        return exchange.getRequestOptions().getURIPaths();
+    }
 
-	@Override
-	public ObserveSpec getObserveSpec() {
-		if (exchange.advanced().getRequest().getOptions().getURIQueryCount() == 0) {
-			return null;
-		}
-		final List<String> uriQueries = exchange.advanced().getRequest().getOptions().getURIQueries();
-		System.out.println(uriQueries);
-		return ObserveSpecParser.parse(uriQueries);
-	}
+    @Override
+    public boolean isObserve() {
+        return exchange.getRequestOptions().hasObserve() && exchange.getRequestCode() == CoAP.Code.GET;
+    }
+
+    @Override
+    public ObserveSpec getObserveSpec() {
+        if (exchange.advanced().getRequest().getOptions().getURIQueryCount() == 0) {
+            return null;
+        }
+        final List<String> uriQueries = exchange.advanced().getRequest().getOptions().getURIQueries();
+        System.out.println(uriQueries);
+        return ObserveSpecParser.parse(uriQueries);
+    }
 
 }

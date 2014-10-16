@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
- * 
+ *
  *
  * All rights reserved.
  *
@@ -31,16 +31,16 @@
  */
 package leshan.client.lwm2m.response;
 
-import static leshan.client.lwm2m.response.OperationResponseCode.CHANGED;
+import leshan.server.lwm2m.request.ResponseCode;
 
 public class ObserveResponse extends BaseLwM2mResponse {
 
-	private ObserveResponse(final OperationResponseCode code, final byte[] payload) {
+	private ObserveResponse(final ResponseCode code, final byte[] payload) {
 		super(code, payload);
 	}
 
 	public static ObserveResponse notifyWithContent(final byte[] payload) {
-		return new ObserveResponse(CHANGED, payload);
+		return new ObserveResponse(ResponseCode.CHANGED, payload);
 	}
 
 }

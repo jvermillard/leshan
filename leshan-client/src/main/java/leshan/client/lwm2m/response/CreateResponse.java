@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
- * 
+ *
  *
  * All rights reserved.
  *
@@ -31,36 +31,34 @@
  */
 package leshan.client.lwm2m.response;
 
-import static leshan.client.lwm2m.response.OperationResponseCode.BAD_REQUEST;
-import static leshan.client.lwm2m.response.OperationResponseCode.CREATED;
-import static leshan.client.lwm2m.response.OperationResponseCode.METHOD_NOT_ALLOWED;
-
 import java.util.Objects;
+
+import leshan.server.lwm2m.request.ResponseCode;
 
 
 public class CreateResponse extends BaseLwM2mResponse {
 
 	private final String location;
 
-	private CreateResponse(final OperationResponseCode code, final String location) {
+	private CreateResponse(final ResponseCode code, final String location) {
 		super(code, new byte[0]);
 		this.location = location;
 	}
 
-	private CreateResponse(final OperationResponseCode code) {
+	private CreateResponse(final ResponseCode code) {
 		this(code, null);
 	}
 
 	public static CreateResponse success(final int instanceId) {
-		return new CreateResponse(CREATED, Integer.toString(instanceId));
+		return new CreateResponse(ResponseCode.CREATED, Integer.toString(instanceId));
 	}
 
 	public static CreateResponse methodNotAllowed() {
-		return new CreateResponse(METHOD_NOT_ALLOWED);
+		return new CreateResponse(ResponseCode.METHOD_NOT_ALLOWED);
 	}
 
 	public static CreateResponse invalidResource() {
-		return new CreateResponse(BAD_REQUEST);
+		return new CreateResponse(ResponseCode.BAD_REQUEST);
 	}
 
 	public String getLocation() {

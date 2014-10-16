@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
- * 
+ *
  *
  * All rights reserved.
  *
@@ -31,10 +31,13 @@
  */
 package leshan.client.lwm2m;
 
-import static leshan.client.lwm2m.response.OperationResponseCode.NOT_FOUND;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -45,6 +48,7 @@ import java.util.concurrent.Executor;
 import leshan.client.lwm2m.response.ResponseMatcher;
 
 import org.eclipse.californium.core.coap.CoAP.Code;
+import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 import org.eclipse.californium.core.coap.OptionSet;
 import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.core.network.Endpoint;
@@ -141,11 +145,11 @@ public class LwM2mServerMessageDelivererTest {
 	}
 
 	private void verifyErrorMessage() {
-		verify(exchange).sendResponse(argThat(new ResponseMatcher(NOT_FOUND, null)));
+		verify(exchange).sendResponse(argThat(new ResponseMatcher(ResponseCode.NOT_FOUND, null)));
 	}
 
 	private void verifyNoErrorMessage() {
-		verify(exchange, never()).sendResponse(argThat(new ResponseMatcher(NOT_FOUND, null)));
+		verify(exchange, never()).sendResponse(argThat(new ResponseMatcher(ResponseCode.NOT_FOUND, null)));
 	}
 
 	private class TestResource implements Resource {

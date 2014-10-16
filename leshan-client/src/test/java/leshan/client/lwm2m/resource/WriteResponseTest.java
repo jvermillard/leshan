@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
- * 
+ *
  *
  * All rights reserved.
  *
@@ -32,8 +32,8 @@
 package leshan.client.lwm2m.resource;
 
 import static org.junit.Assert.assertEquals;
-import leshan.client.lwm2m.response.OperationResponseCode;
 import leshan.client.lwm2m.response.WriteResponse;
+import leshan.server.lwm2m.request.ResponseCode;
 
 import org.junit.Test;
 
@@ -42,13 +42,13 @@ public class WriteResponseTest {
 	@Test
 	public void canCreateSuccessfulResponse() {
 		final WriteResponse response = WriteResponse.success();
-		assertEquals(OperationResponseCode.CHANGED, response.getCode());
+		assertEquals(ResponseCode.CHANGED, response.getCode());
 	}
 
 	@Test
 	public void canCreateFailureResponse() {
 		final WriteResponse response = WriteResponse.failure();
-		assertEquals(OperationResponseCode.BAD_REQUEST, response.getCode());
+		assertEquals(ResponseCode.BAD_REQUEST, response.getCode());
 	}
 
 }

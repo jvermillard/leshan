@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
- * 
+ *
  *
  * All rights reserved.
  *
@@ -36,19 +36,20 @@ import java.util.Objects;
 
 import leshan.server.lwm2m.impl.tlv.Tlv;
 import leshan.server.lwm2m.impl.tlv.Tlv.TlvType;
+import leshan.server.lwm2m.request.ResponseCode;
 
 public abstract class BaseLwM2mResponse implements LwM2mResponse {
 
-	private final OperationResponseCode code;
+	private final ResponseCode code;
 	private final byte[] payload;
 
-	public BaseLwM2mResponse(final OperationResponseCode code, final byte[] payload) {
+	public BaseLwM2mResponse(final ResponseCode code, final byte[] payload) {
 		this.code = code;
 		this.payload = payload;
 	}
 
 	@Override
-	public OperationResponseCode getCode() {
+	public ResponseCode getCode() {
 		return code;
 	}
 
@@ -64,7 +65,20 @@ public abstract class BaseLwM2mResponse implements LwM2mResponse {
 
 	@Override
 	public boolean isSuccess() {
-		return OperationResponseCode.isSuccess(code);
+		switch (code) {
+        case CHANGED:
+        case CONTENT:
+        case CREATED:
+        case DELETED:
+            return true;
+        case BAD_REQUEST:
+        case CONFLICT:
+        case METHOD_NOT_ALLOWED:
+        case NOT_FOUND:
+        case UNAUTHORIZED:
+        default:
+            return false;
+		}
 	}
 
 	@Override
@@ -83,7 +97,7 @@ public abstract class BaseLwM2mResponse implements LwM2mResponse {
 
 	@Override
 	public String toString() {
-		String payloadString = (payload == null) ? "" : ", \"" + Arrays.toString(payload) + "\"";
+		final String payloadString = (payload == null) ? "" : ", \"" + Arrays.toString(payload) + "\"";
 		return "[" + getClass().getSimpleName() + ": " + code + payloadString + "]";
 	}
 

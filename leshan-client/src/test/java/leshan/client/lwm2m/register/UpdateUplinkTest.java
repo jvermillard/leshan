@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
- * 
+ *
  *
  * All rights reserved.
  *
@@ -32,9 +32,14 @@
 package leshan.client.lwm2m.register;
 
 import static com.jayway.awaitility.Awaitility.await;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -45,7 +50,6 @@ import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.InterfaceTypes;
 import leshan.client.lwm2m.bootstrap.BootstrapMessageDeliverer.OperationTypes;
 import leshan.client.lwm2m.response.OperationResponse;
-import leshan.client.lwm2m.response.OperationResponseCode;
 import leshan.client.lwm2m.util.ResponseCallback;
 import leshan.server.lwm2m.client.LinkObject;
 
@@ -119,7 +123,6 @@ public class UpdateUplinkTest {
 				actualRequestPayload = request.getPayloadString();
 
 				final Response response = new Response(responseCode);
-				response.setPayload(OperationResponseCode.generateReasonPhrase(OperationResponseCode.valueOf(response.getCode().value), interfaceType, operationType));
 
 				request.setResponse(response);
 

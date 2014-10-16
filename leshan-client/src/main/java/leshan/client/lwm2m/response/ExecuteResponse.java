@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
- * 
+ *
  *
  * All rights reserved.
  *
@@ -31,26 +31,25 @@
  */
 package leshan.client.lwm2m.response;
 
-import static leshan.client.lwm2m.response.OperationResponseCode.CHANGED;
-import static leshan.client.lwm2m.response.OperationResponseCode.METHOD_NOT_ALLOWED;
+import leshan.server.lwm2m.request.ResponseCode;
 
 public class ExecuteResponse extends BaseLwM2mResponse {
 
-	private ExecuteResponse(final OperationResponseCode code) {
+	private ExecuteResponse(final ResponseCode code) {
 		super(code, new byte[0]);
 	}
 
 	public static ExecuteResponse success() {
-		return new ExecuteResponse(CHANGED);
+		return new ExecuteResponse(ResponseCode.CHANGED);
 	}
 
 	// TODO Evaluate whether this needs to be used
 	public static ExecuteResponse failure() {
-		return new ExecuteResponse(METHOD_NOT_ALLOWED);
+		return new ExecuteResponse(ResponseCode.METHOD_NOT_ALLOWED);
 	}
 
 	public static ExecuteResponse notAllowed() {
-		return new ExecuteResponse(METHOD_NOT_ALLOWED);
+		return new ExecuteResponse(ResponseCode.METHOD_NOT_ALLOWED);
 	}
 
 }
