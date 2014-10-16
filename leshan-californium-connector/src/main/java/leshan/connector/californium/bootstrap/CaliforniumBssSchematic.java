@@ -16,9 +16,9 @@ import leshan.connector.californium.server.CaliforniumPskStore;
 import leshan.connector.californium.server.CaliforniumServerImplementor;
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.impl.bridge.server.CoapServerImplementorSchematic;
-import leshan.server.lwm2m.impl.californium.RegisterResource;
 import leshan.server.lwm2m.impl.security.SecureEndpoint;
 import leshan.server.lwm2m.observation.ObservationRegistry;
+import leshan.server.lwm2m.resource.RegisterResource;
 import leshan.server.lwm2m.security.SecurityRegistry;
 
 public class CaliforniumBssSchematic implements CoapServerImplementorSchematic<CaliforniumServerImplementor, BootstrapResource>{

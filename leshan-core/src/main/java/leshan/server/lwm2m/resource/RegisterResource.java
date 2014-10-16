@@ -27,7 +27,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.lwm2m.impl.californium;
+package leshan.server.lwm2m.resource;
 
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -41,14 +41,12 @@ import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.client.ClientUpdate;
 import leshan.server.lwm2m.client.LinkObject;
 import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
-import leshan.server.lwm2m.resource.CoapResource;
 import leshan.server.lwm2m.resource.proxy.CoapResourceProxy;
 import leshan.server.lwm2m.resource.proxy.ExchangeProxy;
 import leshan.server.lwm2m.security.SecurityInfo;
 import leshan.server.lwm2m.security.SecurityStore;
 
 import org.apache.commons.lang.RandomStringUtils;
-import org.eclipse.californium.core.server.resources.CoapExchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +94,7 @@ public class RegisterResource extends CoapResource {
 		// The LW M2M spec (section 8.2) mandates the usage of Confirmable
 		// messages
 		if(!exchangeProxy.getRequest().isConfirmable()){
-			exchangeProxy.respondWithRequest(ResponseCode.BAD_REQUEST);
+			exchangeProxy.respond(ResponseCode.BAD_REQUEST);
 			return;
 		}
 		// TODO: assert content media type is APPLICATION LINK FORMAT?
@@ -123,7 +121,7 @@ public class RegisterResource extends CoapResource {
 				}
 			}
 			if (endpoint == null || endpoint.isEmpty()) {
-				exchangeProxy.respondWithRequest(ResponseCode.BAD_REQUEST, "Client must specify an endpoint identifier");
+				exchangeProxy.respond(ResponseCode.BAD_REQUEST, "Client must specify an endpoint identifier");
 			} else {
 				// register
 				final String registrationId = RegisterResource.createRegistrationId();
@@ -145,7 +143,7 @@ public class RegisterResource extends CoapResource {
 					if (securityInfo == null || pskIdentity == null || !pskIdentity.equals(securityInfo.getIdentity())) {
 						LOG.warn("Invalid identity for client {}: expected '{}' but was '{}'", endpoint,
 								securityInfo == null ? null : securityInfo.getIdentity(), pskIdentity);
-						exchangeProxy.respondWithRequest(ResponseCode.BAD_REQUEST, "Invalid identity");
+						exchangeProxy.respond(ResponseCode.BAD_REQUEST, "Invalid identity");
 						exchangeProxy.killTlsSession();
 						return;
 					} else {
@@ -155,7 +153,7 @@ public class RegisterResource extends CoapResource {
 				else{
 					if (securityInfo != null) {
 						LOG.warn("client {} must connect using DTLS PSK", endpoint);
-						exchangeProxy.respondWithRequest(ResponseCode.BAD_REQUEST, "Client must connect thru DTLS (port 5684)");
+						exchangeProxy.respond(ResponseCode.BAD_REQUEST, "Client must connect thru DTLS (port 5684)");
 						return;
 					}
 				}
@@ -165,13 +163,13 @@ public class RegisterResource extends CoapResource {
 				LOG.debug("New registered client: {}", client);
 
 				exchangeProxy.setLocationPath(RESOURCE_NAME + "/" + client.getRegistrationId());
-				exchangeProxy.respondWithRequest(ResponseCode.CREATED);
+				exchangeProxy.respond(ResponseCode.CREATED);
 			}
 		} catch (final NumberFormatException e) {
-			exchangeProxy.respondWithRequest(ResponseCode.BAD_REQUEST, "Lifetime parameter must be a valid number");
+			exchangeProxy.respond(ResponseCode.BAD_REQUEST, "Lifetime parameter must be a valid number");
 		} catch (final Exception e) {
 			LOG.debug("Registration failed for client " + endpoint, e);
-			exchangeProxy.respondWithRequest(ResponseCode.BAD_REQUEST);
+			exchangeProxy.respond(ResponseCode.BAD_REQUEST);
 		}
 	}
 
@@ -185,13 +183,13 @@ public class RegisterResource extends CoapResource {
 	public void handlePUT(final ExchangeProxy exchangeProxy) {
 		LOG.debug("UPDATE received : {}", exchangeProxy.getRequest());
 		if(!exchangeProxy.getRequest().isConfirmable()){
-			exchangeProxy.respondWithRequest(ResponseCode.BAD_REQUEST);
+			exchangeProxy.respond(ResponseCode.BAD_REQUEST);
 			return;
 		}
 
 		final List<String> uri = exchangeProxy.getURIPaths();
 		if (uri == null || uri.size() != 2 || !RESOURCE_NAME.equals(uri.get(0))) {
-			exchangeProxy.respondWithRequest(ResponseCode.NOT_FOUND);
+			exchangeProxy.respond(ResponseCode.NOT_FOUND);
 			return;
 		}
 
@@ -221,23 +219,23 @@ public class RegisterResource extends CoapResource {
 		try {
 			final Client c = clientRegistry.updateClient(client);
 			if (c == null) {
-				exchange.respond(ResponseCode.NOT_FOUND);
+				exchangeProxy.respond(ResponseCode.NOT_FOUND);
 			} else {
-				exchange.respond(ResponseCode.CHANGED);
+				exchangeProxy.respond(ResponseCode.CHANGED);
 			}
 		} catch (final ClientRegistrationException e) {
 			LOG.debug("Registration update failed: " + client, e);
-			exchange.respond(ResponseCode.BAD_REQUEST);
+			exchangeProxy.respond(ResponseCode.BAD_REQUEST);
 		}
 
 	}
 
 	@Override
-	public void handleDELETE(final CoapExchange exchange) {
-		LOG.debug("DELETE received : {}", exchange.advanced().getRequest());
+	public void handleDELETE(final ExchangeProxy exchangeProxy) {
+		LOG.debug("DELETE received : {}", exchangeProxy.getRequest());
 
 		Client unregistered = null;
-		final List<String> uri = exchange.getRequestOptions().getURIPaths();
+		final List<String> uri = exchangeProxy.getURIPaths();
 
 		try {
 			if (uri != null && uri.size() == 2 && RESOURCE_NAME.equals(uri.get(0))) {
@@ -245,26 +243,17 @@ public class RegisterResource extends CoapResource {
 			}
 
 			if (unregistered != null) {
-				exchange.respond(ResponseCode.DELETED);
+				exchangeProxy.respond(ResponseCode.DELETED);
 			} else {
 				LOG.debug("Invalid deregistration");
-				exchange.respond(ResponseCode.BAD_REQUEST);
+				exchangeProxy.respond(ResponseCode.BAD_REQUEST);
 			}
 
 		} catch (final ClientRegistrationException e) {
 			LOG.debug("Deregistration failed", e);
-			exchange.respond(ResponseCode.BAD_REQUEST);
+			exchangeProxy.respond(ResponseCode.BAD_REQUEST);
 		}
 
-	}
-
-	/*
-	 * Override the default behavior so that requests to sub resources (typically /rd/{client-reg-id}) are handled by
-	 * /rd resource.
-	 */
-	@Override
-	public Resource getChild(final String name) {
-		return this;
 	}
 
 	private static String createRegistrationId() {

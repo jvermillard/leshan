@@ -31,7 +31,7 @@ public class CaliforniumExchangeProxy extends ExchangeProxy {
 	}
 
 	@Override
-	public void respondWithRequest(
+	public void respond(
 			final leshan.server.lwm2m.request.CoapResponseCode.ResponseCode code, final String... errorMessage) {
 		ResponseCode caCode = null;
 
@@ -42,7 +42,18 @@ public class CaliforniumExchangeProxy extends ExchangeProxy {
 		case CREATED:
 			caCode = ResponseCode.CREATED;
 			break;
-
+		case NOT_FOUND:
+			caCode = ResponseCode.NOT_FOUND;
+			break;
+		case CHANGED:
+			caCode = ResponseCode.CHANGED;
+			break;
+		case DELETED:
+			caCode = ResponseCode.DELETED;
+			break;
+		case CONTENT:
+			caCode = ResponseCode.CONTENT;
+			break;
 		default:
 			caCode = ResponseCode.INTERNAL_SERVER_ERROR;
 

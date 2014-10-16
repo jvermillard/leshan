@@ -30,7 +30,7 @@ public abstract class ExchangeProxy {
 
 	public abstract List<String> getURIPaths();
 
-	public abstract void respondWithRequest(ResponseCode code, final String... errorMessage);
+	public abstract void respond(ResponseCode code, final String... errorMessage);
 
 	public abstract ClientUpdate createNewClientUpdate(String registrationId, Long lifetime,
 			String smsNumber, BindingMode binding, LinkObject[] objectLinks);

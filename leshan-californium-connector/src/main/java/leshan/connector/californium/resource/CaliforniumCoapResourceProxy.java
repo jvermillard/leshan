@@ -44,6 +44,20 @@ public class CaliforniumCoapResourceProxy implements CoapResourceProxy{
 		public void handlePUT(final CoapExchange exchange) {
 			parentResource.handlePUT(new CaliforniumExchangeProxy(exchange));
 		}
+		
+		@Override
+		public void handleDELETE(final CoapExchange exchange) {
+			parentResource.handleDELETE(new CaliforniumExchangeProxy(exchange));
+		}
+		
+		/*
+		 * Override the default behavior so that requests to sub resources (typically /rd/{client-reg-id}) are handled by
+		 * /rd resource.
+		 */
+		@Override
+		public Resource getChild(final String name) {
+			return this;
+		}
 	}
 
 }
