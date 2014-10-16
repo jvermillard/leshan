@@ -66,9 +66,6 @@ public class LwM2mServerMessageDeliverer implements MessageDeliverer {
 		this.root = root;
 	}
 
-	/* (non-Javadoc)
-	 * @see ch.inf.vs.californium.MessageDeliverer#deliverRequest(ch.inf.vs.californium.network.Exchange)
-	 */
 	@Override
 	public void deliverRequest(final Exchange exchange) {
 		final Request request = exchange.getRequest();
@@ -167,9 +164,6 @@ public class LwM2mServerMessageDeliverer implements MessageDeliverer {
 				list.size() == 2;
 	}
 
-	/* (non-Javadoc)
-	 * @see ch.inf.vs.californium.MessageDeliverer#deliverResponse(ch.inf.vs.californium.network.Exchange, ch.inf.vs.californium.coap.Response)
-	 */
 	@Override
 	public void deliverResponse(final Exchange exchange, final Response response) {
 		if (response == null) {
