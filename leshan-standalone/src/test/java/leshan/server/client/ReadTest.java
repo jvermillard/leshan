@@ -1,3 +1,35 @@
+/*
+ * Copyright (c) 2013, Sierra Wireless,
+ * Copyright (c) 2014, Zebra Technologies,
+ * 
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright notice,
+ *       this list of conditions and the following disclaimer in the documentation
+ *       and/or other materials provided with the distribution.
+ *     * Neither the name of {{ project }} nor the names of its contributors
+ *       may be used to endorse or promote products derived from this software
+ *       without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 package leshan.server.client;
 
 import java.util.HashMap;
@@ -31,7 +63,7 @@ public class ReadTest extends LwM2mClientServerIntegrationTest {
 		register();
 		sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);
 
-		LwM2mNode objectNode = new LwM2mObject(GOOD_OBJECT_ID, new LwM2mObjectInstance[] {
+		final LwM2mNode objectNode = new LwM2mObject(GOOD_OBJECT_ID, new LwM2mObjectInstance[] {
 				new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
 						new LwM2mResource(FIRST_RESOURCE_ID, Value.newBinaryValue(HELLO.getBytes())),
 						new LwM2mResource(SECOND_RESOURCE_ID, Value.newBinaryValue(GOODBYE.getBytes()))
@@ -45,7 +77,7 @@ public class ReadTest extends LwM2mClientServerIntegrationTest {
 		register();
 		sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);
 
-		LwM2mObjectInstance objectInstanceNode = new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
+		final LwM2mObjectInstance objectInstanceNode = new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
 				new LwM2mResource(FIRST_RESOURCE_ID, Value.newBinaryValue(HELLO.getBytes())),
 				new LwM2mResource(SECOND_RESOURCE_ID, Value.newBinaryValue(GOODBYE.getBytes()))
 		});
@@ -92,11 +124,11 @@ public class ReadTest extends LwM2mClientServerIntegrationTest {
 		// This encoding is required because the LwM2mNodeParser doesn't have a way
 		// of recognizing the multiple-versus-single resource-ness for the response
 		// of reading a resource.
-		byte[] tlvBytes = TlvEncoder.encode(new Tlv[] {
+		final byte[] tlvBytes = TlvEncoder.encode(new Tlv[] {
 				new Tlv(TlvType.RESOURCE_INSTANCE, null, HELLO.getBytes(), 0),
 				new Tlv(TlvType.RESOURCE_INSTANCE, null, GOODBYE.getBytes(), 1)
 		}).array();
-		LwM2mNode resource = new LwM2mResource(MULTIPLE_RESOURCE_ID, Value.newStringValue(new String(tlvBytes)));
+		final LwM2mNode resource = new LwM2mResource(MULTIPLE_RESOURCE_ID, Value.newStringValue(new String(tlvBytes)));
 
 		assertResponse(sendRead(MULTIPLE_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, MULTIPLE_RESOURCE_ID),
 				ResponseCode.CONTENT, resource);
@@ -113,7 +145,7 @@ public class ReadTest extends LwM2mClientServerIntegrationTest {
 
 		multipleResource.setValue(map);
 
-		LwM2mObjectInstance objectInstance = new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
+		final LwM2mObjectInstance objectInstance = new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
 				new LwM2mResource(MULTIPLE_RESOURCE_ID, new Value<?>[] {
 						Value.newBinaryValue(HELLO.getBytes()),
 						Value.newBinaryValue(GOODBYE.getBytes())

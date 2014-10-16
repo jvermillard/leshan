@@ -1,3 +1,35 @@
+/*
+ * Copyright (c) 2013, Sierra Wireless,
+ * Copyright (c) 2014, Zebra Technologies,
+ * 
+ *
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *
+ *     * Redistributions of source code must retain the above copyright notice,
+ *       this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright notice,
+ *       this list of conditions and the following disclaimer in the documentation
+ *       and/or other materials provided with the distribution.
+ *     * Neither the name of {{ project }} nor the names of its contributors
+ *       may be used to endorse or promote products derived from this software
+ *       without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+ * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+ * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 package leshan.server.client;
 
 import static org.junit.Assert.assertEquals;
@@ -132,7 +164,7 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 		assertResponse(response, ResponseCode.CONTENT, new LwM2mResource(INT_RESOURCE_ID, Value.newStringValue("0")));
 	}
 
-	private void observeResource(ObserveSpec.Builder observeSpecBuilder) {
+	private void observeResource(final ObserveSpec.Builder observeSpecBuilder) {
 		sendWriteAttributes(observeSpecBuilder.build(), INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
 		observeResource();
 	}
@@ -144,7 +176,7 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 		}));
 	}
 
-	private void observeObjectInstance(ObserveSpec.Builder observeSpecBuilder) {
+	private void observeObjectInstance(final ObserveSpec.Builder observeSpecBuilder) {
 		sendWriteAttributes(observeSpecBuilder.build(), INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID);
 		observeObjectInstance();
 	}
@@ -158,28 +190,28 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 		}));
 	}
 
-	private void observeObject(ObserveSpec.Builder observeSpecBuilder) {
+	private void observeObject(final ObserveSpec.Builder observeSpecBuilder) {
 		sendWriteAttributes(observeSpecBuilder.build(), INT_OBJECT_ID);
 		observeObject();
 	}
 
-	private void assertObservedResource(String value) {
+	private void assertObservedResource(final String value) {
 		assertObservedResource(500, value);
 	}
 
-	private void assertObservedResource(long timeoutInSeconds, String value) {
+	private void assertObservedResource(final long timeoutInSeconds, final String value) {
 		Awaitility.await().atMost(timeoutInSeconds, TimeUnit.MILLISECONDS).untilTrue(observer.receievedNotify());
 		assertEquals(new LwM2mResource(INT_RESOURCE_ID, Value.newStringValue(value)), observer.getContent());
 	}
 
-	private void assertObservedObjectInstance(long timeoutInSeconds, String resourceValue) {
+	private void assertObservedObjectInstance(final long timeoutInSeconds, final String resourceValue) {
 		Awaitility.await().atMost(timeoutInSeconds, TimeUnit.MILLISECONDS).untilTrue(observer.receievedNotify());
 		assertEquals(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
 				new LwM2mResource(INT_RESOURCE_ID, Value.newBinaryValue(resourceValue.getBytes()))		
 		}), observer.getContent());
 	}
 
-	private void assertObservedObject(long timeoutInSeconds, String resourceValue) {
+	private void assertObservedObject(final long timeoutInSeconds, final String resourceValue) {
 		Awaitility.await().atMost(timeoutInSeconds, TimeUnit.MILLISECONDS).untilTrue(observer.receievedNotify());
 		assertEquals(new LwM2mObject(INT_OBJECT_ID, new LwM2mObjectInstance[] {
 				new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
@@ -188,7 +220,7 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 		}), observer.getContent());
 	}
 
-	private void assertNoObservation(long time) {
+	private void assertNoObservation(final long time) {
 		sleep(time);
 		assertFalse(observer.receievedNotify().get());
 	}
@@ -201,22 +233,22 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 	}
 
 	private final class SampleObservation implements ObservationRegistryListener {
-		private AtomicBoolean receivedNotify = new AtomicBoolean();
+		private final AtomicBoolean receivedNotify = new AtomicBoolean();
 		private LwM2mNode content;
 
 		@Override
-		public void newValue(Observation observation, LwM2mNode value) {
+		public void newValue(final Observation observation, final LwM2mNode value) {
 			receivedNotify.set(true);
 			content = value;
 		}
 
 		@Override
-		public void cancelled(Observation observation) {
+		public void cancelled(final Observation observation) {
 
 		}
 
 		@Override
-		public void newObservation(Observation observation) {
+		public void newObservation(final Observation observation) {
 
 		}
 
