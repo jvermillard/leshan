@@ -29,6 +29,7 @@
  */
 package leshan.server.lwm2m.impl.tlv;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -153,11 +154,9 @@ public class TlvDecoder {
      * Decodes a byte array into a date value.
      */
     public static Date decodeDate(byte[] value) {
-        ByteBuffer bb = ByteBuffer.wrap(value);
-        if (value.length == 4) {
-            return new Date(bb.getInt() * 1000L);
-        } else if (value.length == 8) {
-            return new Date(bb.getLong() * 1000L);
+        BigInteger bi = new BigInteger(value);
+        if (value.length <= 8) {
+            return new Date(bi.longValue() * 1000L);
         } else {
             throw new IllegalArgumentException("Invalid length for a time value: " + value.length);
         }
@@ -167,15 +166,15 @@ public class TlvDecoder {
      * Decodes a byte array into an integer value.
      */
     public static Number decodeInteger(byte[] value) {
-        ByteBuffer bb = ByteBuffer.wrap(value);
+        BigInteger bi = new BigInteger(value);
         if (value.length == 1) {
-            return bb.get();
-        } else if (value.length == 2) {
-            return bb.getShort();
-        } else if (value.length == 4) {
-            return bb.getInt();
-        } else if (value.length == 8) {
-            return bb.getLong();
+            return bi.byteValue();
+        } else if (value.length <= 2) {
+            return bi.shortValue();
+        } else if (value.length <= 4) {
+            return bi.intValue();
+        } else if (value.length <= 8) {
+            return bi.longValue();
         } else {
             throw new IllegalArgumentException("Invalid length for an integer value: " + value.length);
         }
