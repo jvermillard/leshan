@@ -358,8 +358,7 @@ public class ClientServlet extends HttpServlet {
             } catch (JsonSyntaxException e) {
                 throw new IllegalArgumentException("unable to parse json to tlv:" + e.getMessage(), e);
             }
-
-            return server.send(new WriteRequest(client, target, node, ContentFormat.TLV, true));
+            return server.send(new WriteRequest(client, target, node, null, true));
 
         } else {
             throw new IllegalArgumentException("content type " + req.getContentType()

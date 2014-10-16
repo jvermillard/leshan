@@ -30,6 +30,8 @@
 package leshan.server.lwm2m.request;
 
 import leshan.server.lwm2m.client.Client;
+import leshan.server.lwm2m.impl.objectspec.ResourceSpec;
+import leshan.server.lwm2m.impl.objectspec.Resources;
 import leshan.server.lwm2m.node.LwM2mNode;
 import leshan.server.lwm2m.node.LwM2mPath;
 
@@ -60,11 +62,34 @@ public class WriteRequest extends AbstractLwM2mRequest<ClientResponse> {
         super(client, target);
         Validate.notNull(node);
 
-        if (ContentFormat.TEXT == format && !this.getPath().isResource()) {
-            throw new IllegalArgumentException("Text format must be used only for single resources");
+        // Manage Text format
+        if (ContentFormat.TEXT == format) {
+            if (!getPath().isResource()) {
+                throw new IllegalArgumentException("Text format must be used only for single resources");
+            } else {
+                ResourceSpec description = Resources.getDescription(getPath().getObjectId(), getPath().getObjectId());
+                if (description != null && description.multiple) {
+                    throw new IllegalArgumentException("Text format must be used only for single resources");
+                }
+            }
         }
+
+        // Manage default format
+        if (format == null) {
+            // use text for single resource
+            if (getPath().isResource()) {
+                ResourceSpec description = Resources.getDescription(getPath().getObjectId(), getPath().getObjectId());
+                if (description != null && !description.multiple)
+                    format = ContentFormat.TEXT;
+                else
+                    format = ContentFormat.TLV;
+            } else {
+                format = ContentFormat.TLV;
+            }
+        }
+
         this.node = node;
-        this.contentFormat = format != null ? format : ContentFormat.TLV; // default to TLV
+        this.contentFormat = format;
         this.replaceRequest = replaceResources;
     }
 
