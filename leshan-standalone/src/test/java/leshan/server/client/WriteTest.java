@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
- * 
+ *
  *
  * All rights reserved.
  *
@@ -51,7 +51,7 @@ public class WriteTest extends LwM2mClientServerIntegrationTest {
     private static final String GOODBYE = "goodbye";
 
     @Test
-    public void canWriteReplaceToResource() {
+    public void can_write_replace_to_resource() {
         register();
 
         sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);
@@ -64,7 +64,7 @@ public class WriteTest extends LwM2mClientServerIntegrationTest {
     }
 
     @Test
-    public void badWriteReplaceToResource() {
+    public void bad_write_replace_to_resource() {
         register();
 
         sendCreate(createUnwritableResource("i'm broken!"), BROKEN_OBJECT_ID);
@@ -76,7 +76,7 @@ public class WriteTest extends LwM2mClientServerIntegrationTest {
     }
 
     @Test
-    public void cannotWriteToNonWritableResource() {
+    public void cannot_write_to_non_writable_resource() {
         register();
 
         sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);
@@ -87,7 +87,7 @@ public class WriteTest extends LwM2mClientServerIntegrationTest {
 
     @Ignore
     @Test
-    public void canWriteToWritableMultipleResource() {
+    public void can_write_to_writable_multiple_resource() {
         register();
         sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), MULTIPLE_OBJECT_ID);
 
@@ -110,7 +110,7 @@ public class WriteTest extends LwM2mClientServerIntegrationTest {
     // probably be deleted. Ignored until this is confirmed
     @Ignore
     @Test
-    public void canWritePartialUpdateToResource() {
+    public void can_write_partial_update_to_resource() {
         register();
 
         sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);

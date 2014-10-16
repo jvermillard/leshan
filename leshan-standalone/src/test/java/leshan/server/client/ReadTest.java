@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
- * 
+ *
  *
  * All rights reserved.
  *
@@ -53,13 +53,13 @@ public class ReadTest extends LwM2mClientServerIntegrationTest {
 	private static final String GOODBYE = "goodbye";
 
 	@Test
-	public void canReadObject() {
+	public void can_read_empty_object() {
 		register();
 		assertEmptyResponse(sendRead(GOOD_OBJECT_ID), ResponseCode.CONTENT);
 	}
 
 	@Test
-	public void canReadObjectWithCreatedInstance() {
+	public void can_read_object_with_created_instance() {
 		register();
 		sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);
 
@@ -73,7 +73,7 @@ public class ReadTest extends LwM2mClientServerIntegrationTest {
 	}
 
 	@Test
-	public void canReadObjectInstance() {
+	public void can_read_object_instance() {
 		register();
 		sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);
 
@@ -85,7 +85,7 @@ public class ReadTest extends LwM2mClientServerIntegrationTest {
 	}
 
 	@Test
-	public void canReadResource() {
+	public void can_read_resource() {
 		register();
 		sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);
 
@@ -96,7 +96,7 @@ public class ReadTest extends LwM2mClientServerIntegrationTest {
 	}
 
 	@Test
-	public void cannotReadNonReadableResource() {
+	public void cannot_read_non_readable_resource() {
 		register();
 		sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);
 
@@ -104,7 +104,7 @@ public class ReadTest extends LwM2mClientServerIntegrationTest {
 	}
 
 	@Test
-	public void cannotReadNonExistentResource() {
+	public void cannot_read_non_existent_resource() {
 		register();
 		sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);
 
@@ -112,7 +112,7 @@ public class ReadTest extends LwM2mClientServerIntegrationTest {
 	}
 
 	@Test
-	public void canReadMultipleResource() {
+	public void can_read_multiple_resource() {
 		register();
 		sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), MULTIPLE_OBJECT_ID);
 
@@ -135,7 +135,7 @@ public class ReadTest extends LwM2mClientServerIntegrationTest {
 	}
 
 	@Test
-	public void canReadObjectInstanceWithMultipleResource() {
+	public void can_read_object_instance_with_multiple_resource() {
 		register();
 		sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), MULTIPLE_OBJECT_ID);
 

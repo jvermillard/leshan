@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
- * 
+ *
  *
  * All rights reserved.
  *
@@ -46,7 +46,7 @@ import org.junit.Test;
 public class RegistrationTest extends LwM2mClientServerIntegrationTest {
 
 	@Test
-	public void registeredDeviceExists() {
+	public void registered_device_exists() {
 		final RegisterUplink registerUplink = registerAndGetUplink();
 		final OperationResponse register = registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
 
@@ -55,18 +55,18 @@ public class RegistrationTest extends LwM2mClientServerIntegrationTest {
 	}
 
 	@Test(expected=IllegalArgumentException.class)
-	public void failToCreateClientWithNull(){
+	public void fail_to_create_client_with_null(){
 		client = new LwM2mClient((LwM2mClientObjectDefinition[])null);
 	}
 
 	@Test(expected=IllegalArgumentException.class)
-	public void failToCreateClientWithSameObjectTwice(){
+	public void fail_to_create_client_with_same_object_twice(){
 		final LwM2mClientObjectDefinition objectOne = new LwM2mClientObjectDefinition(1, false, false);
 		client = new LwM2mClient(objectOne, objectOne);
 	}
 
 	@Test
-	public void registeredDeviceExistsAsync() {
+	public void registered_device_exists_async() {
 		final RegisterUplink registerUplink = registerAndGetUplink();
 		final ResponseCallback callback = new ResponseCallback();
 		registerUplink.register(ENDPOINT, clientParameters, callback);

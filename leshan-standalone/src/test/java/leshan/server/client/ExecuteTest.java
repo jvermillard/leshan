@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
- * 
+ *
  *
  * All rights reserved.
  *
@@ -42,7 +42,7 @@ import org.junit.Test;
 public class ExecuteTest extends LwM2mClientServerIntegrationTest {
 
 	@Test
-	public void canNotExecuteWriteOnlyResource() {
+	public void cannot_execute_write_only_resource() {
 		register();
 
 		sendCreate(createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
@@ -60,7 +60,7 @@ public class ExecuteTest extends LwM2mClientServerIntegrationTest {
 	}
 
 	@Test
-	public void canExecuteResource() {
+	public void can_execute_resource() {
 		register();
 
 		sendCreate(createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
- * 
+ *
  *
  * All rights reserved.
  *
@@ -42,14 +42,14 @@ import org.junit.Test;
 public class DeleteTest extends LwM2mClientServerIntegrationTest {
 
 	@Test
-	public void deleteCreatedObjectInstance(){
+	public void delete_created_object_instance(){
 		register();
 
 		createAndThenAssertDeleted();
 	}
 
 	@Test
-	public void deleteAndCantReadObjectInstance(){
+	public void delete_and_cant_read_object_instance(){
 		register();
 
 		createAndThenAssertDeleted();
@@ -58,7 +58,7 @@ public class DeleteTest extends LwM2mClientServerIntegrationTest {
 	}
 
 	@Test
-	public void deleteAndReadObjectIsEmpty(){
+	public void delete_and_read_object_is_empty(){
 		register();
 
 		createAndThenAssertDeleted();
@@ -68,7 +68,7 @@ public class DeleteTest extends LwM2mClientServerIntegrationTest {
 	}
 
 	@Test
-	public void cantDeleteUnknownObjectInstance(){
+	public void cannot_delete_unknown_object_instance(){
 		register();
 
 		final ClientResponse responseDelete = sendDelete(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID);

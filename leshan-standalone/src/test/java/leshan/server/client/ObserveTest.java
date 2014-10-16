@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
- * 
+ *
  *
  * All rights reserved.
  *
@@ -69,7 +69,7 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 	}
 
 	@Test
-	public void canObserveResource() {
+	public void can_observe_resource() {
 		observeResource();
 
 		intResource.setValue(2);
@@ -78,7 +78,7 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 
 	@Ignore
 	@Test
-	public void canObserveResourceWithGtAttributeWithNotify() {
+	public void can_observe_resource_with_gt_with_notify() {
 		observeResource(attributes().greaterThan(6));
 
 		intResource.setValue(20);
@@ -87,7 +87,7 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 
 	@Ignore
 	@Test
-	public void canObserveResourceWithGtAttributeNoNotify() {
+	public void can_observe_resource_with_gt_no_notify() {
 		observeResource(attributes().greaterThan(6));
 
 		intResource.setValue(2);
@@ -96,7 +96,7 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 
 	@Ignore
 	@Test
-	public void canObserveResourceWithLtAttributeWithNotify() {
+	public void can_observe_resource_with_lt_with_notify() {
 		observeResource(attributes().lessThan(6));
 
 		intResource.setValue(2);
@@ -105,7 +105,7 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 
 	@Ignore
 	@Test
-	public void canObserveResourceWithLtAttributeNoNotify() {
+	public void can_observe_resource_with_lt_no_notify() {
 		observeResource(attributes().lessThan(6));
 
 		intResource.setValue(20);
@@ -114,7 +114,7 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 
 	@Ignore
 	@Test
-	public void canObserveResourceWithGtAndLtAttributeWithNotify() {
+	public void can_observe_resource_with_gt_and_lt_with_notify() {
 		observeResource(attributes().greaterThan(10).lessThan(6));
 
 		intResource.setValue(20);
@@ -122,21 +122,21 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 	}
 
 	@Test
-	public void canObserveResourceWithPmaxAttributeWithNotify() {
+	public void can_observe_resource_with_pmax_with_notify() {
 		observeResource(attributes().maxPeriod(1));
 
 		assertObservedResource(2000, "0");
 	}
 
 	@Test
-	public void canObserveResourceWithPmaxAttributeNoNotify() {
+	public void can_observe_resource_with_pmax_no_notify() {
 		observeResource(attributes().maxPeriod(1));
 
 		assertNoObservation(500);
 	}
 
 	@Test
-	public void canObserveObjectInstanceWithPmaxWithNotify() {
+	public void can_observe_object_instance_with_pmax_with_notify() {
 		observeObjectInstance(attributes().maxPeriod(1));
 
 		intResource.setValue(2);
@@ -144,7 +144,7 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 	}
 
 	@Test
-	public void canObserveObjectWithPmaxWithNotify() {
+	public void can_observe_object_with_pmax_with_notify() {
 		observeObject(attributes().maxPeriod(1));
 
 		intResource.setValue(2);
@@ -185,7 +185,7 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 		final ValueResponse response = sendObserve(INT_OBJECT_ID);
 		assertResponse(response, ResponseCode.CONTENT, new LwM2mObject(INT_OBJECT_ID, new LwM2mObjectInstance[] {
 				new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
-						new LwM2mResource(INT_RESOURCE_ID, Value.newBinaryValue("0".getBytes()))		
+						new LwM2mResource(INT_RESOURCE_ID, Value.newBinaryValue("0".getBytes()))
 				})
 		}));
 	}
@@ -207,7 +207,7 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 	private void assertObservedObjectInstance(final long timeoutInSeconds, final String resourceValue) {
 		Awaitility.await().atMost(timeoutInSeconds, TimeUnit.MILLISECONDS).untilTrue(observer.receievedNotify());
 		assertEquals(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
-				new LwM2mResource(INT_RESOURCE_ID, Value.newBinaryValue(resourceValue.getBytes()))		
+				new LwM2mResource(INT_RESOURCE_ID, Value.newBinaryValue(resourceValue.getBytes()))
 		}), observer.getContent());
 	}
 
@@ -215,7 +215,7 @@ public class ObserveTest extends LwM2mClientServerIntegrationTest {
 		Awaitility.await().atMost(timeoutInSeconds, TimeUnit.MILLISECONDS).untilTrue(observer.receievedNotify());
 		assertEquals(new LwM2mObject(INT_OBJECT_ID, new LwM2mObjectInstance[] {
 				new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
-						new LwM2mResource(INT_RESOURCE_ID, Value.newBinaryValue(resourceValue.getBytes()))		
+						new LwM2mResource(INT_RESOURCE_ID, Value.newBinaryValue(resourceValue.getBytes()))
 				})
 		}), observer.getContent());
 	}

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
- * 
+ *
  *
  * All rights reserved.
  *
@@ -42,7 +42,7 @@ import org.junit.Test;
 public class DiscoverTest extends LwM2mClientServerIntegrationTest {
 
 	@Test
-	public void testDiscoverObject() {
+	public void can_discover_object() {
 		register();
 
 		final DiscoverResponse response = sendDiscover(GOOD_OBJECT_ID);
@@ -50,7 +50,7 @@ public class DiscoverTest extends LwM2mClientServerIntegrationTest {
 	}
 
 	@Test(expected=IllegalArgumentException.class)
-	public void testIllegalObjectLinksRequestTwo() {
+	public void illegal_object_links_request_two() {
 		register();
 
 		final DiscoverResponse response = sendDiscover(GOOD_OBJECT_ID);
@@ -58,7 +58,7 @@ public class DiscoverTest extends LwM2mClientServerIntegrationTest {
 	}
 
 	@Test
-	public void testDiscoverObjectInstance() {
+	public void can_discover_object_instance() {
 		register();
 
 		sendCreate(createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
@@ -67,7 +67,7 @@ public class DiscoverTest extends LwM2mClientServerIntegrationTest {
 	}
 
 	@Test
-	public void testDiscoverResource() {
+	public void can_discover_resource() {
 		register();
 
 		sendCreate(createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
@@ -76,7 +76,7 @@ public class DiscoverTest extends LwM2mClientServerIntegrationTest {
 	}
 
 	@Test
-	public void testCantDiscoverNonExistentResource() {
+	public void cant_discover_non_existent_resource() {
 		register();
 
 		sendCreate(createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);

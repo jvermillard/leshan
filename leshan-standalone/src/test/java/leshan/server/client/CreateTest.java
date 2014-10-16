@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
- * 
+ *
  *
  * All rights reserved.
  *
@@ -44,7 +44,7 @@ import org.junit.Test;
 public class CreateTest extends LwM2mClientServerIntegrationTest {
 
     @Test
-    public void canCreateInstanceOfObject() {
+    public void can_create_instance_of_object() {
         register();
 
         final CreateResponse response = sendCreate(createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
@@ -53,7 +53,7 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
     }
 
     @Test
-    public void canCreateSpecificInstanceOfObject() {
+    public void can_create_specific_instance_of_object() {
         register();
 
         final CreateResponse response = sendCreate(createGoodObjectInstance("one", "two"), GOOD_OBJECT_ID, 14);
@@ -62,7 +62,7 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
     }
 
     @Test
-    public void canCreateMultipleInstanceOfObject() {
+    public void can_create_multiple_instance_of_object() {
         register();
 
         final CreateResponse response = sendCreate(createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
@@ -75,7 +75,7 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
     }
 
     @Test
-    public void cannotCreateInstanceOfObject() {
+    public void cannot_create_instance_of_object() {
         register();
 
         final CreateResponse response = sendCreate(createGoodObjectInstance("hello", "goodbye"), BAD_OBJECT_ID);
@@ -83,7 +83,7 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
     }
 
     @Test
-    public void cannotCreateInstanceWithoutAllRequiredResources() {
+    public void cannot_create_instance_without_all_required_resources() {
         register();
 
         final LwM2mObjectInstance instance = new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
@@ -97,7 +97,7 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
     }
 
     @Test
-    public void cannotCreateInstanceWithExtraneousResources() {
+    public void cannot_create_instance_with_extraneous_resources() {
         register();
 
         final LwM2mObjectInstance instance = new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
@@ -113,7 +113,7 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
     }
 
     @Test
-    public void cannotCreateInstanceWithNonWritableResource() {
+    public void cannot_create_instance_with_non_writable_resource() {
         register();
 
         final LwM2mObjectInstance instance = new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
@@ -129,21 +129,21 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
     }
 
     @Test
-    public void canCreateObjectInstanceWithEmptyPayload() {
+    public void can_create_object_instance_with_empty_payload() {
         register();
         assertEmptyResponse(sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), MULTIPLE_OBJECT_ID),
                 ResponseCode.CREATED);
     }
 
     @Test
-    public void cannotCreateMandatorySingleObject() {
+    public void cannot_create_mandatory_single_object() {
         register();
         assertEmptyResponse(sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), MANDATORY_SINGLE_OBJECT_ID),
                 ResponseCode.BAD_REQUEST);
     }
 
     @Test
-    public void canCreateMandatoryMultipleObject() {
+    public void can_create_mandatory_multiple_object() {
         register();
         assertEmptyResponse(sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), MANDATORY_MULTIPLE_OBJECT_ID),
                 ResponseCode.CREATED);
@@ -152,7 +152,7 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
     }
 
     @Test
-    public void cannotCreateMoreThanOneSingleObject() {
+    public void cannot_create_more_than_one_single_object() {
         register();
         assertEmptyResponse(sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), OPTIONAL_SINGLE_OBJECT_ID),
                 ResponseCode.CREATED);
@@ -161,7 +161,7 @@ public class CreateTest extends LwM2mClientServerIntegrationTest {
     }
 
     @Test
-    public void canAccessMandatoryObjectWithoutCreate() {
+    public void can_access_mandatory_object_without_create() {
         register();
         assertResponse(sendRead(MANDATORY_SINGLE_OBJECT_ID, 0, MANDATORY_SINGLE_RESOURCE_ID),
                 ResponseCode.CONTENT,
