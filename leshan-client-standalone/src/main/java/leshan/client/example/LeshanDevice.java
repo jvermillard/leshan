@@ -1,6 +1,7 @@
 package leshan.client.example;
 
 import java.net.InetSocketAddress;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.TimeZone;
@@ -11,8 +12,12 @@ import leshan.client.lwm2m.exchange.LwM2mExchange;
 import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.resource.LwM2mClientObjectDefinition;
 import leshan.client.lwm2m.resource.SingleResourceDefinition;
+import leshan.client.lwm2m.resource.integer.IntegerLwM2mExchange;
+import leshan.client.lwm2m.resource.integer.IntegerLwM2mResource;
 import leshan.client.lwm2m.resource.string.StringLwM2mExchange;
 import leshan.client.lwm2m.resource.string.StringLwM2mResource;
+import leshan.client.lwm2m.resource.time.TimeLwM2mExchange;
+import leshan.client.lwm2m.resource.time.TimeLwM2mResource;
 import leshan.client.lwm2m.response.ExecuteResponse;
 import leshan.client.lwm2m.response.OperationResponse;
 
@@ -79,8 +84,8 @@ public class LeshanDevice {
 		final StringValueResource firmwareResource = new StringValueResource("1.0.0", 3);
 		final ExecutableResource rebootResource = new ExecutableResource(4);
 		final ExecutableResource factoryResetResource = new ExecutableResource(5);
-		final StringValueResource powerSourceVoltageResource = new StringValueResource("5.02V", 7);
-		final StringValueResource batteryLevelResource = new StringValueResource("92%", 9);
+		final IntegerValueResource powerSourceVoltageResource = new IntegerValueResource(5, 7);
+		final IntegerValueResource batteryLevelResource = new IntegerValueResource(92, 9);
 		final MemoryFreeResource memoryFreeResource = new MemoryFreeResource();
 		final StringValueResource errorCodeResource = new StringValueResource("0", 11);
 		final TimeResource currentTimeResource = new TimeResource();
@@ -107,53 +112,59 @@ public class LeshanDevice {
 		return objectDevice;
 	}
 	
-	public class TimeResource extends StringLwM2mResource {
-		public void setValue(final String newValue) {
+	public class TimeResource extends TimeLwM2mResource {
+		private Date value;
+		
+		public TimeResource(){
+			this.value = new Date();
+		}
+
+		public void setValue(final Date newValue) {
+			this.value = newValue;
 			notifyResourceUpdated();
 		}
 
-		public String getValue() {
-			return Double.toString(System.currentTimeMillis());
+		public Date getValue() {
+			return value;
 		}
 
 		@Override
-		public void handleWrite(final StringLwM2mExchange exchange) {
+		public void handleWrite(final TimeLwM2mExchange exchange) {
 			setValue(exchange.getRequestPayload());
 
 			exchange.respondSuccess();
 		}
-
 		@Override
-		public void handleRead(final StringLwM2mExchange exchange) {
+		public void handleRead(final TimeLwM2mExchange exchange) {
 			System.out.println("\tDevice: Reading Current Device Time.");
 			exchange.respondContent(getValue());
 		}
 	}
 	
-	public class MemoryFreeResource extends StringLwM2mResource {
-		public void setValue(final String newValue) {
+	public class MemoryFreeResource extends IntegerLwM2mResource {
+		public void setValue(final Integer newValue) {
 			notifyResourceUpdated();
 		}
 
-		public String getValue() {
+		public Integer getValue() {
 			final Random rand = new Random();
-			return Integer.toString(114 + rand.nextInt(50)) + "KB";
+			return 114 + rand.nextInt(50);
 		}
 
 		@Override
-		public void handleWrite(final StringLwM2mExchange exchange) {
+		public void handleWrite(final IntegerLwM2mExchange exchange) {
 			setValue(exchange.getRequestPayload());
 
 			exchange.respondSuccess();
 		}
 
 		@Override
-		public void handleRead(final StringLwM2mExchange exchange) {
+		public void handleRead(final IntegerLwM2mExchange exchange) {
 			System.out.println("\tDevice: Reading Memory Free Resource");
 			exchange.respondContent(getValue());
 		}
 	}
-
+	
 	public class StringValueResource extends StringLwM2mResource {
 
 		private String value;
@@ -184,6 +195,41 @@ public class LeshanDevice {
 		@Override
 		public void handleRead(final StringLwM2mExchange exchange) {
 			System.out.println("\tDevice: Reading on Resource " + resourceId);
+			exchange.respondContent(value);
+		}
+		
+	}
+
+	public class IntegerValueResource extends IntegerLwM2mResource {
+
+		private Integer value;
+		private final int resourceId;
+
+		public IntegerValueResource(final int initialValue, final int resourceId) {
+			value = initialValue;
+			this.resourceId = resourceId;
+		}
+
+		public void setValue(final Integer newValue) {
+			value = newValue;
+			notifyResourceUpdated();
+		}
+
+		public Integer getValue() {
+			return value;
+		}
+
+		@Override
+		public void handleWrite(final IntegerLwM2mExchange exchange) {
+			System.out.println("\tDevice: Writing on Integer Resource " + resourceId);
+			setValue(exchange.getRequestPayload());
+
+			exchange.respondSuccess();
+		}
+
+		@Override
+		public void handleRead(final IntegerLwM2mExchange exchange) {
+			System.out.println("\tDevice: Reading on IntegerResource " + resourceId);
 			exchange.respondContent(value);
 		}
 		
