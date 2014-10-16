@@ -245,14 +245,15 @@ public class LwM2mNodeEncoder {
 
         switch (expectedType) {
         case BOOLEAN:
-            if (value.type == DataType.STRING) {
+            switch (value.type) {
+            case STRING:
                 LOG.debug("Trying to convert string value {} to boolean", value.value);
                 if (StringUtils.equalsIgnoreCase((String) value.value, "true")) {
                     return Value.newBooleanValue(true);
                 } else if (StringUtils.equalsIgnoreCase((String) value.value, "false")) {
                     return Value.newBooleanValue(false);
                 }
-            } else if (value.type == DataType.INTEGER) {
+            case INTEGER:
                 LOG.debug("Trying to convert int value {} to boolean", value.value);
                 Integer val = (Integer) value.value;
                 if (val == 1) {
@@ -260,15 +261,17 @@ public class LwM2mNodeEncoder {
                 } else if (val == 0) {
                     return Value.newBooleanValue(false);
                 }
+            default:
+                break;
             }
             break;
-
         case TIME:
-            if (value.type == DataType.LONG) {
+            switch (value.type) {
+            case LONG:
                 LOG.debug("Trying to convert long value {} to date", value.value);
                 // let's assume we received the millisecond since 1970/1/1
                 return Value.newDateValue(new Date((Long) value.value));
-            } else if (value.type == DataType.STRING) {
+            case STRING:
                 LOG.debug("Trying to convert string value {} to date", value.value);
                 // let's assume we received an ISO 8601 format date
                 DateTimeFormatter parser = ISODateTimeFormat.dateTimeParser();
@@ -277,9 +280,22 @@ public class LwM2mNodeEncoder {
                 } catch (IllegalArgumentException e) {
                     LOG.debug("Unable to convert string to date", e);
                 }
+            default:
+                break;
             }
             break;
-
+        case STRING:
+            switch (value.type) {
+            case BOOLEAN:
+            case INTEGER:
+            case LONG:
+            case DOUBLE:
+            case FLOAT:
+                return Value.newStringValue(String.valueOf(value.value));
+            default:
+                break;
+            }
+            break;
         case OPAQUE:
             if (value.type == DataType.STRING) {
                 // let's assume we received an hexadecimal string
@@ -291,7 +307,6 @@ public class LwM2mNodeEncoder {
                 }
             }
             break;
-
         default:
         }
 
