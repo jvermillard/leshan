@@ -41,6 +41,7 @@ import java.net.InetAddress;
 import java.util.HashSet;
 import java.util.Set;
 
+import leshan.connector.californium.server.CaliforniumLwM2mRequestSender;
 import leshan.server.lwm2m.client.LinkObject;
 import leshan.server.lwm2m.impl.BasicTestSupport;
 import leshan.server.lwm2m.impl.ObservationRegistryImpl;
