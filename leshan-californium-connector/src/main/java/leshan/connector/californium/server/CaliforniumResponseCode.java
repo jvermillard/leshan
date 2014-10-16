@@ -1,14 +1,14 @@
 package leshan.connector.californium.server;
 
+import leshan.server.lwm2m.request.CoapResponseCode;
+
 import org.apache.commons.lang.Validate;
 import org.eclipse.californium.core.coap.CoAP;
-
-import leshan.server.lwm2m.request.CoapResponseCode;
 
 public class CaliforniumResponseCode extends CoapResponseCode {
 
 	@Override
-	public ResponseCode fromCoapCode(int code) {
+	public ResponseCode fromCoapCode(final int code) {
 		Validate.notNull(code);
 
         if (code == CoAP.ResponseCode.CREATED.value) {

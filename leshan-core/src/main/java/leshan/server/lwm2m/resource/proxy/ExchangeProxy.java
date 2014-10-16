@@ -42,4 +42,6 @@ public abstract class ExchangeProxy {
 
 	public abstract RequestProxy createPostSecurityRequest(ByteBuffer encoded);
 
+	public abstract RequestProxy createPostServerRequest(ByteBuffer encoded);
+
 }

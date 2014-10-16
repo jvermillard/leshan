@@ -4,8 +4,11 @@ import leshan.server.lwm2m.resource.proxy.CoapResourceProxy;
 import leshan.server.lwm2m.resource.proxy.ExchangeProxy;
 
 import org.apache.commons.lang.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class CoapResource {
+	private static final Logger LOG = LoggerFactory.getLogger(CoapResource.class);
 
 	private final CoapResourceProxy coapResourceProxy;
 
@@ -20,9 +23,15 @@ public abstract class CoapResource {
 		return coapResourceProxy;
 	}
 
-	public abstract void handlePOST(ExchangeProxy exchangeProxy);
+	public void handlePOST(final ExchangeProxy exchangeProxy){
+		LOG.debug("Doing nothing by default.");
+	}
 
-	public abstract void handlePUT(ExchangeProxy exchangeProxy);
+	public void handlePUT(final ExchangeProxy exchangeProxy){
+		LOG.debug("Doing nothing by default.");
+	}
 
-	public abstract void handleDELETE(ExchangeProxy exchangeProxy);
+	public void handleDELETE(final ExchangeProxy exchangeProxy){
+		LOG.debug("Doing nothing by default.");
+	}
 }

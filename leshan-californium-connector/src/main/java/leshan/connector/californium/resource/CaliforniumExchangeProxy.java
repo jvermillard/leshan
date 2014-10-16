@@ -161,4 +161,17 @@ public class CaliforniumExchangeProxy extends ExchangeProxy {
 		return new CaliforniumRequestProxy(postSecurity, e);
 	}
 
+	@Override
+	public RequestProxy createPostServerRequest(final ByteBuffer encoded) {
+		final Endpoint e = exchange.advanced().getEndpoint();
+		final Request postServer = Request.newPost();
+		postServer.getOptions().addURIPath("/1");
+		postServer.setConfirmable(true);
+		postServer.setDestination(exchange.getSourceAddress());
+		postServer.setDestinationPort(exchange.getSourcePort());
+		postServer.setPayload(encoded.array());
+		
+		return new CaliforniumRequestProxy(postServer, e);
+	}
+
 }

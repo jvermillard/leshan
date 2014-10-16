@@ -2,6 +2,7 @@ package leshan.connector.californium.resource;
 
 import java.util.List;
 
+import leshan.connector.californium.server.CaliforniumResponseCode;
 import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
 import leshan.server.lwm2m.resource.proxy.RequestProxy;
 import leshan.server.lwm2m.resource.proxy.ResponseProxy;
@@ -12,6 +13,7 @@ import org.eclipse.californium.core.coap.Response;
 import org.eclipse.californium.core.network.Endpoint;
 
 public class CaliforniumRequestProxy extends RequestProxy {
+	private static final CaliforniumResponseCode CALIFORNIUM_RESPONSE_CODE = new CaliforniumResponseCode();
 
 	private final Request request;
 	private Endpoint endpoint;
@@ -54,7 +56,7 @@ public class CaliforniumRequestProxy extends RequestProxy {
 				return ResponseProxy.failure("Timeout", ResponseCode.NOT_FOUND);
 			}
 			else{
-				return new CaliforniumResponseProxy(response);
+				return new CaliforniumResponseProxy(response, CALIFORNIUM_RESPONSE_CODE.fromCoapCode(response.getCode().ordinal()));
 			}
 		} catch (final InterruptedException e) {
 			return ResponseProxy.failure(e.getLocalizedMessage(), ResponseCode.BAD_REQUEST);

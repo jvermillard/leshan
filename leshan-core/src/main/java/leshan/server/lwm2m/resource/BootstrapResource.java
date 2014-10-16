@@ -47,8 +47,6 @@ import leshan.server.lwm2m.resource.proxy.ExchangeProxy;
 import leshan.server.lwm2m.resource.proxy.RequestProxy;
 import leshan.server.lwm2m.resource.proxy.ResponseProxy;
 
-import org.eclipse.californium.core.coap.Request;
-import org.eclipse.californium.core.coap.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -155,24 +153,21 @@ public class BootstrapResource extends CoapResource {
 		}
 		encoded = TlvEncoder.encode(serverInstances);
 
-		final Request postServer = Request.newPost();
-		postServer.getOptions().addURIPath("/1");
-		postServer.setConfirmable(true);
-		postServer.setDestination(exchange.getSourceAddress());
-		postServer.setDestinationPort(exchange.getSourcePort());
-		postServer.setPayload(encoded.array());
+		final RequestProxy postServer = exchangeProxy.createPostServerRequest(encoded);
 
-		try {
-			final Response response = postServer.sendAndWaitForResponse(e).waitForResponse(TIMEOUT_MILLI);
-			if (response == null) {
-				LOG.error("server list bootstrap of {} timeout", endpoint);
+		response = postServer.sendAndWaitForResponse(TIMEOUT_MILLI);
+		if (!response.isSuccess()) {
+			if(response.getCode() == ResponseCode.NOT_FOUND){
+				LOG.error("Server list bootstrap of {} timeout", endpoint);
 				return;
 			}
-			LOG.debug("Server list bootstrap of {} returned code {}", endpoint, response.getCode());
-		} catch (final InterruptedException e1) {
-			// get out!the server is stopping
-			return;
+			else{
+				// get out!the server is stopping
+				return;
+			}
 		}
+
+		LOG.debug("Server list bootstrap of {} returned code {}", endpoint, response.getCode());
 	}
 
 	private Tlv tlvEncode(final int key, final ServerSecurity value) {
