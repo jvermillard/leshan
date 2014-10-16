@@ -1,6 +1,7 @@
 package leshan.connector.californium.resource;
 
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import leshan.server.lwm2m.client.BindingMode;
@@ -13,6 +14,7 @@ import leshan.server.lwm2m.resource.proxy.RequestProxy;
 
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 import org.eclipse.californium.core.coap.Request;
+import org.eclipse.californium.core.network.Endpoint;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 
 public class CaliforniumExchangeProxy extends ExchangeProxy {
@@ -127,6 +129,36 @@ public class CaliforniumExchangeProxy extends ExchangeProxy {
 		
 		return client;
 		
+	}
+
+	@Override
+	public List<String> getUQRIQueries() {
+        return exchange.advanced().getRequest().getOptions().getURIQueries();
+	}
+
+	@Override
+	public RequestProxy createDeleteAllRequest() {
+        final Endpoint e = exchange.advanced().getEndpoint();
+        final Request deleteAll = Request.newDelete();
+        deleteAll.getOptions().addURIPath("/");
+        deleteAll.setConfirmable(true);
+        deleteAll.setDestination(exchange.getSourceAddress());
+        deleteAll.setDestinationPort(exchange.getSourcePort());
+        
+		return new CaliforniumRequestProxy(deleteAll, e);
+	}
+
+	@Override
+	public RequestProxy createPostSecurityRequest(final ByteBuffer encoded) {
+		final Endpoint e = exchange.advanced().getEndpoint();
+		final Request postSecurity = Request.newPost();
+		postSecurity.getOptions().addURIPath("/0");
+		postSecurity.setConfirmable(true);
+		postSecurity.setDestination(exchange.getSourceAddress());
+		postSecurity.setDestinationPort(exchange.getSourcePort());
+		postSecurity.setPayload(encoded.array());
+		
+		return new CaliforniumRequestProxy(postSecurity, e);
 	}
 
 }

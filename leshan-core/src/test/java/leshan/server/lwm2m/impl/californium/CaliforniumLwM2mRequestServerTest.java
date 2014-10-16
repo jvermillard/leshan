@@ -100,7 +100,7 @@ public class CaliforniumLwM2mRequestServerTest extends BasicTestSupport {
         ifTheClientReturns(newTextContentResponse(org.eclipse.californium.core.coap.CoAP.ResponseCode.CONTENT,
                 TEXT_PAYLOAD));
 
-        ValueResponse response = requestSender.send(request);
+        ValueResponse response = requestSender.sendAndWaitForResponse(request);
         assertTrue(response.getCode() == ResponseCode.CONTENT);
         LwM2mResource content = (LwM2mResource) response.getContent();
         assertEquals(TEXT_PAYLOAD, content.getValue().value);
@@ -115,7 +115,7 @@ public class CaliforniumLwM2mRequestServerTest extends BasicTestSupport {
         coapResponse.setPayload(coreLinkPayload, MediaTypeRegistry.APPLICATION_LINK_FORMAT);
         ifTheClientReturns(coapResponse);
 
-        DiscoverResponse response = requestSender.send(request);
+        DiscoverResponse response = requestSender.sendAndWaitForResponse(request);
         assertTrue(response.getCode() == ResponseCode.CONTENT);
         assertEquals(1, response.getObjectLinks().length);
         LinkObject link = response.getObjectLinks()[0];
@@ -128,7 +128,7 @@ public class CaliforniumLwM2mRequestServerTest extends BasicTestSupport {
         DeleteRequest request = new DeleteRequest(client, 10, 1);
         ifTheClientReturns(new Response(org.eclipse.californium.core.coap.CoAP.ResponseCode.DELETED));
 
-        ClientResponse response = requestSender.send(request);
+        ClientResponse response = requestSender.sendAndWaitForResponse(request);
         assertEquals(ResponseCode.DELETED, response.getCode());
     }
 
@@ -139,7 +139,7 @@ public class CaliforniumLwM2mRequestServerTest extends BasicTestSupport {
         WriteAttributesRequest request = new WriteAttributesRequest(client, OBJECT_ID_DEVICE, spec);
         ifTheClientReturns(new Response(org.eclipse.californium.core.coap.CoAP.ResponseCode.CHANGED));
 
-        ClientResponse response = requestSender.send(request);
+        ClientResponse response = requestSender.sendAndWaitForResponse(request);
         assertEquals(ResponseCode.CHANGED, response.getCode());
     }
 
@@ -149,7 +149,7 @@ public class CaliforniumLwM2mRequestServerTest extends BasicTestSupport {
                 ContentFormat.TEXT, true);
         ifTheClientReturns(newTextContentResponse(org.eclipse.californium.core.coap.CoAP.ResponseCode.CHANGED, null));
 
-        ClientResponse response = requestSender.send(request);
+        ClientResponse response = requestSender.sendAndWaitForResponse(request);
         assertEquals(ResponseCode.CHANGED, response.getCode());
     }
 
@@ -158,7 +158,7 @@ public class CaliforniumLwM2mRequestServerTest extends BasicTestSupport {
         CreateRequest request = new CreateRequest(client, 15, mock(LwM2mObjectInstance.class), ContentFormat.TLV);
         ifTheClientReturns(newTextContentResponse(org.eclipse.californium.core.coap.CoAP.ResponseCode.CREATED, null));
 
-        ClientResponse response = requestSender.send(request);
+        ClientResponse response = requestSender.sendAndWaitForResponse(request);
         assertEquals(ResponseCode.CREATED, response.getCode());
     }
 
@@ -167,7 +167,7 @@ public class CaliforniumLwM2mRequestServerTest extends BasicTestSupport {
         ReadRequest request = new ReadRequest(client, OBJECT_ID_DEVICE);
         ifTheClientReturns(new Response(org.eclipse.californium.core.coap.CoAP.ResponseCode.UNAUTHORIZED));
 
-        ClientResponse response = requestSender.send(request);
+        ClientResponse response = requestSender.sendAndWaitForResponse(request);
         assertEquals(ResponseCode.UNAUTHORIZED, response.getCode());
     }
 
@@ -176,7 +176,7 @@ public class CaliforniumLwM2mRequestServerTest extends BasicTestSupport {
         ReadRequest request = new ReadRequest(client, OBJECT_ID_DEVICE);
         ifTheClientReturns(new Response(org.eclipse.californium.core.coap.CoAP.ResponseCode.NOT_FOUND));
 
-        ClientResponse response = requestSender.send(request);
+        ClientResponse response = requestSender.sendAndWaitForResponse(request);
         assertEquals(ResponseCode.NOT_FOUND, response.getCode());
     }
 
@@ -186,14 +186,14 @@ public class CaliforniumLwM2mRequestServerTest extends BasicTestSupport {
                 ContentFormat.TLV);
         ifTheClientReturns(new Response(org.eclipse.californium.core.coap.CoAP.ResponseCode.METHOD_NOT_ALLOWED));
 
-        ClientResponse response = requestSender.send(request);
+        ClientResponse response = requestSender.sendAndWaitForResponse(request);
         assertEquals(ResponseCode.METHOD_NOT_ALLOWED, response.getCode());
     }
 
     @Test(expected = RequestTimeoutException.class)
     public void testSendRequestThrowsRequestTimeoutException() throws Exception {
         ReadRequest request = new ReadRequest(client, OBJECT_ID_DEVICE);
-        requestSender.send(request);
+        requestSender.sendAndWaitForResponse(request);
         fail("Request should have timed out with exception");
     }
 
@@ -212,7 +212,7 @@ public class CaliforniumLwM2mRequestServerTest extends BasicTestSupport {
         ifTheClientReturns(new Response(org.eclipse.californium.core.coap.CoAP.ResponseCode.DELETED));
         
         try {
-            requestSender.send(rq);
+            requestSender.sendAndWaitForResponse(rq);
             fail("no exception reported");
         } catch (RuntimeException e) {
             assertEquals("meh", e.getMessage());

@@ -12,4 +12,6 @@ public abstract class RequestProxy {
 
 	public abstract byte[] getPayload();
 
+	public abstract ResponseProxy sendAndWaitForResponse(int timeoutMilli);
+
 }

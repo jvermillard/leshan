@@ -41,178 +41,172 @@ import leshan.server.lwm2m.bootstrap.BootstrapStore;
 import leshan.server.lwm2m.impl.tlv.Tlv;
 import leshan.server.lwm2m.impl.tlv.Tlv.TlvType;
 import leshan.server.lwm2m.impl.tlv.TlvEncoder;
+import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
 import leshan.server.lwm2m.resource.proxy.CoapResourceProxy;
+import leshan.server.lwm2m.resource.proxy.ExchangeProxy;
+import leshan.server.lwm2m.resource.proxy.RequestProxy;
+import leshan.server.lwm2m.resource.proxy.ResponseProxy;
 
-import org.eclipse.californium.core.coap.CoAP.ResponseCode;
-import org.eclipse.californium.core.coap.CoAP.Type;
 import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.core.coap.Response;
-import org.eclipse.californium.core.network.Endpoint;
-import org.eclipse.californium.core.server.resources.CoapExchange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BootstrapResource extends CoapResource {
 
-    private static final Logger LOG = LoggerFactory.getLogger(BootstrapResource.class);
-    private static final String QUERY_PARAM_ENDPOINT = "ep=";
-    private static final int TIMEOUT_MILLI = 20_000;
+	private static final Logger LOG = LoggerFactory.getLogger(BootstrapResource.class);
+	private static final String QUERY_PARAM_ENDPOINT = "ep=";
+	private static final int TIMEOUT_MILLI = 20_000;
 	private static final String RESOURCE_NAME = "bs";
 
-    private final BootstrapStore store;
+	private final BootstrapStore store;
 
-    public BootstrapResource(final BootstrapStore store, final CoapResourceProxy coapResourceProxy) {
-        super(coapResourceProxy, RESOURCE_NAME);
-        this.store = store;
-    }
+	public BootstrapResource(final BootstrapStore store, final CoapResourceProxy coapResourceProxy) {
+		super(coapResourceProxy, RESOURCE_NAME);
+		this.store = store;
+	}
 
-    @Override
-    public void handlePOST(final CoapExchange exchange) {
-        final Request request = exchange.advanced().getRequest();
-        LOG.debug("POST received : {}", request);
-        // The LW M2M spec (section 8.2) mandates the usage of Confirmable
-        // messages
-        if (!Type.CON.equals(request.getType())) {
-            exchange.respond(ResponseCode.BAD_REQUEST);
-            return;
-        }
+	@Override
+	public void handlePOST(final ExchangeProxy exchangeProxy) {
+		LOG.debug("POST received : {}", exchangeProxy.getRequest());
 
-        // which endpoint?
-        String endpoint = null;
-        for (final String param : request.getOptions().getURIQueries()) {
-            if (param.startsWith(QUERY_PARAM_ENDPOINT)) {
-                endpoint = param.substring(QUERY_PARAM_ENDPOINT.length());
-                break;
-            }
-        }
-        if (endpoint == null) {
-            exchange.respond(ResponseCode.BAD_REQUEST);
-            return;
-        }
+		// The LW M2M spec (section 8.2) mandates the usage of Confirmable
+		// messages
+		if(!exchangeProxy.getRequest().isConfirmable()){
+			exchangeProxy.respond(ResponseCode.BAD_REQUEST);
+			return;
+		}
 
-        // TODO check security of the endpoint
+		// which endpoint?
+		String endpoint = null;
+		for (final String param : exchangeProxy.getUQRIQueries()){
+			if (param.startsWith(QUERY_PARAM_ENDPOINT)) {
+				endpoint = param.substring(QUERY_PARAM_ENDPOINT.length());
+				break;
+			}
+		}
+		if (endpoint == null) {
+			exchangeProxy.respond(ResponseCode.BAD_REQUEST);
+			return;
+		}
 
-        final BootstrapConfig cfg = store.getBootstrap(endpoint);
-        if (cfg == null) {
-            LOG.error("No bootstrap config for {}", endpoint);
-            exchange.respond(ResponseCode.BAD_REQUEST);
-            return;
-        }
-        exchange.respond(ResponseCode.CHANGED);
+		// TODO check security of the endpoint
 
-        // now push the config
+		final BootstrapConfig cfg = store.getBootstrap(endpoint);
+		if (cfg == null) {
+			LOG.error("No bootstrap config for {}", endpoint);
+			exchangeProxy.respond(ResponseCode.BAD_REQUEST);
+			return;
+		}
+		exchangeProxy.respond(ResponseCode.CHANGED);
 
-        // first delete everything
+		// now push the config
 
-        final Endpoint e = exchange.advanced().getEndpoint();
-        final Request deleteAll = Request.newDelete();
-        deleteAll.getOptions().addURIPath("/");
-        deleteAll.setConfirmable(true);
-        deleteAll.setDestination(exchange.getSourceAddress());
-        deleteAll.setDestinationPort(exchange.getSourcePort());
+		// first delete everything
 
-        try {
-            final Response response = deleteAll.send(e).waitForResponse(TIMEOUT_MILLI);
-            if (response == null) {
-                LOG.error("Bootstrap {} delete timeout", endpoint);
-                return;
-            }
-            LOG.debug("Bootstrap delete {} return code {}", endpoint, response.getCode());
-        } catch (final InterruptedException e1) {
-            // get out!the server is stopping
-            return;
-        }
-        // send security elements
+		final RequestProxy deleteAll = exchangeProxy.createDeleteAllRequest();
 
-        // 1st encode them into a juicy TLV binary
-        final Tlv[] secuInstances = new Tlv[cfg.security.size()];
-        int idx = 0;
-        for (final Map.Entry<Integer, BootstrapConfig.ServerSecurity> entry : cfg.security.entrySet()) {
-            // create the security entry for this server
-            secuInstances[idx++] = tlvEncode(entry.getKey(), entry.getValue());
-        }
-        ByteBuffer encoded = TlvEncoder.encode(secuInstances);
+		ResponseProxy response = deleteAll.sendAndWaitForResponse(TIMEOUT_MILLI);
+		if (!response.isSuccess()) {
+			if(response.getCode() == ResponseCode.NOT_FOUND){
+				LOG.error("Bootstrap {} delete timeout", endpoint);
+				return;
+			}
+			else{
+				// get out!the server is stopping
+				return;
+			}
+		}
+		LOG.debug("Bootstrap delete {} return code {}", endpoint, response.getCode());
 
-        final Request postSecurity = Request.newPost();
-        postSecurity.getOptions().addURIPath("/0");
-        postSecurity.setConfirmable(true);
-        postSecurity.setDestination(exchange.getSourceAddress());
-        postSecurity.setDestinationPort(exchange.getSourcePort());
-        postSecurity.setPayload(encoded.array());
+		// send security elements
 
-        try {
-            final Response response = postSecurity.send(e).waitForResponse(TIMEOUT_MILLI);
-            if (response == null) {
-                LOG.error("security bootstrap of {} timeout", endpoint);
-                return;
-            }
-            LOG.debug("Security bootstrap of {} returned code {}", endpoint, response.getCode());
-        } catch (final InterruptedException e1) {
-            // get out!the server is stopping
-            return;
-        }
+		// 1st encode them into a juicy TLV binary
+		final Tlv[] secuInstances = new Tlv[cfg.security.size()];
+		int idx = 0;
+		for (final Map.Entry<Integer, BootstrapConfig.ServerSecurity> entry : cfg.security.entrySet()) {
+			// create the security entry for this server
+			secuInstances[idx++] = tlvEncode(entry.getKey(), entry.getValue());
+		}
+		ByteBuffer encoded = TlvEncoder.encode(secuInstances);
 
-        // send the server settings
-        final Tlv[] serverInstances = new Tlv[cfg.servers.size()];
-        idx = 0;
-        for (final Map.Entry<Integer, BootstrapConfig.ServerConfig> entry : cfg.servers.entrySet()) {
-            // create the security entry for this server
-            serverInstances[idx++] = tlvEncode(entry.getKey(), entry.getValue());
-        }
-        encoded = TlvEncoder.encode(serverInstances);
 
-        final Request postServer = Request.newPost();
-        postServer.getOptions().addURIPath("/1");
-        postServer.setConfirmable(true);
-        postServer.setDestination(exchange.getSourceAddress());
-        postServer.setDestinationPort(exchange.getSourcePort());
-        postServer.setPayload(encoded.array());
+		final RequestProxy postSecurity = exchangeProxy.createPostSecurityRequest(encoded);
 
-        try {
-            final Response response = postServer.send(e).waitForResponse(TIMEOUT_MILLI);
-            if (response == null) {
-                LOG.error("server list bootstrap of {} timeout", endpoint);
-                return;
-            }
-            LOG.debug("Server list bootstrap of {} returned code {}", endpoint, response.getCode());
-        } catch (final InterruptedException e1) {
-            // get out!the server is stopping
-            return;
-        }
-    }
+		response = postSecurity.sendAndWaitForResponse(TIMEOUT_MILLI);
+		if (!response.isSuccess()) {
+			if(response.getCode() == ResponseCode.NOT_FOUND){
+				LOG.error("Security bootstrap of {} timeout", endpoint);
+				return;
+			}
+			else{
+				// get out!the server is stopping
+				return;
+			}
+		}
+		LOG.debug("Security bootstrap of {} returned code {}", endpoint, response.getCode());
 
-    private Tlv tlvEncode(final int key, final ServerSecurity value) {
-        final Tlv[] resources = new Tlv[12];
-        resources[0] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeString(value.uri), 0);
-        resources[1] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeBoolean(value.bootstrapServer), 1);
-        resources[2] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.securityMode.code), 2);
-        resources[3] = new Tlv(TlvType.RESOURCE_INSTANCE, null, value.publicKeyOrId, 3);
-        resources[4] = new Tlv(TlvType.RESOURCE_INSTANCE, null, value.serverPublicKeyOrId, 4);
-        resources[5] = new Tlv(TlvType.RESOURCE_INSTANCE, null, value.secretKey, 5);
-        resources[6] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.smsSecurityMode.code), 6);
-        resources[7] = new Tlv(TlvType.RESOURCE_INSTANCE, null, value.smsBindingKeyParam, 7);
-        resources[8] = new Tlv(TlvType.RESOURCE_INSTANCE, null, value.smsBindingKeySecret, 8);
-        resources[9] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeString(value.serverSmsNumber), 9);
-        resources[10] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.serverId), 10);
-        resources[11] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.clientOldOffTime), 11);
-        return new Tlv(TlvType.OBJECT_INSTANCE, resources, null, key);
-    }
+		// send the server settings
+		final Tlv[] serverInstances = new Tlv[cfg.servers.size()];
+		idx = 0;
+		for (final Map.Entry<Integer, BootstrapConfig.ServerConfig> entry : cfg.servers.entrySet()) {
+			// create the security entry for this server
+			serverInstances[idx++] = tlvEncode(entry.getKey(), entry.getValue());
+		}
+		encoded = TlvEncoder.encode(serverInstances);
 
-    private Tlv tlvEncode(final int key, final ServerConfig value) {
-        final List<Tlv> resources = new ArrayList<Tlv>();
-        resources.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.shortId), 0));
-        resources.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.lifetime), 1));
-        resources.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.defaultMinPeriod), 2));
-        if (value.defaultMaxPeriod != null) {
-            resources
-                    .add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.defaultMaxPeriod), 3));
-        }
-        if (value.disableTimeout != null) {
-            resources.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.disableTimeout), 5));
-        }
-        resources.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeBoolean(value.notifIfDisabled), 6));
-        resources.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeString(value.binding.name()), 7));
+		final Request postServer = Request.newPost();
+		postServer.getOptions().addURIPath("/1");
+		postServer.setConfirmable(true);
+		postServer.setDestination(exchange.getSourceAddress());
+		postServer.setDestinationPort(exchange.getSourcePort());
+		postServer.setPayload(encoded.array());
 
-        return new Tlv(TlvType.OBJECT_INSTANCE, resources.toArray(new Tlv[] {}), null, key);
-    }
+		try {
+			final Response response = postServer.sendAndWaitForResponse(e).waitForResponse(TIMEOUT_MILLI);
+			if (response == null) {
+				LOG.error("server list bootstrap of {} timeout", endpoint);
+				return;
+			}
+			LOG.debug("Server list bootstrap of {} returned code {}", endpoint, response.getCode());
+		} catch (final InterruptedException e1) {
+			// get out!the server is stopping
+			return;
+		}
+	}
+
+	private Tlv tlvEncode(final int key, final ServerSecurity value) {
+		final Tlv[] resources = new Tlv[12];
+		resources[0] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeString(value.uri), 0);
+		resources[1] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeBoolean(value.bootstrapServer), 1);
+		resources[2] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.securityMode.code), 2);
+		resources[3] = new Tlv(TlvType.RESOURCE_INSTANCE, null, value.publicKeyOrId, 3);
+		resources[4] = new Tlv(TlvType.RESOURCE_INSTANCE, null, value.serverPublicKeyOrId, 4);
+		resources[5] = new Tlv(TlvType.RESOURCE_INSTANCE, null, value.secretKey, 5);
+		resources[6] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.smsSecurityMode.code), 6);
+		resources[7] = new Tlv(TlvType.RESOURCE_INSTANCE, null, value.smsBindingKeyParam, 7);
+		resources[8] = new Tlv(TlvType.RESOURCE_INSTANCE, null, value.smsBindingKeySecret, 8);
+		resources[9] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeString(value.serverSmsNumber), 9);
+		resources[10] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.serverId), 10);
+		resources[11] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.clientOldOffTime), 11);
+		return new Tlv(TlvType.OBJECT_INSTANCE, resources, null, key);
+	}
+
+	private Tlv tlvEncode(final int key, final ServerConfig value) {
+		final List<Tlv> resources = new ArrayList<Tlv>();
+		resources.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.shortId), 0));
+		resources.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.lifetime), 1));
+		resources.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.defaultMinPeriod), 2));
+		if (value.defaultMaxPeriod != null) {
+			resources
+			.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.defaultMaxPeriod), 3));
+		}
+		if (value.disableTimeout != null) {
+			resources.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.disableTimeout), 5));
+		}
+		resources.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeBoolean(value.notifIfDisabled), 6));
+		resources.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeString(value.binding.name()), 7));
+
+		return new Tlv(TlvType.OBJECT_INSTANCE, resources.toArray(new Tlv[] {}), null, key);
+	}
 }

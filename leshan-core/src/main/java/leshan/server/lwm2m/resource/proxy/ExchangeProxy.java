@@ -1,6 +1,7 @@
 package leshan.server.lwm2m.resource.proxy;
 
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import leshan.server.lwm2m.client.BindingMode;
@@ -34,4 +35,11 @@ public abstract class ExchangeProxy {
 
 	public abstract ClientUpdate createNewClientUpdate(String registrationId, Long lifetime,
 			String smsNumber, BindingMode binding, LinkObject[] objectLinks);
+
+	public abstract List<String> getUQRIQueries();
+
+	public abstract RequestProxy createDeleteAllRequest();
+
+	public abstract RequestProxy createPostSecurityRequest(ByteBuffer encoded);
+
 }
