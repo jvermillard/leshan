@@ -48,6 +48,6 @@ public class RegisterEndpoint {
 	
 	@Override
 	public String toString() {
-		return "coap://" + destination.getHostString() + ":" + destination.getPort() + "/rd?" + Request.toQueryStringMap(queryString);
+		return String.format("coap://%s:%s/rd?%s", destination.getHostString(), destination.getPort(), Request.toQueryStringMap(queryString));
 	}
 }
