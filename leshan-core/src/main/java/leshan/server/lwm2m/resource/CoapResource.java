@@ -21,4 +21,6 @@ public abstract class CoapResource {
 	}
 
 	public abstract void handlePOST(ExchangeProxy exchangeProxy);
+
+	public abstract void handlePUT(ExchangeProxy exchangeProxy);
 }

@@ -40,6 +40,10 @@ public class CaliforniumCoapResourceProxy implements CoapResourceProxy{
 			parentResource.handlePOST(new CaliforniumExchangeProxy(exchange));
 		}
 		
+		@Override
+		public void handlePUT(final CoapExchange exchange) {
+			parentResource.handlePUT(new CaliforniumExchangeProxy(exchange));
+		}
 	}
 
 }

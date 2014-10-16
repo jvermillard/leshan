@@ -40,6 +40,7 @@ import leshan.server.lwm2m.client.ClientRegistrationException;
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.client.ClientUpdate;
 import leshan.server.lwm2m.client.LinkObject;
+import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
 import leshan.server.lwm2m.resource.CoapResource;
 import leshan.server.lwm2m.resource.proxy.CoapResourceProxy;
 import leshan.server.lwm2m.resource.proxy.ExchangeProxy;
@@ -95,7 +96,7 @@ public class RegisterResource extends CoapResource {
 		// The LW M2M spec (section 8.2) mandates the usage of Confirmable
 		// messages
 		if(!exchangeProxy.getRequest().isConfirmable()){
-			exchangeProxy.respondWithBadRequest();
+			exchangeProxy.respondWithRequest(ResponseCode.BAD_REQUEST);
 			return;
 		}
 		// TODO: assert content media type is APPLICATION LINK FORMAT?
@@ -122,7 +123,7 @@ public class RegisterResource extends CoapResource {
 				}
 			}
 			if (endpoint == null || endpoint.isEmpty()) {
-				exchangeProxy.respondWithBadRequest("Client must specify an endpoint identifier");
+				exchangeProxy.respondWithRequest(ResponseCode.BAD_REQUEST, "Client must specify an endpoint identifier");
 			} else {
 				// register
 				final String registrationId = RegisterResource.createRegistrationId();
@@ -144,7 +145,7 @@ public class RegisterResource extends CoapResource {
 					if (securityInfo == null || pskIdentity == null || !pskIdentity.equals(securityInfo.getIdentity())) {
 						LOG.warn("Invalid identity for client {}: expected '{}' but was '{}'", endpoint,
 								securityInfo == null ? null : securityInfo.getIdentity(), pskIdentity);
-						exchangeProxy.respondWithBadRequest("Invalid identity");
+						exchangeProxy.respondWithRequest(ResponseCode.BAD_REQUEST, "Invalid identity");
 						exchangeProxy.killTlsSession();
 						return;
 					} else {
@@ -154,7 +155,7 @@ public class RegisterResource extends CoapResource {
 				else{
 					if (securityInfo != null) {
 						LOG.warn("client {} must connect using DTLS PSK", endpoint);
-						exchangeProxy.respondWithBadRequest("Client must connect thru DTLS (port 5684)");
+						exchangeProxy.respondWithRequest(ResponseCode.BAD_REQUEST, "Client must connect thru DTLS (port 5684)");
 						return;
 					}
 				}
@@ -164,13 +165,13 @@ public class RegisterResource extends CoapResource {
 				LOG.debug("New registered client: {}", client);
 
 				exchangeProxy.setLocationPath(RESOURCE_NAME + "/" + client.getRegistrationId());
-				exchangeProxy.respondWithCreated();
+				exchangeProxy.respondWithRequest(ResponseCode.CREATED);
 			}
 		} catch (final NumberFormatException e) {
-			exchangeProxy.respondWithBadRequest("Lifetime parameter must be a valid number");
+			exchangeProxy.respondWithRequest(ResponseCode.BAD_REQUEST, "Lifetime parameter must be a valid number");
 		} catch (final Exception e) {
 			LOG.debug("Registration failed for client " + endpoint, e);
-			exchangeProxy.respondWithBadRequest();
+			exchangeProxy.respondWithRequest(ResponseCode.BAD_REQUEST);
 		}
 	}
 
@@ -178,21 +179,19 @@ public class RegisterResource extends CoapResource {
 	/**
 	 * Updates an existing Client registration.
 	 * 
-	 * @param exchange the CoAP request containing the updated regsitration properties
+	 * @param exchange the CoAP request containing the updated registration properties
 	 */
 	@Override
-	public void handlePUT(final CoapExchange exchange) {
-		final Request request = exchange.advanced().getRequest();
-
-		LOG.debug("UPDATE received : {}", request);
-		if (!Type.CON.equals(request.getType())) {
-			exchange.respond(ResponseCode.BAD_REQUEST);
+	public void handlePUT(final ExchangeProxy exchangeProxy) {
+		LOG.debug("UPDATE received : {}", exchangeProxy.getRequest());
+		if(!exchangeProxy.getRequest().isConfirmable()){
+			exchangeProxy.respondWithRequest(ResponseCode.BAD_REQUEST);
 			return;
 		}
 
-		final List<String> uri = exchange.getRequestOptions().getURIPaths();
+		final List<String> uri = exchangeProxy.getURIPaths();
 		if (uri == null || uri.size() != 2 || !RESOURCE_NAME.equals(uri.get(0))) {
-			exchange.respond(ResponseCode.NOT_FOUND);
+			exchangeProxy.respondWithRequest(ResponseCode.NOT_FOUND);
 			return;
 		}
 
@@ -203,7 +202,7 @@ public class RegisterResource extends CoapResource {
 		BindingMode binding = null;
 		LinkObject[] objectLinks = null;
 
-		for (final String param : request.getOptions().getURIQueries()) {
+		for (final String param : exchangeProxy.getRequest().getURIQueries()) {
 			if (param.startsWith(QUERY_PARAM_LIFETIME)) {
 				lifetime = Long.valueOf(param.substring(3));
 			} else if (param.startsWith(QUERY_PARAM_SMS)) {
@@ -213,12 +212,11 @@ public class RegisterResource extends CoapResource {
 			}
 		}
 
-		if (request.getPayload() != null && request.getPayload().length > 0) {
-			objectLinks = LinkObject.parse(request.getPayload());
+		if(exchangeProxy.getRequest().hasPayload()){
+			objectLinks = LinkObject.parse(exchangeProxy.getRequest().getPayload());
 		}
 
-		final ClientUpdate client = new ClientUpdate(registrationId, request.getSource(), request.getSourcePort(), lifetime,
-				smsNumber, binding, objectLinks);
+		final ClientUpdate client = exchangeProxy.createNewClientUpdate(registrationId, lifetime, smsNumber, binding, objectLinks);
 
 		try {
 			final Client c = clientRegistry.updateClient(client);
