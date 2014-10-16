@@ -20,5 +20,5 @@ public abstract class CoapResource {
 		return coapResourceProxy;
 	}
 
-	public abstract void onPOST(ExchangeProxy exchangeProxy);
+	public abstract void handlePOST(ExchangeProxy exchangeProxy);
 }

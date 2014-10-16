@@ -8,4 +8,8 @@ public abstract class RequestProxy {
 
 	public abstract List<String> getURIQueries();
 
+	public abstract boolean hasPayload();
+
+	public abstract byte[] getPayload();
+
 }

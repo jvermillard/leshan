@@ -25,4 +25,14 @@ public class CaliforniumRequestProxy extends RequestProxy {
 		return request.getOptions().getURIQueries();
 	}
 
+	@Override
+	public boolean hasPayload() {
+		return request.getPayload() != null;
+	}
+
+	@Override
+	public byte[] getPayload() {
+		return request.getPayload();
+	}
+
 }

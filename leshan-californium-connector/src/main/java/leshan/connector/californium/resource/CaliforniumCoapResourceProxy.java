@@ -37,7 +37,7 @@ public class CaliforniumCoapResourceProxy implements CoapResourceProxy{
 		
 		@Override
 		public void handlePOST(final CoapExchange exchange) {
-			parentResource.onPOST(new CaliforniumExchangeProxy(exchange));
+			parentResource.handlePOST(new CaliforniumExchangeProxy(exchange));
 		}
 		
 	}
