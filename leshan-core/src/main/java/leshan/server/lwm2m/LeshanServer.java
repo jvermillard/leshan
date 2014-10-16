@@ -64,20 +64,6 @@ public class LeshanServer implements LwM2mServer {
 
 	private final CoapServerImplementor coapServerImplementor;
 
-    private final LwM2mRequestSender requestSender;
-
-    private final ClientRegistry clientRegistry;
-
-    private final ObservationRegistry observationRegistry;
-
-    private final SecurityRegistry securityRegistry;
-
-    /**
-     * Initialize a server which will bind to default UDP port for CoAP (5684).
-     */
-    public LeshanServer(CoapServerImplementor coapServerImplementor) {
-        this(coapServerImplementor, null, null, null);
-    }
 
     /**
      * Initialize a server which will bind to the specified address and port.
@@ -85,26 +71,11 @@ public class LeshanServer implements LwM2mServer {
      * @param localAddress the address to bind the CoAP server.
      * @param localAddressSecure the address to bind the CoAP server for DTLS connection.
      */
-    public LeshanServer(CoapServerImplementor coapServerImplementor, ClientRegistry clientRegistry, SecurityRegistry securityRegistry, ObservationRegistry observationRegistry) {
+    public LeshanServer(CoapServerImplementor coapServerImplementor) {
     	this.coapServerImplementor = coapServerImplementor;
-        // init registry
-        if (clientRegistry == null)
-            this.clientRegistry = new ClientRegistryImpl();
-        else
-            this.clientRegistry = clientRegistry;
-
-        if (observationRegistry == null)
-            this.observationRegistry = new ObservationRegistryImpl();
-        else
-            this.observationRegistry = observationRegistry;
-
-        if (securityRegistry == null)
-            this.securityRegistry = new SecurityRegistryImpl();
-        else
-            this.securityRegistry = securityRegistry;
 
         // Cancel observations on client unregistering
-        this.clientRegistry.addListener(new ClientRegistryListener() {
+    	coapServerImplementor.getClientRegistry().addListener(new ClientRegistryListener() {
 
             @Override
             public void updated(Client clientUpdated) {
@@ -112,23 +83,13 @@ public class LeshanServer implements LwM2mServer {
 
             @Override
             public void unregistered(Client client) {
-                LeshanServer.this.observationRegistry.cancelObservations(client);
+                LeshanServer.this.coapServerImplementor.getObservationRegistry().cancelObservations(client);
             }
 
             @Override
             public void registered(Client client) {
             }
         });
-
-        // init CoAP server
-        coapServerImplementor.createCoAPServer(clientRegistry, observationRegistry, securityRegistry);
-        coapServerImplementor.bindEndpoints();
-
-        // define /rd resource
-        coapServerImplementor.bindResource();
-
-        // create sender
-        requestSender = coapServerImplementor.getLWM2MRequestSender();
     }
 
     /**
@@ -142,8 +103,8 @@ public class LeshanServer implements LwM2mServer {
         LOG.info("LW-M2M server started");
 
         // start client registry
-        if (clientRegistry instanceof ClientRegistryImpl)
-            ((ClientRegistryImpl) clientRegistry).start();
+        if (coapServerImplementor.getClientRegistry() instanceof ClientRegistryImpl)
+            ((ClientRegistryImpl) coapServerImplementor.getClientRegistry()).start();
     }
 
     /**
@@ -152,9 +113,9 @@ public class LeshanServer implements LwM2mServer {
     public void stop() {
     	coapServerImplementor.stop();
 
-        if (clientRegistry instanceof ClientRegistryImpl) {
+        if (coapServerImplementor.getClientRegistry() instanceof ClientRegistryImpl) {
             try {
-                ((ClientRegistryImpl) clientRegistry).stop();
+                ((ClientRegistryImpl) coapServerImplementor.getClientRegistry()).stop();
             } catch (InterruptedException e) {
                 LOG.info("LW-M2M server started");
             }
@@ -167,9 +128,9 @@ public class LeshanServer implements LwM2mServer {
     public void destroy() {
     	coapServerImplementor.destroy();
 
-        if (clientRegistry instanceof ClientRegistryImpl) {
+        if (coapServerImplementor.getClientRegistry() instanceof ClientRegistryImpl) {
             try {
-                ((ClientRegistryImpl) clientRegistry).stop();
+                ((ClientRegistryImpl) coapServerImplementor.getClientRegistry()).stop();
             } catch (InterruptedException e) {
                 LOG.info("LW-M2M server started");
             }
@@ -178,27 +139,27 @@ public class LeshanServer implements LwM2mServer {
 
     @Override
     public ClientRegistry getClientRegistry() {
-        return this.clientRegistry;
+        return coapServerImplementor.getClientRegistry();
     }
 
     @Override
     public ObservationRegistry getObservationRegistry() {
-        return this.observationRegistry;
+        return coapServerImplementor.getObservationRegistry();
     }
 
     @Override
     public SecurityRegistry getSecurityRegistry() {
-        return this.securityRegistry;
+        return coapServerImplementor.getSecurityRegistry();
     }
 
     @Override
     public <T extends ClientResponse> T send(LwM2mRequest<T> request) {
-        return requestSender.send(request);
+        return coapServerImplementor.getLWM2MRequestSender().send(request);
     }
 
     @Override
     public <T extends ClientResponse> void send(LwM2mRequest<T> request, ResponseConsumer<T> responseCallback,
             ExceptionConsumer errorCallback) {
-        requestSender.send(request, responseCallback, errorCallback);
+    	coapServerImplementor.getLWM2MRequestSender().send(request, responseCallback, errorCallback);
     }
 }

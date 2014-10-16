@@ -13,18 +13,18 @@ public interface CoapServerImplementor {
     /** IANA assigned UDP port for CoAP with DTLS */
     public static final int PORT_DTLS = 5684;
 	
-	public void createCoAPServer(ClientRegistry clientRegistry, ObservationRegistry observationRegistry, SecurityRegistry securityRegistry);
-	
-	public void bindEndpoints();
-		
-	public void bindResource();
-	
 	public LwM2mRequestSender getLWM2MRequestSender();
+	
+	public ClientRegistry getClientRegistry();
+	
+	public ObservationRegistry getObservationRegistry();
+	
+	public SecurityRegistry getSecurityRegistry();
 	
 	public void start();
 	
 	public void stop();
 
 	public void destroy();
-
+	
 }

@@ -1,4 +1,4 @@
-package leshan.server.lwm2m.resource.californium;
+package leshan.connector.californium.resource;
 
 import leshan.server.lwm2m.resource.proxy.ExchangeProxy;
 import leshan.server.lwm2m.resource.proxy.RequestProxy;

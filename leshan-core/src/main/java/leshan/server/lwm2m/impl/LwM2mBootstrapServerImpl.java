@@ -34,6 +34,7 @@ import java.net.InetSocketAddress;
 
 import leshan.server.lwm2m.bootstrap.BootstrapStore;
 import leshan.server.lwm2m.bootstrap.LwM2mBootstrapServer;
+import leshan.server.lwm2m.impl.bridge.server.CoapServerImplementor;
 import leshan.server.lwm2m.impl.californium.BootstrapResource;
 import leshan.server.lwm2m.impl.californium.CaliforniumPskStore;
 import leshan.server.lwm2m.impl.security.SecureEndpoint;
@@ -54,30 +55,21 @@ public class LwM2mBootstrapServerImpl implements LwM2mBootstrapServer {
 
     private final static Logger LOG = LoggerFactory.getLogger(LwM2mBootstrapServerImpl.class);
 
-    /** IANA assigned UDP port for CoAP (so for LWM2M) */
-    public static final int PORT = 5683;
-
-    /** IANA assigned UDP port for CoAP with DTLS (so for LWM2M) */
-    public static final int PORT_DTLS = 5684;
-
     private final CoapServer coapServer;
 
     private final BootstrapStore bsStore;
 
     private final SecurityStore securityStore;
 
-    public LwM2mBootstrapServerImpl(BootstrapStore bsStore, SecurityStore securityStore) {
-        this(new InetSocketAddress((InetAddress) null, PORT), new InetSocketAddress((InetAddress) null, PORT_DTLS),
-                bsStore, securityStore);
+	private final CoapServerImplementor coapServerImplementor;
 
-    }
-
-    public LwM2mBootstrapServerImpl(InetSocketAddress localAddress, InetSocketAddress localAddressSecure,
-            BootstrapStore bsStore, SecurityStore securityStore) {
+    public LwM2mBootstrapServerImpl(CoapServerImplementor coapServerImplementor, BootstrapStore bsStore, SecurityStore securityStore) {
         Validate.notNull(bsStore, "bootstrap store must not be null");
-
+        
+        this.coapServerImplementor = coapServerImplementor;
         this.bsStore = bsStore;
         this.securityStore = securityStore;
+        
         // init CoAP server
         coapServer = new CoapServer();
         Endpoint endpoint = new CoAPEndpoint(localAddress);
