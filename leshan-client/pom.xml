@@ -39,7 +39,7 @@
     </parent>
 	<artifactId>leshan-client</artifactId>
 	<packaging>jar</packaging>
-	<name>leshan-client</name>
+	<name>leshan - client</name>
 	<description>A LWM2M client built upon the Leshan core.</description>
 
 	<properties>
