@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
- * 
+ *
  *
  * All rights reserved.
  *
@@ -33,18 +33,17 @@ package leshan.client.lwm2m.request;
 
 import java.util.Map;
 
+import org.apache.commons.lang.Validate;
+
 public class Request {
-//	private ch.ethz.inf.vs.californium.coap.Request coapRequest;
 
 	public static String toQueryStringMap(final Map<String, String> map) {
-		if(map == null) {
-			throw new IllegalArgumentException("Map was null!");
-		}
-		
+		Validate.notNull(map);
+
 		if(map.isEmpty()) {
 			return "";
 		}
-		
+
 		final StringBuilder builder = new StringBuilder();
 		for(final Map.Entry<String, String> entry : map.entrySet()) {
 			builder.append(entry.getKey()).append("=").append(entry.getValue()).append("&");
@@ -52,9 +51,9 @@ public class Request {
 		builder.deleteCharAt(builder.length() - 1);
 		return builder.toString();
 	}
-	
+
 	public static org.eclipse.californium.core.coap.Request toCaliforniumRequest(final Request r) {
-		
+
 		return null;
 	}
 }
