@@ -46,14 +46,14 @@
     </properties>
 
     <dependencies>
-        <dependency>
+       <!--  <dependency>
             <groupId>org.eclipse.californium</groupId>
             <artifactId>californium-core</artifactId>
-        </dependency>
-        <dependency>
+        </dependency>  
+         <dependency>
             <groupId>org.eclipse.californium</groupId>
             <artifactId>scandium</artifactId>
-        </dependency>
+        </dependency>--> 
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>

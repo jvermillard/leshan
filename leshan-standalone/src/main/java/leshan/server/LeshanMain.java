@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2013, Sierra Wireless
+ * Copyright (c) 2014, Zebra Technologies
  *
  * All rights reserved.
  *

@@ -32,12 +32,12 @@ package leshan.server.lwm2m.impl;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
+import leshan.connector.californium.security.SecureEndpoint;
 import leshan.server.lwm2m.bootstrap.BootstrapStore;
 import leshan.server.lwm2m.bootstrap.LwM2mBootstrapServer;
 import leshan.server.lwm2m.impl.bridge.server.CoapServerImplementor;
 import leshan.server.lwm2m.impl.californium.BootstrapResource;
 import leshan.server.lwm2m.impl.californium.CaliforniumPskStore;
-import leshan.server.lwm2m.impl.security.SecureEndpoint;
 import leshan.server.lwm2m.security.SecurityStore;
 
 import org.apache.commons.lang.Validate;
@@ -66,14 +66,14 @@ public class LwM2mBootstrapServerImpl implements LwM2mBootstrapServer {
     public LwM2mBootstrapServerImpl(CoapServerImplementor coapServerImplementor, BootstrapStore bsStore, SecurityStore securityStore) {
         Validate.notNull(bsStore, "bootstrap store must not be null");
         
-        this.coapServerImplementor = coapServerImplementor;
+        this.coapServerImplementor = coapnoServerImplementor;
         this.bsStore = bsStore;
         this.securityStore = securityStore;
         
         // init CoAP server
         coapServer = new CoapServer();
         Endpoint endpoint = new CoAPEndpoint(localAddress);
-        coapServer.addEndpoint(endpoint);
+        coapServer.addEndpoint(endpoint);w
 
         // init DTLS server
         DTLSConnector connector = new DTLSConnector(localAddressSecure, null);

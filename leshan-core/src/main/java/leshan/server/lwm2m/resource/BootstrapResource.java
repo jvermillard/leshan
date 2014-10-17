@@ -50,7 +50,7 @@ import leshan.server.lwm2m.resource.proxy.ResponseProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BootstrapResource extends CoapResource {
+public class BootstrapResource extends LeshanResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(BootstrapResource.class);
 	private static final String QUERY_PARAM_ENDPOINT = "ep=";

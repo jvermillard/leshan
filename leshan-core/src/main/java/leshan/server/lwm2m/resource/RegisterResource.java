@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2013, Sierra Wireless
+ * Copyright (c) 2014, Zebra Technologies
  *
  * All rights reserved.
  *
@@ -41,7 +42,6 @@ import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.client.ClientUpdate;
 import leshan.server.lwm2m.client.LinkObject;
 import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
-import leshan.server.lwm2m.resource.proxy.CoapResourceProxy;
 import leshan.server.lwm2m.resource.proxy.ExchangeProxy;
 import leshan.server.lwm2m.security.SecurityInfo;
 import leshan.server.lwm2m.security.SecurityStore;
@@ -57,34 +57,20 @@ import org.slf4j.LoggerFactory;
  * {@link ClientRegistry}.
  * </p>
  */
-public class RegisterResource extends CoapResource {
-
-	private static final String RESOURCE_TYPE = "core.rd";
-
-	private static final String QUERY_PARAM_ENDPOINT = "ep=";
-
-	private static final String QUERY_PARAM_BINDING_MODE = "b=";
-
-	private static final String QUERY_PARAM_LWM2M_VERSION = "lwm2m=";
-
-	private static final String QUERY_PARAM_SMS = "sms=";
-
-	private static final String QUERY_PARAM_LIFETIME = "lt=";
+public class RegisterResource extends LeshanResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RegisterResource.class);
-
-	public static final String RESOURCE_NAME = "rd";
 
 	private final ClientRegistry clientRegistry;
 
 	private final SecurityStore securityStore;
 
-	public RegisterResource(final ClientRegistry clientRegistry, final SecurityStore securityStore, final CoapResourceProxy coapResourceProxy) {
-		super(coapResourceProxy, RESOURCE_NAME); //super(RESOURCE_NAME); //SHIM
+	public RegisterResource(final ClientRegistry clientRegistry, final SecurityStore securityStore) {
+		 //super(RESOURCE_NAME); //SHIM
 
 		this.clientRegistry = clientRegistry;
 		this.securityStore = securityStore;
-		getCoapResourceProxy().setResourceType(RESOURCE_TYPE);//getAttributes().addResourceType(RESOURCE_TYPE); //SHIM
+		//getAttributes().addResourceType(RESOURCE_TYPE); //SHIM
 	}
 
 	@Override
@@ -108,15 +94,15 @@ public class RegisterResource extends CoapResource {
 		
 		try{
 			for (final String param : exchangeProxy.getRequest().getURIQueries()) {
-				if (param.startsWith(QUERY_PARAM_ENDPOINT)) {
+				if (param.startsWith(LeshanResource.QUERY_PARAM_ENDPOINT)) {
 					endpoint = param.substring(3);
-				} else if (param.startsWith(QUERY_PARAM_LIFETIME)) {
+				} else if (param.startsWith(LeshanResource.QUERY_PARAM_LIFETIME)) {
 					lifetime = Long.valueOf(param.substring(3));
-				} else if (param.startsWith(QUERY_PARAM_SMS)) {
+				} else if (param.startsWith(LeshanResource.QUERY_PARAM_SMS)) {
 					smsNumber = param.substring(4);
-				} else if (param.startsWith(QUERY_PARAM_LWM2M_VERSION)) {
+				} else if (param.startsWith(LeshanResource.QUERY_PARAM_LWM2M_VERSION)) {
 					lwVersion = param.substring(6);
-				} else if (param.startsWith(QUERY_PARAM_BINDING_MODE)) {
+				} else if (param.startsWith(LeshanResource.QUERY_PARAM_BINDING_MODE)) {
 					binding = BindingMode.valueOf(param.substring(2));
 				}
 			}

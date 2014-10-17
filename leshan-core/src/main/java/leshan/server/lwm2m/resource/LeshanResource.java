@@ -27,40 +27,57 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.connector.californium.server;
+package leshan.server.lwm2m.resource;
 
-import leshan.server.lwm2m.request.CoapResponseCode;
+import leshan.server.lwm2m.resource.proxy.CoapResourceProxy;
+import leshan.server.lwm2m.resource.proxy.ExchangeProxy;
 
 import org.apache.commons.lang.Validate;
-import org.eclipse.californium.core.coap.CoAP;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class CaliforniumResponseCode extends CoapResponseCode {
+public abstract class LeshanResource {
+	private static final Logger LOG = LoggerFactory.getLogger(LeshanResource.class);
+	
+	public static final String RESOURCE_TYPE = "core.rd";
 
-	@Override
-	public ResponseCode fromCoapCode(final int code) {
-		Validate.notNull(code);
+	public static final String QUERY_PARAM_ENDPOINT = "ep=";
 
-        if (code == CoAP.ResponseCode.CREATED.value) {
-            return CoapResponseCode.ResponseCode.CREATED;
-        } else if (code == CoAP.ResponseCode.DELETED.value) {
-            return CoapResponseCode.ResponseCode.DELETED;
-        } else if (code == CoAP.ResponseCode.CHANGED.value) {
-            return CoapResponseCode.ResponseCode.CHANGED;
-        } else if (code == CoAP.ResponseCode.CONTENT.value) {
-            return CoapResponseCode.ResponseCode.CONTENT;
-        } else if (code == CoAP.ResponseCode.BAD_REQUEST.value) {
-            return CoapResponseCode.ResponseCode.BAD_REQUEST;
-        } else if (code == CoAP.ResponseCode.UNAUTHORIZED.value) {
-            return CoapResponseCode.ResponseCode.UNAUTHORIZED;
-        } else if (code == CoAP.ResponseCode.NOT_FOUND.value) {
-            return CoapResponseCode.ResponseCode.NOT_FOUND;
-        } else if (code == CoAP.ResponseCode.METHOD_NOT_ALLOWED.value) {
-            return CoapResponseCode.ResponseCode.METHOD_NOT_ALLOWED;
-        } else if (code == 137) {
-            return CoapResponseCode.ResponseCode.CONFLICT;
-        } else {
-            throw new IllegalArgumentException("Invalid CoAP code for LWM2M response: " + code);
-        }
+	public static final String QUERY_PARAM_BINDING_MODE = "b=";
+
+	public static final String QUERY_PARAM_LWM2M_VERSION = "lwm2m=";
+
+	public static final String QUERY_PARAM_SMS = "sms=";
+
+	public static final String QUERY_PARAM_LIFETIME = "lt=";
+	
+	public static final String RESOURCE_NAME = "rd";
+
+
+	private CoapResourceProxy coapResourceProxy;
+
+	public LeshanResource() {
+	}
+	
+	public void setCoapResourceFactory(final CoapResourceProxy factory){
+		this.coapResourceProxy = factory;
+	}
+	
+	public CoapResourceProxy getCoapResourceProxy() {
+		Validate.notNull(coapResourceProxy);
+		
+		return coapResourceProxy;
 	}
 
+	public void handlePOST(final ExchangeProxy exchangeProxy){
+		LOG.debug("Doing nothing by default.");
+	}
+
+	public void handlePUT(final ExchangeProxy exchangeProxy){
+		LOG.debug("Doing nothing by default.");
+	}
+
+	public void handleDELETE(final ExchangeProxy exchangeProxy){
+		LOG.debug("Doing nothing by default.");
+	}
 }
