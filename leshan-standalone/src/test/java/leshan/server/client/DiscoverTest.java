@@ -32,68 +32,81 @@
 
 package leshan.server.client;
 
+import static leshan.server.client.IntegrationTestHelper.*;
+import static leshan.server.lwm2m.request.ResponseCode.*;
 import static org.junit.Assert.assertEquals;
 import leshan.server.lwm2m.client.LinkObject;
 import leshan.server.lwm2m.request.DiscoverResponse;
 import leshan.server.lwm2m.request.ResponseCode;
 
+import org.junit.After;
 import org.junit.Test;
 
-public class DiscoverTest extends LwM2mClientServerIntegrationTest {
+public class DiscoverTest {
 
-	@Test
-	public void can_discover_object() {
-		register();
+    private IntegrationTestHelper helper = new IntegrationTestHelper();
 
-		final DiscoverResponse response = sendDiscover(GOOD_OBJECT_ID);
-		assertLinkFormatResponse(response, ResponseCode.CONTENT, client.getObjectModel(GOOD_OBJECT_ID));
-	}
+    @After
+    public void stop() {
+        helper.stop();
+    }
 
-	@Test(expected=IllegalArgumentException.class)
-	public void illegal_object_links_request_two() {
-		register();
+    @Test
+    public void can_discover_object() {
+        helper.register();
 
-		final DiscoverResponse response = sendDiscover(GOOD_OBJECT_ID);
-		assertLinkFormatResponse(response, ResponseCode.CONTENT, client.getObjectModel(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, FIRST_RESOURCE_ID, SECOND_RESOURCE_ID));
-	}
+        final DiscoverResponse response = helper.sendDiscover(GOOD_OBJECT_ID);
+        assertLinkFormatResponse(response, CONTENT, helper.client.getObjectModel(GOOD_OBJECT_ID));
+    }
 
-	@Test
-	public void can_discover_object_instance() {
-		register();
+    @Test(expected = IllegalArgumentException.class)
+    public void illegal_object_links_request_two() {
+        helper.register();
 
-		sendCreate(createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
+        final DiscoverResponse response = helper.sendDiscover(GOOD_OBJECT_ID);
+        assertLinkFormatResponse(response, CONTENT, helper.client.getObjectModel(GOOD_OBJECT_ID,
+                GOOD_OBJECT_INSTANCE_ID, FIRST_RESOURCE_ID, SECOND_RESOURCE_ID));
+    }
 
-		assertLinkFormatResponse(sendDiscover(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.CONTENT, client.getObjectModel(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID));
-	}
+    @Test
+    public void can_discover_object_instance() {
+        helper.register();
 
-	@Test
-	public void can_discover_resource() {
-		register();
+        helper.sendCreate(createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
 
-		sendCreate(createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
+        assertLinkFormatResponse(helper.sendDiscover(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), CONTENT,
+                helper.client.getObjectModel(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID));
+    }
 
-		assertLinkFormatResponse(sendDiscover(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, FIRST_RESOURCE_ID), ResponseCode.CONTENT, client.getObjectModel(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, FIRST_RESOURCE_ID));
-	}
+    @Test
+    public void can_discover_resource() {
+        helper.register();
 
-	@Test
-	public void cant_discover_non_existent_resource() {
-		register();
+        helper.sendCreate(createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
 
-		sendCreate(createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
+        assertLinkFormatResponse(helper.sendDiscover(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, FIRST_RESOURCE_ID),
+                CONTENT, helper.client.getObjectModel(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, FIRST_RESOURCE_ID));
+    }
 
-		assertEmptyResponse(sendDiscover(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, 1234231), ResponseCode.NOT_FOUND);
-	}
+    @Test
+    public void cant_discover_non_existent_resource() {
+        helper.register();
 
-	private void assertLinkFormatResponse(final DiscoverResponse response,
-			final ResponseCode responseCode, final LinkObject[] expectedObjects) {
-		assertEquals(responseCode, response.getCode());
+        helper.sendCreate(createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
 
-		final LinkObject[] actualObjects = response.getObjectLinks();
+        assertEmptyResponse(helper.sendDiscover(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, 1234231), NOT_FOUND);
+    }
 
-		assertEquals(expectedObjects.length, actualObjects.length);
-		for(int i = 0; i < expectedObjects.length; i++){
-			assertEquals(expectedObjects[i].toString(), actualObjects[i].toString());
-		}
-	}
+    private void assertLinkFormatResponse(final DiscoverResponse response, final ResponseCode responseCode,
+            final LinkObject[] expectedObjects) {
+        assertEquals(responseCode, response.getCode());
+
+        final LinkObject[] actualObjects = response.getObjectLinks();
+
+        assertEquals(expectedObjects.length, actualObjects.length);
+        for (int i = 0; i < expectedObjects.length; i++) {
+            assertEquals(expectedObjects[i].toString(), actualObjects[i].toString());
+        }
+    }
 
 }

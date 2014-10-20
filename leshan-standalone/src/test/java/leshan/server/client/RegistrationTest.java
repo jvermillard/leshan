@@ -33,49 +33,56 @@
 package leshan.server.client;
 
 import static com.jayway.awaitility.Awaitility.await;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static leshan.server.client.IntegrationTestHelper.*;
+import static org.junit.Assert.*;
 import leshan.client.lwm2m.LwM2mClient;
 import leshan.client.lwm2m.register.RegisterUplink;
 import leshan.client.lwm2m.resource.LwM2mClientObjectDefinition;
 import leshan.client.lwm2m.response.OperationResponse;
 import leshan.client.lwm2m.util.ResponseCallback;
 
+import org.junit.After;
 import org.junit.Test;
 
-public class RegistrationTest extends LwM2mClientServerIntegrationTest {
+public class RegistrationTest {
 
-	@Test
-	public void registered_device_exists() {
-		final RegisterUplink registerUplink = registerAndGetUplink();
-		final OperationResponse register = registerUplink.register(ENDPOINT, clientParameters, TIMEOUT_MS);
+    private IntegrationTestHelper helper = new IntegrationTestHelper();
 
-		assertTrue(register.isSuccess());
-		assertNotNull(getClient());
-	}
+    @After
+    public void stop() {
+        helper.stop();
+    }
 
-	@Test(expected=IllegalArgumentException.class)
-	public void fail_to_create_client_with_null(){
-		client = new LwM2mClient((LwM2mClientObjectDefinition[])null);
-	}
+    @Test
+    public void registered_device_exists() {
+        final RegisterUplink registerUplink = helper.registerAndGetUplink();
+        final OperationResponse register = registerUplink.register(ENDPOINT, helper.clientParameters, TIMEOUT_MS);
 
-	@Test(expected=IllegalArgumentException.class)
-	public void fail_to_create_client_with_same_object_twice(){
-		final LwM2mClientObjectDefinition objectOne = new LwM2mClientObjectDefinition(1, false, false);
-		client = new LwM2mClient(objectOne, objectOne);
-	}
+        assertTrue(register.isSuccess());
+        assertNotNull(helper.getClient());
+    }
 
-	@Test
-	public void registered_device_exists_async() {
-		final RegisterUplink registerUplink = registerAndGetUplink();
-		final ResponseCallback callback = new ResponseCallback();
-		registerUplink.register(ENDPOINT, clientParameters, callback);
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_create_client_with_null() {
+        helper.client = new LwM2mClient((LwM2mClientObjectDefinition[]) null);
+    }
 
-		await().untilTrue(callback.isCalled());
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_create_client_with_same_object_twice() {
+        final LwM2mClientObjectDefinition objectOne = new LwM2mClientObjectDefinition(1, false, false);
+        helper.client = new LwM2mClient(objectOne, objectOne);
+    }
 
-		assertTrue(callback.isSuccess());
-		assertNotNull(getClient());
-	}
+    @Test
+    public void registered_device_exists_async() {
+        final RegisterUplink registerUplink = helper.registerAndGetUplink();
+        final ResponseCallback callback = new ResponseCallback();
+        registerUplink.register(ENDPOINT, helper.clientParameters, callback);
 
+        await().untilTrue(callback.isCalled());
+
+        assertTrue(callback.isSuccess());
+        assertNotNull(helper.getClient());
+    }
 
 }

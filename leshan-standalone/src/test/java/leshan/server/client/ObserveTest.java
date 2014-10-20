@@ -32,8 +32,8 @@
 
 package leshan.server.client;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static leshan.server.client.IntegrationTestHelper.*;
+import static org.junit.Assert.*;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -49,217 +49,222 @@ import leshan.server.lwm2m.observation.ObserveSpec;
 import leshan.server.lwm2m.request.ResponseCode;
 import leshan.server.lwm2m.request.ValueResponse;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import com.jayway.awaitility.Awaitility;
 
-public class ObserveTest extends LwM2mClientServerIntegrationTest {
+public class ObserveTest {
 
-	private SampleObservation observer;
+    private SampleObservation observer;
 
-	@Before
-	public void setupObservation() {
-		observer = new SampleObservation();
-		observationRegistry.addListener(observer);
+    private IntegrationTestHelper helper = new IntegrationTestHelper();
 
-		register();
-		create();
-	}
+    @After
+    public void stop() {
+        helper.stop();
+    }
 
-	@Test
-	public void can_observe_resource() {
-		observeResource();
+    @Before
+    public void setupObservation() {
+        observer = new SampleObservation();
+        helper.observationRegistry.addListener(observer);
 
-		intResource.setValue(2);
-		assertObservedResource("2");
-	}
+        helper.register();
+        create();
+    }
 
-	@Ignore
-	@Test
-	public void can_observe_resource_with_gt_with_notify() {
-		observeResource(attributes().greaterThan(6));
+    @Test
+    public void can_observe_resource() {
+        observeResource();
 
-		intResource.setValue(20);
-		assertObservedResource("20");
-	}
+        helper.intResource.setValue(2);
+        assertObservedResource("2");
+    }
 
-	@Ignore
-	@Test
-	public void can_observe_resource_with_gt_no_notify() {
-		observeResource(attributes().greaterThan(6));
+    @Ignore
+    @Test
+    public void can_observe_resource_with_gt_with_notify() {
+        observeResource(attributes().greaterThan(6));
 
-		intResource.setValue(2);
-		assertNoObservation(500);
-	}
+        helper.intResource.setValue(20);
+        assertObservedResource("20");
+    }
 
-	@Ignore
-	@Test
-	public void can_observe_resource_with_lt_with_notify() {
-		observeResource(attributes().lessThan(6));
+    @Ignore
+    @Test
+    public void can_observe_resource_with_gt_no_notify() {
+        observeResource(attributes().greaterThan(6));
 
-		intResource.setValue(2);
-		assertObservedResource("2");
-	}
+        helper.intResource.setValue(2);
+        assertNoObservation(500);
+    }
 
-	@Ignore
-	@Test
-	public void can_observe_resource_with_lt_no_notify() {
-		observeResource(attributes().lessThan(6));
+    @Ignore
+    @Test
+    public void can_observe_resource_with_lt_with_notify() {
+        observeResource(attributes().lessThan(6));
 
-		intResource.setValue(20);
-		assertNoObservation(500);
-	}
+        helper.intResource.setValue(2);
+        assertObservedResource("2");
+    }
 
-	@Ignore
-	@Test
-	public void can_observe_resource_with_gt_and_lt_with_notify() {
-		observeResource(attributes().greaterThan(10).lessThan(6));
+    @Ignore
+    @Test
+    public void can_observe_resource_with_lt_no_notify() {
+        observeResource(attributes().lessThan(6));
 
-		intResource.setValue(20);
-		assertObservedResource("20");
-	}
+        helper.intResource.setValue(20);
+        assertNoObservation(500);
+    }
 
-	@Test
-	public void can_observe_resource_with_pmax_with_notify() {
-		observeResource(attributes().maxPeriod(1));
+    @Ignore
+    @Test
+    public void can_observe_resource_with_gt_and_lt_with_notify() {
+        observeResource(attributes().greaterThan(10).lessThan(6));
 
-		assertObservedResource(2000, "0");
-	}
+        helper.intResource.setValue(20);
+        assertObservedResource("20");
+    }
 
-	@Test
-	public void can_observe_resource_with_pmax_no_notify() {
-		observeResource(attributes().maxPeriod(1));
+    @Test
+    public void can_observe_resource_with_pmax_with_notify() {
+        observeResource(attributes().maxPeriod(1));
 
-		assertNoObservation(500);
-	}
+        assertObservedResource(2000, "0");
+    }
 
-	@Test
-	public void can_observe_object_instance_with_pmax_with_notify() {
-		observeObjectInstance(attributes().maxPeriod(1));
+    @Test
+    public void can_observe_resource_with_pmax_no_notify() {
+        observeResource(attributes().maxPeriod(1));
 
-		intResource.setValue(2);
-		assertObservedObjectInstance(2000, "2");
-	}
+        assertNoObservation(500);
+    }
 
-	@Test
-	public void can_observe_object_with_pmax_with_notify() {
-		observeObject(attributes().maxPeriod(1));
+    @Test
+    public void can_observe_object_instance_with_pmax_with_notify() {
+        observeObjectInstance(attributes().maxPeriod(1));
 
-		intResource.setValue(2);
-		assertObservedObject(2000, "2");
-	}
+        helper.intResource.setValue(2);
+        assertObservedObjectInstance(2000, "2");
+    }
 
-	private void create() {
-		sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), INT_OBJECT_ID);
-	}
+    @Test
+    public void can_observe_object_with_pmax_with_notify() {
+        observeObject(attributes().maxPeriod(1));
 
-	private ObserveSpec.Builder attributes() {
-		return new ObserveSpec.Builder();
-	}
+        helper.intResource.setValue(2);
+        assertObservedObject(2000, "2");
+    }
 
-	private void observeResource() {
-		final ValueResponse response = sendObserve(INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
-		assertResponse(response, ResponseCode.CONTENT, new LwM2mResource(INT_RESOURCE_ID, Value.newStringValue("0")));
-	}
+    private void create() {
+        helper.sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), INT_OBJECT_ID);
+    }
 
-	private void observeResource(final ObserveSpec.Builder observeSpecBuilder) {
-		sendWriteAttributes(observeSpecBuilder.build(), INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
-		observeResource();
-	}
+    private ObserveSpec.Builder attributes() {
+        return new ObserveSpec.Builder();
+    }
 
-	private void observeObjectInstance() {
-		final ValueResponse response = sendObserve(INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID);
-		assertResponse(response, ResponseCode.CONTENT, new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
-				new LwM2mResource(INT_RESOURCE_ID, Value.newBinaryValue("0".getBytes()))
-		}));
-	}
+    private void observeResource() {
+        final ValueResponse response = helper.sendObserve(INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
+        assertResponse(response, ResponseCode.CONTENT, new LwM2mResource(INT_RESOURCE_ID, Value.newStringValue("0")));
+    }
 
-	private void observeObjectInstance(final ObserveSpec.Builder observeSpecBuilder) {
-		sendWriteAttributes(observeSpecBuilder.build(), INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID);
-		observeObjectInstance();
-	}
+    private void observeResource(final ObserveSpec.Builder observeSpecBuilder) {
+        helper.sendWriteAttributes(observeSpecBuilder.build(), INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, INT_RESOURCE_ID);
+        observeResource();
+    }
 
-	private void observeObject() {
-		final ValueResponse response = sendObserve(INT_OBJECT_ID);
-		assertResponse(response, ResponseCode.CONTENT, new LwM2mObject(INT_OBJECT_ID, new LwM2mObjectInstance[] {
-				new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
-						new LwM2mResource(INT_RESOURCE_ID, Value.newBinaryValue("0".getBytes()))
-				})
-		}));
-	}
+    private void observeObjectInstance() {
+        final ValueResponse response = helper.sendObserve(INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID);
+        assertResponse(response, ResponseCode.CONTENT, new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID,
+                new LwM2mResource[] { new LwM2mResource(INT_RESOURCE_ID, Value.newBinaryValue("0".getBytes())) }));
+    }
 
-	private void observeObject(final ObserveSpec.Builder observeSpecBuilder) {
-		sendWriteAttributes(observeSpecBuilder.build(), INT_OBJECT_ID);
-		observeObject();
-	}
+    private void observeObjectInstance(final ObserveSpec.Builder observeSpecBuilder) {
+        helper.sendWriteAttributes(observeSpecBuilder.build(), INT_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID);
+        observeObjectInstance();
+    }
 
-	private void assertObservedResource(final String value) {
-		assertObservedResource(500, value);
-	}
+    private void observeObject() {
+        final ValueResponse response = helper.sendObserve(INT_OBJECT_ID);
+        assertResponse(
+                response,
+                ResponseCode.CONTENT,
+                new LwM2mObject(INT_OBJECT_ID, new LwM2mObjectInstance[] { new LwM2mObjectInstance(
+                        GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] { new LwM2mResource(INT_RESOURCE_ID, Value
+                                .newBinaryValue("0".getBytes())) }) }));
+    }
 
-	private void assertObservedResource(final long timeoutInSeconds, final String value) {
-		Awaitility.await().atMost(timeoutInSeconds, TimeUnit.MILLISECONDS).untilTrue(observer.receievedNotify());
-		assertEquals(new LwM2mResource(INT_RESOURCE_ID, Value.newStringValue(value)), observer.getContent());
-	}
+    private void observeObject(final ObserveSpec.Builder observeSpecBuilder) {
+        helper.sendWriteAttributes(observeSpecBuilder.build(), INT_OBJECT_ID);
+        observeObject();
+    }
 
-	private void assertObservedObjectInstance(final long timeoutInSeconds, final String resourceValue) {
-		Awaitility.await().atMost(timeoutInSeconds, TimeUnit.MILLISECONDS).untilTrue(observer.receievedNotify());
-		assertEquals(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
-				new LwM2mResource(INT_RESOURCE_ID, Value.newBinaryValue(resourceValue.getBytes()))
-		}), observer.getContent());
-	}
+    private void assertObservedResource(final String value) {
+        assertObservedResource(500, value);
+    }
 
-	private void assertObservedObject(final long timeoutInSeconds, final String resourceValue) {
-		Awaitility.await().atMost(timeoutInSeconds, TimeUnit.MILLISECONDS).untilTrue(observer.receievedNotify());
-		assertEquals(new LwM2mObject(INT_OBJECT_ID, new LwM2mObjectInstance[] {
-				new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
-						new LwM2mResource(INT_RESOURCE_ID, Value.newBinaryValue(resourceValue.getBytes()))
-				})
-		}), observer.getContent());
-	}
+    private void assertObservedResource(final long timeoutInSeconds, final String value) {
+        Awaitility.await().atMost(timeoutInSeconds, TimeUnit.MILLISECONDS).untilTrue(observer.receievedNotify());
+        assertEquals(new LwM2mResource(INT_RESOURCE_ID, Value.newStringValue(value)), observer.getContent());
+    }
 
-	private void assertNoObservation(final long time) {
-		sleep(time);
-		assertFalse(observer.receievedNotify().get());
-	}
+    private void assertObservedObjectInstance(final long timeoutInSeconds, final String resourceValue) {
+        Awaitility.await().atMost(timeoutInSeconds, TimeUnit.MILLISECONDS).untilTrue(observer.receievedNotify());
+        assertEquals(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] { new LwM2mResource(
+                INT_RESOURCE_ID, Value.newBinaryValue(resourceValue.getBytes())) }), observer.getContent());
+    }
 
-	private void sleep(final long time) {
-		try {
-			Thread.sleep(time);
-		} catch (final InterruptedException e) {
-		}
-	}
+    private void assertObservedObject(final long timeoutInSeconds, final String resourceValue) {
+        Awaitility.await().atMost(timeoutInSeconds, TimeUnit.MILLISECONDS).untilTrue(observer.receievedNotify());
+        assertEquals(
+                new LwM2mObject(INT_OBJECT_ID, new LwM2mObjectInstance[] { new LwM2mObjectInstance(
+                        GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] { new LwM2mResource(INT_RESOURCE_ID,
+                                Value.newBinaryValue(resourceValue.getBytes())) }) }), observer.getContent());
+    }
 
-	private final class SampleObservation implements ObservationRegistryListener {
-		private final AtomicBoolean receivedNotify = new AtomicBoolean();
-		private LwM2mNode content;
+    private void assertNoObservation(final long time) {
+        sleep(time);
+        assertFalse(observer.receievedNotify().get());
+    }
 
-		@Override
-		public void newValue(final Observation observation, final LwM2mNode value) {
-			receivedNotify.set(true);
-			content = value;
-		}
+    private void sleep(final long time) {
+        try {
+            Thread.sleep(time);
+        } catch (final InterruptedException e) {
+        }
+    }
 
-		@Override
-		public void cancelled(final Observation observation) {
+    private final class SampleObservation implements ObservationRegistryListener {
+        private final AtomicBoolean receivedNotify = new AtomicBoolean();
+        private LwM2mNode content;
 
-		}
+        @Override
+        public void newValue(final Observation observation, final LwM2mNode value) {
+            receivedNotify.set(true);
+            content = value;
+        }
 
-		@Override
-		public void newObservation(final Observation observation) {
+        @Override
+        public void cancelled(final Observation observation) {
 
-		}
+        }
 
-		public AtomicBoolean receievedNotify() {
-			return receivedNotify;
-		}
+        @Override
+        public void newObservation(final Observation observation) {
 
-		public LwM2mNode getContent() {
-			return content;
-		}
-	}
+        }
+
+        public AtomicBoolean receievedNotify() {
+            return receivedNotify;
+        }
+
+        public LwM2mNode getContent() {
+            return content;
+        }
+    }
 
 }
-

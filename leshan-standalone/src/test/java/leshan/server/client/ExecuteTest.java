@@ -32,50 +32,47 @@
 
 package leshan.server.client;
 
+import static leshan.server.client.IntegrationTestHelper.*;
+import static leshan.server.lwm2m.request.ResponseCode.METHOD_NOT_ALLOWED;
 import leshan.server.lwm2m.request.ClientResponse;
 import leshan.server.lwm2m.request.ContentFormat;
 import leshan.server.lwm2m.request.ExecuteRequest;
 import leshan.server.lwm2m.request.ResponseCode;
 
+import org.junit.After;
 import org.junit.Test;
 
-public class ExecuteTest extends LwM2mClientServerIntegrationTest {
+public class ExecuteTest {
 
-	@Test
-	public void cannot_execute_write_only_resource() {
-		register();
+    private IntegrationTestHelper helper = new IntegrationTestHelper();
 
-		sendCreate(createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
+    @After
+    public void stop() {
+        helper.stop();
+    }
 
-		final ClientResponse response = server.send(
-				new ExecuteRequest(
-						getClient(),
-						GOOD_OBJECT_ID,
-						GOOD_OBJECT_INSTANCE_ID,
-						SECOND_RESOURCE_ID,
-						"world".getBytes(),
-						ContentFormat.TEXT));
+    @Test
+    public void cannot_execute_write_only_resource() {
+        helper.register();
 
-		assertEmptyResponse(response, ResponseCode.METHOD_NOT_ALLOWED);
-	}
+        helper.sendCreate(IntegrationTestHelper.createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
 
-	@Test
-	public void can_execute_resource() {
-		register();
+        final ClientResponse response = helper.server.send(new ExecuteRequest(helper.getClient(), GOOD_OBJECT_ID,
+                GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID, "world".getBytes(), ContentFormat.TEXT));
 
-		sendCreate(createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
+        IntegrationTestHelper.assertEmptyResponse(response, METHOD_NOT_ALLOWED);
+    }
 
-		final ClientResponse response = server.send(
-				new ExecuteRequest(
-						getClient(),
-						GOOD_OBJECT_ID,
-						GOOD_OBJECT_INSTANCE_ID,
-						EXECUTABLE_RESOURCE_ID,
-                        "world".getBytes(),
-						ContentFormat.TEXT));
+    @Test
+    public void can_execute_resource() {
+        helper.register();
 
-		assertEmptyResponse(response, ResponseCode.CHANGED);
-//		executableResource).execute(any(LwM2mExchange.class));
-	}
+        helper.sendCreate(IntegrationTestHelper.createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
+
+        final ClientResponse response = helper.server.send(new ExecuteRequest(helper.getClient(), GOOD_OBJECT_ID,
+                GOOD_OBJECT_INSTANCE_ID, EXECUTABLE_RESOURCE_ID, "world".getBytes(), ContentFormat.TEXT));
+
+        IntegrationTestHelper.assertEmptyResponse(response, ResponseCode.CHANGED);
+    }
 
 }

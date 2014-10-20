@@ -32,6 +32,7 @@
 
 package leshan.server.client;
 
+import static leshan.server.client.IntegrationTestHelper.*;
 import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
@@ -42,67 +43,76 @@ import leshan.server.lwm2m.node.LwM2mResource;
 import leshan.server.lwm2m.node.Value;
 import leshan.server.lwm2m.request.ResponseCode;
 
+import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 
-public class WriteTest extends LwM2mClientServerIntegrationTest {
+public class WriteTest {
 
     private static final String HELLO = "hello";
     private static final String GOODBYE = "goodbye";
 
+    private IntegrationTestHelper helper = new IntegrationTestHelper();
+
+    @After
+    public void stop() {
+        helper.stop();
+    }
+
     @Test
     public void can_write_replace_to_resource() {
-        register();
+        helper.register();
 
-        sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);
+        helper.sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);
 
-        assertEmptyResponse(sendReplace("world", GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
+        assertEmptyResponse(helper.sendReplace("world", GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
                 ResponseCode.CHANGED);
-        assertResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
+        assertResponse(helper.sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
                 ResponseCode.CONTENT, new LwM2mResource(SECOND_RESOURCE_ID, Value.newStringValue("world")));
-        assertEquals("world", secondResource.getValue());
+        assertEquals("world", helper.secondResource.getValue());
     }
 
     @Test
     public void bad_write_replace_to_resource() {
-        register();
+        helper.register();
 
-        sendCreate(createUnwritableResource("i'm broken!"), BROKEN_OBJECT_ID);
+        helper.sendCreate(createUnwritableResource("i'm broken!"), BROKEN_OBJECT_ID);
 
-        assertEmptyResponse(sendReplace("fix me!", BROKEN_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, BROKEN_RESOURCE_ID),
+        assertEmptyResponse(
+                helper.sendReplace("fix me!", BROKEN_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, BROKEN_RESOURCE_ID),
                 ResponseCode.BAD_REQUEST);
-        assertResponse(sendRead(BROKEN_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, BROKEN_RESOURCE_ID),
-                ResponseCode.CONTENT,  new LwM2mResource(BROKEN_RESOURCE_ID, Value.newStringValue("i'm broken!")));
+        assertResponse(helper.sendRead(BROKEN_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, BROKEN_RESOURCE_ID),
+                ResponseCode.CONTENT, new LwM2mResource(BROKEN_RESOURCE_ID, Value.newStringValue("i'm broken!")));
     }
 
     @Test
     public void cannot_write_to_non_writable_resource() {
-        register();
+        helper.register();
 
-        sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);
+        helper.sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);
 
-        assertEmptyResponse(sendReplace("world", GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, EXECUTABLE_RESOURCE_ID),
+        assertEmptyResponse(
+                helper.sendReplace("world", GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, EXECUTABLE_RESOURCE_ID),
                 ResponseCode.METHOD_NOT_ALLOWED);
     }
 
     @Ignore
     @Test
     public void can_write_to_writable_multiple_resource() {
-        register();
-        sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), MULTIPLE_OBJECT_ID);
+        helper.register();
+        helper.sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), MULTIPLE_OBJECT_ID);
 
         final LwM2mResource newValues = new LwM2mResource(MULTIPLE_OBJECT_ID, new Value<?>[] {
-                Value.newStringValue(HELLO),
-                Value.newStringValue(GOODBYE)
-        });
+                                Value.newStringValue(HELLO), Value.newStringValue(GOODBYE) });
 
-        final Map<Integer, byte[]> map = new HashMap<Integer, byte[]>();
+        final Map<Integer, byte[]> map = new HashMap<>();
         map.put(0, HELLO.getBytes());
         map.put(1, GOODBYE.getBytes());
 
-        multipleResource.setValue(map);
+        helper.multipleResource.setValue(map);
 
-        assertEmptyResponse(sendReplace(newValues, MULTIPLE_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, MULTIPLE_RESOURCE_ID),
+        assertEmptyResponse(
+                helper.sendReplace(newValues, MULTIPLE_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, MULTIPLE_RESOURCE_ID),
                 ResponseCode.CHANGED);
     }
 
@@ -111,21 +121,20 @@ public class WriteTest extends LwM2mClientServerIntegrationTest {
     @Ignore
     @Test
     public void can_write_partial_update_to_resource() {
-        register();
+        helper.register();
 
-        sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);
+        helper.sendCreate(createGoodObjectInstance(HELLO, GOODBYE), GOOD_OBJECT_ID);
 
-        assertEmptyResponse(sendUpdate("world", GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
+        assertEmptyResponse(helper.sendUpdate("world", GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
                 ResponseCode.CHANGED);
-        assertResponse(sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
+        assertResponse(helper.sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID),
                 ResponseCode.CONTENT, new LwM2mResource(SECOND_RESOURCE_ID, Value.newStringValue("world")));
-        assertEquals("world", secondResource.getValue());
+        assertEquals("world", helper.secondResource.getValue());
     }
 
     protected LwM2mObjectInstance createUnwritableResource(final String value) {
-        return new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
-                new LwM2mResource(BROKEN_RESOURCE_ID, Value.newStringValue(value))
-        });
+        return new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] { new LwM2mResource(
+                BROKEN_RESOURCE_ID, Value.newStringValue(value)) });
     }
 
 }
