@@ -55,12 +55,6 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.github.leshan</groupId>
-			<artifactId>leshan-core</artifactId>
-			<version>${project.version}</version>
-			<type>jar</type>
-		</dependency>
-		<dependency>
-			<groupId>org.github.leshan</groupId>
 			<artifactId>leshan-client</artifactId>
 			<version>${project.version}</version>
 		</dependency>

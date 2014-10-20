@@ -55,12 +55,6 @@
 
         <dependency>
             <groupId>org.github.leshan</groupId>
-            <artifactId>leshan-bs-server</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.github.leshan</groupId>
             <artifactId>leshan-client</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -114,25 +108,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>17.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>[1.9.5, 2)</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>com.jayway.awaitility</groupId>
             <artifactId>awaitility</artifactId>
             <scope>test</scope>
             <version>1.6.1</version>
         </dependency>
     </dependencies>
-    
     <build>
         <plugins>
             <plugin>
