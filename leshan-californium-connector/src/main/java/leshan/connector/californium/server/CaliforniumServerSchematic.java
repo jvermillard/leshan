@@ -33,20 +33,19 @@ import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.commons.lang.Validate;
-import org.eclipse.californium.core.CoapServer;
-import org.eclipse.californium.core.network.CoAPEndpoint;
-import org.eclipse.californium.core.network.Endpoint;
-import org.eclipse.californium.scandium.DTLSConnector;
-
 import leshan.connector.californium.resource.CaliforniumCoapResourceProxy;
 import leshan.connector.californium.security.SecureEndpoint;
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.impl.bridge.server.CoapServerImplementorSchematic;
 import leshan.server.lwm2m.observation.ObservationRegistry;
-import leshan.server.lwm2m.resource.LeshanResource;
 import leshan.server.lwm2m.resource.RegisterResource;
 import leshan.server.lwm2m.security.SecurityRegistry;
+
+import org.apache.commons.lang.Validate;
+import org.eclipse.californium.core.CoapServer;
+import org.eclipse.californium.core.network.CoAPEndpoint;
+import org.eclipse.californium.core.network.Endpoint;
+import org.eclipse.californium.scandium.DTLSConnector;
 
 public class CaliforniumServerSchematic implements CoapServerImplementorSchematic<CaliforniumServerImplementor, CaliforniumCoapResourceProxy> {
 	
@@ -60,43 +59,43 @@ public class CaliforniumServerSchematic implements CoapServerImplementorSchemati
 	private CaliforniumLwM2mRequestSender requestSender;
 	
 	@Override
-	public CaliforniumServerSchematic addEndpoint(InetSocketAddress... localAddress) {
+	public CaliforniumServerSchematic addEndpoint(final InetSocketAddress... localAddress) {
 		Validate.notNull(localAddress, "IP address cannot be null");
-		for(InetSocketAddress address : localAddress) {
+		for(final InetSocketAddress address : localAddress) {
 			enpointAddress.add(address);
 		}
 		return this;
 	}
 
 	@Override
-	public CaliforniumServerSchematic addSecureEndpoint(InetSocketAddress... localSecureAddress) {
+	public CaliforniumServerSchematic addSecureEndpoint(final InetSocketAddress... localSecureAddress) {
 		Validate.notNull(localSecureAddress, "IP address cannot be null");
-		for(InetSocketAddress address : localSecureAddress){
+		for(final InetSocketAddress address : localSecureAddress){
 			secureEndpointAddress.add(address);
 		}
 		return this;
 	}
 
 	@Override
-	public CaliforniumServerSchematic bindResource(CaliforniumCoapResourceProxy coapResourceProxy) {
+	public CaliforniumServerSchematic bindResource(final CaliforniumCoapResourceProxy coapResourceProxy) {
 		this.coapResourceProxy = coapResourceProxy;
 		return this;
 	}
 
 	@Override
-	public CaliforniumServerSchematic setClientRegistry(ClientRegistry clientRegistry) {
+	public CaliforniumServerSchematic setClientRegistry(final ClientRegistry clientRegistry) {
 		this.clientRegistry = clientRegistry;
 		return this;
 	}
 
 	@Override
-	public CaliforniumServerSchematic setSecurityRegistry(SecurityRegistry securityRegistry) {
+	public CaliforniumServerSchematic setSecurityRegistry(final SecurityRegistry securityRegistry) {
 		this.securityRegistry = securityRegistry;
 		return this;
 	}
 
 	@Override
-	public CaliforniumServerSchematic setObservationRegistry(ObservationRegistry observationRegistry) {
+	public CaliforniumServerSchematic setObservationRegistry(final ObservationRegistry observationRegistry) {
 		this.observationRegistry = observationRegistry;
 		return this;
 	}
@@ -106,12 +105,12 @@ public class CaliforniumServerSchematic implements CoapServerImplementorSchemati
 		coapServer = new CoapServer();
 		
 		final Set<Endpoint> endpoints = new HashSet<Endpoint>();
-		for(InetSocketAddress address : enpointAddress) {
-			Endpoint endpoint = new CoAPEndpoint(address);
+		for(final InetSocketAddress address : enpointAddress) {
+			final Endpoint endpoint = new CoAPEndpoint(address);
 			coapServer.addEndpoint(endpoint);
 			endpoints.add(endpoint);	
 		}
-		for(InetSocketAddress address : secureEndpointAddress) {
+		for(final InetSocketAddress address : secureEndpointAddress) {
 			final DTLSConnector connector = new DTLSConnector(address, null);
 	        connector.getConfig().setPskStore(new CaliforniumPskStore(this.securityRegistry, this.clientRegistry));
 	
@@ -121,6 +120,7 @@ public class CaliforniumServerSchematic implements CoapServerImplementorSchemati
 		}
 		
 		requestSender = new CaliforniumLwM2mRequestSender(endpoints, observationRegistry);
+		coapResourceProxy = new CaliforniumCoapResourceProxy();
 		coapResourceProxy.initialize(new RegisterResource(clientRegistry, securityRegistry));
 //		final RegisterResource rdResource = new RegisterResource(clientRegistry, securityRegistry, coapResourceProxy);
 		coapServer.add(coapResourceProxy.getCoapResource());
