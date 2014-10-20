@@ -79,7 +79,7 @@ java -jar target/leshan-client-*-SNAPSHOT-jar-with-dependencies.jar localhost 90
 
 The list of the registered clients: http://localhost:8080/api/clients
 
-![Leshan](https://raw.github.com/msangoi/leshan/master/leshan.png)
+![Leshan](https://raw.github.com/msangoi/leshan/master/leshan-capture.png)
 
 Code with eclipse
 -----------------
