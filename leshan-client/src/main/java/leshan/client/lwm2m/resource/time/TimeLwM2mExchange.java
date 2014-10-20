@@ -45,7 +45,7 @@ public class TimeLwM2mExchange extends TypedLwM2mExchange<Date> {
     @Override
     protected Date convertFromBytes(final byte[] value) {
         final int secondsSinceEpoch = Integer.parseInt(new String(value));
-        final long millisSinceEpoch = secondsSinceEpoch * 1000;
+        final long millisSinceEpoch = secondsSinceEpoch * 1000L;
         return new Date(millisSinceEpoch);
     }
 
