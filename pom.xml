@@ -34,7 +34,7 @@
 
     <groupId>org.github.leshan</groupId>
     <artifactId>leshan-server</artifactId>
-    <version>0.1.7</version>
+    <version>0.1.8-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>leshan</name>
