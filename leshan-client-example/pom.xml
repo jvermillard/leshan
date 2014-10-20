@@ -37,7 +37,7 @@
 	<parent>
 		<groupId>org.github.leshan</groupId>
 		<artifactId>leshan-server</artifactId>
-		<version>0.1.7-SNAPSHOT</version>
+		<version>0.1.7</version>
 	</parent>
 	<artifactId>leshan-client-example</artifactId>
 	<packaging>jar</packaging>
