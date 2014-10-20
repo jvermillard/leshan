@@ -120,7 +120,6 @@ public class CaliforniumServerSchematic implements CoapServerImplementorSchemati
 		}
 		
 		requestSender = new CaliforniumLwM2mRequestSender(endpoints, observationRegistry);
-		coapResourceProxy = new CaliforniumCoapResourceProxy();
 		coapResourceProxy.initialize(new RegisterResource(clientRegistry, securityRegistry));
 //		final RegisterResource rdResource = new RegisterResource(clientRegistry, securityRegistry, coapResourceProxy);
 		coapServer.add(coapResourceProxy.getCoapResource());
