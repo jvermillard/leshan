@@ -29,22 +29,12 @@
  */
 package leshan.server.lwm2m.impl;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-
-import leshan.connector.californium.security.SecureEndpoint;
 import leshan.server.lwm2m.bootstrap.BootstrapStore;
 import leshan.server.lwm2m.bootstrap.LwM2mBootstrapServer;
-import leshan.server.lwm2m.impl.bridge.server.CoapServerImplementor;
-import leshan.server.lwm2m.impl.californium.BootstrapResource;
-import leshan.server.lwm2m.impl.californium.CaliforniumPskStore;
+import leshan.server.lwm2m.impl.bridge.bootstrap.BootstrapImplementor;
 import leshan.server.lwm2m.security.SecurityStore;
 
 import org.apache.commons.lang.Validate;
-import org.eclipse.californium.core.CoapServer;
-import org.eclipse.californium.core.network.CoAPEndpoint;
-import org.eclipse.californium.core.network.Endpoint;
-import org.eclipse.californium.scandium.DTLSConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,53 +45,29 @@ public class LwM2mBootstrapServerImpl implements LwM2mBootstrapServer {
 
     private final static Logger LOG = LoggerFactory.getLogger(LwM2mBootstrapServerImpl.class);
 
-    private final CoapServer coapServer;
+	private final BootstrapImplementor implementor;
 
-    private final BootstrapStore bsStore;
+    public LwM2mBootstrapServerImpl(BootstrapImplementor implementor) {
+        Validate.notNull(implementor, "bootstrap store must not be null");
+        this.implementor = implementor;
 
-    private final SecurityStore securityStore;
-
-	private final CoapServerImplementor coapServerImplementor;
-
-    public LwM2mBootstrapServerImpl(CoapServerImplementor coapServerImplementor, BootstrapStore bsStore, SecurityStore securityStore) {
-        Validate.notNull(bsStore, "bootstrap store must not be null");
-        
-        this.coapServerImplementor = coapnoServerImplementor;
-        this.bsStore = bsStore;
-        this.securityStore = securityStore;
-        
-        // init CoAP server
-        coapServer = new CoapServer();
-        Endpoint endpoint = new CoAPEndpoint(localAddress);
-        coapServer.addEndpoint(endpoint);w
-
-        // init DTLS server
-        DTLSConnector connector = new DTLSConnector(localAddressSecure, null);
-        connector.getConfig().setPskStore(new CaliforniumPskStore(this.securityStore));
-
-        Endpoint secureEndpoint = new SecureEndpoint(connector);
-        coapServer.addEndpoint(secureEndpoint);
-
-        // define /bs ressource
-        BootstrapResource bsResource = new BootstrapResource(bsStore);
-        coapServer.add(bsResource);
     }
 
     @Override
     public BootstrapStore getBoostrapStore() {
-        return bsStore;
+        return implementor.getBootstrapStore();
     }
 
     @Override
     public SecurityStore getSecurityStore() {
-        return securityStore;
+        return implementor.getSecurityStore();
     }
 
     /**
      * Starts the server and binds it to the specified port.
      */
     public void start() {
-        coapServer.start();
+        implementor.start();
         LOG.info("LW-M2M server started");
     }
 
@@ -109,13 +75,13 @@ public class LwM2mBootstrapServerImpl implements LwM2mBootstrapServer {
      * Stops the server and unbinds it from assigned ports (can be restarted).
      */
     public void stop() {
-        coapServer.stop();
+    	implementor.stop();
     }
 
     /**
      * Stops the server and unbinds it from assigned ports.
      */
     public void destroy() {
-        coapServer.destroy();
+    	implementor.destroy();
     }
 }

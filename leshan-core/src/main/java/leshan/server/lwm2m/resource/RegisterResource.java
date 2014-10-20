@@ -60,13 +60,15 @@ import org.slf4j.LoggerFactory;
 public class RegisterResource extends LeshanResource {
 
 	private static final Logger LOG = LoggerFactory.getLogger(RegisterResource.class);
+	public static final String RESOURCE_NAME = "rd";
+
 
 	private final ClientRegistry clientRegistry;
 
 	private final SecurityStore securityStore;
 
 	public RegisterResource(final ClientRegistry clientRegistry, final SecurityStore securityStore) {
-		 //super(RESOURCE_NAME); //SHIM
+		 super(RESOURCE_NAME); //SHIM
 
 		this.clientRegistry = clientRegistry;
 		this.securityStore = securityStore;

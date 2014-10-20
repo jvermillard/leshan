@@ -52,6 +52,13 @@
             <version>${project.version}</version>
             <type>jar</type>
         </dependency>
+        
+        <dependency>
+            <groupId>org.github.leshan</groupId>
+            <artifactId>leshan-californium-connector</artifactId>
+            <version>${project.version}</version>
+            <type>jar</type>
+        </dependency>
 
         <dependency>
             <groupId>commons-codec</groupId>

@@ -33,7 +33,12 @@ package leshan.bootstrap;
 import java.net.InetSocketAddress;
 
 import leshan.bootstrap.servlet.BootstrapServlet;
+import leshan.connector.californium.bootstrap.BootstrapServerImplementor;
+import leshan.connector.californium.bootstrap.CaliforniumBssSchematic;
+import leshan.connector.californium.resource.CaliforniumCoapResourceProxy;
 import leshan.server.lwm2m.impl.LwM2mBootstrapServerImpl;
+import leshan.server.lwm2m.impl.bridge.bootstrap.BootstrapImplementor;
+import leshan.server.lwm2m.impl.bridge.server.CoapServerImplementor;
 import leshan.server.lwm2m.security.SecurityStore;
 
 import org.eclipse.jetty.server.Server;
@@ -55,20 +60,26 @@ public class BootstrapMain {
         String iface = System.getenv("COAPIFACE");
         String ifaces = System.getenv("COAPSIFACE");
 
-        LwM2mBootstrapServerImpl bsServer;
+        CaliforniumBssSchematic serverSchematics = new CaliforniumBssSchematic();
 
         if (iface == null || iface.isEmpty() || ifaces == null || ifaces.isEmpty()) {
-            bsServer = new LwM2mBootstrapServerImpl(bsStore, securityStore);
+        	serverSchematics.addEndpoint(new InetSocketAddress(BootstrapImplementor.PORT));
+        	serverSchematics.addSecureEndpoint(new InetSocketAddress(BootstrapImplementor.PORT_DTLS));
         } else {
             String[] add = iface.split(":");
             String[] adds = ifaces.split(":");
 
-            // user specified the iface to be bound
-            bsServer = new LwM2mBootstrapServerImpl(new InetSocketAddress(add[0], Integer.parseInt(add[1])),
-                    new InetSocketAddress(adds[0], Integer.parseInt(adds[1])), bsStore, securityStore);
+            serverSchematics.addEndpoint(new InetSocketAddress(add[0], Integer.parseInt(add[1])));
+            serverSchematics.addSecureEndpoint(new InetSocketAddress(adds[0], Integer.parseInt(adds[1])));
         }
-
-        bsServer.start();
+        
+        BootstrapServerImplementor implementor = serverSchematics.setBootstrapStore(bsStore)
+        										.setSecurityStore(securityStore)
+        										.bindResource(new CaliforniumCoapResourceProxy()).build();
+        
+        LwM2mBootstrapServerImpl impl = new LwM2mBootstrapServerImpl(implementor);
+        impl.start();
+        
         // now prepare and start jetty
 
         String webPort = System.getenv("PORT");

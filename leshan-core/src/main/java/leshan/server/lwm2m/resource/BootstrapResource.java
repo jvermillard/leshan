@@ -59,8 +59,8 @@ public class BootstrapResource extends LeshanResource {
 
 	private final BootstrapStore store;
 
-	public BootstrapResource(final BootstrapStore store, final CoapResourceProxy coapResourceProxy) {
-		super(coapResourceProxy, RESOURCE_NAME);
+	public BootstrapResource(final BootstrapStore store) {
+		super(RESOURCE_NAME);
 		this.store = store;
 	}
 

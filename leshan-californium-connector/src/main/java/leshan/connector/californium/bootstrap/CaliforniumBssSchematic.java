@@ -38,12 +38,17 @@ import leshan.connector.californium.security.SecureEndpoint;
 import leshan.connector.californium.server.CaliforniumLwM2mRequestSender;
 import leshan.connector.californium.server.CaliforniumPskStore;
 import leshan.connector.californium.server.CaliforniumServerImplementor;
+import leshan.connector.californium.server.CaliforniumServerSchematic;
 import leshan.server.lwm2m.bootstrap.BootstrapStore;
 import leshan.server.lwm2m.client.ClientRegistry;
+import leshan.server.lwm2m.impl.LwM2mBootstrapServerImpl;
+import leshan.server.lwm2m.impl.bridge.bootstrap.BootstrapImplementor;
+import leshan.server.lwm2m.impl.bridge.bootstrap.BootstrapSchematic;
 import leshan.server.lwm2m.impl.bridge.server.CoapServerImplementorSchematic;
 import leshan.server.lwm2m.observation.ObservationRegistry;
 import leshan.server.lwm2m.resource.BootstrapResource;
 import leshan.server.lwm2m.security.SecurityRegistry;
+import leshan.server.lwm2m.security.SecurityStore;
 
 import org.apache.commons.lang.Validate;
 import org.eclipse.californium.core.CoapServer;
@@ -51,59 +56,53 @@ import org.eclipse.californium.core.network.CoAPEndpoint;
 import org.eclipse.californium.core.network.Endpoint;
 import org.eclipse.californium.scandium.DTLSConnector;
 
-public class CaliforniumBssSchematic implements CoapServerImplementorSchematic<CaliforniumServerImplementor, CaliforniumCoapResourceProxy>{
+public class CaliforniumBssSchematic implements BootstrapSchematic<BootstrapServerImplementor, CaliforniumCoapResourceProxy>{
 
 	private final Set<InetSocketAddress> enpointAddress = new HashSet<InetSocketAddress>();
 	private final Set<InetSocketAddress> secureEndpointAddress = new HashSet<InetSocketAddress>();
-	private ClientRegistry clientRegistry;
-	private SecurityRegistry securityRegistry;
-	private ObservationRegistry observationRegistry;
-	private CaliforniumCoapResourceProxy coapResourceProxy;
-	private CoapServer coapServer;
-	private CaliforniumLwM2mRequestSender requestSender;
-	//TODO This currently isn't created or set anywhere.
+	private SecurityStore securityStore;
 	private BootstrapStore boostrapStore;
+	private CoapServer coapServer;
+	private CaliforniumCoapResourceProxy coapResourceProxy;
+
+	@Override
+	public CaliforniumBssSchematic addEndpoint(InetSocketAddress... localAddress) {
+		Validate.notNull(localAddress, "IP address cannot be null");
+		for(final InetSocketAddress address : localAddress) {
+			enpointAddress.add(address);
+		}
+		return this;
+	}
+
+	@Override
+	public CaliforniumBssSchematic addSecureEndpoint(InetSocketAddress... localSecureAddress) {
+		Validate.notNull(localSecureAddress, "IP address cannot be null");
+		for(final InetSocketAddress address : localSecureAddress){
+			secureEndpointAddress.add(address);
+		}
+		return this;
+	}
+
+	@Override
+	public CaliforniumBssSchematic setSecurityStore(SecurityStore securityStore) {
+		this.securityStore = securityStore;
+		return this;
+	}
+
+	@Override
+	public CaliforniumBssSchematic setBootstrapStore(BootstrapStore bootstrapStore) {
+		this.boostrapStore = bootstrapStore;
+		return null;
+	}
 	
 	@Override
-	public void addEndpoint(final InetSocketAddress localAddress) {
-		Validate.notNull(localAddress, "IP address cannot be null");
-		enpointAddress.add(localAddress);
-		
-	}
-
-	@Override
-	public void addSecureEndpoint(final InetSocketAddress localSecureAddress) {
-		Validate.notNull(localSecureAddress, "IP address cannot be null");
-		secureEndpointAddress.add(localSecureAddress);
-		
-	}
-
-	@Override
-	public void bindResource(final BootstrapResource coapResourceProxy) {
+	public CaliforniumBssSchematic bindResource(final CaliforniumCoapResourceProxy coapResourceProxy) {
 		this.coapResourceProxy = coapResourceProxy;
-		
+		return this;
 	}
 
 	@Override
-	public void setClientRegistry(final ClientRegistry clientRegistry) {
-		this.clientRegistry = clientRegistry;
-		
-	}
-
-	@Override
-	public void setSecurityRegistry(final SecurityRegistry securityRegistry) {
-		this.securityRegistry = securityRegistry;
-		
-	}
-
-	@Override
-	public void setObservationRegistry(final ObservationRegistry observationRegistry) {
-		this.observationRegistry = observationRegistry;
-		
-	}
-
-	@Override
-	public CaliforniumServerImplementor buildCoapServerImplementor() {
+	public BootstrapServerImplementor build() {
 		coapServer = new CoapServer();
 		
 		final Set<Endpoint> endpoints = new HashSet<Endpoint>();
@@ -114,19 +113,17 @@ public class CaliforniumBssSchematic implements CoapServerImplementorSchematic<C
 		}
 		for(final InetSocketAddress address : secureEndpointAddress) {
 			final DTLSConnector connector = new DTLSConnector(address, null);
-	        connector.getConfig().setPskStore(new CaliforniumPskStore(this.securityRegistry, this.clientRegistry));
-	
+	        connector.getConfig().setPskStore(new CaliforniumPskStore(this.securityStore));
 	        final Endpoint secureEndpoint = new SecureEndpoint(connector);
 	        coapServer.addEndpoint(secureEndpoint);
 	        endpoints.add(secureEndpoint);
 		}
 		
-		requestSender = new CaliforniumLwM2mRequestSender(endpoints, observationRegistry);
-		
-		final BootstrapResource bsResource = new BootstrapResource(boostrapStore, coapResourceProxy);
-		coapServer.add(coapResourceProxy.getCoapResource());
-		
-		return new CaliforniumServerImplementor(coapServer, requestSender, null, null, securityRegistry);
+		if(coapResourceProxy != null) {
+			coapResourceProxy.initialize( new BootstrapResource(boostrapStore));
+			coapServer.add(coapResourceProxy.getCoapResource());
+		}
+		return new BootstrapServerImplementor(coapServer, boostrapStore, securityStore);
 	}
 
 }

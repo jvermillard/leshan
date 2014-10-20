@@ -51,12 +51,17 @@ public abstract class LeshanResource {
 
 	public static final String QUERY_PARAM_LIFETIME = "lt=";
 	
-	public static final String RESOURCE_NAME = "rd";
-
+	public final String resourceName;
+	
 
 	private CoapResourceProxy coapResourceProxy;
 
-	public LeshanResource() {
+	public LeshanResource(String resourceName) {
+		this.resourceName = resourceName;
+	}
+	
+	public String getResourceName() {
+		return resourceName;
 	}
 	
 	public void setCoapResourceFactory(final CoapResourceProxy factory){

@@ -45,7 +45,7 @@ public class CaliforniumCoapResourceProxy implements CoapResourceProxy{
 
 	@Override
 	public void initialize(final LeshanResource parent) {
-		this.proxyCoapResource = new ProxyCoapResource(LeshanResource.RESOURCE_NAME);
+		this.proxyCoapResource = new ProxyCoapResource(parent.getResourceName());
 		this.parentResource = parent;
 		setResourceType(LeshanResource.RESOURCE_TYPE);
 	}

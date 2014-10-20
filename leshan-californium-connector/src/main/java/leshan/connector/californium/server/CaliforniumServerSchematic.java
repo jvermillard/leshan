@@ -36,7 +36,10 @@ import java.util.Set;
 import leshan.connector.californium.resource.CaliforniumCoapResourceProxy;
 import leshan.connector.californium.security.SecureEndpoint;
 import leshan.server.lwm2m.client.ClientRegistry;
+import leshan.server.lwm2m.impl.ClientRegistryImpl;
+import leshan.server.lwm2m.impl.ObservationRegistryImpl;
 import leshan.server.lwm2m.impl.bridge.server.CoapServerImplementorSchematic;
+import leshan.server.lwm2m.impl.security.SecurityRegistryImpl;
 import leshan.server.lwm2m.observation.ObservationRegistry;
 import leshan.server.lwm2m.resource.RegisterResource;
 import leshan.server.lwm2m.security.SecurityRegistry;
@@ -119,10 +122,18 @@ public class CaliforniumServerSchematic implements CoapServerImplementorSchemati
 	        endpoints.add(secureEndpoint);
 		}
 		
-		requestSender = new CaliforniumLwM2mRequestSender(endpoints, observationRegistry);
-		coapResourceProxy.initialize(new RegisterResource(clientRegistry, securityRegistry));
-//		final RegisterResource rdResource = new RegisterResource(clientRegistry, securityRegistry, coapResourceProxy);
-		coapServer.add(coapResourceProxy.getCoapResource());
+		
+		
+		requestSender = new CaliforniumLwM2mRequestSender(endpoints, 
+								observationRegistry != null ? observationRegistry : new ObservationRegistryImpl());
+		
+		coapResourceProxy.initialize(new RegisterResource(
+										clientRegistry != null ? clientRegistry : new ClientRegistryImpl(), 
+										securityRegistry != null ? securityRegistry : new SecurityRegistryImpl()));
+		
+		if(coapResourceProxy != null) {
+			coapServer.add(coapResourceProxy.getCoapResource());
+		}
 		
 		return new CaliforniumServerImplementor(coapServer, requestSender, clientRegistry, observationRegistry, securityRegistry);
 	}
