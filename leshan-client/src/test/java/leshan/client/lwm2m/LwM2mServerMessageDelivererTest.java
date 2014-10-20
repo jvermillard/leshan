@@ -62,210 +62,210 @@ import org.junit.Test;
 
 public class LwM2mServerMessageDelivererTest {
 
-	private LwM2mServerMessageDeliverer deliverer;
-	private Exchange exchange;
-	private Resource root;
+    private LwM2mServerMessageDeliverer deliverer;
+    private Exchange exchange;
+    private Resource root;
 
-	@Before
-	public void setup() {
-		root = new TestResource();
-		deliverer = new LwM2mServerMessageDeliverer(root);
-	}
+    @Before
+    public void setup() {
+        root = new TestResource();
+        deliverer = new LwM2mServerMessageDeliverer(root);
+    }
 
-	@Test
-	public void canDeliverOneLevel() {
-		final TestResource resource = spy(new TestResource("3"));
-		root.add(resource);
+    @Test
+    public void canDeliverOneLevel() {
+        final TestResource resource = spy(new TestResource("3"));
+        root.add(resource);
 
-		deliver(Code.GET, "3");
-		verify(resource).handleRequest(exchange);
-		verifyNoErrorMessage();
-	}
+        deliver(Code.GET, "3");
+        verify(resource).handleRequest(exchange);
+        verifyNoErrorMessage();
+    }
 
-	@Test
-	public void canDeliverThreeLevels() {
-		final Resource parent = new TestResource("3");
-		final Resource child = new TestResource("4");
-		final Resource grandchild = spy(new TestResource("5"));
+    @Test
+    public void canDeliverThreeLevels() {
+        final Resource parent = new TestResource("3");
+        final Resource child = new TestResource("4");
+        final Resource grandchild = spy(new TestResource("5"));
 
-		child.add(grandchild);
-		parent.add(child);
-		root.add(parent);
+        child.add(grandchild);
+        parent.add(child);
+        root.add(parent);
 
-		deliver(Code.GET, "3", "4", "5");
-		verify(grandchild).handleRequest(exchange);
-		verifyNoErrorMessage();
-	}
+        deliver(Code.GET, "3", "4", "5");
+        verify(grandchild).handleRequest(exchange);
+        verifyNoErrorMessage();
+    }
 
-	@Test
-	public void failedPostDeliveryThreeLevelsDeepGetsReported() {
-		final Resource parent = new TestResource("3");
-		final Resource child = new TestResource("4");
+    @Test
+    public void failedPostDeliveryThreeLevelsDeepGetsReported() {
+        final Resource parent = new TestResource("3");
+        final Resource child = new TestResource("4");
 
-		parent.add(child);
-		root.add(parent);
+        parent.add(child);
+        root.add(parent);
 
-		deliver(Code.POST, "3", "4", "5");
-		verifyErrorMessage();
-	}
+        deliver(Code.POST, "3", "4", "5");
+        verifyErrorMessage();
+    }
 
-	@Test
-	public void failedGetDeliveryTwoLevelsDeepGetsReported() {
-		final Resource resource = spy(new TestResource("3"));
+    @Test
+    public void failedGetDeliveryTwoLevelsDeepGetsReported() {
+        final Resource resource = spy(new TestResource("3"));
 
-		root.add(resource);
+        root.add(resource);
 
-		deliver(Code.GET, "3", "4");
-		verifyErrorMessage();
-		verify(resource, never()).handleRequest(any(Exchange.class));
-	}
+        deliver(Code.GET, "3", "4");
+        verifyErrorMessage();
+        verify(resource, never()).handleRequest(any(Exchange.class));
+    }
 
-	@Test
-	public void failedPostDeliveryTwoLevelsDeepGetsDeliveredToParent() {
-		final Resource resource = spy(new TestResource("3"));
+    @Test
+    public void failedPostDeliveryTwoLevelsDeepGetsDeliveredToParent() {
+        final Resource resource = spy(new TestResource("3"));
 
-		root.add(resource);
+        root.add(resource);
 
-		deliver(Code.POST, "3", "4");
-		verify(resource).handleRequest(exchange);
-		verifyNoErrorMessage();
-	}
+        deliver(Code.POST, "3", "4");
+        verify(resource).handleRequest(exchange);
+        verifyNoErrorMessage();
+    }
 
-	private void deliver(final Code code, final String... uriPath) {
-		final OptionSet options = new OptionSet();
-		for (final String path : uriPath) {
-			options.addURIPath(path);
-		}
-		final Request request = new Request(code);
-		request.setOptions(options);
-		exchange = mock(Exchange.class);
-		when(exchange.getRequest()).thenReturn(request);
+    private void deliver(final Code code, final String... uriPath) {
+        final OptionSet options = new OptionSet();
+        for (final String path : uriPath) {
+            options.addURIPath(path);
+        }
+        final Request request = new Request(code);
+        request.setOptions(options);
+        exchange = mock(Exchange.class);
+        when(exchange.getRequest()).thenReturn(request);
 
-		deliverer.deliverRequest(exchange);
-	}
+        deliverer.deliverRequest(exchange);
+    }
 
-	private void verifyErrorMessage() {
-		verify(exchange).sendResponse(argThat(new ResponseMatcher(ResponseCode.NOT_FOUND, null)));
-	}
+    private void verifyErrorMessage() {
+        verify(exchange).sendResponse(argThat(new ResponseMatcher(ResponseCode.NOT_FOUND, null)));
+    }
 
-	private void verifyNoErrorMessage() {
-		verify(exchange, never()).sendResponse(argThat(new ResponseMatcher(ResponseCode.NOT_FOUND, null)));
-	}
+    private void verifyNoErrorMessage() {
+        verify(exchange, never()).sendResponse(argThat(new ResponseMatcher(ResponseCode.NOT_FOUND, null)));
+    }
 
-	private class TestResource implements Resource {
+    private class TestResource implements Resource {
 
-		private String name;
-		private final Map<String, Resource> children = new HashMap<>();
+        private String name;
+        private final Map<String, Resource> children = new HashMap<>();
 
-		public TestResource() {
-		}
+        public TestResource() {
+        }
 
-		public TestResource(final String name) {
-			this.name = name;
-		}
+        public TestResource(final String name) {
+            this.name = name;
+        }
 
-		@Override
-		public void handleRequest(final Exchange exchange) {
-		}
+        @Override
+        public void handleRequest(final Exchange exchange) {
+        }
 
-		@Override
-		public String getName() {
-			return name;
-		}
+        @Override
+        public String getName() {
+            return name;
+        }
 
-		@Override
-		public void setName(final String name) {
-		}
+        @Override
+        public void setName(final String name) {
+        }
 
-		@Override
-		public String getPath() {
-			return null;
-		}
+        @Override
+        public String getPath() {
+            return null;
+        }
 
-		@Override
-		public void setPath(final String path) {
-		}
+        @Override
+        public void setPath(final String path) {
+        }
 
-		@Override
-		public String getURI() {
-			return null;
-		}
+        @Override
+        public String getURI() {
+            return null;
+        }
 
-		@Override
-		public boolean isVisible() {
-			return false;
-		}
+        @Override
+        public boolean isVisible() {
+            return false;
+        }
 
-		@Override
-		public boolean isCachable() {
-			return false;
-		}
+        @Override
+        public boolean isCachable() {
+            return false;
+        }
 
-		@Override
-		public boolean isObservable() {
-			return false;
-		}
+        @Override
+        public boolean isObservable() {
+            return false;
+        }
 
-		@Override
-		public ResourceAttributes getAttributes() {
-			return null;
-		}
+        @Override
+        public ResourceAttributes getAttributes() {
+            return null;
+        }
 
-		@Override
-		public void add(final Resource child) {
-			children.put(child.getName(), child);
-		}
+        @Override
+        public void add(final Resource child) {
+            children.put(child.getName(), child);
+        }
 
-		@Override
-		public boolean remove(final Resource child) {
-			return false;
-		}
+        @Override
+        public boolean remove(final Resource child) {
+            return false;
+        }
 
-		@Override
-		public Collection<Resource> getChildren() {
-			return null;
-		}
+        @Override
+        public Collection<Resource> getChildren() {
+            return null;
+        }
 
-		@Override
-		public Resource getChild(final String name) {
-			return children.get(name);
-		}
+        @Override
+        public Resource getChild(final String name) {
+            return children.get(name);
+        }
 
-		@Override
-		public Resource getParent() {
-			return null;
-		}
+        @Override
+        public Resource getParent() {
+            return null;
+        }
 
-		@Override
-		public void setParent(final Resource parent) {
-		}
+        @Override
+        public void setParent(final Resource parent) {
+        }
 
-		@Override
-		public void addObserver(final ResourceObserver observer) {
-		}
+        @Override
+        public void addObserver(final ResourceObserver observer) {
+        }
 
-		@Override
-		public void removeObserver(final ResourceObserver observer) {
-		}
+        @Override
+        public void removeObserver(final ResourceObserver observer) {
+        }
 
-		@Override
-		public void addObserveRelation(final ObserveRelation relation) {
-		}
+        @Override
+        public void addObserveRelation(final ObserveRelation relation) {
+        }
 
-		@Override
-		public void removeObserveRelation(final ObserveRelation relation) {
-		}
+        @Override
+        public void removeObserveRelation(final ObserveRelation relation) {
+        }
 
-		@Override
-		public Executor getExecutor() {
-			return null;
-		}
+        @Override
+        public Executor getExecutor() {
+            return null;
+        }
 
-		@Override
-		public List<Endpoint> getEndpoints() {
-			return null;
-		}
+        @Override
+        public List<Endpoint> getEndpoints() {
+            return null;
+        }
 
-	}
+    }
 
 }

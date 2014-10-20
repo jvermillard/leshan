@@ -35,16 +35,16 @@ import leshan.server.lwm2m.request.ResponseCode;
 
 public class DeleteResponse extends BaseLwM2mResponse {
 
-	private DeleteResponse(final ResponseCode code) {
-		super(code, new byte[0]);
-	}
+    private DeleteResponse(final ResponseCode code) {
+        super(code, new byte[0]);
+    }
 
-	public static DeleteResponse success() {
-		return new DeleteResponse(ResponseCode.DELETED);
-	}
+    public static DeleteResponse success() {
+        return new DeleteResponse(ResponseCode.DELETED);
+    }
 
-	public static DeleteResponse notAllowed() {
-		return new DeleteResponse(ResponseCode.METHOD_NOT_ALLOWED);
-	}
+    public static DeleteResponse notAllowed() {
+        return new DeleteResponse(ResponseCode.METHOD_NOT_ALLOWED);
+    }
 
 }

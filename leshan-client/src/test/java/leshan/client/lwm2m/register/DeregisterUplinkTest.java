@@ -63,99 +63,98 @@ import org.mockito.stubbing.Answer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DeregisterUplinkTest {
-	private static final int SYNC_TIMEOUT_MS = 2000;
-	private static final String SERVER_HOST = "leshan.com";
-	private static final int SERVER_PORT = 1234;
+    private static final int SYNC_TIMEOUT_MS = 2000;
+    private static final String SERVER_HOST = "leshan.com";
+    private static final int SERVER_PORT = 1234;
 
-	private static final String ENDPOINT_LOCATION = UUID.randomUUID().toString();
+    private static final String ENDPOINT_LOCATION = UUID.randomUUID().toString();
 
-	@Mock
-	private CoAPEndpoint endpoint;
+    @Mock
+    private CoAPEndpoint endpoint;
 
-	@Mock
-	private LwM2mClient client;
+    @Mock
+    private LwM2mClient client;
 
-	private String actualRequestLocation;
+    private String actualRequestLocation;
 
-	private RegisterUplink uplink;
+    private RegisterUplink uplink;
 
-	private ResponseCallback callback;
+    private ResponseCallback callback;
 
-	private InetSocketAddress serverAddress;
-	private int tearDownEndpointStops;
+    private InetSocketAddress serverAddress;
+    private int tearDownEndpointStops;
 
-	@Before
-	public void setUp(){
-		callback = new ResponseCallback();
-		serverAddress = InetSocketAddress.createUnresolved(SERVER_HOST, SERVER_PORT);
-		uplink = new RegisterUplink(serverAddress, endpoint, client);
+    @Before
+    public void setUp() {
+        callback = new ResponseCallback();
+        serverAddress = InetSocketAddress.createUnresolved(SERVER_HOST, SERVER_PORT);
+        uplink = new RegisterUplink(serverAddress, endpoint, client);
 
-		doAnswer(new Answer<Void>() {
+        doAnswer(new Answer<Void>() {
 
-			@Override
-			public Void answer(final InvocationOnMock invocation) throws Throwable {
-				final Request request = (Request) invocation.getArguments()[0];
-				actualRequestLocation = request.getOptions().getLocationPathString();
+            @Override
+            public Void answer(final InvocationOnMock invocation) throws Throwable {
+                final Request request = (Request) invocation.getArguments()[0];
+                actualRequestLocation = request.getOptions().getLocationPathString();
 
-				final Response response = new Response(ResponseCode.DELETED);
+                final Response response = new Response(ResponseCode.DELETED);
 
-				request.setResponse(response);
+                request.setResponse(response);
 
-				return null;
-			}
-		}).when(endpoint).sendRequest(any(Request.class));
-	}
+                return null;
+            }
+        }).when(endpoint).sendRequest(any(Request.class));
+    }
 
-	@After
-	public void tearDown(){
-		uplink.stop();
+    @After
+    public void tearDown() {
+        uplink.stop();
 
-		verify(endpoint, times(tearDownEndpointStops)).stop();
-	}
+        verify(endpoint, times(tearDownEndpointStops)).stop();
+    }
 
-	@Test
-	public void testGoodSyncDeregister() {
-		tearDownEndpointStops = 2;
+    @Test
+    public void testGoodSyncDeregister() {
+        tearDownEndpointStops = 2;
 
-		final OperationResponse response = uplink.deregister(ENDPOINT_LOCATION, SYNC_TIMEOUT_MS);
+        final OperationResponse response = uplink.deregister(ENDPOINT_LOCATION, SYNC_TIMEOUT_MS);
 
+        verify(endpoint).stop();
+        verify(endpoint).sendRequest(any(Request.class));
 
-		verify(endpoint).stop();
-		verify(endpoint).sendRequest(any(Request.class));
+        assertTrue(response.isSuccess());
+        assertEquals(ResponseCode.DELETED, response.getResponseCode());
+        assertEquals(ENDPOINT_LOCATION, actualRequestLocation);
+    }
 
-		assertTrue(response.isSuccess());
-		assertEquals(ResponseCode.DELETED, response.getResponseCode());
-		assertEquals(ENDPOINT_LOCATION, actualRequestLocation);
-	}
+    @Test
+    public void testGoodAsyncDeregister() {
+        tearDownEndpointStops = 2;
 
-	@Test
-	public void testGoodAsyncDeregister() {
-		tearDownEndpointStops = 2;
+        uplink.deregister(ENDPOINT_LOCATION, callback);
 
-		uplink.deregister(ENDPOINT_LOCATION, callback);
+        await().untilTrue(callback.isCalled());
+        callback.getResponsePayload();
 
-		await().untilTrue(callback.isCalled());
-		callback.getResponsePayload();
+        verify(endpoint).stop();
+        verify(endpoint).sendRequest(any(Request.class));
 
-		verify(endpoint).stop();
-		verify(endpoint).sendRequest(any(Request.class));
+        assertTrue(callback.isSuccess());
+        assertEquals(ResponseCode.DELETED, callback.getResponseCode());
+        assertEquals(ENDPOINT_LOCATION, actualRequestLocation);
+    }
 
-		assertTrue(callback.isSuccess());
-		assertEquals(ResponseCode.DELETED, callback.getResponseCode());
-		assertEquals(ENDPOINT_LOCATION, actualRequestLocation);
-	}
+    @Test
+    public void testNullSyncDeregister() {
+        tearDownEndpointStops = 1;
 
-	@Test
-	public void testNullSyncDeregister() {
-		tearDownEndpointStops = 1;
+        final OperationResponse response = uplink.deregister(null, SYNC_TIMEOUT_MS);
 
-		final OperationResponse response = uplink.deregister(null, SYNC_TIMEOUT_MS);
+        verify(endpoint, never()).stop();
+        verify(endpoint, never()).sendRequest(any(Request.class));
 
-		verify(endpoint, never()).stop();
-		verify(endpoint, never()).sendRequest(any(Request.class));
-
-		assertFalse(response.isSuccess());
-		assertEquals(ResponseCode.NOT_FOUND, response.getResponseCode());
-	}
+        assertFalse(response.isSuccess());
+        assertEquals(ResponseCode.NOT_FOUND, response.getResponseCode());
+    }
 
 }

@@ -37,23 +37,23 @@ import org.apache.commons.lang.Validate;
 
 public class Request {
 
-	public static String toQueryStringMap(final Map<String, String> map) {
-		Validate.notNull(map);
+    public static String toQueryStringMap(final Map<String, String> map) {
+        Validate.notNull(map);
 
-		if(map.isEmpty()) {
-			return "";
-		}
+        if (map.isEmpty()) {
+            return "";
+        }
 
-		final StringBuilder builder = new StringBuilder();
-		for(final Map.Entry<String, String> entry : map.entrySet()) {
-			builder.append(entry.getKey()).append("=").append(entry.getValue()).append("&");
-		}
-		builder.deleteCharAt(builder.length() - 1);
-		return builder.toString();
-	}
+        final StringBuilder builder = new StringBuilder();
+        for (final Map.Entry<String, String> entry : map.entrySet()) {
+            builder.append(entry.getKey()).append("=").append(entry.getValue()).append("&");
+        }
+        builder.deleteCharAt(builder.length() - 1);
+        return builder.toString();
+    }
 
-	public static org.eclipse.californium.core.coap.Request toCaliforniumRequest(final Request r) {
+    public static org.eclipse.californium.core.coap.Request toCaliforniumRequest(final Request r) {
 
-		return null;
-	}
+        return null;
+    }
 }

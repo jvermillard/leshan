@@ -35,48 +35,47 @@ import java.util.Objects;
 
 import leshan.server.lwm2m.request.ResponseCode;
 
-
 public class CreateResponse extends BaseLwM2mResponse {
 
-	private final String location;
+    private final String location;
 
-	private CreateResponse(final ResponseCode code, final String location) {
-		super(code, new byte[0]);
-		this.location = location;
-	}
+    private CreateResponse(final ResponseCode code, final String location) {
+        super(code, new byte[0]);
+        this.location = location;
+    }
 
-	private CreateResponse(final ResponseCode code) {
-		this(code, null);
-	}
+    private CreateResponse(final ResponseCode code) {
+        this(code, null);
+    }
 
-	public static CreateResponse success(final int instanceId) {
-		return new CreateResponse(ResponseCode.CREATED, Integer.toString(instanceId));
-	}
+    public static CreateResponse success(final int instanceId) {
+        return new CreateResponse(ResponseCode.CREATED, Integer.toString(instanceId));
+    }
 
-	public static CreateResponse methodNotAllowed() {
-		return new CreateResponse(ResponseCode.METHOD_NOT_ALLOWED);
-	}
+    public static CreateResponse methodNotAllowed() {
+        return new CreateResponse(ResponseCode.METHOD_NOT_ALLOWED);
+    }
 
-	public static CreateResponse invalidResource() {
-		return new CreateResponse(ResponseCode.BAD_REQUEST);
-	}
+    public static CreateResponse invalidResource() {
+        return new CreateResponse(ResponseCode.BAD_REQUEST);
+    }
 
-	public String getLocation() {
-		return location;
-	}
+    public String getLocation() {
+        return location;
+    }
 
-	@Override
-	public boolean equals(final Object o) {
-		if (!(o instanceof CreateResponse) || !super.equals(o)) {
-			return false;
-		}
-		final CreateResponse other = (CreateResponse)o;
-		return Objects.equals(location, other.location);
-	}
+    @Override
+    public boolean equals(final Object o) {
+        if (!(o instanceof CreateResponse) || !super.equals(o)) {
+            return false;
+        }
+        final CreateResponse other = (CreateResponse) o;
+        return Objects.equals(location, other.location);
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(super.hashCode(), location);
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), location);
+    }
 
 }

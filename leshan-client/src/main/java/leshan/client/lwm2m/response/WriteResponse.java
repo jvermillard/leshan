@@ -35,24 +35,24 @@ import leshan.server.lwm2m.request.ResponseCode;
 
 public class WriteResponse extends BaseLwM2mResponse {
 
-	private WriteResponse(final ResponseCode code) {
-		super(code, new byte[0]);
-	}
+    private WriteResponse(final ResponseCode code) {
+        super(code, new byte[0]);
+    }
 
-	public static WriteResponse success() {
-		return new WriteResponse(ResponseCode.CHANGED);
-	}
+    public static WriteResponse success() {
+        return new WriteResponse(ResponseCode.CHANGED);
+    }
 
-	public static WriteResponse failure() {
-		return new WriteResponse(ResponseCode.BAD_REQUEST);
-	}
+    public static WriteResponse failure() {
+        return new WriteResponse(ResponseCode.BAD_REQUEST);
+    }
 
-	public static WriteResponse notAllowed() {
-		return new WriteResponse(ResponseCode.METHOD_NOT_ALLOWED);
-	}
+    public static WriteResponse notAllowed() {
+        return new WriteResponse(ResponseCode.METHOD_NOT_ALLOWED);
+    }
 
-	public static WriteResponse badRequest() {
-		return new WriteResponse(ResponseCode.BAD_REQUEST);
-	}
+    public static WriteResponse badRequest() {
+        return new WriteResponse(ResponseCode.BAD_REQUEST);
+    }
 
 }

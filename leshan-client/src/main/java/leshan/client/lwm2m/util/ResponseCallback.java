@@ -39,48 +39,47 @@ import leshan.client.lwm2m.response.OperationResponse;
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 
 public class ResponseCallback implements Callback {
-	
 
-	private final AtomicBoolean called;
-	private OperationResponse response;
-	
-	public ResponseCallback() {
-		called = new AtomicBoolean(false);
-	}
+    private final AtomicBoolean called;
+    private OperationResponse response;
 
-	@Override
-	public void onSuccess(final OperationResponse t) {
-		called.set(true);
-		response = t;
-	}
+    public ResponseCallback() {
+        called = new AtomicBoolean(false);
+    }
 
-	@Override
-	public void onFailure(final OperationResponse t) {
-		called.set(true);
-		response = t;
-	}
+    @Override
+    public void onSuccess(final OperationResponse t) {
+        called.set(true);
+        response = t;
+    }
 
-	public AtomicBoolean isCalled() {
-		return called;
-	}
+    @Override
+    public void onFailure(final OperationResponse t) {
+        called.set(true);
+        response = t;
+    }
 
-	public byte[] getResponsePayload() {
-		return response.getPayload();
-	}
-	
-	public ResponseCode getResponseCode(){
-		return response.getResponseCode();
-	}
-	
-	public boolean isSuccess(){
-		return response.isSuccess();
-	}
+    public AtomicBoolean isCalled() {
+        return called;
+    }
 
-	public void reset() {
-		called.set(false);
-	}
+    public byte[] getResponsePayload() {
+        return response.getPayload();
+    }
 
-	public OperationResponse getResponse() {
-		return response;
-	}
+    public ResponseCode getResponseCode() {
+        return response.getResponseCode();
+    }
+
+    public boolean isSuccess() {
+        return response.isSuccess();
+    }
+
+    public void reset() {
+        called.set(false);
+    }
+
+    public OperationResponse getResponse() {
+        return response;
+    }
 }

@@ -36,9 +36,9 @@ import leshan.client.lwm2m.resource.BaseTypedLwM2mResource;
 
 public class FloatLwM2mResource extends BaseTypedLwM2mResource<FloatLwM2mExchange> {
 
-	@Override
-	protected FloatLwM2mExchange createSpecificExchange(final LwM2mExchange exchange) {
-		return new FloatLwM2mExchange(exchange);
-	}
+    @Override
+    protected FloatLwM2mExchange createSpecificExchange(final LwM2mExchange exchange) {
+        return new FloatLwM2mExchange(exchange);
+    }
 
 }

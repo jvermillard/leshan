@@ -39,22 +39,23 @@ import org.eclipse.californium.core.server.resources.CoapExchange;
 
 class CaliforniumBasedResource extends CaliforniumBasedLwM2mNode<LwM2mClientResource> implements LinkFormattable {
 
-	public CaliforniumBasedResource(final int id, final LwM2mClientResource lwM2mResource) {
-		super(id, lwM2mResource);
-	}
+    public CaliforniumBasedResource(final int id, final LwM2mClientResource lwM2mResource) {
+        super(id, lwM2mResource);
+    }
 
-	@Override
-	public void handlePOST(final CoapExchange exchange) {
-		node.execute(new CaliforniumBasedLwM2mExchange(exchange));
-	}
+    @Override
+    public void handlePOST(final CoapExchange exchange) {
+        node.execute(new CaliforniumBasedLwM2mExchange(exchange));
+    }
 
-	@Override
-	public String asLinkFormat() {
-		final StringBuilder linkFormat = LinkFormat.serializeResource(this).append(LinkFormat.serializeAttributes(getAttributes()));
+    @Override
+    public String asLinkFormat() {
+        final StringBuilder linkFormat = LinkFormat.serializeResource(this).append(
+                LinkFormat.serializeAttributes(getAttributes()));
 
-		linkFormat.deleteCharAt(linkFormat.length() - 1);
+        linkFormat.deleteCharAt(linkFormat.length() - 1);
 
-		return linkFormat.toString();
-	}
+        return linkFormat.toString();
+    }
 
 }

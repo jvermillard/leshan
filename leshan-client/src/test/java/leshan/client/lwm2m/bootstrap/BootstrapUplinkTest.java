@@ -61,105 +61,108 @@ import org.mockito.stubbing.Answer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BootstrapUplinkTest {
-	private static final int SYNC_TIMEOUT_MS = 2000;
-	private static final String ENDPOINT_NAME = UUID.randomUUID().toString();
-	private byte[] actualPayload;
-	private String actualRequest;
-	private Code actualCode;
-	private ResponseCallback callback;
+    private static final int SYNC_TIMEOUT_MS = 2000;
+    private static final String ENDPOINT_NAME = UUID.randomUUID().toString();
+    private byte[] actualPayload;
+    private String actualRequest;
+    private Code actualCode;
+    private ResponseCallback callback;
 
-	@Mock
-	private CoAPEndpoint endpoint;
-	@Mock
-	private BootstrapDownlink downlink;
-	private String expectedRequest;
-	private InetSocketAddress serverAddress;
+    @Mock
+    private CoAPEndpoint endpoint;
+    @Mock
+    private BootstrapDownlink downlink;
+    private String expectedRequest;
+    private InetSocketAddress serverAddress;
 
-	@Before
-	public void setUp() {
-		callback = new ResponseCallback();
-		expectedRequest = "coap://localhost/bs?ep=" + ENDPOINT_NAME;
-		serverAddress = InetSocketAddress.createUnresolved("localhost", 1234);
-	}
+    @Before
+    public void setUp() {
+        callback = new ResponseCallback();
+        expectedRequest = "coap://localhost/bs?ep=" + ENDPOINT_NAME;
+        serverAddress = InetSocketAddress.createUnresolved("localhost", 1234);
+    }
 
-	private BootstrapUplink initializeServerResponse(final InterfaceTypes interfaceType, final OperationTypes operationType, final ResponseCode responseCode) {
-		doAnswer(new Answer<Void>(){
+    private BootstrapUplink initializeServerResponse(final InterfaceTypes interfaceType,
+            final OperationTypes operationType, final ResponseCode responseCode) {
+        doAnswer(new Answer<Void>() {
 
-			@Override
-			public Void answer(final InvocationOnMock invocation) throws Throwable {
-				final Request request = (Request) invocation.getArguments()[0];
-				actualRequest = request.getURI();
-				actualCode = request.getCode();
+            @Override
+            public Void answer(final InvocationOnMock invocation) throws Throwable {
+                final Request request = (Request) invocation.getArguments()[0];
+                actualRequest = request.getURI();
+                actualCode = request.getCode();
 
-				final Response response = new Response(responseCode);
+                final Response response = new Response(responseCode);
 
-				request.setResponse(response);
+                request.setResponse(response);
 
-				return null;
-			}
-		}).when(endpoint).sendRequest(any(Request.class));
+                return null;
+            }
+        }).when(endpoint).sendRequest(any(Request.class));
 
-		final BootstrapUplink uplink = new BootstrapUplink(serverAddress, endpoint, downlink);
-		return uplink;
-	}
+        final BootstrapUplink uplink = new BootstrapUplink(serverAddress, endpoint, downlink);
+        return uplink;
+    }
 
-	private void sendBootstrapAndGetAsyncResponse(final BootstrapUplink uplink) {
-		uplink.bootstrap(ENDPOINT_NAME, callback);
+    private void sendBootstrapAndGetAsyncResponse(final BootstrapUplink uplink) {
+        uplink.bootstrap(ENDPOINT_NAME, callback);
 
-		await().untilTrue(callback.isCalled());
-		if(callback.isSuccess()){
-			actualPayload = callback.getResponsePayload();
-		}
-	}
+        await().untilTrue(callback.isCalled());
+        if (callback.isSuccess()) {
+            actualPayload = callback.getResponsePayload();
+        }
+    }
 
-	private void sendBootstrapAndGetSyncResponse(final BootstrapUplink uplink) {
-		final OperationResponse operationResponse = uplink.bootstrap(ENDPOINT_NAME, SYNC_TIMEOUT_MS);
-		if(operationResponse.isSuccess()){
-			actualPayload = operationResponse.getPayload();
-		}
-	}
+    private void sendBootstrapAndGetSyncResponse(final BootstrapUplink uplink) {
+        final OperationResponse operationResponse = uplink.bootstrap(ENDPOINT_NAME, SYNC_TIMEOUT_MS);
+        if (operationResponse.isSuccess()) {
+            actualPayload = operationResponse.getPayload();
+        }
+    }
 
-	private void verifyResponse(final String expectedPayload) {
-		assertEquals(expectedRequest, actualRequest);
-		assertEquals(Code.POST, actualCode);
-		if(expectedPayload != null){
-			assertArrayEquals(expectedPayload.getBytes(), actualPayload);
-		}
-		else{
-			assertTrue(actualPayload == null);
-		}
-	}
+    private void verifyResponse(final String expectedPayload) {
+        assertEquals(expectedRequest, actualRequest);
+        assertEquals(Code.POST, actualCode);
+        if (expectedPayload != null) {
+            assertArrayEquals(expectedPayload.getBytes(), actualPayload);
+        } else {
+            assertTrue(actualPayload == null);
+        }
+    }
 
-	@Test
-	public void testGoodAsyncRequestPayload() {
-		final BootstrapUplink uplink = initializeServerResponse(InterfaceTypes.BOOTSTRAP, OperationTypes.REQUEST, ResponseCode.CHANGED);
+    @Test
+    public void testGoodAsyncRequestPayload() {
+        final BootstrapUplink uplink = initializeServerResponse(InterfaceTypes.BOOTSTRAP, OperationTypes.REQUEST,
+                ResponseCode.CHANGED);
 
-		sendBootstrapAndGetAsyncResponse(uplink);
-	}
+        sendBootstrapAndGetAsyncResponse(uplink);
+    }
 
+    @Test
+    public void testBadAsyncPayload() {
+        final BootstrapUplink uplink = initializeServerResponse(InterfaceTypes.BOOTSTRAP, OperationTypes.REQUEST,
+                ResponseCode.BAD_REQUEST);
 
-	@Test
-	public void testBadAsyncPayload() {
-		final BootstrapUplink uplink = initializeServerResponse(InterfaceTypes.BOOTSTRAP, OperationTypes.REQUEST, ResponseCode.BAD_REQUEST);
+        sendBootstrapAndGetAsyncResponse(uplink);
 
-		sendBootstrapAndGetAsyncResponse(uplink);
+        verifyResponse(null);
+    }
 
-		verifyResponse(null);
-	}
+    @Test
+    public void testGoodSyncPayload() {
+        final BootstrapUplink uplink = initializeServerResponse(InterfaceTypes.BOOTSTRAP, OperationTypes.REQUEST,
+                ResponseCode.CHANGED);
 
-	@Test
-	public void testGoodSyncPayload(){
-		final BootstrapUplink uplink = initializeServerResponse(InterfaceTypes.BOOTSTRAP, OperationTypes.REQUEST, ResponseCode.CHANGED);
+        sendBootstrapAndGetSyncResponse(uplink);
+    }
 
-		sendBootstrapAndGetSyncResponse(uplink);
-	}
+    @Test
+    public void testBadSyncPayload() {
+        final BootstrapUplink uplink = initializeServerResponse(InterfaceTypes.BOOTSTRAP, OperationTypes.REQUEST,
+                ResponseCode.BAD_REQUEST);
 
-	@Test
-	public void testBadSyncPayload() {
-		final BootstrapUplink uplink = initializeServerResponse(InterfaceTypes.BOOTSTRAP, OperationTypes.REQUEST, ResponseCode.BAD_REQUEST);
+        sendBootstrapAndGetSyncResponse(uplink);
 
-		sendBootstrapAndGetSyncResponse(uplink);
-
-		verifyResponse(null);
-	}
+        verifyResponse(null);
+    }
 }

@@ -46,54 +46,54 @@ import leshan.server.lwm2m.request.ResponseCode;
 
 public class ReadResponse extends BaseLwM2mResponse {
 
-	private ReadResponse(final ResponseCode code, final byte[] payload) {
-		super(code, payload);
-	}
+    private ReadResponse(final ResponseCode code, final byte[] payload) {
+        super(code, payload);
+    }
 
-	private ReadResponse(final ResponseCode code) {
-		this(code, new byte[0]);
-	}
+    private ReadResponse(final ResponseCode code) {
+        this(code, new byte[0]);
+    }
 
-	public static ReadResponse success(final byte[] readValue) {
-		return new ReadResponse(ResponseCode.CONTENT, readValue);
-	}
+    public static ReadResponse success(final byte[] readValue) {
+        return new ReadResponse(ResponseCode.CONTENT, readValue);
+    }
 
-	public static ReadResponse successMultiple(final Map<Integer, byte[]> readValues) {
-		return new MultipleReadResponse(ResponseCode.CONTENT, readValues);
-	}
+    public static ReadResponse successMultiple(final Map<Integer, byte[]> readValues) {
+        return new MultipleReadResponse(ResponseCode.CONTENT, readValues);
+    }
 
-	// TODO Evaluate whether this needs to be used
-	public static ReadResponse failure() {
-		return new ReadResponse(ResponseCode.METHOD_NOT_ALLOWED);
-	}
+    // TODO Evaluate whether this needs to be used
+    public static ReadResponse failure() {
+        return new ReadResponse(ResponseCode.METHOD_NOT_ALLOWED);
+    }
 
-	public static ReadResponse notAllowed() {
-		return new ReadResponse(ResponseCode.METHOD_NOT_ALLOWED);
-	}
+    public static ReadResponse notAllowed() {
+        return new ReadResponse(ResponseCode.METHOD_NOT_ALLOWED);
+    }
 
-	private static class MultipleReadResponse extends ReadResponse {
+    private static class MultipleReadResponse extends ReadResponse {
 
-		private final Tlv tlvPayload;
+        private final Tlv tlvPayload;
 
-		public MultipleReadResponse(final ResponseCode code, final Map<Integer, byte[]> readValues) {
-			super(code, getPayload(readValues));
-			tlvPayload = new Tlv(TlvType.MULTIPLE_RESOURCE, TlvDecoder.decode(ByteBuffer.wrap(getResponsePayload())),
-					null, 0);
-		}
+        public MultipleReadResponse(final ResponseCode code, final Map<Integer, byte[]> readValues) {
+            super(code, getPayload(readValues));
+            tlvPayload = new Tlv(TlvType.MULTIPLE_RESOURCE, TlvDecoder.decode(ByteBuffer.wrap(getResponsePayload())),
+                    null, 0);
+        }
 
-		@Override
-		public Tlv getResponsePayloadAsTlv() {
-			return tlvPayload;
-		}
+        @Override
+        public Tlv getResponsePayloadAsTlv() {
+            return tlvPayload;
+        }
 
-	}
+    }
 
-	private static byte[] getPayload(final Map<Integer, byte[]> readValues) {
-		final List<Tlv> children = new ArrayList<Tlv>();
-		for(final Entry<Integer, byte[]> entry : new TreeMap<>(readValues).entrySet()) {
-			children.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, entry.getValue(), entry.getKey()));
-		}
-		return TlvEncoder.encode(children.toArray(new Tlv[0])).array();
-	}
+    private static byte[] getPayload(final Map<Integer, byte[]> readValues) {
+        final List<Tlv> children = new ArrayList<Tlv>();
+        for (final Entry<Integer, byte[]> entry : new TreeMap<>(readValues).entrySet()) {
+            children.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, entry.getValue(), entry.getKey()));
+        }
+        return TlvEncoder.encode(children.toArray(new Tlv[0])).array();
+    }
 
 }

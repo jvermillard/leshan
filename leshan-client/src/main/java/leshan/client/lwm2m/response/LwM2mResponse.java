@@ -36,12 +36,12 @@ import leshan.server.lwm2m.request.ResponseCode;
 
 public interface LwM2mResponse {
 
-	public ResponseCode getCode();
+    public ResponseCode getCode();
 
-	public byte[] getResponsePayload();
+    public byte[] getResponsePayload();
 
-	public boolean isSuccess();
+    public boolean isSuccess();
 
-	Tlv getResponsePayloadAsTlv();
+    Tlv getResponsePayloadAsTlv();
 
 }

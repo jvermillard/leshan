@@ -36,97 +36,100 @@ import org.eclipse.californium.core.coap.Response;
 
 public abstract class OperationResponse {
 
-	public abstract boolean isSuccess();
-	public abstract String getErrorMessage();
-	public abstract ResponseCode getResponseCode();
-	public abstract byte[] getPayload();
-	public abstract String getLocation();
+    public abstract boolean isSuccess();
 
-	public static OperationResponse of(final Response response) {
-		return new SuccessfulOperationResponse(response);
-	}
+    public abstract String getErrorMessage();
 
-	public static OperationResponse failure(final ResponseCode responseCode, final String errorMessage) {
-		return new FailedOperationResponse(responseCode, errorMessage);
-	}
+    public abstract ResponseCode getResponseCode();
 
-	private static class SuccessfulOperationResponse extends OperationResponse {
-		private final Response response;
+    public abstract byte[] getPayload();
 
-		public SuccessfulOperationResponse(final Response response) {
-			this.response = response;
-		}
+    public abstract String getLocation();
 
-		@Override
-		public boolean isSuccess() {
-			return true;
-		}
+    public static OperationResponse of(final Response response) {
+        return new SuccessfulOperationResponse(response);
+    }
 
-		@Override
-		public ResponseCode getResponseCode() {
-			return response.getCode();
-		}
+    public static OperationResponse failure(final ResponseCode responseCode, final String errorMessage) {
+        return new FailedOperationResponse(responseCode, errorMessage);
+    }
 
-		@Override
-		public byte[] getPayload() {
-			return response.getPayload();
-		}
+    private static class SuccessfulOperationResponse extends OperationResponse {
+        private final Response response;
 
-		@Override
-		public String getErrorMessage() {
-			throw new UnsupportedOperationException("Successful Operations do not have Error Messages.");
-		}
+        public SuccessfulOperationResponse(final Response response) {
+            this.response = response;
+        }
 
-		@Override
-		public String getLocation() {
-			return response.getOptions().getLocationString();
-		}
-		
+        @Override
+        public boolean isSuccess() {
+            return true;
+        }
 
-	}
+        @Override
+        public ResponseCode getResponseCode() {
+            return response.getCode();
+        }
 
-	private static class FailedOperationResponse extends OperationResponse {
-		private final ResponseCode responseCode;
-		private final String errorMessage;
+        @Override
+        public byte[] getPayload() {
+            return response.getPayload();
+        }
 
-		public FailedOperationResponse(final ResponseCode responseCode, final String errorMessage) {
-			this.responseCode = responseCode;
-			this.errorMessage = errorMessage;
-		}
+        @Override
+        public String getErrorMessage() {
+            throw new UnsupportedOperationException("Successful Operations do not have Error Messages.");
+        }
 
-		@Override
-		public boolean isSuccess() {
-			return false;
-		}
+        @Override
+        public String getLocation() {
+            return response.getOptions().getLocationString();
+        }
 
-		@Override
-		public ResponseCode getResponseCode() {
-			return responseCode;
-		}
-		
-		@Override
-		public String getErrorMessage() {
-			return errorMessage;
-		}
+    }
 
-		@Override
-		public byte[] getPayload() {
-			throw new UnsupportedOperationException("Failed Operations Do Not Have Payloads... for NOW...");
-		}
+    private static class FailedOperationResponse extends OperationResponse {
+        private final ResponseCode responseCode;
+        private final String errorMessage;
 
-		@Override
-		public String getLocation() {
-			throw new UnsupportedOperationException("Failed Operations Do Not Have Location Paths... for NOW...");
-		}
+        public FailedOperationResponse(final ResponseCode responseCode, final String errorMessage) {
+            this.responseCode = responseCode;
+            this.errorMessage = errorMessage;
+        }
 
-	}
+        @Override
+        public boolean isSuccess() {
+            return false;
+        }
 
-	@Override
-	public String toString() {
-		final StringBuilder builder = new StringBuilder();
-		builder.append("Response[" + isSuccess() + "|" + getResponseCode() + "]");
-		
-		return builder.toString();
-	}
-	
+        @Override
+        public ResponseCode getResponseCode() {
+            return responseCode;
+        }
+
+        @Override
+        public String getErrorMessage() {
+            return errorMessage;
+        }
+
+        @Override
+        public byte[] getPayload() {
+            throw new UnsupportedOperationException("Failed Operations Do Not Have Payloads... for NOW...");
+        }
+
+        @Override
+        public String getLocation() {
+            throw new UnsupportedOperationException("Failed Operations Do Not Have Location Paths... for NOW...");
+        }
+
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("Response[" + isSuccess() + "|" + getResponseCode() + "]");
+
+        return builder.toString();
+    }
+
 }

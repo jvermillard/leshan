@@ -43,74 +43,70 @@ import leshan.server.lwm2m.observation.ObserveSpec;
 
 public class ObserveNotifyExchange extends ForwardingLwM2mExchange implements Runnable {
 
-	private static final long SECONDS_TO_MILLIS = 1000;
+    private static final long SECONDS_TO_MILLIS = 1000;
 
-	private ObserveSpec observeSpec;
+    private ObserveSpec observeSpec;
 
-	private ScheduledExecutorService service;
-	private LwM2mClientNode node;
-	private byte[] previousValue;
-	private Date previousTime;
+    private ScheduledExecutorService service;
+    private LwM2mClientNode node;
+    private byte[] previousValue;
+    private Date previousTime;
 
-	public ObserveNotifyExchange(final LwM2mExchange exchange,
-			LwM2mClientNode node,
-			ObserveSpec observeSpec,
-			ScheduledExecutorService service) {
-		super(exchange);
-		this.node = node;
-		this.observeSpec = observeSpec;
-		this.service = service;
-		updatePrevious(null);
-		scheduleNext();
-	}
+    public ObserveNotifyExchange(final LwM2mExchange exchange, LwM2mClientNode node, ObserveSpec observeSpec,
+            ScheduledExecutorService service) {
+        super(exchange);
+        this.node = node;
+        this.observeSpec = observeSpec;
+        this.service = service;
+        updatePrevious(null);
+        scheduleNext();
+    }
 
-	@Override
-	public void respond(final LwM2mResponse response) {
-		if (shouldNotify(response)) {
-			sendNotify(response);
-		}
-		scheduleNext();
-	}
+    @Override
+    public void respond(final LwM2mResponse response) {
+        if (shouldNotify(response)) {
+            sendNotify(response);
+        }
+        scheduleNext();
+    }
 
-	private void updatePrevious(byte[] responsePayload) {
-		previousValue = responsePayload;
-		previousTime = new Date();
-	}
+    private void updatePrevious(byte[] responsePayload) {
+        previousValue = responsePayload;
+        previousTime = new Date();
+    }
 
-	private boolean shouldNotify(final LwM2mResponse response) {
-		final long diff = getTimeDiff();
-		final Integer pmax = observeSpec.getMaxPeriod();
-		if (pmax != null && diff > pmax*SECONDS_TO_MILLIS) {
-			return true;
-		}
-		return !Arrays.equals(response.getResponsePayload(), previousValue);
-	}
+    private boolean shouldNotify(final LwM2mResponse response) {
+        final long diff = getTimeDiff();
+        final Integer pmax = observeSpec.getMaxPeriod();
+        if (pmax != null && diff > pmax * SECONDS_TO_MILLIS) {
+            return true;
+        }
+        return !Arrays.equals(response.getResponsePayload(), previousValue);
+    }
 
-	private void sendNotify(final LwM2mResponse response) {
-		updatePrevious(response.getResponsePayload());
-		exchange.respond(ObserveResponse.notifyWithContent(response.getResponsePayload()));
-	}
+    private void sendNotify(final LwM2mResponse response) {
+        updatePrevious(response.getResponsePayload());
+        exchange.respond(ObserveResponse.notifyWithContent(response.getResponsePayload()));
+    }
 
-	public void setObserveSpec(final ObserveSpec observeSpec) {
-		this.observeSpec = observeSpec;
-	}
+    public void setObserveSpec(final ObserveSpec observeSpec) {
+        this.observeSpec = observeSpec;
+    }
 
-	private void scheduleNext() {
-		if (observeSpec.getMaxPeriod() != null) {
-			long diff = getTimeDiff();
-			service.schedule(this,
-					observeSpec.getMaxPeriod()*SECONDS_TO_MILLIS - diff,
-					TimeUnit.MILLISECONDS);
-		}
-	}
+    private void scheduleNext() {
+        if (observeSpec.getMaxPeriod() != null) {
+            long diff = getTimeDiff();
+            service.schedule(this, observeSpec.getMaxPeriod() * SECONDS_TO_MILLIS - diff, TimeUnit.MILLISECONDS);
+        }
+    }
 
-	private long getTimeDiff() {
-		return new Date().getTime() - previousTime.getTime();
-	}
+    private long getTimeDiff() {
+        return new Date().getTime() - previousTime.getTime();
+    }
 
-	@Override
-	public void run() {
-		node.read(this);
-	}
-	
+    @Override
+    public void run() {
+        node.read(this);
+    }
+
 }

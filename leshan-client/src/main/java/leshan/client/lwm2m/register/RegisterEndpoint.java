@@ -38,16 +38,17 @@ import java.util.Map;
 import leshan.client.lwm2m.request.Request;
 
 public class RegisterEndpoint {
-	private final Map<String, String> queryString;
-	private final InetSocketAddress destination;
-	
-	public RegisterEndpoint(final InetSocketAddress destination, final Map<String, String> queryString) {
-		this.destination = destination;
-		this.queryString = new HashMap<>(queryString);
-	}
-	
-	@Override
-	public String toString() {
-		return String.format("coap://%s:%s/rd?%s", destination.getHostString(), destination.getPort(), Request.toQueryStringMap(queryString));
-	}
+    private final Map<String, String> queryString;
+    private final InetSocketAddress destination;
+
+    public RegisterEndpoint(final InetSocketAddress destination, final Map<String, String> queryString) {
+        this.destination = destination;
+        this.queryString = new HashMap<>(queryString);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("coap://%s:%s/rd?%s", destination.getHostString(), destination.getPort(),
+                Request.toQueryStringMap(queryString));
+    }
 }

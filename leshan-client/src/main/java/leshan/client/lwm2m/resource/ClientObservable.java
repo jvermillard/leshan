@@ -35,6 +35,6 @@ import org.eclipse.californium.core.server.resources.CoapExchange;
 
 public interface ClientObservable {
 
-	void createObservation(ClientObservable observable, CoapExchange exchange);
+    void createObservation(ClientObservable observable, CoapExchange exchange);
 
 }

@@ -45,192 +45,189 @@ import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.core.network.CoAPEndpoint;
 
-public class RegisterUplink extends Uplink{
-	private static final String MESSAGE_NULL_ENDPOINT = "Provided Endpoint was Null";
-	private static final String MESSAGE_BAD_OBJECTS = "Objects and Instances Passed Were Not in Valid Link Format.";
-	private static final String MESSAGE_BAD_PARAMETERS = "Either the Parameters are Invalid or the Objects and Instances are Null.";
-	private static final String ENDPOINT = "ep";
-	private final LwM2mClient client;
+public class RegisterUplink extends Uplink {
+    private static final String MESSAGE_NULL_ENDPOINT = "Provided Endpoint was Null";
+    private static final String MESSAGE_BAD_OBJECTS = "Objects and Instances Passed Were Not in Valid Link Format.";
+    private static final String MESSAGE_BAD_PARAMETERS = "Either the Parameters are Invalid or the Objects and Instances are Null.";
+    private static final String ENDPOINT = "ep";
+    private final LwM2mClient client;
 
-	public RegisterUplink(final InetSocketAddress destination, final CoAPEndpoint origin, final LwM2mClient client) {
-		super(destination, origin);
-		if(client == null){
-			throw new IllegalArgumentException("Client must not be null.");
-		}
-		this.client = client;
-	}
+    public RegisterUplink(final InetSocketAddress destination, final CoAPEndpoint origin, final LwM2mClient client) {
+        super(destination, origin);
+        if (client == null) {
+            throw new IllegalArgumentException("Client must not be null.");
+        }
+        this.client = client;
+    }
 
-	public OperationResponse register(final String endpointName, final Map<String, String> parameters, final int timeout) {
-		if(parameters == null || !areParametersValid(parameters)){
-			return OperationResponse.failure(ResponseCode.BAD_REQUEST, MESSAGE_BAD_PARAMETERS);
-		}
+    public OperationResponse register(final String endpointName, final Map<String, String> parameters, final int timeout) {
+        if (parameters == null || !areParametersValid(parameters)) {
+            return OperationResponse.failure(ResponseCode.BAD_REQUEST, MESSAGE_BAD_PARAMETERS);
+        }
 
-		final String payload = LinkFormatUtils.payloadize(client.getObjectModel());
-		if(payload == null || payload.equals("<>")){
-			return OperationResponse.failure(ResponseCode.BAD_REQUEST, MESSAGE_BAD_OBJECTS);
-		}
-		final Request request = createRegisterRequest(
-				endpointName, payload);
-		request.setURI(request.getURI() + "&" + leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
+        final String payload = LinkFormatUtils.payloadize(client.getObjectModel());
+        if (payload == null || payload.equals("<>")) {
+            return OperationResponse.failure(ResponseCode.BAD_REQUEST, MESSAGE_BAD_OBJECTS);
+        }
+        final Request request = createRegisterRequest(endpointName, payload);
+        request.setURI(request.getURI() + "&" + leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
 
-		return sendSyncRequest(timeout, request);
-	}
+        return sendSyncRequest(timeout, request);
+    }
 
-	public void register(final String endpointName, final Map<String, String> parameters, final Callback callback) {
-		if(parameters == null || !areParametersValid(parameters)){
-			callback.onFailure(OperationResponse.failure(ResponseCode.BAD_REQUEST, MESSAGE_BAD_PARAMETERS));
-			return;
-		}
+    public void register(final String endpointName, final Map<String, String> parameters, final Callback callback) {
+        if (parameters == null || !areParametersValid(parameters)) {
+            callback.onFailure(OperationResponse.failure(ResponseCode.BAD_REQUEST, MESSAGE_BAD_PARAMETERS));
+            return;
+        }
 
-		final String payload = LinkFormatUtils.payloadize(client.getObjectModel());
-		if(payload == null || payload.equals("<>")){
-			callback.onFailure(OperationResponse.failure(ResponseCode.BAD_REQUEST, MESSAGE_BAD_OBJECTS));
-			return;
-		}
+        final String payload = LinkFormatUtils.payloadize(client.getObjectModel());
+        if (payload == null || payload.equals("<>")) {
+            callback.onFailure(OperationResponse.failure(ResponseCode.BAD_REQUEST, MESSAGE_BAD_OBJECTS));
+            return;
+        }
 
-		final Request request = createRegisterRequest(
-				endpointName, payload);
-		request.setURI(request.getURI() + "&" + leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
+        final Request request = createRegisterRequest(endpointName, payload);
+        request.setURI(request.getURI() + "&" + leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
 
-		sendAsyncRequest(callback, request);
-	}
+        sendAsyncRequest(callback, request);
+    }
 
-	public void delete(final String location, final Callback callback) {
-		// TODO Auto-generated method stub
+    public void delete(final String location, final Callback callback) {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	public void update(final String endpointLocation, final Map<String, String> parameters, final Callback callback) {
-		if(parameters == null || !areParametersValid(parameters) || parameters.isEmpty()){
-			callback.onFailure(OperationResponse.failure(ResponseCode.BAD_REQUEST, MESSAGE_BAD_PARAMETERS));
-			return;
-		}
+    public void update(final String endpointLocation, final Map<String, String> parameters, final Callback callback) {
+        if (parameters == null || !areParametersValid(parameters) || parameters.isEmpty()) {
+            callback.onFailure(OperationResponse.failure(ResponseCode.BAD_REQUEST, MESSAGE_BAD_PARAMETERS));
+            return;
+        }
 
-		final String payload = LinkFormatUtils.payloadize(client.getObjectModel());
+        final String payload = LinkFormatUtils.payloadize(client.getObjectModel());
 
-		final Request request = createUpdateRequest(endpointLocation, parameters);
-		if(!payload.equals("<>")){
-			request.setPayload(payload);
-		}
+        final Request request = createUpdateRequest(endpointLocation, parameters);
+        if (!payload.equals("<>")) {
+            request.setPayload(payload);
+        }
 
-		sendAsyncRequest(callback, request);
-	}
+        sendAsyncRequest(callback, request);
+    }
 
-	public OperationResponse update(final String endpointLocation, final Map<String, String> parameters, final long timeout) {
-		if(parameters == null || !areParametersValid(parameters) || parameters.isEmpty()){
-			return OperationResponse.failure(ResponseCode.BAD_REQUEST, MESSAGE_BAD_PARAMETERS);
-		}
-		
-		final String payload = LinkFormatUtils.payloadize(client.getObjectModel());
+    public OperationResponse update(final String endpointLocation, final Map<String, String> parameters,
+            final long timeout) {
+        if (parameters == null || !areParametersValid(parameters) || parameters.isEmpty()) {
+            return OperationResponse.failure(ResponseCode.BAD_REQUEST, MESSAGE_BAD_PARAMETERS);
+        }
 
-		final Request request = createUpdateRequest(endpointLocation, parameters);
-		if(!payload.equals("<>")){
-			request.setPayload(payload);
-		}
+        final String payload = LinkFormatUtils.payloadize(client.getObjectModel());
 
-		return sendSyncRequest(timeout, request);
-	}
+        final Request request = createUpdateRequest(endpointLocation, parameters);
+        if (!payload.equals("<>")) {
+            request.setPayload(payload);
+        }
 
-	public OperationResponse deregister(final String endpointLocation, final long timeout) {
-		if(endpointLocation == null){
-			return OperationResponse.failure(ResponseCode.NOT_FOUND, MESSAGE_NULL_ENDPOINT);
-		}
+        return sendSyncRequest(timeout, request);
+    }
 
-		final Request request = createDeregisterRequest(endpointLocation);
+    public OperationResponse deregister(final String endpointLocation, final long timeout) {
+        if (endpointLocation == null) {
+            return OperationResponse.failure(ResponseCode.NOT_FOUND, MESSAGE_NULL_ENDPOINT);
+        }
 
-		final OperationResponse response = sendSyncRequest(timeout, request);
+        final Request request = createDeregisterRequest(endpointLocation);
 
-		origin.stop();
+        final OperationResponse response = sendSyncRequest(timeout, request);
 
-		return response;
-	}
+        origin.stop();
 
-	public void deregister(final String endpointLocation, final Callback callback) {
-		if(endpointLocation == null){
-			callback.onFailure(OperationResponse.failure(ResponseCode.NOT_FOUND, MESSAGE_NULL_ENDPOINT));
-		}
+        return response;
+    }
 
-		final Request request = createDeregisterRequest(endpointLocation);
+    public void deregister(final String endpointLocation, final Callback callback) {
+        if (endpointLocation == null) {
+            callback.onFailure(OperationResponse.failure(ResponseCode.NOT_FOUND, MESSAGE_NULL_ENDPOINT));
+        }
 
-		sendAsyncRequest(new Callback(){
-			final Callback initializingCallback = callback;
+        final Request request = createDeregisterRequest(endpointLocation);
 
-			@Override
-			public void onSuccess(final OperationResponse response) {
-				initializingCallback.onSuccess(response);
-				origin.stop();
-			}
+        sendAsyncRequest(new Callback() {
+            final Callback initializingCallback = callback;
 
-			@Override
-			public void onFailure(final OperationResponse response) {
-				initializingCallback.onFailure(response);
-				origin.stop();
-			}
+            @Override
+            public void onSuccess(final OperationResponse response) {
+                initializingCallback.onSuccess(response);
+                origin.stop();
+            }
 
-		}, request);
-	}
+            @Override
+            public void onFailure(final OperationResponse response) {
+                initializingCallback.onFailure(response);
+                origin.stop();
+            }
 
-	public OperationResponse notify(final String todo) {
-		return null;
-	}
+        }, request);
+    }
 
-	private Request createRegisterRequest(
-			final String endpointName, final String payload) {
-		final Request request = Request.newPost();
-		final RegisterEndpoint registerEndpoint = new RegisterEndpoint(getDestination(), Collections.singletonMap(ENDPOINT, endpointName));
-		request.setURI(registerEndpoint.toString());
-		request.setPayload(payload);
-		return request;
-	}
+    public OperationResponse notify(final String todo) {
+        return null;
+    }
 
-	private Request createUpdateRequest(final String endpointLocation,
-			final Map<String, String> parameters) {
-		final Request request = Request.newPut();
-		final RegisteredEndpoint registerEndpoint = new RegisteredEndpoint(getDestination(), endpointLocation);
-		request.setURI(registerEndpoint.toString());
-		request.getOptions().setURIQuery(leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
+    private Request createRegisterRequest(final String endpointName, final String payload) {
+        final Request request = Request.newPost();
+        final RegisterEndpoint registerEndpoint = new RegisterEndpoint(getDestination(), Collections.singletonMap(
+                ENDPOINT, endpointName));
+        request.setURI(registerEndpoint.toString());
+        request.setPayload(payload);
+        return request;
+    }
 
-		return request;
-	}
+    private Request createUpdateRequest(final String endpointLocation, final Map<String, String> parameters) {
+        final Request request = Request.newPut();
+        final RegisteredEndpoint registerEndpoint = new RegisteredEndpoint(getDestination(), endpointLocation);
+        request.setURI(registerEndpoint.toString());
+        request.getOptions().setURIQuery(leshan.client.lwm2m.request.Request.toQueryStringMap(parameters));
 
-	private Request createDeregisterRequest(
-			final String endpointLocation) {
-		final Request request = Request.newDelete();
-		final RegisteredEndpoint deregisterEndpoint = new RegisteredEndpoint(getDestination(), endpointLocation);
-		request.getOptions().setLocationPath(endpointLocation);
-		request.setURI(deregisterEndpoint.toString());
+        return request;
+    }
 
-		return request;
-	}
+    private Request createDeregisterRequest(final String endpointLocation) {
+        final Request request = Request.newDelete();
+        final RegisteredEndpoint deregisterEndpoint = new RegisteredEndpoint(getDestination(), endpointLocation);
+        request.getOptions().setLocationPath(endpointLocation);
+        request.setURI(deregisterEndpoint.toString());
 
-	private boolean areParametersValid(final Map<String, String> parameters) {
-		for(final Map.Entry<String, String> p : parameters.entrySet()){
-			switch(p.getKey()){
-			case "lt" :
-				break;
-			case "lwm2m" :
-				break;
-			case "sms" :
-				return false;
-			case "b" :
-				if(!isBindingValid(p.getValue())){
-					return false;
-				}
-				break;
-			default:
-				return false;
-			}
-		}
+        return request;
+    }
 
-		return true;
-	}
+    private boolean areParametersValid(final Map<String, String> parameters) {
+        for (final Map.Entry<String, String> p : parameters.entrySet()) {
+            switch (p.getKey()) {
+            case "lt":
+                break;
+            case "lwm2m":
+                break;
+            case "sms":
+                return false;
+            case "b":
+                if (!isBindingValid(p.getValue())) {
+                    return false;
+                }
+                break;
+            default:
+                return false;
+            }
+        }
 
-	private boolean isBindingValid(final String value) {
-		if(value.equals("U")){
-			return true;
-		}
+        return true;
+    }
 
-		return false;
-	}
+    private boolean isBindingValid(final String value) {
+        if (value.equals("U")) {
+            return true;
+        }
+
+        return false;
+    }
 
 }

@@ -40,32 +40,32 @@ import leshan.server.lwm2m.request.ResponseCode;
 
 public abstract class BaseLwM2mResponse implements LwM2mResponse {
 
-	private final ResponseCode code;
-	private final byte[] payload;
+    private final ResponseCode code;
+    private final byte[] payload;
 
-	public BaseLwM2mResponse(final ResponseCode code, final byte[] payload) {
-		this.code = code;
-		this.payload = payload;
-	}
+    public BaseLwM2mResponse(final ResponseCode code, final byte[] payload) {
+        this.code = code;
+        this.payload = payload;
+    }
 
-	@Override
-	public ResponseCode getCode() {
-		return code;
-	}
+    @Override
+    public ResponseCode getCode() {
+        return code;
+    }
 
-	@Override
-	public byte[] getResponsePayload() {
-		return payload;
-	}
+    @Override
+    public byte[] getResponsePayload() {
+        return payload;
+    }
 
-	@Override
-	public Tlv getResponsePayloadAsTlv() {
-		return new Tlv(TlvType.RESOURCE_VALUE, null, payload, 0);
-	}
+    @Override
+    public Tlv getResponsePayloadAsTlv() {
+        return new Tlv(TlvType.RESOURCE_VALUE, null, payload, 0);
+    }
 
-	@Override
-	public boolean isSuccess() {
-		switch (code) {
+    @Override
+    public boolean isSuccess() {
+        switch (code) {
         case CHANGED:
         case CONTENT:
         case CREATED:
@@ -78,27 +78,27 @@ public abstract class BaseLwM2mResponse implements LwM2mResponse {
         case UNAUTHORIZED:
         default:
             return false;
-		}
-	}
+        }
+    }
 
-	@Override
-	public boolean equals(final Object o) {
-		if (!(o instanceof BaseLwM2mResponse)) {
-			return false;
-		}
-		final BaseLwM2mResponse other = (BaseLwM2mResponse)o;
-		return code == other.code && Arrays.equals(payload, other.payload);
-	}
+    @Override
+    public boolean equals(final Object o) {
+        if (!(o instanceof BaseLwM2mResponse)) {
+            return false;
+        }
+        final BaseLwM2mResponse other = (BaseLwM2mResponse) o;
+        return code == other.code && Arrays.equals(payload, other.payload);
+    }
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(code, Arrays.hashCode(payload));
-	}
+    @Override
+    public int hashCode() {
+        return Objects.hash(code, Arrays.hashCode(payload));
+    }
 
-	@Override
-	public String toString() {
-		final String payloadString = (payload == null) ? "" : ", \"" + Arrays.toString(payload) + "\"";
-		return "[" + getClass().getSimpleName() + ": " + code + payloadString + "]";
-	}
+    @Override
+    public String toString() {
+        final String payloadString = (payload == null) ? "" : ", \"" + Arrays.toString(payload) + "\"";
+        return "[" + getClass().getSimpleName() + ": " + code + payloadString + "]";
+    }
 
 }

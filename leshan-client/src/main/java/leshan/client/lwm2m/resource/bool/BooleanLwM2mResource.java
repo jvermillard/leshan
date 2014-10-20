@@ -36,9 +36,9 @@ import leshan.client.lwm2m.resource.BaseTypedLwM2mResource;
 
 public class BooleanLwM2mResource extends BaseTypedLwM2mResource<BooleanLwM2mExchange> {
 
-	@Override
-	protected BooleanLwM2mExchange createSpecificExchange(final LwM2mExchange exchange) {
-		return new BooleanLwM2mExchange(exchange);
-	}
+    @Override
+    protected BooleanLwM2mExchange createSpecificExchange(final LwM2mExchange exchange) {
+        return new BooleanLwM2mExchange(exchange);
+    }
 
 }

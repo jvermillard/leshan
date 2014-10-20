@@ -55,14 +55,14 @@ public class CaliforniumBasedLwM2mExchange implements LwM2mExchange {
     public void respond(final LwM2mResponse response) {
         if (response instanceof CreateResponse) {
             final String objectId = getObjectId();
-            exchange.setLocationPath(objectId  + "/" + ((CreateResponse)response).getLocation());
+            exchange.setLocationPath(objectId + "/" + ((CreateResponse) response).getLocation());
         }
 
         exchange.respond(leshanToCalifornium(response.getCode()), response.getResponsePayload());
     }
 
     private ResponseCode leshanToCalifornium(final leshan.server.lwm2m.request.ResponseCode code) {
-        switch(code) {
+        switch (code) {
         case BAD_REQUEST:
             return ResponseCode.BAD_REQUEST;
         case CHANGED:

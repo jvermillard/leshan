@@ -35,12 +35,12 @@ import leshan.server.lwm2m.request.ResponseCode;
 
 public class ObserveResponse extends BaseLwM2mResponse {
 
-	private ObserveResponse(final ResponseCode code, final byte[] payload) {
-		super(code, payload);
-	}
+    private ObserveResponse(final ResponseCode code, final byte[] payload) {
+        super(code, payload);
+    }
 
-	public static ObserveResponse notifyWithContent(final byte[] payload) {
-		return new ObserveResponse(ResponseCode.CHANGED, payload);
-	}
+    public static ObserveResponse notifyWithContent(final byte[] payload) {
+        return new ObserveResponse(ResponseCode.CHANGED, payload);
+    }
 
 }

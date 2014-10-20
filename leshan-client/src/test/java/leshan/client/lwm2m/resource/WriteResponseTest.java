@@ -39,16 +39,16 @@ import org.junit.Test;
 
 public class WriteResponseTest {
 
-	@Test
-	public void canCreateSuccessfulResponse() {
-		final WriteResponse response = WriteResponse.success();
-		assertEquals(ResponseCode.CHANGED, response.getCode());
-	}
+    @Test
+    public void canCreateSuccessfulResponse() {
+        final WriteResponse response = WriteResponse.success();
+        assertEquals(ResponseCode.CHANGED, response.getCode());
+    }
 
-	@Test
-	public void canCreateFailureResponse() {
-		final WriteResponse response = WriteResponse.failure();
-		assertEquals(ResponseCode.BAD_REQUEST, response.getCode());
-	}
+    @Test
+    public void canCreateFailureResponse() {
+        final WriteResponse response = WriteResponse.failure();
+        assertEquals(ResponseCode.BAD_REQUEST, response.getCode());
+    }
 
 }

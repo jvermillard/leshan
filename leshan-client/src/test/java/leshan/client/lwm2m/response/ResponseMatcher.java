@@ -40,22 +40,22 @@ import org.hamcrest.Description;
 
 public class ResponseMatcher extends BaseMatcher<Response> {
 
-	private final ResponseCode code;
-	private final byte[] payload;
+    private final ResponseCode code;
+    private final byte[] payload;
 
-	public ResponseMatcher(final ResponseCode code, final byte[] payload) {
-		this.code = code;
-		this.payload = payload;
-	}
+    public ResponseMatcher(final ResponseCode code, final byte[] payload) {
+        this.code = code;
+        this.payload = payload;
+    }
 
-	@Override
-	public boolean matches(final Object arg0) {
-		final ResponseCode responseCode = ResponseCode.valueOf(((Response)arg0).getCode().value);
-		return responseCode == code && Arrays.equals(payload, ((Response)arg0).getPayload());
-	}
+    @Override
+    public boolean matches(final Object arg0) {
+        final ResponseCode responseCode = ResponseCode.valueOf(((Response) arg0).getCode().value);
+        return responseCode == code && Arrays.equals(payload, ((Response) arg0).getPayload());
+    }
 
-	@Override
-	public void describeTo(final Description arg0) {
-	}
+    @Override
+    public void describeTo(final Description arg0) {
+    }
 
 }

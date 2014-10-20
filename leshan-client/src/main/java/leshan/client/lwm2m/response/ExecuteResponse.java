@@ -35,21 +35,21 @@ import leshan.server.lwm2m.request.ResponseCode;
 
 public class ExecuteResponse extends BaseLwM2mResponse {
 
-	private ExecuteResponse(final ResponseCode code) {
-		super(code, new byte[0]);
-	}
+    private ExecuteResponse(final ResponseCode code) {
+        super(code, new byte[0]);
+    }
 
-	public static ExecuteResponse success() {
-		return new ExecuteResponse(ResponseCode.CHANGED);
-	}
+    public static ExecuteResponse success() {
+        return new ExecuteResponse(ResponseCode.CHANGED);
+    }
 
-	// TODO Evaluate whether this needs to be used
-	public static ExecuteResponse failure() {
-		return new ExecuteResponse(ResponseCode.METHOD_NOT_ALLOWED);
-	}
+    // TODO Evaluate whether this needs to be used
+    public static ExecuteResponse failure() {
+        return new ExecuteResponse(ResponseCode.METHOD_NOT_ALLOWED);
+    }
 
-	public static ExecuteResponse notAllowed() {
-		return new ExecuteResponse(ResponseCode.METHOD_NOT_ALLOWED);
-	}
+    public static ExecuteResponse notAllowed() {
+        return new ExecuteResponse(ResponseCode.METHOD_NOT_ALLOWED);
+    }
 
 }
