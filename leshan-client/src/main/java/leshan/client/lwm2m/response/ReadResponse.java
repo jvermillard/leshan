@@ -42,7 +42,7 @@ import leshan.server.lwm2m.impl.tlv.Tlv;
 import leshan.server.lwm2m.impl.tlv.Tlv.TlvType;
 import leshan.server.lwm2m.impl.tlv.TlvDecoder;
 import leshan.server.lwm2m.impl.tlv.TlvEncoder;
-import leshan.server.lwm2m.request.ResponseCode;
+import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
 
 public class ReadResponse extends BaseLwM2mResponse {
 

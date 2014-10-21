@@ -31,7 +31,7 @@
  */
 package leshan.client.lwm2m.response;
 
-import leshan.server.lwm2m.request.ResponseCode;
+import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
 
 public class DeleteResponse extends BaseLwM2mResponse {
 

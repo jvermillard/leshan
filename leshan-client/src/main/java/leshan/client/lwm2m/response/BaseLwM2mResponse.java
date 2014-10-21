@@ -36,7 +36,7 @@ import java.util.Objects;
 
 import leshan.server.lwm2m.impl.tlv.Tlv;
 import leshan.server.lwm2m.impl.tlv.Tlv.TlvType;
-import leshan.server.lwm2m.request.ResponseCode;
+import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
 
 public abstract class BaseLwM2mResponse implements LwM2mResponse {
 
