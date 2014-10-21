@@ -31,7 +31,6 @@ package leshan.server.servlet;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,7 +56,6 @@ import leshan.server.lwm2m.request.ResourceAccessException;
 import leshan.server.lwm2m.request.ValueResponse;
 import leshan.server.lwm2m.request.WriteRequest;
 import leshan.server.servlet.json.ClientSerializer;
-import leshan.server.servlet.json.DateSerializer;
 import leshan.server.servlet.json.LwM2mNodeDeserializer;
 import leshan.server.servlet.json.LwM2mNodeSerializer;
 import leshan.server.servlet.json.ResponseSerializer;
@@ -93,7 +91,7 @@ public class ClientServlet extends HttpServlet {
         gsonBuilder.registerTypeHierarchyAdapter(ClientResponse.class, new ResponseSerializer());
         gsonBuilder.registerTypeHierarchyAdapter(LwM2mNode.class, new LwM2mNodeSerializer());
         gsonBuilder.registerTypeHierarchyAdapter(LwM2mNode.class, new LwM2mNodeDeserializer());
-        gsonBuilder.registerTypeHierarchyAdapter(Date.class, new DateSerializer());
+        gsonBuilder.setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         this.gson = gsonBuilder.create();
     }
 
@@ -360,8 +358,7 @@ public class ClientServlet extends HttpServlet {
             } catch (JsonSyntaxException e) {
                 throw new IllegalArgumentException("unable to parse json to tlv:" + e.getMessage(), e);
             }
-
-            return server.send(new WriteRequest(client, target, node, ContentFormat.TLV, true));
+            return server.send(new WriteRequest(client, target, node, null, true));
 
         } else {
             throw new IllegalArgumentException("content type " + req.getContentType()

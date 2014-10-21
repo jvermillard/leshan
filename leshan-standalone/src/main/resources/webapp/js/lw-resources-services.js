@@ -214,7 +214,6 @@ var getTypedValue = function(strValue, type) {
     if(type != undefined) {
         switch(type) {
             case "integer":
-            case "time":
                 val = parseInt(strValue);
                 break;
             case "float":
@@ -235,7 +234,7 @@ var getObjectDefinitions = function() {
             {
                 "name": "LWM2M Security",
                 "id": 0,
-                "instancetype": "mutiple",
+                "instancetype": "multiple",
                 "mandatory": true,
                 "description": "",
                 "resourcedefs": [
@@ -376,7 +375,7 @@ var getObjectDefinitions = function() {
               {
                 "name": "LWM2M Server",
                 "id": 1,
-                "instancetype": "mutiple",
+                "instancetype": "multiple",
                 "mandatory": true,
                 "description": "",
                 "resourcedefs": [
@@ -484,7 +483,7 @@ var getObjectDefinitions = function() {
               {
                 "name": "LWM2M Access Control",
                 "id": 2,
-                "instancetype": "mutiple",
+                "instancetype": "multiple",
                 "mandatory": false,
                 "description": "",
                 "resourcedefs": [
@@ -514,7 +513,7 @@ var getObjectDefinitions = function() {
                     "id": 2,
                     "name": "ACL",
                     "operations": "RW",
-                    "instancetype": "mutiple",
+                    "instancetype": "multiple",
                     "mandatory": false,
                     "type": "integer",
                     "range": "16-bit",
@@ -611,7 +610,7 @@ var getObjectDefinitions = function() {
                     "id": 6,
                     "name": "Available Power Sources",
                     "operations": "R",
-                    "instancetype": "mutiple",
+                    "instancetype": "multiple",
                     "mandatory": false,
                     "type": "integer",
                     "range": "0-7",
@@ -622,7 +621,7 @@ var getObjectDefinitions = function() {
                     "id": 7,
                     "name": "Power Source Voltage",
                     "operations": "R",
-                    "instancetype": "mutiple",
+                    "instancetype": "multiple",
                     "mandatory": false,
                     "type": "integer",
                     "range": "",
@@ -633,7 +632,7 @@ var getObjectDefinitions = function() {
                     "id": 8,
                     "name": "Power Source Current",
                     "operations": "R",
-                    "instancetype": "mutiple",
+                    "instancetype": "multiple",
                     "mandatory": false,
                     "type": "integer",
                     "range": "",
@@ -666,7 +665,7 @@ var getObjectDefinitions = function() {
                     "id": 11,
                     "name": "Error Code",
                     "operations": "R",
-                    "instancetype": "mutiple",
+                    "instancetype": "multiple",
                     "mandatory": true,
                     "type": "integer",
                     "range": "",
@@ -752,7 +751,7 @@ var getObjectDefinitions = function() {
                     "id": 1,
                     "name": "Available Network Bearer",
                     "operations": "R",
-                    "instancetype": "mutiple",
+                    "instancetype": "multiple",
                     "mandatory": true,
                     "type": "integer",
                     "range": "",
@@ -785,7 +784,7 @@ var getObjectDefinitions = function() {
                     "id": 4,
                     "name": "IP Addresses",
                     "operations": "R",
-                    "instancetype": "mutiple",
+                    "instancetype": "multiple",
                     "mandatory": true,
                     "type": "string",
                     "range": "",
@@ -796,7 +795,7 @@ var getObjectDefinitions = function() {
                     "id": 5,
                     "name": "Router IP Addresse",
                     "operations": "R",
-                    "instancetype": "mutiple",
+                    "instancetype": "multiple",
                     "mandatory": false,
                     "type": "string",
                     "range": "",
@@ -818,7 +817,7 @@ var getObjectDefinitions = function() {
                     "id": 7,
                     "name": "APN",
                     "operations": "R",
-                    "instancetype": "mutiple",
+                    "instancetype": "multiple",
                     "mandatory": false,
                     "type": "string",
                     "range": "",

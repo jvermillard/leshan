@@ -40,6 +40,7 @@ import leshan.server.lwm2m.request.ClientResponse;
 import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
 import leshan.server.lwm2m.request.ContentFormat;
 import leshan.server.lwm2m.request.CreateRequest;
+import leshan.server.lwm2m.request.CreateResponse;
 import leshan.server.lwm2m.request.DeleteRequest;
 import leshan.server.lwm2m.request.DiscoverRequest;
 import leshan.server.lwm2m.request.DiscoverResponse;
@@ -200,13 +201,14 @@ public class CaliforniumLwM2mResponseBuilder<T extends ClientResponse> implement
     public void visit(CreateRequest request) {
         switch (coapResponse.getCode()) {
         case CREATED:
-            lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new CreateResponse(fromCoapCode(coapResponse.getCode().value),
+                    coapResponse.getOptions().getLocationPathString());
             break;
         case BAD_REQUEST:
         case UNAUTHORIZED:
         case NOT_FOUND:
         case METHOD_NOT_ALLOWED:
-            lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new CreateResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         default:
             handleUnexpectedResponseCode(request.getClient(), coapRequest, coapResponse);

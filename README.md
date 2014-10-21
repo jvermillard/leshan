@@ -3,7 +3,7 @@
 Leshan
 ======
 
-Leshan is a OMA Lightweight M2M server implementation.
+Leshan is a OMA Lightweight M2M server and client implementation.
 
 What is OMA LWM2M: 
 http://technical.openmobilealliance.org/Technical/release_program/lightweightM2M_v1_0.aspx
@@ -26,7 +26,11 @@ https://groups.google.com/d/forum/leshan-lwm2m
 Test Sandbox
 ------------
 
-You can try it live on our demo instance: http://54.228.25.31/
+You can try it live on our server demo instance: http://54.228.25.31/
+
+
+Server
+======
 
 Get and run last binary
 -----------------------
@@ -51,19 +55,31 @@ Run:
 java -jar target/leshan-standalone-*-SNAPSHOT-jar-with-dependencies.jar 
 ```
 
-
 Connect on Leshan UI: http://localhost:8080
 
-Leshan provides a very simple UI  to get the list of connected clients and interact with clients resources.
+Leshan provides a very simple UI to get the list of connected clients and interact with clients resources.
 
-Now you can register your LWM2M client like [Eclipse Wakaama](http://eclipse.org/wakaama) or its lua binding [lualwm2m] (https://github.com/sbernard31/lualwm2m).
+Now you can register your LWM2M client using:
+
+[Eclipse Wakaama](http://eclipse.org/wakaama) or its lua binding [lualwm2m] (https://github.com/sbernard31/lualwm2m).
+
+Leshan-client library or use the example LeshanDevice.  To build the LeshanDevice example, first compile the leshan-client:
+
+```
+mvn install
+cd leshan-client-standalone
+mvn assembly:assembly -DdescriptorId=jar-with-dependencies
+```
+
+Then run, setting first the hostname and port the client should use (i.e., something that isn't either 5683 or 5684 if both the server and client are running on the same machine) followed by the hostname and port of the server:
+
+```
+java -jar target/leshan-client-*-SNAPSHOT-jar-with-dependencies.jar localhost 9000 localhost 5683
+```
 
 The list of the registered clients: http://localhost:8080/api/clients
 
-Get the instace 0 of the object 3 of a registered client: http://localhost:8080/api/clients/{endpoint}/3/0
-
-
-![Leshan](https://raw.github.com/msangoi/leshan/master/lw-clients.png)
+![Leshan](https://raw.github.com/msangoi/leshan/master/leshan-capture.png)
 
 Code with eclipse
 -----------------

@@ -124,9 +124,6 @@ angular.module('resourceDirectives', [])
                         scope.resource.tooltip = formattedDate;
                     }
                 }).error(function(data, status, headers, config) {
-                    if (observe) {
-                        scope.resource.observe.status = false;
-                    }
                     errormessage = "Unable to read resource " + scope.resource.path + " for "+ $routeParams.clientId + " : " + status +" "+ data
                     dialog.open(errormessage);
                     console.error(errormessage)

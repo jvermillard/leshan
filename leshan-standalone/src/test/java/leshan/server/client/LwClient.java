@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2013, Sierra Wireless
+ * Copyright (c) 2013, Sierra Wireless,
+ * Copyright (c) 2014, Zebra Technologies,
+ * 
  *
  * All rights reserved.
  *
@@ -27,6 +29,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package leshan.server.client;
 
 import java.io.BufferedReader;
@@ -41,9 +44,9 @@ public class LwClient implements Closeable {
     private Process p;
     private BufferedReader br;
 
-    public void start(String endpoint, String script, String... params) {
+    public void start(final String endpoint, final String script, final String... params) {
 
-        String luaScript = this.getClass().getResource(script).getFile();
+        final String luaScript = this.getClass().getResource(script).getFile();
 
         try {
             // Run a docker container to simulate a client
@@ -52,7 +55,7 @@ public class LwClient implements Closeable {
                             + ":/lwm2m/script.lua jvermillard/lualwm2m script.lua " + StringUtils.join(params, " "));
             br = new BufferedReader(new InputStreamReader(p.getInputStream()));
 
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new IllegalStateException("Unable to run LW test client", e);
         }
     }
@@ -62,7 +65,7 @@ public class LwClient implements Closeable {
 
         System.err.println("Stopping LWM2M client");
 
-        StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder();
         String current = "";
         while (br.ready() && (current = br.readLine()) != null) {
             builder.append(current).append("\n");
@@ -70,7 +73,7 @@ public class LwClient implements Closeable {
         System.err.println("---------\nClient logs:\n" + builder.toString() + "\n----------");
 
         try {
-            Process stop = Runtime.getRuntime().exec("sudo docker stop lwm2mClientIT");
+            final Process stop = Runtime.getRuntime().exec("sudo docker stop lwm2mClientIT");
 
             System.err.println("Waiting for docker container to stop");
             stop.waitFor();
