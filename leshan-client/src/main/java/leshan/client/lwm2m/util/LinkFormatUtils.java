@@ -31,11 +31,11 @@
  */
 package leshan.client.lwm2m.util;
 
+import static org.eclipse.californium.core.coap.LinkFormat.*;
+
 import java.util.Map;
 
 import leshan.server.lwm2m.client.LinkObject;
-
-import org.eclipse.californium.core.coap.LinkFormat;
 
 public class LinkFormatUtils {
     public static final String INVALID_LINK_PAYLOAD = "<>";
@@ -67,41 +67,32 @@ public class LinkFormatUtils {
 
         if (hasPayloadAttributes(attributes)) {
             builder.append(";");
-            if (attributes.containsKey(LinkFormat.RESOURCE_TYPE)) {
-                builder.append(LinkFormat.RESOURCE_TYPE).append("=\"").append(attributes.get(LinkFormat.RESOURCE_TYPE))
+            if (attributes.containsKey(RESOURCE_TYPE)) {
+                builder.append(RESOURCE_TYPE).append("=\"").append(attributes.get(RESOURCE_TYPE)).append("\"");
+            }
+            if (attributes.containsKey(INTERFACE_DESCRIPTION)) {
+                builder.append(INTERFACE_DESCRIPTION).append("=\"").append(attributes.get(INTERFACE_DESCRIPTION))
                         .append("\"");
             }
-            if (attributes.containsKey(LinkFormat.INTERFACE_DESCRIPTION)) {
-                builder.append(LinkFormat.INTERFACE_DESCRIPTION).append("=\"")
-                        .append(attributes.get(LinkFormat.INTERFACE_DESCRIPTION)).append("\"");
+            if (attributes.containsKey(CONTENT_TYPE)) {
+                builder.append(CONTENT_TYPE).append("=\"").append(attributes.get(CONTENT_TYPE)).append("\"");
             }
-            if (attributes.containsKey(LinkFormat.CONTENT_TYPE)) {
-                builder.append(LinkFormat.CONTENT_TYPE).append("=\"").append(attributes.get(LinkFormat.CONTENT_TYPE))
-                        .append("\"");
+            if (attributes.containsKey(MAX_SIZE_ESTIMATE)) {
+                builder.append(MAX_SIZE_ESTIMATE).append("=\"").append(attributes.get(MAX_SIZE_ESTIMATE)).append("\"");
             }
-            if (attributes.containsKey(LinkFormat.MAX_SIZE_ESTIMATE)) {
-                builder.append(LinkFormat.MAX_SIZE_ESTIMATE).append("=\"")
-                        .append(attributes.get(LinkFormat.MAX_SIZE_ESTIMATE)).append("\"");
+            if (attributes.containsKey(OBSERVABLE)) {
+                builder.append(OBSERVABLE);
             }
-            if (attributes.containsKey(LinkFormat.OBSERVABLE)) {
-                builder.append(LinkFormat.OBSERVABLE);
-            }
-
         }
 
         return builder.toString();
     }
 
     private static boolean hasPayloadAttributes(final Map<String, Object> attributes) {
-        if (attributes.containsKey(LinkFormat.RESOURCE_TYPE)
-                || attributes.containsKey(LinkFormat.INTERFACE_DESCRIPTION)
-                || attributes.containsKey(LinkFormat.CONTENT_TYPE)
-                || attributes.containsKey(LinkFormat.MAX_SIZE_ESTIMATE)
-                || attributes.containsKey(LinkFormat.OBSERVABLE)) {
-            return true;
-        }
-
-        return false;
+        return attributes.containsKey(RESOURCE_TYPE) || //
+                attributes.containsKey(INTERFACE_DESCRIPTION) || //
+                attributes.containsKey(CONTENT_TYPE) || //
+                attributes.containsKey(MAX_SIZE_ESTIMATE) || //
+                attributes.containsKey(OBSERVABLE);
     }
-
 }

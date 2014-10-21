@@ -51,9 +51,4 @@ public class Request {
         builder.deleteCharAt(builder.length() - 1);
         return builder.toString();
     }
-
-    public static org.eclipse.californium.core.coap.Request toCaliforniumRequest(final Request r) {
-
-        return null;
-    }
 }

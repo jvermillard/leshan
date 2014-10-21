@@ -38,6 +38,7 @@ import leshan.client.lwm2m.Uplink;
 import leshan.client.lwm2m.response.Callback;
 import leshan.client.lwm2m.response.OperationResponse;
 
+import org.apache.commons.lang.Validate;
 import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.core.network.CoAPEndpoint;
 
@@ -47,9 +48,7 @@ public class BootstrapUplink extends Uplink {
     public BootstrapUplink(final InetSocketAddress destination, final CoAPEndpoint origin,
             final BootstrapDownlink downlink) {
         super(destination, origin);
-        if (downlink == null) {
-            throw new IllegalArgumentException("BootstrapDownlink must not be null");
-        }
+        Validate.notNull(downlink, "BootstrapDownlink must not be null");
     }
 
     public OperationResponse bootstrap(final String endpointName, final long timeout) {

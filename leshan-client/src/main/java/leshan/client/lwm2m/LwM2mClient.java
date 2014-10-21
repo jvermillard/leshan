@@ -49,6 +49,9 @@ import org.eclipse.californium.core.network.CoAPEndpoint;
 import org.eclipse.californium.core.network.interceptors.MessageInterceptor;
 import org.eclipse.californium.core.server.resources.Resource;
 
+/**
+ * A Lightweight M2M client.
+ */
 public class LwM2mClient {
 
     private final CoapServer clientSideServer;

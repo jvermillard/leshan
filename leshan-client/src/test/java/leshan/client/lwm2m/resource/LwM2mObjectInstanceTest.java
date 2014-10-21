@@ -111,6 +111,7 @@ public class LwM2mObjectInstanceTest {
     private LwM2mClientObjectInstance createInstance(final LwM2mClientObjectDefinition definition, final byte[] payload) {
         final LwM2mClientObject obj = mock(LwM2mClientObject.class);
         final LwM2mClientObjectInstance instance = new LwM2mClientObjectInstance(0, obj, definition);
+        @SuppressWarnings("unchecked")
         final LwM2mCallbackExchange<LwM2mClientObjectInstance> createExchange = mock(LwM2mCallbackExchange.class);
         when(createExchange.getRequestPayload()).thenReturn(payload);
         instance.createInstance(createExchange);
