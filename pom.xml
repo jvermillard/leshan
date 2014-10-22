@@ -53,6 +53,8 @@
         <module>leshan-core</module>
         <module>leshan-standalone</module>
         <module>leshan-bs-server</module>
+        <module>leshan-osgi</module>
+        <module>leshan-osgi-itest</module>
         <module>leshan-client</module>
         <module>leshan-client-example</module>
     </modules>
