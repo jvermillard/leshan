@@ -27,33 +27,26 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.lwm2m.impl.bridge.server;
+package leshan.server.lwm2m.impl.bridge.bootstrap;
 
-import leshan.server.lwm2m.client.ClientRegistry;
-import leshan.server.lwm2m.observation.ObservationRegistry;
-import leshan.server.lwm2m.request.LwM2mRequestSender;
-import leshan.server.lwm2m.security.SecurityRegistry;
+import java.net.InetSocketAddress;
 
-public interface CoapServerImplementor {
+import leshan.server.lwm2m.bootstrap.BootstrapStore;
+import leshan.server.lwm2m.resource.proxy.CoapResourceProxy;
+import leshan.server.lwm2m.security.SecurityStore;
 
-	/** IANA assigned UDP port for CoAP */
-	public static final int PORT = 5683;
-
-	/** IANA assigned UDP port for CoAP with DTLS */
-	public static final int PORT_DTLS = 5684;
-
-	public LwM2mRequestSender getLWM2MRequestSender();
-
-	public ClientRegistry getClientRegistry();
-
-	public ObservationRegistry getObservationRegistry();
-
-	public SecurityRegistry getSecurityRegistry();
-
-	public void start();
-
-	public void stop();
-
-	public void destroy();
+public interface BootstrapServerImplementorBuilder<E extends BootstrapServerImplementor, R extends CoapResourceProxy> {
+	
+	public BootstrapServerImplementorBuilder<E, R> addEndpoint(InetSocketAddress... localaddress);
+	
+	public BootstrapServerImplementorBuilder<E, R> addSecureEndpoint(InetSocketAddress... localSecureAddress);
+	
+	public BootstrapServerImplementorBuilder<E, R> setSecurityStore(SecurityStore securityStore);
+	
+	public BootstrapServerImplementorBuilder<E, R> setBootstrapStore(BootstrapStore bootstrapStore);
+	
+	public BootstrapServerImplementorBuilder<E, R> bindResource(R coapResourceProxy);
+	
+	public E build();
 
 }

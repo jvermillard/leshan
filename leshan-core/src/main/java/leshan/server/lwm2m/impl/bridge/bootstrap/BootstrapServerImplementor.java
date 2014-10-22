@@ -27,33 +27,27 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.lwm2m.impl.bridge.server;
+package leshan.server.lwm2m.impl.bridge.bootstrap;
 
-import leshan.server.lwm2m.client.ClientRegistry;
-import leshan.server.lwm2m.observation.ObservationRegistry;
-import leshan.server.lwm2m.request.LwM2mRequestSender;
-import leshan.server.lwm2m.security.SecurityRegistry;
+import leshan.server.lwm2m.bootstrap.BootstrapStore;
+import leshan.server.lwm2m.security.SecurityStore;
 
-public interface CoapServerImplementor {
+public interface BootstrapServerImplementor {
+	
+	 /** IANA assigned UDP port for CoAP */
+    public static final int PORT = 5683;
 
-	/** IANA assigned UDP port for CoAP */
-	public static final int PORT = 5683;
+    /** IANA assigned UDP port for CoAP with DTLS */
+    public static final int PORT_DTLS = 5684;
+	
+	public SecurityStore getSecurityStore();
 
-	/** IANA assigned UDP port for CoAP with DTLS */
-	public static final int PORT_DTLS = 5684;
-
-	public LwM2mRequestSender getLWM2MRequestSender();
-
-	public ClientRegistry getClientRegistry();
-
-	public ObservationRegistry getObservationRegistry();
-
-	public SecurityRegistry getSecurityRegistry();
-
+	public BootstrapStore getBootstrapStore();
+	
 	public void start();
-
+	
 	public void stop();
-
+	
 	public void destroy();
 
 }

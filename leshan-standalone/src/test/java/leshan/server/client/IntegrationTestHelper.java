@@ -149,7 +149,7 @@ public final class IntegrationTestHelper {
         		  											 .setObservationRegistry(observationRegistry)
         		  											 .setSecurityRegistry(securityRegistry)
         		  											 .bindResource(new CaliforniumCoapResourceProxy())
-        		  											 .buildCoapServerImplementor();
+        		  											 .build();
         
         server = new LeshanServer(implementor);
         server.start();

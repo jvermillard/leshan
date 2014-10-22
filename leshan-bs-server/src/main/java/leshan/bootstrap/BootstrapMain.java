@@ -33,11 +33,11 @@ package leshan.bootstrap;
 import java.net.InetSocketAddress;
 
 import leshan.bootstrap.servlet.BootstrapServlet;
-import leshan.connector.californium.bootstrap.BootstrapServerImplementor;
-import leshan.connector.californium.bootstrap.CaliforniumBssSchematic;
+import leshan.connector.californium.bootstrap.CaliforniumBootstrapServerImplementor;
+import leshan.connector.californium.bootstrap.CaliforniumBootstrapServerImplementorBuilder;
 import leshan.connector.californium.resource.CaliforniumCoapResourceProxy;
 import leshan.server.lwm2m.impl.LwM2mBootstrapServerImpl;
-import leshan.server.lwm2m.impl.bridge.bootstrap.BootstrapImplementor;
+import leshan.server.lwm2m.impl.bridge.bootstrap.BootstrapServerImplementor;
 import leshan.server.lwm2m.impl.bridge.server.CoapServerImplementor;
 import leshan.server.lwm2m.security.SecurityStore;
 
@@ -60,11 +60,11 @@ public class BootstrapMain {
         String iface = System.getenv("COAPIFACE");
         String ifaces = System.getenv("COAPSIFACE");
 
-        CaliforniumBssSchematic serverSchematics = new CaliforniumBssSchematic();
+        CaliforniumBootstrapServerImplementorBuilder serverSchematics = new CaliforniumBootstrapServerImplementorBuilder();
 
         if (iface == null || iface.isEmpty() || ifaces == null || ifaces.isEmpty()) {
-        	serverSchematics.addEndpoint(new InetSocketAddress(BootstrapImplementor.PORT));
-        	serverSchematics.addSecureEndpoint(new InetSocketAddress(BootstrapImplementor.PORT_DTLS));
+        	serverSchematics.addEndpoint(new InetSocketAddress(BootstrapServerImplementor.PORT));
+        	serverSchematics.addSecureEndpoint(new InetSocketAddress(BootstrapServerImplementor.PORT_DTLS));
         } else {
             String[] add = iface.split(":");
             String[] adds = ifaces.split(":");
@@ -73,7 +73,7 @@ public class BootstrapMain {
             serverSchematics.addSecureEndpoint(new InetSocketAddress(adds[0], Integer.parseInt(adds[1])));
         }
         
-        BootstrapServerImplementor implementor = serverSchematics.setBootstrapStore(bsStore)
+        CaliforniumBootstrapServerImplementor implementor = serverSchematics.setBootstrapStore(bsStore)
         										.setSecurityStore(securityStore)
         										.bindResource(new CaliforniumCoapResourceProxy()).build();
         

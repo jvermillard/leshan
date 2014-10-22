@@ -36,22 +36,8 @@ import leshan.server.lwm2m.impl.node.LwM2mNodeDecoder;
 import leshan.server.lwm2m.node.LwM2mNode;
 import leshan.server.lwm2m.node.LwM2mPath;
 import leshan.server.lwm2m.observation.ObservationRegistry;
-import leshan.server.lwm2m.request.ClientResponse;
 import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
-import leshan.server.lwm2m.request.ContentFormat;
-import leshan.server.lwm2m.request.CreateRequest;
-import leshan.server.lwm2m.request.CreateResponse;
-import leshan.server.lwm2m.request.DeleteRequest;
-import leshan.server.lwm2m.request.DiscoverRequest;
-import leshan.server.lwm2m.request.DiscoverResponse;
-import leshan.server.lwm2m.request.ExecuteRequest;
-import leshan.server.lwm2m.request.LwM2mRequestVisitor;
-import leshan.server.lwm2m.request.ObserveRequest;
-import leshan.server.lwm2m.request.ReadRequest;
-import leshan.server.lwm2m.request.ResourceAccessException;
-import leshan.server.lwm2m.request.ValueResponse;
-import leshan.server.lwm2m.request.WriteAttributesRequest;
-import leshan.server.lwm2m.request.WriteRequest;
+import leshan.server.lwm2m.request.*;
 
 import org.apache.commons.lang.Validate;
 import org.eclipse.californium.core.coap.CoAP;
@@ -72,27 +58,32 @@ public class CaliforniumLwM2mResponseBuilder<T extends ClientResponse> implement
 
     public static ResponseCode fromCoapCode(int code) {
         Validate.notNull(code);
-
-        if (code == CoAP.ResponseCode.CREATED.value) {
-            return ResponseCode.CREATED;
-        } else if (code == CoAP.ResponseCode.DELETED.value) {
-            return ResponseCode.DELETED;
-        } else if (code == CoAP.ResponseCode.CHANGED.value) {
-            return ResponseCode.CHANGED;
-        } else if (code == CoAP.ResponseCode.CONTENT.value) {
-            return ResponseCode.CONTENT;
-        } else if (code == CoAP.ResponseCode.BAD_REQUEST.value) {
-            return ResponseCode.BAD_REQUEST;
-        } else if (code == CoAP.ResponseCode.UNAUTHORIZED.value) {
-            return ResponseCode.UNAUTHORIZED;
-        } else if (code == CoAP.ResponseCode.NOT_FOUND.value) {
-            return ResponseCode.NOT_FOUND;
-        } else if (code == CoAP.ResponseCode.METHOD_NOT_ALLOWED.value) {
-            return ResponseCode.METHOD_NOT_ALLOWED;
-        } else if (code == 137) {
-            return ResponseCode.CONFLICT;
-        } else {
-            throw new IllegalArgumentException("Invalid CoAP code for LWM2M response: " + code);
+        
+        CoAP.ResponseCode californiumCode = CoAP.ResponseCode.valueOf(code);
+        
+        switch(californiumCode) {
+        	case CREATED: 
+	            return ResponseCode.CREATED;
+        	case DELETED: 
+	            return ResponseCode.DELETED;
+        	case CHANGED: 
+	            return ResponseCode.CHANGED;
+	        case CONTENT: 
+	            return ResponseCode.CONTENT;
+	        case BAD_REQUEST: 
+	            return ResponseCode.BAD_REQUEST;
+	        case UNAUTHORIZED:
+	            return ResponseCode.UNAUTHORIZED;
+	        case NOT_FOUND:
+	            return ResponseCode.NOT_FOUND;
+	        case METHOD_NOT_ALLOWED:
+	            return ResponseCode.METHOD_NOT_ALLOWED;
+	       default:
+	    	   if (code == 137) {
+	               return ResponseCode.CONFLICT;
+	    	   } else {
+	            throw new IllegalArgumentException("Invalid CoAP code for LWM2M response: " + code);
+	    	   }
         }
     }
 

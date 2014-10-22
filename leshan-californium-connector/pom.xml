@@ -41,10 +41,6 @@
     <name>leshan - californium - connector</name>
     <description>a leshan connector to californium</description>
 
-    <properties>
-        <internal.repo.path>file://${basedir}/../../leshan-repo</internal.repo.path>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.github.leshan</groupId>
@@ -63,10 +59,6 @@
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -120,19 +112,11 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            leshan.server.lwm2m,
-                            leshan.server.lwm2m.bootstrap,
-                            leshan.server.lwm2m.client,
-                            leshan.server.lwm2m.impl,
-                            leshan.server.lwm2m.impl.californium,
-                            leshan.server.lwm2m.impl.node,
-                            leshan.server.lwm2m.impl.objectspec,
-                            leshan.server.lwm2m.impl.security,
-                            leshan.server.lwm2m.impl.tlv,
-                            leshan.server.lwm2m.node,
-                            leshan.server.lwm2m.observation,
-                            leshan.server.lwm2m.request,
-                            leshan.server.lwm2m.security,
+                            leshan.connector.Califorium,
+                            leshan.connector.Califorium.bootstrap,
+                            leshan.connector.Califorium.resource,
+                            leshan.connector.Califorium.security,
+                            leshan.connector.Califorium.server,
                         </Export-Package>
                         <Import-Package>
                             org.eclipse.californium.*;version="[1.0.0, 1.1)",

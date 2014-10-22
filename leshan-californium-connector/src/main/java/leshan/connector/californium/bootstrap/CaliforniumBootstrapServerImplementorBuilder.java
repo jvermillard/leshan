@@ -42,9 +42,9 @@ import leshan.connector.californium.server.CaliforniumServerSchematic;
 import leshan.server.lwm2m.bootstrap.BootstrapStore;
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.impl.LwM2mBootstrapServerImpl;
-import leshan.server.lwm2m.impl.bridge.bootstrap.BootstrapImplementor;
-import leshan.server.lwm2m.impl.bridge.bootstrap.BootstrapSchematic;
-import leshan.server.lwm2m.impl.bridge.server.CoapServerImplementorSchematic;
+import leshan.server.lwm2m.impl.bridge.bootstrap.BootstrapServerImplementor;
+import leshan.server.lwm2m.impl.bridge.bootstrap.BootstrapServerImplementorBuilder;
+import leshan.server.lwm2m.impl.bridge.server.CoapServerImplementorBuilder;
 import leshan.server.lwm2m.observation.ObservationRegistry;
 import leshan.server.lwm2m.resource.BootstrapResource;
 import leshan.server.lwm2m.security.SecurityRegistry;
@@ -56,7 +56,7 @@ import org.eclipse.californium.core.network.CoAPEndpoint;
 import org.eclipse.californium.core.network.Endpoint;
 import org.eclipse.californium.scandium.DTLSConnector;
 
-public class CaliforniumBssSchematic implements BootstrapSchematic<BootstrapServerImplementor, CaliforniumCoapResourceProxy>{
+public class CaliforniumBootstrapServerImplementorBuilder implements BootstrapServerImplementorBuilder<CaliforniumBootstrapServerImplementor, CaliforniumCoapResourceProxy>{
 
 	private final Set<InetSocketAddress> enpointAddress = new HashSet<InetSocketAddress>();
 	private final Set<InetSocketAddress> secureEndpointAddress = new HashSet<InetSocketAddress>();
@@ -66,7 +66,7 @@ public class CaliforniumBssSchematic implements BootstrapSchematic<BootstrapServ
 	private CaliforniumCoapResourceProxy coapResourceProxy;
 
 	@Override
-	public CaliforniumBssSchematic addEndpoint(InetSocketAddress... localAddress) {
+	public CaliforniumBootstrapServerImplementorBuilder addEndpoint(InetSocketAddress... localAddress) {
 		Validate.notNull(localAddress, "IP address cannot be null");
 		for(final InetSocketAddress address : localAddress) {
 			enpointAddress.add(address);
@@ -75,7 +75,7 @@ public class CaliforniumBssSchematic implements BootstrapSchematic<BootstrapServ
 	}
 
 	@Override
-	public CaliforniumBssSchematic addSecureEndpoint(InetSocketAddress... localSecureAddress) {
+	public CaliforniumBootstrapServerImplementorBuilder addSecureEndpoint(InetSocketAddress... localSecureAddress) {
 		Validate.notNull(localSecureAddress, "IP address cannot be null");
 		for(final InetSocketAddress address : localSecureAddress){
 			secureEndpointAddress.add(address);
@@ -84,25 +84,25 @@ public class CaliforniumBssSchematic implements BootstrapSchematic<BootstrapServ
 	}
 
 	@Override
-	public CaliforniumBssSchematic setSecurityStore(SecurityStore securityStore) {
+	public CaliforniumBootstrapServerImplementorBuilder setSecurityStore(SecurityStore securityStore) {
 		this.securityStore = securityStore;
 		return this;
 	}
 
 	@Override
-	public CaliforniumBssSchematic setBootstrapStore(BootstrapStore bootstrapStore) {
+	public CaliforniumBootstrapServerImplementorBuilder setBootstrapStore(BootstrapStore bootstrapStore) {
 		this.boostrapStore = bootstrapStore;
 		return null;
 	}
 	
 	@Override
-	public CaliforniumBssSchematic bindResource(final CaliforniumCoapResourceProxy coapResourceProxy) {
+	public CaliforniumBootstrapServerImplementorBuilder bindResource(final CaliforniumCoapResourceProxy coapResourceProxy) {
 		this.coapResourceProxy = coapResourceProxy;
 		return this;
 	}
 
 	@Override
-	public BootstrapServerImplementor build() {
+	public CaliforniumBootstrapServerImplementor build() {
 		coapServer = new CoapServer();
 		
 		final Set<Endpoint> endpoints = new HashSet<Endpoint>();
@@ -123,7 +123,7 @@ public class CaliforniumBssSchematic implements BootstrapSchematic<BootstrapServ
 			coapResourceProxy.initialize( new BootstrapResource(boostrapStore));
 			coapServer.add(coapResourceProxy.getCoapResource());
 		}
-		return new BootstrapServerImplementor(coapServer, boostrapStore, securityStore);
+		return new CaliforniumBootstrapServerImplementor(coapServer, boostrapStore, securityStore);
 	}
 
 }

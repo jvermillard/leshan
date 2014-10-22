@@ -36,19 +36,19 @@ import leshan.server.lwm2m.observation.ObservationRegistry;
 import leshan.server.lwm2m.resource.proxy.CoapResourceProxy;
 import leshan.server.lwm2m.security.SecurityRegistry;
 
-public interface CoapServerImplementorSchematic<E extends CoapServerImplementor, R extends CoapResourceProxy> {
+public interface CoapServerImplementorBuilder<E extends CoapServerImplementor, R extends CoapResourceProxy> {
 	
-	public CoapServerImplementorSchematic<E, R> addEndpoint(InetSocketAddress... localaddress);
+	public CoapServerImplementorBuilder<E, R> addEndpoint(InetSocketAddress... localaddress);
 	
-	public CoapServerImplementorSchematic<E, R> addSecureEndpoint(InetSocketAddress... localSecureAddress);
+	public CoapServerImplementorBuilder<E, R> addSecureEndpoint(InetSocketAddress... localSecureAddress);
 
-	public CoapServerImplementorSchematic<E, R> bindResource(R coapResourceProxy);
+	public CoapServerImplementorBuilder<E, R> bindResource(R coapResourceProxy);
 	
-	public CoapServerImplementorSchematic<E, R> setClientRegistry(ClientRegistry clientRegistry);
+	public CoapServerImplementorBuilder<E, R> setClientRegistry(ClientRegistry clientRegistry);
 	
-	public CoapServerImplementorSchematic<E, R> setSecurityRegistry(SecurityRegistry registry);
+	public CoapServerImplementorBuilder<E, R> setSecurityRegistry(SecurityRegistry registry);
 	
-	public CoapServerImplementorSchematic<E, R> setObservationRegistry(ObservationRegistry observationRegistry);
+	public CoapServerImplementorBuilder<E, R> setObservationRegistry(ObservationRegistry observationRegistry);
 	
-	public E buildCoapServerImplementor();
+	public E build();
 }

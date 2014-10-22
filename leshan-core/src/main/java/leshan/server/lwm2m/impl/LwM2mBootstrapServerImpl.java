@@ -31,7 +31,7 @@ package leshan.server.lwm2m.impl;
 
 import leshan.server.lwm2m.bootstrap.BootstrapStore;
 import leshan.server.lwm2m.bootstrap.LwM2mBootstrapServer;
-import leshan.server.lwm2m.impl.bridge.bootstrap.BootstrapImplementor;
+import leshan.server.lwm2m.impl.bridge.bootstrap.BootstrapServerImplementor;
 import leshan.server.lwm2m.security.SecurityStore;
 
 import org.apache.commons.lang.Validate;
@@ -45,9 +45,9 @@ public class LwM2mBootstrapServerImpl implements LwM2mBootstrapServer {
 
     private final static Logger LOG = LoggerFactory.getLogger(LwM2mBootstrapServerImpl.class);
 
-	private final BootstrapImplementor implementor;
+	private final BootstrapServerImplementor implementor;
 
-    public LwM2mBootstrapServerImpl(BootstrapImplementor implementor) {
+    public LwM2mBootstrapServerImpl(BootstrapServerImplementor implementor) {
         Validate.notNull(implementor, "bootstrap store must not be null");
         this.implementor = implementor;
 

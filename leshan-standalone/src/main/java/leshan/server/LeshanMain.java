@@ -86,7 +86,7 @@ public class LeshanMain {
         													.setObservationRegistry(new ObservationRegistryImpl())
         													.setSecurityRegistry(new SecurityRegistryImpl())
         													.bindResource(new CaliforniumCoapResourceProxy())
-        													.buildCoapServerImplementor();
+        													.build();
         
         lwServer = new LeshanServer(implementor);
         lwServer.start();

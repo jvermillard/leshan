@@ -38,7 +38,7 @@ import leshan.connector.californium.security.SecureEndpoint;
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.impl.ClientRegistryImpl;
 import leshan.server.lwm2m.impl.ObservationRegistryImpl;
-import leshan.server.lwm2m.impl.bridge.server.CoapServerImplementorSchematic;
+import leshan.server.lwm2m.impl.bridge.server.CoapServerImplementorBuilder;
 import leshan.server.lwm2m.impl.security.SecurityRegistryImpl;
 import leshan.server.lwm2m.observation.ObservationRegistry;
 import leshan.server.lwm2m.resource.RegisterResource;
@@ -50,7 +50,7 @@ import org.eclipse.californium.core.network.CoAPEndpoint;
 import org.eclipse.californium.core.network.Endpoint;
 import org.eclipse.californium.scandium.DTLSConnector;
 
-public class CaliforniumServerSchematic implements CoapServerImplementorSchematic<CaliforniumServerImplementor, CaliforniumCoapResourceProxy> {
+public class CaliforniumServerSchematic implements CoapServerImplementorBuilder<CaliforniumServerImplementor, CaliforniumCoapResourceProxy> {
 	
 	private final Set<InetSocketAddress> enpointAddress = new HashSet<InetSocketAddress>();
 	private final Set<InetSocketAddress> secureEndpointAddress = new HashSet<InetSocketAddress>();
@@ -104,7 +104,7 @@ public class CaliforniumServerSchematic implements CoapServerImplementorSchemati
 	}
 
 	@Override
-	public CaliforniumServerImplementor buildCoapServerImplementor() {
+	public CaliforniumServerImplementor build() {
 		coapServer = new CoapServer();
 		
 		final Set<Endpoint> endpoints = new HashSet<Endpoint>();
