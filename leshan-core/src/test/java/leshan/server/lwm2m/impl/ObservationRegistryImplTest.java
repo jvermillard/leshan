@@ -46,19 +46,19 @@ public class ObservationRegistryImplTest extends BasicTestSupport {
 
     @Before
     public void setUp() throws Exception {
-        this.registry = new ObservationRegistryImpl();
+        registry = new ObservationRegistryImpl();
     }
 
     @Test
-    public void testAddObservationHandlesDuplicateRegistration() throws IOException {
+    public void add_duplicate_observation() throws IOException {
         givenASimpleClient();
 
-        Observation obs = new CaliforniumObservation(Request.newGet(), this.client, new LwM2mPath(3, 0, 15));
+        Observation obs = new CaliforniumObservation(Request.newGet(), client, new LwM2mPath(3, 0, 15));
         registry.addObservation(obs);
 
-        Observation duplicate = new CaliforniumObservation(Request.newGet(), this.client, new LwM2mPath(3, 0, 15));
+        Observation duplicate = new CaliforniumObservation(Request.newGet(), client, new LwM2mPath(3, 0, 15));
 
         registry.addObservation(duplicate);
-        Assert.assertSame(1, this.registry.cancelObservations(this.client));
+        Assert.assertSame(1, registry.cancelObservations(client));
     }
 }

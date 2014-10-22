@@ -37,27 +37,27 @@ import org.junit.Test;
 public class ValueTest {
 
     @Test
-    public void twoIdenticalStringsAreEqual() {
+    public void two_identical_strings_are_equal() {
         assertEquals(Value.newStringValue("hello"), Value.newStringValue("hello"));
     }
 
     @Test
-    public void twoNonIdenticalStringsAreNotEqual() {
+    public void two_non_identical_strings_are_not_equal() {
         assertNotEquals(Value.newStringValue("hello"), Value.newStringValue("world"));
     }
 
     @Test
-    public void twoIdenticalOpaquesAreEqual() {
+    public void two_identical_opaques_are_equal() {
         assertEquals(Value.newBinaryValue("hello".getBytes()), Value.newBinaryValue("hello".getBytes()));
     }
 
     @Test
-    public void twoNonIdenticalOpaquesAreNotEqual() {
+    public void two_non_identical_opaques_are_not_equal() {
         assertNotEquals(Value.newBinaryValue("hello".getBytes()), Value.newBinaryValue("world".getBytes()));
     }
 
     @Test
-    public void twoStringAndBinaryAreNotEqual() {
+    public void two_string_and_binary_are_not_equal() {
         assertNotEquals(Value.newStringValue("hello"), Value.newBinaryValue("hello".getBytes()));
     }
 

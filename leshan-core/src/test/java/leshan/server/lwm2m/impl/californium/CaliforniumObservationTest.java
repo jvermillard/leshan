@@ -57,11 +57,11 @@ public class CaliforniumObservationTest {
     @Before
     public void setUp() throws Exception {
         support.givenASimpleClient();
-        this.target = new LwM2mPath(3, 0, 15);
+        target = new LwM2mPath(3, 0, 15);
     }
 
     @Test
-    public void testNotificationIsForwardedToResourceObserver() {
+    public void coapNotification_is_forwarded_to_observationListener() {
 
         ObservationListener listener = new ObservationListener() {
             @Override
@@ -77,32 +77,30 @@ public class CaliforniumObservationTest {
             public void cancelled(Observation observation) {
             }
         };
-        givenAnObserveRequest(this.target);
-        CaliforniumObservation observation = new CaliforniumObservation(this.coapRequest, this.support.client,
-                this.target);
+        givenAnObserveRequest(target);
+        CaliforniumObservation observation = new CaliforniumObservation(coapRequest, support.client, target);
         observation.addListener(listener);
         Response coapResponse = new Response(ResponseCode.CONTENT);
-        coapResponse.setPayload(this.reportedValue, MediaTypeRegistry.TEXT_PLAIN);
+        coapResponse.setPayload(reportedValue, MediaTypeRegistry.TEXT_PLAIN);
         observation.onResponse(coapResponse);
     }
 
     @Test
-    public void testCancelInvokesCancelOnCoapRequest() {
+    public void cancel_Observation_cancel_coapRequest() {
 
-        givenAnObserveRequest(this.target);
-        assertFalse(this.coapRequest.isCanceled());
-        CaliforniumObservation observation = new CaliforniumObservation(this.coapRequest, this.support.client,
-                this.target);
+        givenAnObserveRequest(target);
+        assertFalse(coapRequest.isCanceled());
+        CaliforniumObservation observation = new CaliforniumObservation(coapRequest, support.client, target);
         observation.cancel();
-        Assert.assertTrue(this.coapRequest.isCanceled());
+        Assert.assertTrue(coapRequest.isCanceled());
     }
 
     private void givenAnObserveRequest(LwM2mPath target) {
-        this.coapRequest = Request.newGet();
-        this.coapRequest.getOptions().addURIPath(String.valueOf(target.getObjectId()));
-        this.coapRequest.getOptions().addURIPath(String.valueOf(target.getObjectInstanceId()));
-        this.coapRequest.getOptions().addURIPath(String.valueOf(target.getResourceId()));
-        this.coapRequest.setDestination(this.support.client.getAddress());
-        this.coapRequest.setDestinationPort(this.support.client.getPort());
+        coapRequest = Request.newGet();
+        coapRequest.getOptions().addURIPath(String.valueOf(target.getObjectId()));
+        coapRequest.getOptions().addURIPath(String.valueOf(target.getObjectInstanceId()));
+        coapRequest.getOptions().addURIPath(String.valueOf(target.getResourceId()));
+        coapRequest.setDestination(support.client.getAddress());
+        coapRequest.setDestinationPort(support.client.getPort());
     }
 }

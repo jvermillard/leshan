@@ -29,14 +29,11 @@
  */
 package leshan.server.lwm2m.impl;
 
-import static org.mockito.Mockito.mock;
-
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 import leshan.server.lwm2m.client.BindingMode;
 import leshan.server.lwm2m.client.Client;
-import leshan.server.lwm2m.client.ClientRegistryListener;
 import leshan.server.lwm2m.client.ClientUpdate;
 import leshan.server.lwm2m.client.LinkObject;
 
@@ -44,7 +41,6 @@ import org.apache.commons.io.Charsets;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 public class ClientRegistryImplTest {
 
@@ -63,13 +59,10 @@ public class ClientRegistryImplTest {
     public void setUp() throws Exception {
         address = InetAddress.getLocalHost();
         registry = new ClientRegistryImpl();
-
     }
 
     @Test
-    public void testUpdateClientKeepsUnchangedProperties() {
-        ClientRegistryListener crl = mock(ClientRegistryListener.class);
-        registry.addListener(crl);
+    public void update_registration_keeps_properties_unchanged() {
         givenASimpleClient(lifetime);
         registry.registerClient(client);
 
@@ -80,18 +73,17 @@ public class ClientRegistryImplTest {
         Assert.assertEquals((long) lifetime, registeredClient.getLifeTimeInSec());
         Assert.assertSame(binding, registeredClient.getBindingMode());
         Assert.assertEquals(sms, registeredClient.getSmsNumber());
-        Mockito.verify(crl).updated(registeredClient);
     }
 
     @Test
-    public void testRegisterClientSetsTimeToLive() {
+    public void client_registration_sets_time_to_live() {
         givenASimpleClient(lifetime);
         registry.registerClient(client);
         Assert.assertTrue(client.isAlive());
     }
 
     @Test
-    public void testUpdateClientExtendsTimeToLive() {
+    public void update_registration_to_extend_time_to_live() {
         givenASimpleClient(0L);
         registry.registerClient(client);
         Assert.assertFalse(client.isAlive());
@@ -102,7 +94,6 @@ public class ClientRegistryImplTest {
     }
 
     private void givenASimpleClient(Long lifetime) {
-
         client = new Client(registrationId, ep, address, port, null, lifetime, sms, binding, objectLinks, null,
                 InetSocketAddress.createUnresolved("localhost", 5683));
     }
