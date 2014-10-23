@@ -50,7 +50,7 @@ import org.eclipse.californium.core.network.CoAPEndpoint;
 import org.eclipse.californium.core.network.Endpoint;
 import org.eclipse.californium.scandium.DTLSConnector;
 
-public class CaliforniumServerSchematic implements CoapServerImplementorBuilder<CaliforniumServerImplementor, CaliforniumCoapResourceProxy> {
+public class CaliforniumServerBuilder implements CoapServerImplementorBuilder<CaliforniumServerImplementor, CaliforniumCoapResourceProxy> {
 	
 	private final Set<InetSocketAddress> enpointAddress = new HashSet<InetSocketAddress>();
 	private final Set<InetSocketAddress> secureEndpointAddress = new HashSet<InetSocketAddress>();
@@ -62,7 +62,7 @@ public class CaliforniumServerSchematic implements CoapServerImplementorBuilder<
 	private CaliforniumLwM2mRequestSender requestSender;
 	
 	@Override
-	public CaliforniumServerSchematic addEndpoint(final InetSocketAddress... localAddress) {
+	public CaliforniumServerBuilder addEndpoint(final InetSocketAddress... localAddress) {
 		Validate.notNull(localAddress, "IP address cannot be null");
 		for(final InetSocketAddress address : localAddress) {
 			enpointAddress.add(address);
@@ -71,7 +71,7 @@ public class CaliforniumServerSchematic implements CoapServerImplementorBuilder<
 	}
 
 	@Override
-	public CaliforniumServerSchematic addSecureEndpoint(final InetSocketAddress... localSecureAddress) {
+	public CaliforniumServerBuilder addSecureEndpoint(final InetSocketAddress... localSecureAddress) {
 		Validate.notNull(localSecureAddress, "IP address cannot be null");
 		for(final InetSocketAddress address : localSecureAddress){
 			secureEndpointAddress.add(address);
@@ -80,25 +80,25 @@ public class CaliforniumServerSchematic implements CoapServerImplementorBuilder<
 	}
 
 	@Override
-	public CaliforniumServerSchematic bindResource(final CaliforniumCoapResourceProxy coapResourceProxy) {
+	public CaliforniumServerBuilder bindResource(final CaliforniumCoapResourceProxy coapResourceProxy) {
 		this.coapResourceProxy = coapResourceProxy;
 		return this;
 	}
 
 	@Override
-	public CaliforniumServerSchematic setClientRegistry(final ClientRegistry clientRegistry) {
+	public CaliforniumServerBuilder setClientRegistry(final ClientRegistry clientRegistry) {
 		this.clientRegistry = clientRegistry;
 		return this;
 	}
 
 	@Override
-	public CaliforniumServerSchematic setSecurityRegistry(final SecurityRegistry securityRegistry) {
+	public CaliforniumServerBuilder setSecurityRegistry(final SecurityRegistry securityRegistry) {
 		this.securityRegistry = securityRegistry;
 		return this;
 	}
 
 	@Override
-	public CaliforniumServerSchematic setObservationRegistry(final ObservationRegistry observationRegistry) {
+	public CaliforniumServerBuilder setObservationRegistry(final ObservationRegistry observationRegistry) {
 		this.observationRegistry = observationRegistry;
 		return this;
 	}

@@ -35,7 +35,7 @@ import java.util.Collection;
 
 import leshan.connector.californium.resource.CaliforniumCoapResourceProxy;
 import leshan.connector.californium.server.CaliforniumServerImplementor;
-import leshan.connector.californium.server.CaliforniumServerSchematic;
+import leshan.connector.californium.server.CaliforniumServerBuilder;
 import leshan.server.lwm2m.LeshanServer;
 import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.ClientRegistrationException;
@@ -69,7 +69,7 @@ public class LeshanMain {
         String ifaces = System.getenv("COAPSIFACE");
 
         // LWM2M server
-        CaliforniumServerSchematic serverSchematics = new CaliforniumServerSchematic();
+        CaliforniumServerBuilder serverSchematics = new CaliforniumServerBuilder();
 
         if (iface == null || iface.isEmpty() || ifaces == null || ifaces.isEmpty()) {
         	serverSchematics.addEndpoint(new InetSocketAddress(CoapServerImplementor.PORT));

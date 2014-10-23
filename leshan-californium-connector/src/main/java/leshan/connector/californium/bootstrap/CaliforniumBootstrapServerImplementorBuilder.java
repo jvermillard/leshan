@@ -38,7 +38,7 @@ import leshan.connector.californium.security.SecureEndpoint;
 import leshan.connector.californium.server.CaliforniumLwM2mRequestSender;
 import leshan.connector.californium.server.CaliforniumPskStore;
 import leshan.connector.californium.server.CaliforniumServerImplementor;
-import leshan.connector.californium.server.CaliforniumServerSchematic;
+import leshan.connector.californium.server.CaliforniumServerBuilder;
 import leshan.server.lwm2m.bootstrap.BootstrapStore;
 import leshan.server.lwm2m.client.ClientRegistry;
 import leshan.server.lwm2m.impl.LwM2mBootstrapServerImpl;

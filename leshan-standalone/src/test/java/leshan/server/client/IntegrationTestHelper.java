@@ -53,7 +53,7 @@ import leshan.client.lwm2m.resource.string.StringLwM2mResource;
 import leshan.client.lwm2m.response.ExecuteResponse;
 import leshan.connector.californium.resource.CaliforniumCoapResourceProxy;
 import leshan.connector.californium.server.CaliforniumServerImplementor;
-import leshan.connector.californium.server.CaliforniumServerSchematic;
+import leshan.connector.californium.server.CaliforniumServerBuilder;
 import leshan.server.lwm2m.LeshanServer;
 import leshan.server.lwm2m.LwM2mServer;
 import leshan.server.lwm2m.client.Client;
@@ -142,7 +142,7 @@ public final class IntegrationTestHelper {
         clientRegistry = new ClientRegistryImpl();
         observationRegistry = new ObservationRegistryImpl();
         final SecurityRegistry securityRegistry = new SecurityRegistryImpl();
-        CaliforniumServerSchematic schematics = new CaliforniumServerSchematic();
+        CaliforniumServerBuilder schematics = new CaliforniumServerBuilder();
         CaliforniumServerImplementor implementor = schematics.addEndpoint(serverAddress)
         		  											 .addSecureEndpoint(serverAddressSecure)
         		  											 .setClientRegistry(clientRegistry)
