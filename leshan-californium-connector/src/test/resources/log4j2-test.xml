@@ -1,3 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
 /*
  * Copyright (c) 2013, Sierra Wireless
  *
@@ -27,38 +29,24 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.lwm2m.impl;
+ -->
+<Configuration status="warn" strict="true" name="unit test execution"
+               packages="org.apache.logging.log4j.test">
 
-import java.io.IOException;
-
-import leshan.server.lwm2m.impl.californium.CaliforniumObservation;
-import leshan.server.lwm2m.node.LwM2mPath;
-import leshan.server.lwm2m.observation.Observation;
-
-import org.eclipse.californium.core.coap.Request;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-public class ObservationRegistryImplTest extends BasicTestSupport {
-
-    ObservationRegistryImpl registry;
-
-    @Before
-    public void setUp() throws Exception {
-        this.registry = new ObservationRegistryImpl();
-    }
-
-    @Test
-    public void testAddObservationHandlesDuplicateRegistration() throws IOException {
-        givenASimpleClient();
-
-        Observation obs = new CaliforniumObservation(Request.newGet(), this.client, new LwM2mPath(3, 0, 15));
-        registry.addObservation(obs);
-
-        Observation duplicate = new CaliforniumObservation(Request.newGet(), this.client, new LwM2mPath(3, 0, 15));
-
-        registry.addObservation(duplicate);
-        Assert.assertSame(1, this.registry.cancelObservations(this.client));
-    }
-}
+  <Appenders>
+    <Appender type="Console" name="STDOUT">
+      <Layout type="PatternLayout" pattern="%d %p %C{1.} [%t] %m%n"/>
+    </Appender>
+  </Appenders>
+ 
+  <Loggers>
+    <Logger name="leshan.server.lwm2m" level="warn" additivity="false">
+      <AppenderRef ref="STDOUT"/>
+    </Logger>
+ 
+    <Root level="info">
+      <AppenderRef ref="STDOUT"/>
+    </Root>
+  </Loggers>
+ 
+</Configuration>

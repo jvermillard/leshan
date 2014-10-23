@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Sierra Wireless
+ * Copyright (c) 2014, Zebra Technologies
  *
  * All rights reserved.
  *
@@ -27,28 +27,28 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.lwm2m.request;
+package leshan.server.lwm2m.impl.bridge.server;
 
-/**
- * Response codes defined for LWM2M enabler
- */
-public enum ResponseCode {
-    /** Resource correctly created */
-    CREATED,
-    /** Resource correctly deleted */
-    DELETED,
-    /** Resource correctly changed */
-    CHANGED,
-    /** Content correctly delivered */
-    CONTENT,
-    /** Operation not authorized */
-    UNAUTHORIZED,
-    /** Cannot fulfill the request, it's incorrect */
-    BAD_REQUEST,
-    /** This method (GET/PUT/POST/DELETE) is not allowed on this resource */
-    METHOD_NOT_ALLOWED,
-    /** The End-point Client Name results in a duplicate entry on the LWM2M Server */
-    CONFLICT,
-    /** Resource not found */
-    NOT_FOUND;
+import java.net.InetSocketAddress;
+
+import leshan.server.lwm2m.client.ClientRegistry;
+import leshan.server.lwm2m.observation.ObservationRegistry;
+import leshan.server.lwm2m.resource.proxy.CoapResourceProxy;
+import leshan.server.lwm2m.security.SecurityRegistry;
+
+public interface CoapServerImplementorBuilder<E extends CoapServerImplementor, R extends CoapResourceProxy> {
+	
+	public CoapServerImplementorBuilder<E, R> addEndpoint(InetSocketAddress... localaddress);
+	
+	public CoapServerImplementorBuilder<E, R> addSecureEndpoint(InetSocketAddress... localSecureAddress);
+
+	public CoapServerImplementorBuilder<E, R> bindResource(R coapResourceProxy);
+	
+	public CoapServerImplementorBuilder<E, R> setClientRegistry(ClientRegistry clientRegistry);
+	
+	public CoapServerImplementorBuilder<E, R> setSecurityRegistry(SecurityRegistry registry);
+	
+	public CoapServerImplementorBuilder<E, R> setObservationRegistry(ObservationRegistry observationRegistry);
+	
+	public E build();
 }

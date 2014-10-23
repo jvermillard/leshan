@@ -27,7 +27,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.lwm2m.impl.californium;
+package leshan.connector.californium.server;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -39,8 +39,8 @@ import leshan.server.lwm2m.node.LwM2mNode;
 import leshan.server.lwm2m.node.LwM2mPath;
 import leshan.server.lwm2m.observation.Observation;
 import leshan.server.lwm2m.observation.ObservationListener;
+import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
 import leshan.server.lwm2m.request.ContentFormat;
-import leshan.server.lwm2m.request.ResponseCode;
 import leshan.server.lwm2m.request.ValueResponse;
 
 import org.apache.commons.lang.Validate;

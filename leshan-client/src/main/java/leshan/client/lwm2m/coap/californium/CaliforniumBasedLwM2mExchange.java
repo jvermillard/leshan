@@ -61,7 +61,7 @@ public class CaliforniumBasedLwM2mExchange implements LwM2mExchange {
         exchange.respond(leshanToCalifornium(response.getCode()), response.getResponsePayload());
     }
 
-    private ResponseCode leshanToCalifornium(final leshan.server.lwm2m.request.ResponseCode code) {
+    private ResponseCode leshanToCalifornium(final leshan.server.lwm2m.request.CoapResponseCode.ResponseCode code) {
         switch (code) {
         case BAD_REQUEST:
             return ResponseCode.BAD_REQUEST;

@@ -32,8 +32,12 @@
 
 package leshan.server.client;
 
-import static leshan.server.client.IntegrationTestHelper.*;
-import static org.junit.Assert.*;
+import static leshan.server.client.IntegrationTestHelper.GOOD_OBJECT_INSTANCE_ID;
+import static leshan.server.client.IntegrationTestHelper.INT_OBJECT_ID;
+import static leshan.server.client.IntegrationTestHelper.INT_RESOURCE_ID;
+import static leshan.server.client.IntegrationTestHelper.assertResponse;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -46,7 +50,7 @@ import leshan.server.lwm2m.node.Value;
 import leshan.server.lwm2m.observation.Observation;
 import leshan.server.lwm2m.observation.ObservationRegistryListener;
 import leshan.server.lwm2m.observation.ObserveSpec;
-import leshan.server.lwm2m.request.ResponseCode;
+import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
 import leshan.server.lwm2m.request.ValueResponse;
 
 import org.junit.After;

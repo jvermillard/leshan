@@ -32,11 +32,15 @@
 
 package leshan.server.client;
 
-import static leshan.server.client.IntegrationTestHelper.*;
-import static leshan.server.lwm2m.request.ResponseCode.*;
+import static leshan.server.client.IntegrationTestHelper.GOOD_OBJECT_ID;
+import static leshan.server.client.IntegrationTestHelper.GOOD_OBJECT_INSTANCE_ID;
+import static leshan.server.client.IntegrationTestHelper.assertEmptyResponse;
+import static leshan.server.client.IntegrationTestHelper.assertResponse;
+import static leshan.server.client.IntegrationTestHelper.createGoodObjectInstance;
 import leshan.server.lwm2m.node.LwM2mObject;
 import leshan.server.lwm2m.node.LwM2mObjectInstance;
 import leshan.server.lwm2m.request.ClientResponse;
+import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
 
 import org.junit.After;
 import org.junit.Test;
@@ -63,7 +67,7 @@ public class DeleteTest {
 
         createAndThenAssertDeleted();
 
-        assertEmptyResponse(helper.sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), NOT_FOUND);
+        assertEmptyResponse(helper.sendRead(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID), ResponseCode.NOT_FOUND);
     }
 
     @Test
@@ -72,7 +76,7 @@ public class DeleteTest {
 
         createAndThenAssertDeleted();
 
-        assertResponse(helper.sendRead(GOOD_OBJECT_ID), CONTENT, new LwM2mObject(GOOD_OBJECT_ID,
+        assertResponse(helper.sendRead(GOOD_OBJECT_ID), ResponseCode.CONTENT, new LwM2mObject(GOOD_OBJECT_ID,
                 new LwM2mObjectInstance[0]));
     }
 
@@ -81,14 +85,14 @@ public class DeleteTest {
         helper.register();
 
         final ClientResponse responseDelete = helper.sendDelete(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID);
-        assertEmptyResponse(responseDelete, NOT_FOUND);
+        assertEmptyResponse(responseDelete, ResponseCode.NOT_FOUND);
     }
 
     private void createAndThenAssertDeleted() {
         helper.sendCreate(createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
 
         final ClientResponse responseDelete = helper.sendDelete(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID);
-        assertEmptyResponse(responseDelete, DELETED);
+        assertEmptyResponse(responseDelete, ResponseCode.DELETED);
     }
 
 }

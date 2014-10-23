@@ -33,7 +33,8 @@ package leshan.client.lwm2m.response;
 
 import java.util.Objects;
 
-import leshan.server.lwm2m.request.ResponseCode;
+import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
+
 
 public class CreateResponse extends BaseLwM2mResponse {
 

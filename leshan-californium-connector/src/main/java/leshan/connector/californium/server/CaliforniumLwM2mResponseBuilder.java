@@ -27,7 +27,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.lwm2m.impl.californium;
+package leshan.connector.californium.server;
 
 import leshan.server.lwm2m.client.Client;
 import leshan.server.lwm2m.client.LinkObject;
@@ -36,6 +36,7 @@ import leshan.server.lwm2m.impl.node.LwM2mNodeDecoder;
 import leshan.server.lwm2m.node.LwM2mNode;
 import leshan.server.lwm2m.node.LwM2mPath;
 import leshan.server.lwm2m.observation.ObservationRegistry;
+import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
 import leshan.server.lwm2m.request.*;
 
 import org.apache.commons.lang.Validate;
@@ -57,27 +58,32 @@ public class CaliforniumLwM2mResponseBuilder<T extends ClientResponse> implement
 
     public static ResponseCode fromCoapCode(int code) {
         Validate.notNull(code);
-
-        if (code == CoAP.ResponseCode.CREATED.value) {
-            return ResponseCode.CREATED;
-        } else if (code == CoAP.ResponseCode.DELETED.value) {
-            return ResponseCode.DELETED;
-        } else if (code == CoAP.ResponseCode.CHANGED.value) {
-            return ResponseCode.CHANGED;
-        } else if (code == CoAP.ResponseCode.CONTENT.value) {
-            return ResponseCode.CONTENT;
-        } else if (code == CoAP.ResponseCode.BAD_REQUEST.value) {
-            return ResponseCode.BAD_REQUEST;
-        } else if (code == CoAP.ResponseCode.UNAUTHORIZED.value) {
-            return ResponseCode.UNAUTHORIZED;
-        } else if (code == CoAP.ResponseCode.NOT_FOUND.value) {
-            return ResponseCode.NOT_FOUND;
-        } else if (code == CoAP.ResponseCode.METHOD_NOT_ALLOWED.value) {
-            return ResponseCode.METHOD_NOT_ALLOWED;
-        } else if (code == 137) {
-            return ResponseCode.CONFLICT;
-        } else {
-            throw new IllegalArgumentException("Invalid CoAP code for LWM2M response: " + code);
+        
+        CoAP.ResponseCode californiumCode = CoAP.ResponseCode.valueOf(code);
+        
+        switch(californiumCode) {
+        	case CREATED: 
+	            return ResponseCode.CREATED;
+        	case DELETED: 
+	            return ResponseCode.DELETED;
+        	case CHANGED: 
+	            return ResponseCode.CHANGED;
+	        case CONTENT: 
+	            return ResponseCode.CONTENT;
+	        case BAD_REQUEST: 
+	            return ResponseCode.BAD_REQUEST;
+	        case UNAUTHORIZED:
+	            return ResponseCode.UNAUTHORIZED;
+	        case NOT_FOUND:
+	            return ResponseCode.NOT_FOUND;
+	        case METHOD_NOT_ALLOWED:
+	            return ResponseCode.METHOD_NOT_ALLOWED;
+	       default:
+	    	   if (code == 137) {
+	               return ResponseCode.CONFLICT;
+	    	   } else {
+	            throw new IllegalArgumentException("Invalid CoAP code for LWM2M response: " + code);
+	    	   }
         }
     }
 

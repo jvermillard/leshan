@@ -32,7 +32,7 @@
 package leshan.client.lwm2m.response;
 
 import leshan.server.lwm2m.impl.tlv.Tlv;
-import leshan.server.lwm2m.request.ResponseCode;
+import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
 
 public interface LwM2mResponse {
 

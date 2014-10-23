@@ -33,7 +33,7 @@ package leshan.client.lwm2m.resource;
 
 import static org.junit.Assert.assertEquals;
 import leshan.client.lwm2m.response.WriteResponse;
-import leshan.server.lwm2m.request.ResponseCode;
+import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
 
 import org.junit.Test;
 

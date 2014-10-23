@@ -32,8 +32,17 @@
 
 package leshan.server.client;
 
-import static leshan.server.client.IntegrationTestHelper.*;
-import static leshan.server.lwm2m.request.ResponseCode.CONTENT;
+import static leshan.server.client.IntegrationTestHelper.EXECUTABLE_RESOURCE_ID;
+import static leshan.server.client.IntegrationTestHelper.FIRST_RESOURCE_ID;
+import static leshan.server.client.IntegrationTestHelper.GOOD_OBJECT_ID;
+import static leshan.server.client.IntegrationTestHelper.GOOD_OBJECT_INSTANCE_ID;
+import static leshan.server.client.IntegrationTestHelper.INVALID_RESOURCE_ID;
+import static leshan.server.client.IntegrationTestHelper.MULTIPLE_OBJECT_ID;
+import static leshan.server.client.IntegrationTestHelper.MULTIPLE_RESOURCE_ID;
+import static leshan.server.client.IntegrationTestHelper.SECOND_RESOURCE_ID;
+import static leshan.server.client.IntegrationTestHelper.assertEmptyResponse;
+import static leshan.server.client.IntegrationTestHelper.assertResponse;
+import static leshan.server.client.IntegrationTestHelper.createGoodObjectInstance;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +55,7 @@ import leshan.server.lwm2m.node.LwM2mObject;
 import leshan.server.lwm2m.node.LwM2mObjectInstance;
 import leshan.server.lwm2m.node.LwM2mResource;
 import leshan.server.lwm2m.node.Value;
-import leshan.server.lwm2m.request.ResponseCode;
+import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
 
 import org.junit.After;
 import org.junit.Test;
@@ -66,7 +75,7 @@ public class ReadTest {
     @Test
     public void can_read_empty_object() {
         helper.register();
-        assertEmptyResponse(helper.sendRead(GOOD_OBJECT_ID), CONTENT);
+        assertEmptyResponse(helper.sendRead(GOOD_OBJECT_ID), ResponseCode.CONTENT);
     }
 
     @Test

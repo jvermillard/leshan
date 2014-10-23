@@ -51,6 +51,9 @@ import leshan.client.lwm2m.resource.multiple.MultipleLwM2mResource;
 import leshan.client.lwm2m.resource.string.StringLwM2mExchange;
 import leshan.client.lwm2m.resource.string.StringLwM2mResource;
 import leshan.client.lwm2m.response.ExecuteResponse;
+import leshan.connector.californium.resource.CaliforniumCoapResourceProxy;
+import leshan.connector.californium.server.CaliforniumServerImplementor;
+import leshan.connector.californium.server.CaliforniumServerBuilder;
 import leshan.server.lwm2m.LeshanServer;
 import leshan.server.lwm2m.LwM2mServer;
 import leshan.server.lwm2m.client.Client;
@@ -72,7 +75,7 @@ import leshan.server.lwm2m.request.DiscoverRequest;
 import leshan.server.lwm2m.request.DiscoverResponse;
 import leshan.server.lwm2m.request.ObserveRequest;
 import leshan.server.lwm2m.request.ReadRequest;
-import leshan.server.lwm2m.request.ResponseCode;
+import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
 import leshan.server.lwm2m.request.ValueResponse;
 import leshan.server.lwm2m.request.WriteAttributesRequest;
 import leshan.server.lwm2m.request.WriteRequest;
@@ -139,8 +142,16 @@ public final class IntegrationTestHelper {
         clientRegistry = new ClientRegistryImpl();
         observationRegistry = new ObservationRegistryImpl();
         final SecurityRegistry securityRegistry = new SecurityRegistryImpl();
-        server = new LeshanServer(serverAddress, serverAddressSecure, clientRegistry, securityRegistry,
-                observationRegistry);
+        CaliforniumServerBuilder schematics = new CaliforniumServerBuilder();
+        CaliforniumServerImplementor implementor = schematics.addEndpoint(serverAddress)
+        		  											 .addSecureEndpoint(serverAddressSecure)
+        		  											 .setClientRegistry(clientRegistry)
+        		  											 .setObservationRegistry(observationRegistry)
+        		  											 .setSecurityRegistry(securityRegistry)
+        		  											 .bindResource(new CaliforniumCoapResourceProxy())
+        		  											 .build();
+        
+        server = new LeshanServer(implementor);
         server.start();
 
         firstResource = new ValueResource();

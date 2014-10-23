@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2013, Sierra Wireless
+ * Copyright (c) 2014, Zebra Technologies
  *
  * All rights reserved.
  *
@@ -30,8 +31,21 @@
 package leshan.server;
 
 import java.net.InetSocketAddress;
+import java.util.Collection;
 
+import leshan.connector.californium.resource.CaliforniumCoapResourceProxy;
+import leshan.connector.californium.server.CaliforniumServerImplementor;
+import leshan.connector.californium.server.CaliforniumServerBuilder;
 import leshan.server.lwm2m.LeshanServer;
+import leshan.server.lwm2m.client.Client;
+import leshan.server.lwm2m.client.ClientRegistrationException;
+import leshan.server.lwm2m.client.ClientRegistry;
+import leshan.server.lwm2m.client.ClientRegistryListener;
+import leshan.server.lwm2m.client.ClientUpdate;
+import leshan.server.lwm2m.impl.ClientRegistryImpl;
+import leshan.server.lwm2m.impl.ObservationRegistryImpl;
+import leshan.server.lwm2m.impl.bridge.server.CoapServerImplementor;
+import leshan.server.lwm2m.impl.security.SecurityRegistryImpl;
 import leshan.server.servlet.ClientServlet;
 import leshan.server.servlet.EventServlet;
 import leshan.server.servlet.SecurityServlet;
@@ -55,15 +69,26 @@ public class LeshanMain {
         String ifaces = System.getenv("COAPSIFACE");
 
         // LWM2M server
+        CaliforniumServerBuilder serverSchematics = new CaliforniumServerBuilder();
+
         if (iface == null || iface.isEmpty() || ifaces == null || ifaces.isEmpty()) {
-            lwServer = new LeshanServer();
+        	serverSchematics.addEndpoint(new InetSocketAddress(CoapServerImplementor.PORT));
+        	serverSchematics.addSecureEndpoint(new InetSocketAddress(CoapServerImplementor.PORT_DTLS));
         } else {
             String[] add = iface.split(":");
             String[] adds = ifaces.split(":");
             // user specified the iface to be bound
-            lwServer = new LeshanServer(new InetSocketAddress(add[0], Integer.parseInt(add[1])),
-                    new InetSocketAddress(adds[0], Integer.parseInt(adds[1])));
+            serverSchematics.addEndpoint(new InetSocketAddress(add[0], Integer.parseInt(add[1])));
+            serverSchematics.addSecureEndpoint(new InetSocketAddress(adds[0], Integer.parseInt(adds[1])));
         }
+        
+        CoapServerImplementor implementor = serverSchematics.setClientRegistry(new ClientRegistryImpl())
+        													.setObservationRegistry(new ObservationRegistryImpl())
+        													.setSecurityRegistry(new SecurityRegistryImpl())
+        													.bindResource(new CaliforniumCoapResourceProxy())
+        													.build();
+        
+        lwServer = new LeshanServer(implementor);
         lwServer.start();
 
         // now prepare and start jetty

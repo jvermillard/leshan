@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Sierra Wireless
+ * Copyright (c) 2014, Zebra Technologies
  *
  * All rights reserved.
  *
@@ -27,44 +27,51 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.lwm2m.impl.security;
+package leshan.server.lwm2m.resource.proxy;
 
-import java.net.InetSocketAddress;
+import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
 
-import org.eclipse.californium.core.coap.Request;
-import org.eclipse.californium.core.network.CoAPEndpoint;
-import org.eclipse.californium.core.network.config.NetworkConfig;
-import org.eclipse.californium.scandium.DTLSConnector;
-import org.eclipse.californium.scandium.dtls.DTLSSession;
+public abstract class ResponseProxy {
+	private final ResponseCode code;
 
-/**
- * A {@link CoAPEndpoint} for communications using DTLS security.
- */
-public class SecureEndpoint extends CoAPEndpoint {
+	public ResponseProxy(final ResponseCode code) {
+		this.code = code;
+	}
 
-    private final DTLSConnector connector;
+	public final ResponseCode getCode(){
+		return code;
+	}
+	
+	public boolean isSuccess() {
+		return true;
+	}
+	
+	public String getErrorMessage() {
+		throw new UnsupportedOperationException("No Error Messages in default ResponseProxies");
+	}
 
-    public SecureEndpoint(DTLSConnector connector) {
-        super(connector, NetworkConfig.getStandard());
-        this.connector = connector;
-    }
+	public static ResponseProxy failure(final String localizedMessage, final ResponseCode code) {
+		return new FailureResponseProxy(localizedMessage, code);
+	}
 
-    /**
-     * Returns the PSK identity from the DTLS session associated with the given request.
-     * 
-     * @param request the CoAP request
-     * @return the PSK identity of the client of <code>null</code> if not found.
-     */
-    public String getPskIdentity(Request request) {
-        return this.getSession(request).getPskIdentity();
-    }
+	private static final class FailureResponseProxy extends ResponseProxy{
+		
+		private final String errorMessage;
 
-    public DTLSConnector getDTLSConnector() {
-        return connector;
-    }
+		public FailureResponseProxy(final String localizedMessage, final ResponseCode code) {
+			super(code);
+			this.errorMessage = localizedMessage;
+		}
 
-    private DTLSSession getSession(Request request) {
-        return connector.getSessionByAddress(new InetSocketAddress(request.getSource(), request.getSourcePort()));
-    }
+		@Override
+		public boolean isSuccess(){
+			return false;
+		}
+		
+		@Override
+		public String getErrorMessage(){
+			return errorMessage;
+		}
+	}
 
 }

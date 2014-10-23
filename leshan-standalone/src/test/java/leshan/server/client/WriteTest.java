@@ -41,7 +41,7 @@ import java.util.Map;
 import leshan.server.lwm2m.node.LwM2mObjectInstance;
 import leshan.server.lwm2m.node.LwM2mResource;
 import leshan.server.lwm2m.node.Value;
-import leshan.server.lwm2m.request.ResponseCode;
+import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
 
 import org.junit.After;
 import org.junit.Ignore;

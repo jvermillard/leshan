@@ -32,12 +32,14 @@
 
 package leshan.server.client;
 
-import static leshan.server.client.IntegrationTestHelper.*;
-import static leshan.server.lwm2m.request.ResponseCode.METHOD_NOT_ALLOWED;
+import static leshan.server.client.IntegrationTestHelper.EXECUTABLE_RESOURCE_ID;
+import static leshan.server.client.IntegrationTestHelper.GOOD_OBJECT_ID;
+import static leshan.server.client.IntegrationTestHelper.GOOD_OBJECT_INSTANCE_ID;
+import static leshan.server.client.IntegrationTestHelper.SECOND_RESOURCE_ID;
 import leshan.server.lwm2m.request.ClientResponse;
+import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
 import leshan.server.lwm2m.request.ContentFormat;
 import leshan.server.lwm2m.request.ExecuteRequest;
-import leshan.server.lwm2m.request.ResponseCode;
 
 import org.junit.After;
 import org.junit.Test;
@@ -60,7 +62,7 @@ public class ExecuteTest {
         final ClientResponse response = helper.server.send(new ExecuteRequest(helper.getClient(), GOOD_OBJECT_ID,
                 GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID, "world".getBytes(), ContentFormat.TEXT));
 
-        IntegrationTestHelper.assertEmptyResponse(response, METHOD_NOT_ALLOWED);
+        IntegrationTestHelper.assertEmptyResponse(response, ResponseCode.METHOD_NOT_ALLOWED);
     }
 
     @Test

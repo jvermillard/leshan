@@ -1,5 +1,7 @@
 package leshan.server.lwm2m.request;
 
+import leshan.server.lwm2m.request.CoapResponseCode.ResponseCode;
+
 public class CreateResponse extends ClientResponse {
 
 	private String location;
