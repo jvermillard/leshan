@@ -33,8 +33,8 @@ package leshan.bootstrap;
 import java.net.InetSocketAddress;
 
 import leshan.bootstrap.servlet.BootstrapServlet;
-import leshan.server.lwm2m.impl.LwM2mBootstrapServerImpl;
-import leshan.server.lwm2m.security.SecurityStore;
+import leshan.server.californium.impl.LwM2mBootstrapServerImpl;
+import leshan.server.security.SecurityStore;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletHolder;

@@ -3,11 +3,11 @@ package leshan.bootstrap;
 import java.util.Arrays;
 import java.util.Map;
 
-import leshan.server.lwm2m.bootstrap.BootstrapConfig;
-import leshan.server.lwm2m.bootstrap.BootstrapConfig.ServerSecurity;
-import leshan.server.lwm2m.bootstrap.SecurityMode;
-import leshan.server.lwm2m.security.SecurityInfo;
-import leshan.server.lwm2m.security.SecurityStore;
+import leshan.server.bootstrap.BootstrapConfig;
+import leshan.server.bootstrap.SecurityMode;
+import leshan.server.bootstrap.BootstrapConfig.ServerSecurity;
+import leshan.server.security.SecurityInfo;
+import leshan.server.security.SecurityStore;
 
 import org.apache.commons.io.Charsets;
 

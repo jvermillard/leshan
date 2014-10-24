@@ -40,8 +40,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import leshan.server.lwm2m.bootstrap.BootstrapConfig;
-import leshan.server.lwm2m.bootstrap.BootstrapStore;
+import leshan.server.bootstrap.BootstrapConfig;
+import leshan.server.bootstrap.BootstrapStore;
 
 import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;

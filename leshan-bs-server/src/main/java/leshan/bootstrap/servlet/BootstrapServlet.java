@@ -39,7 +39,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import leshan.bootstrap.BootstrapStoreImpl;
-import leshan.server.lwm2m.bootstrap.BootstrapConfig;
+import leshan.server.bootstrap.BootstrapConfig;
 
 import org.apache.commons.io.Charsets;
 import org.apache.commons.lang.StringUtils;

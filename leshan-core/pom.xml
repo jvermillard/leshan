@@ -33,7 +33,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.github.leshan</groupId>
-        <artifactId>leshan-server</artifactId>
+        <artifactId>leshan</artifactId>
         <version>0.1.8-SNAPSHOT</version>
     </parent>
     <artifactId>leshan-core</artifactId>
@@ -46,14 +46,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.eclipse.californium</groupId>
-            <artifactId>californium-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.californium</groupId>
-            <artifactId>scandium</artifactId>
-        </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
@@ -118,19 +110,8 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            leshan.server.lwm2m,
-                            leshan.server.lwm2m.bootstrap,
-                            leshan.server.lwm2m.client,
-                            leshan.server.lwm2m.impl,
-                            leshan.server.lwm2m.impl.californium,
-                            leshan.server.lwm2m.impl.node,
-                            leshan.server.lwm2m.impl.objectspec,
-                            leshan.server.lwm2m.impl.security,
-                            leshan.server.lwm2m.impl.tlv,
-                            leshan.server.lwm2m.node,
-                            leshan.server.lwm2m.observation,
-                            leshan.server.lwm2m.request,
-                            leshan.server.lwm2m.security,
+                            leshan,
+                            leshan.tlv,
                         </Export-Package>
                         <Import-Package>
                             org.eclipse.californium.*;version="[1.0.0, 1.1)",

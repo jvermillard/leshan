@@ -33,7 +33,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.github.leshan</groupId>
-        <artifactId>leshan-server</artifactId>
+        <artifactId>leshan</artifactId>
         <version>0.1.8-SNAPSHOT</version>
     </parent>
     <artifactId>leshan-bs-server</artifactId>
@@ -48,7 +48,7 @@
 
         <dependency>
             <groupId>org.github.leshan</groupId>
-            <artifactId>leshan-core</artifactId>
+            <artifactId>leshan-server-californium</artifactId>
             <version>${project.version}</version>
             <type>jar</type>
         </dependency>
