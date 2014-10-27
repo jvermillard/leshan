@@ -33,6 +33,8 @@
 package leshan.client.example;
 
 import java.net.InetSocketAddress;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Random;
@@ -109,7 +111,6 @@ public class LeshanClientExample {
     }
 
     private LwM2mClientObjectDefinition createObjectDefinition() {
-        final TimeZone timeZone = TimeZone.getTimeZone("America/Los_Angeles");
         // Create an object model
         final StringValueResource manufacturerResource = new StringValueResource("Leshan Example Device", 0);
         final StringValueResource modelResource = new StringValueResource("Model 500", 1);
@@ -122,9 +123,9 @@ public class LeshanClientExample {
         final MemoryFreeResource memoryFreeResource = new MemoryFreeResource();
         final StringValueResource errorCodeResource = new StringValueResource("0", 11);
         final TimeResource currentTimeResource = new TimeResource();
-        final StringValueResource utcOffsetResource = new StringValueResource(Integer.toString(timeZone
-                .getOffset(System.currentTimeMillis())), 14);
-        final StringValueResource timezoneResource = new StringValueResource(timeZone.getDisplayName(), 15);
+        final StringValueResource utcOffsetResource = new StringValueResource(new SimpleDateFormat("X").format(Calendar
+                .getInstance().getTime()), 14);
+        final StringValueResource timezoneResource = new StringValueResource(TimeZone.getDefault().getID(), 15);
         final StringValueResource bindingsResource = new StringValueResource("U", 16);
 
         final LwM2mClientObjectDefinition objectDevice = new LwM2mClientObjectDefinition(3, true, true,
@@ -142,56 +143,19 @@ public class LeshanClientExample {
     }
 
     public class TimeResource extends TimeLwM2mResource {
-        private Date value;
-
-        public TimeResource() {
-            this.value = new Date();
-        }
-
-        public void setValue(final Date newValue) {
-            this.value = newValue;
-            notifyResourceUpdated();
-        }
-
-        public Date getValue() {
-            return value;
-        }
-
-        @Override
-        public void handleWrite(final TimeLwM2mExchange exchange) {
-            setValue(exchange.getRequestPayload());
-
-            exchange.respondSuccess();
-        }
-
         @Override
         public void handleRead(final TimeLwM2mExchange exchange) {
             System.out.println("\tDevice: Reading Current Device Time.");
-            exchange.respondContent(getValue());
+            exchange.respondContent(new Date());
         }
     }
 
     public class MemoryFreeResource extends IntegerLwM2mResource {
-        public void setValue(final Integer newValue) {
-            notifyResourceUpdated();
-        }
-
-        public Integer getValue() {
-            final Random rand = new Random();
-            return 114 + rand.nextInt(50);
-        }
-
-        @Override
-        public void handleWrite(final IntegerLwM2mExchange exchange) {
-            setValue(exchange.getRequestPayload());
-
-            exchange.respondSuccess();
-        }
-
         @Override
         public void handleRead(final IntegerLwM2mExchange exchange) {
             System.out.println("\tDevice: Reading Memory Free Resource");
-            exchange.respondContent(getValue());
+            final Random rand = new Random();
+            exchange.respondContent(114 + rand.nextInt(50));
         }
     }
 
@@ -286,5 +250,4 @@ public class LeshanClientExample {
         }
 
     }
-
 }
