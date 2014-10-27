@@ -91,7 +91,7 @@ public class ClientServlet extends HttpServlet {
         gsonBuilder.registerTypeHierarchyAdapter(ClientResponse.class, new ResponseSerializer());
         gsonBuilder.registerTypeHierarchyAdapter(LwM2mNode.class, new LwM2mNodeSerializer());
         gsonBuilder.registerTypeHierarchyAdapter(LwM2mNode.class, new LwM2mNodeDeserializer());
-        gsonBuilder.setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+        gsonBuilder.setDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
         this.gson = gsonBuilder.create();
     }
 
