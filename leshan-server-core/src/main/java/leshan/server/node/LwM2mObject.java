@@ -33,7 +33,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.Validate;
+import leshan.util.Validate;
 
 /**
  * The top level element in the LWM2M resource tree.

@@ -30,8 +30,7 @@
 package leshan.server.request;
 
 import leshan.ResponseCode;
-
-import org.apache.commons.lang.Validate;
+import leshan.util.Validate;
 
 /**
  * A response to a server request.

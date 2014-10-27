@@ -48,8 +48,8 @@ import leshan.server.request.RejectionException;
 import leshan.server.request.RequestTimeoutException;
 import leshan.server.request.ResourceAccessException;
 import leshan.server.request.ResponseConsumer;
+import leshan.util.Validate;
 
-import org.apache.commons.lang.Validate;
 import org.eclipse.californium.core.coap.MessageObserverAdapter;
 import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.core.coap.Response;

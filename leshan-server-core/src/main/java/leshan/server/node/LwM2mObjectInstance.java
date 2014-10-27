@@ -33,7 +33,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang.Validate;
+import leshan.util.Validate;
 
 /**
  * An instance of {@link LwM2mObject}.

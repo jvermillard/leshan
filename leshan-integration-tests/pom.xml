@@ -51,7 +51,7 @@
             <groupId>org.github.leshan</groupId>
             <artifactId>leshan-client</artifactId>
             <version>${project.version}</version>
-        </dependency>   
+        </dependency>
 
         <!-- test dependencies -->
         <dependency>
@@ -63,7 +63,6 @@
             <groupId>com.jayway.awaitility</groupId>
             <artifactId>awaitility</artifactId>
             <scope>test</scope>
-            <version>1.6.1</version>
         </dependency>
     </dependencies>
 </project>

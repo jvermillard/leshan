@@ -29,8 +29,7 @@
  */
 package leshan.server.node;
 
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.Validate;
+import leshan.util.Validate;
 
 /**
  * A path pointing to a LwM2M node (object, object instance or resource).
@@ -43,6 +42,7 @@ public class LwM2mPath {
 
     /**
      * Create a path to an object
+     * 
      * @param objectId the object identifier
      */
     public LwM2mPath(int objectId) {
@@ -53,6 +53,7 @@ public class LwM2mPath {
 
     /**
      * Create a path to an object instance
+     * 
      * @param objectId the object identifier
      * @param objectInstanceId the instance
      */
@@ -63,9 +64,10 @@ public class LwM2mPath {
     }
 
     /**
-     * Create a path to a resource of a given object instance 
+     * Create a path to a resource of a given object instance
+     * 
      * @param objectId the object identifier
-     * @param objectInstanceId 
+     * @param objectInstanceId
      * @param resourceIdthe resource identifier
      */
     public LwM2mPath(int objectId, int objectInstanceId, int resourceId) {
@@ -84,7 +86,8 @@ public class LwM2mPath {
         if (!path.startsWith("/")) {
             throw new IllegalArgumentException("Invalid LWM2M path: " + path);
         }
-        String[] p = StringUtils.split(path, '/');
+        path = path.substring(1);
+        String[] p = path.split("/");
         if (p.length < 1 || p.length > 3) {
             throw new IllegalArgumentException("Invalid length for path: " + path);
         }
@@ -196,5 +199,4 @@ public class LwM2mPath {
         return true;
     }
 
-    
 }

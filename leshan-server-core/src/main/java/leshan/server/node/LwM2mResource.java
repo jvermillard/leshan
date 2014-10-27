@@ -31,7 +31,7 @@ package leshan.server.node;
 
 import java.util.Arrays;
 
-import org.apache.commons.lang.Validate;
+import leshan.util.Validate;
 
 /**
  * A resource is an information made available by the LWM2M Client.

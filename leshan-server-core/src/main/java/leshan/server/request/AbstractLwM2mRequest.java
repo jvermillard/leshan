@@ -31,8 +31,7 @@ package leshan.server.request;
 
 import leshan.server.client.Client;
 import leshan.server.node.LwM2mPath;
-
-import org.apache.commons.lang.Validate;
+import leshan.util.Validate;
 
 /**
  * A base class for concrete LWM2M request types.

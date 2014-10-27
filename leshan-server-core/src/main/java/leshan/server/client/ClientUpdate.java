@@ -34,8 +34,7 @@ import java.util.Arrays;
 import java.util.Date;
 
 import leshan.LinkObject;
-
-import org.apache.commons.lang.Validate;
+import leshan.util.Validate;
 
 /**
  * A container object for updating a LW-M2M client's registration properties on the server.

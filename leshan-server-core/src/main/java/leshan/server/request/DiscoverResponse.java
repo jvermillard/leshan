@@ -33,8 +33,7 @@ import java.util.Arrays;
 
 import leshan.LinkObject;
 import leshan.ResponseCode;
-
-import org.apache.commons.lang.Validate;
+import leshan.util.Validate;
 
 public class DiscoverResponse extends ClientResponse {
 

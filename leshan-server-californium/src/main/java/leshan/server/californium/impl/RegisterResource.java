@@ -40,8 +40,8 @@ import leshan.server.client.ClientRegistry;
 import leshan.server.client.ClientUpdate;
 import leshan.server.security.SecurityInfo;
 import leshan.server.security.SecurityStore;
+import leshan.util.RandomStringUtils;
 
-import org.apache.commons.lang.RandomStringUtils;
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 import org.eclipse.californium.core.coap.CoAP.Type;

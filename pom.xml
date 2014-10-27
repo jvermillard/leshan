@@ -38,7 +38,7 @@
     <packaging>pom</packaging>
 
     <name>leshan</name>
-    <url>http://github.com/jvermillard/leshan</url>
+    <url>https://github.com/jvermillard/leshan/tree/master/</url>
     <description>A Lightweight M2M Server implementation based on Californium</description>
     <licenses>
         <license>
@@ -47,7 +47,6 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
-
 
     <modules>
         <module>leshan-core</module>
@@ -69,6 +68,7 @@
         <url>https://github.com/jvermillard/leshan</url>
         <tag>HEAD</tag>
     </scm>
+
     <developers>
         <developer>
             <id>jvermillard</id>
@@ -91,6 +91,7 @@
             </roles>
         </developer>
     </developers>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <californium.version>1.0.0-M2</californium.version>
@@ -169,7 +170,6 @@
                             </execution>
                         </executions>
                     </plugin>
-
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
@@ -287,6 +287,31 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>org.github.leshan</groupId>
+                <artifactId>leshan-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.github.leshan</groupId>
+                <artifactId>leshan-server-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.github.leshan</groupId>
+                <artifactId>leshan-server-californium</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.github.leshan</groupId>
+                <artifactId>leshan-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>[1.7.0, 1.8)</version>
+            </dependency>
+            <dependency>
                 <groupId>org.eclipse.californium</groupId>
                 <artifactId>californium-core</artifactId>
                 <version>${californium.version}</version>
@@ -297,20 +322,14 @@
                 <version>${californium.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>[1.7.0, 1.8)</version>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>2.2.4</version>
             </dependency>
             <dependency>
                 <groupId>commons-lang</groupId>
                 <artifactId>commons-lang</artifactId>
                 <version>2.6</version>
-            </dependency>
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.11</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>commons-io</groupId>
@@ -331,11 +350,19 @@
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-continuation</artifactId>
                 <version>${jetty.version}</version>
-            </dependency>
+            </dependency>            
             <dependency>
-                <groupId>com.google.code.gson</groupId>
-                <artifactId>gson</artifactId>
-                <version>2.2.4</version>
+                <groupId>joda-time</groupId>
+                <artifactId>joda-time</artifactId>
+                <version>2.5</version>
+            </dependency>
+
+            <!-- test dependencies -->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.11</version>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
@@ -360,6 +387,24 @@
                 <artifactId>guava</artifactId>
                 <version>17.0</version>
                 <scope>test</scope>
+            </dependency>
+                <dependency>
+                <groupId>com.jayway.awaitility</groupId>
+                <artifactId>awaitility</artifactId>
+                <scope>test</scope>
+                <version>1.6.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-api-mockito</artifactId>
+                <scope>test</scope>
+                <version>1.5.5</version>
+            </dependency>
+            <dependency>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-module-junit4</artifactId>
+                <scope>test</scope>
+                <version>1.5.5</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

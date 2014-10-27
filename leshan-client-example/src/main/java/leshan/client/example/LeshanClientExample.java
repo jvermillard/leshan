@@ -61,8 +61,8 @@ import leshan.client.response.OperationResponse;
  */
 public class LeshanClientExample {
     private static final int TIMEOUT_MS = 2000;
-    private static String deviceLocation;
-    private static RegisterUplink registerUplink;
+    private String deviceLocation;
+    private final RegisterUplink registerUplink;
 
     public static void main(final String[] args) {
         if (args.length < 4) {

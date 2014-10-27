@@ -35,8 +35,8 @@ import java.net.InetSocketAddress;
 import leshan.server.bootstrap.BootstrapStore;
 import leshan.server.bootstrap.LwM2mBootstrapServer;
 import leshan.server.security.SecurityStore;
+import leshan.util.Validate;
 
-import org.apache.commons.lang.Validate;
 import org.eclipse.californium.core.CoapServer;
 import org.eclipse.californium.core.network.CoAPEndpoint;
 import org.eclipse.californium.core.network.Endpoint;

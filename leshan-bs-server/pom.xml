@@ -40,55 +40,43 @@
     <name>leshan - standalone bootstrap server</name>
     <description>A LWM2M bootstrap server running an embedded Jetty server</description>
 
-    <properties>
-        <internal.repo.path>file://${basedir}/../../leshan-repo</internal.repo.path>
-    </properties>
-
     <dependencies>
-
         <dependency>
             <groupId>org.github.leshan</groupId>
             <artifactId>leshan-server-californium</artifactId>
             <version>${project.version}</version>
-            <type>jar</type>
         </dependency>
-
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
         </dependency>
-
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
         </dependency>
-
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-webapp</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-continuation</artifactId>
         </dependency>
-
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
 
+        <!-- runtime dependencies -->
        <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
             <scope>runtime</scope>
         </dependency>
-
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
@@ -119,7 +107,7 @@
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
                 </configuration>
-        <executions>
+                <executions>
                   <execution>
                     <id>make-assembly</id> <!-- this is used for inheritance merges -->
                     <phase>package</phase> <!-- bind to the packaging phase -->

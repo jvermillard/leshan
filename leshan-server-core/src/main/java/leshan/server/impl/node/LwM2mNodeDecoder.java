@@ -33,8 +33,8 @@ import java.nio.ByteBuffer;
 import java.util.Date;
 
 import leshan.server.impl.objectspec.ResourceSpec;
-import leshan.server.impl.objectspec.Resources;
 import leshan.server.impl.objectspec.ResourceSpec.Type;
+import leshan.server.impl.objectspec.Resources;
 import leshan.server.node.LwM2mNode;
 import leshan.server.node.LwM2mObject;
 import leshan.server.node.LwM2mObjectInstance;
@@ -44,10 +44,9 @@ import leshan.server.node.Value;
 import leshan.server.request.ContentFormat;
 import leshan.tlv.Tlv;
 import leshan.tlv.TlvDecoder;
+import leshan.util.Charsets;
+import leshan.util.Validate;
 
-import org.apache.commons.io.Charsets;
-import org.apache.commons.lang.NotImplementedException;
-import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,7 +107,7 @@ public class LwM2mNodeDecoder {
         case JSON:
         case LINK:
         case OPAQUE:
-            throw new NotImplementedException("Content format " + format + " not yet implemented");
+            throw new IllegalStateException("Content format " + format + " not yet implemented");
         }
         return null;
 

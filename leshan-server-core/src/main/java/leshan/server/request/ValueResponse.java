@@ -31,8 +31,7 @@ package leshan.server.request;
 
 import leshan.ResponseCode;
 import leshan.server.node.LwM2mNode;
-
-import org.apache.commons.lang.Validate;
+import leshan.util.Validate;
 
 public class ValueResponse extends ClientResponse {
 

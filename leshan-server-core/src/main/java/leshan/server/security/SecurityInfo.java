@@ -31,7 +31,7 @@ package leshan.server.security;
 
 import java.io.Serializable;
 
-import org.apache.commons.lang.Validate;
+import leshan.util.Validate;
 
 /**
  * The security info for a client.

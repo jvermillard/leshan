@@ -42,8 +42,8 @@ import leshan.server.observation.Observation;
 import leshan.server.observation.ObservationListener;
 import leshan.server.request.ContentFormat;
 import leshan.server.request.ValueResponse;
+import leshan.util.Validate;
 
-import org.apache.commons.lang.Validate;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.MessageObserverAdapter;
 import org.eclipse.californium.core.coap.Request;

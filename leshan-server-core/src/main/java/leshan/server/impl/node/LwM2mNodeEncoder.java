@@ -50,13 +50,12 @@ import leshan.server.request.ContentFormat;
 import leshan.tlv.Tlv;
 import leshan.tlv.Tlv.TlvType;
 import leshan.tlv.TlvEncoder;
+import leshan.util.Charsets;
+import leshan.util.StringUtils;
+import leshan.util.Validate;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.io.Charsets;
-import org.apache.commons.lang.NotImplementedException;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,7 +92,7 @@ public class LwM2mNodeEncoder {
             encoded = textEncoder.encoded;
             break;
         case JSON:
-            throw new NotImplementedException("JSON content format not supported");
+            throw new IllegalArgumentException("JSON content format not supported");
         default:
             throw new IllegalArgumentException("Cannot encode " + node + " with format " + format);
         }

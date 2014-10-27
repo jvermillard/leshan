@@ -43,8 +43,8 @@ import leshan.server.client.Client;
 import leshan.server.client.ClientRegistry;
 import leshan.server.client.ClientRegistryListener;
 import leshan.server.client.ClientUpdate;
+import leshan.util.Validate;
 
-import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

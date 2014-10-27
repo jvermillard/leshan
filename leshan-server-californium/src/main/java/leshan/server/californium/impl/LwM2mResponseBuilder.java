@@ -52,8 +52,8 @@ import leshan.server.request.ResourceAccessException;
 import leshan.server.request.ValueResponse;
 import leshan.server.request.WriteAttributesRequest;
 import leshan.server.request.WriteRequest;
+import leshan.util.Validate;
 
-import org.apache.commons.lang.Validate;
 import org.eclipse.californium.core.coap.CoAP;
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.coap.Request;
@@ -96,8 +96,7 @@ public class LwM2mResponseBuilder<T extends ClientResponse> implements LwM2mRequ
         }
     }
 
-    public LwM2mResponseBuilder(Request coapRequest, Response coapResponse,
-            ObservationRegistry observationRegistry) {
+    public LwM2mResponseBuilder(Request coapRequest, Response coapResponse, ObservationRegistry observationRegistry) {
         super();
         this.coapRequest = coapRequest;
         this.coapResponse = coapResponse;

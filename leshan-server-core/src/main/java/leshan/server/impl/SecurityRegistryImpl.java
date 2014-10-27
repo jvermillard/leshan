@@ -42,9 +42,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import leshan.server.security.NonUniqueSecurityInfoException;
 import leshan.server.security.SecurityInfo;
 import leshan.server.security.SecurityRegistry;
+import leshan.util.Validate;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -144,10 +143,6 @@ public class SecurityRegistryImpl implements SecurityRegistry {
     // /////// File persistence
 
     private void loadFromFile() {
-
-        FileInputStream fileIn = null;
-        ObjectInputStream in = null;
-
         try {
             File file = new File(filename);
 
@@ -161,45 +156,36 @@ public class SecurityRegistryImpl implements SecurityRegistry {
 
             } else {
 
-                fileIn = new FileInputStream(file);
-                in = new ObjectInputStream(fileIn);
+                try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(file));) {
+                    SecurityInfo[] infos = (SecurityInfo[]) in.readObject();
 
-                SecurityInfo[] infos = (SecurityInfo[]) in.readObject();
-
-                for (SecurityInfo info : infos) {
-                    try {
-                        this.add(info);
-                    } catch (NonUniqueSecurityInfoException e) {
-                        // ignore it (should not occur)
+                    if (infos != null) {
+                        for (SecurityInfo info : infos) {
+                            try {
+                                this.add(info);
+                            } catch (NonUniqueSecurityInfoException e) {
+                                // ignore it (should not occur)
+                            }
+                        }
                     }
-                }
 
-                if (infos != null && infos.length > 0) {
-                    LOG.info("{} security infos loaded", infos.length);
+                    if (infos != null && infos.length > 0) {
+                        LOG.info("{} security infos loaded", infos.length);
+                    }
+                } catch (Exception e) {
+                    LOG.debug("Could not load security infos from file", e);
                 }
             }
         } catch (Exception e) {
             LOG.debug("Could not load security infos from file", e);
-        } finally {
-            IOUtils.closeQuietly(fileIn);
-            IOUtils.closeQuietly(in);
         }
     }
 
     private void saveToFile() {
-        FileOutputStream fileOut = null;
-        ObjectOutputStream out = null;
-
-        try {
-            fileOut = new FileOutputStream(filename);
-            out = new ObjectOutputStream(fileOut);
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(filename));) {
             out.writeObject(this.getAll().toArray(new SecurityInfo[0]));
-
         } catch (Exception e) {
             LOG.debug("Could not save security infos to file", e);
-        } finally {
-            IOUtils.closeQuietly(fileOut);
-            IOUtils.closeQuietly(out);
         }
     }
 }

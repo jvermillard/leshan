@@ -33,7 +33,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Date;
 
-import org.apache.commons.io.Charsets;
+import leshan.util.Charsets;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

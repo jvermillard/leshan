@@ -36,8 +36,7 @@ import java.util.Comparator;
 import java.util.Date;
 
 import leshan.LinkObject;
-
-import org.apache.commons.lang.Validate;
+import leshan.util.Validate;
 
 /**
  * A LW-M2M client registered on the server

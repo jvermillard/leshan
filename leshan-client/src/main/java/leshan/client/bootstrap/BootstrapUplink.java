@@ -37,8 +37,8 @@ import java.util.Collections;
 import leshan.client.Uplink;
 import leshan.client.response.Callback;
 import leshan.client.response.OperationResponse;
+import leshan.util.Validate;
 
-import org.apache.commons.lang.Validate;
 import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.core.network.CoAPEndpoint;
 

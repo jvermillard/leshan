@@ -39,8 +39,8 @@ import leshan.server.node.LwM2mPath;
 import leshan.server.node.LwM2mResource;
 import leshan.server.node.Value;
 import leshan.server.request.ContentFormat;
+import leshan.util.Charsets;
 
-import org.apache.commons.io.Charsets;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;

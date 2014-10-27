@@ -36,9 +36,7 @@ import leshan.LinkObject;
 import leshan.server.client.BindingMode;
 import leshan.server.client.Client;
 import leshan.server.client.ClientUpdate;
-import leshan.server.impl.ClientRegistryImpl;
 
-import org.apache.commons.io.Charsets;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,7 +50,7 @@ public class ClientRegistryImplTest {
     Long lifetime = 10000L;
     String sms = "0171-32423545";
     BindingMode binding = BindingMode.UQS;
-    LinkObject[] objectLinks = LinkObject.parse("</3>".getBytes(Charsets.UTF_8));
+    LinkObject[] objectLinks = LinkObject.parse("</3>".getBytes(leshan.util.Charsets.UTF_8));
     String registrationId = "4711";
     Client client;
 

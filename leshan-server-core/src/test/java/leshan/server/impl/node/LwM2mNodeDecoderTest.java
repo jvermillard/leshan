@@ -35,8 +35,6 @@ import static org.junit.Assert.assertNull;
 
 import java.util.Date;
 
-import leshan.server.impl.node.InvalidValueException;
-import leshan.server.impl.node.LwM2mNodeDecoder;
 import leshan.server.impl.objectspec.Resources;
 import leshan.server.node.LwM2mObjectInstance;
 import leshan.server.node.LwM2mPath;
@@ -46,8 +44,8 @@ import leshan.server.request.ContentFormat;
 import leshan.tlv.Tlv;
 import leshan.tlv.Tlv.TlvType;
 import leshan.tlv.TlvEncoder;
+import leshan.util.Charsets;
 
-import org.apache.commons.io.Charsets;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

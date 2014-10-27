@@ -33,7 +33,7 @@ package leshan.client.request;
 
 import java.util.Map;
 
-import org.apache.commons.lang.Validate;
+import leshan.util.Validate;
 
 public class Request {
 

@@ -35,8 +35,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.io.Charsets;
-import org.apache.commons.lang.StringUtils;
+import leshan.util.Charsets;
+import leshan.util.StringUtils;
 
 /**
  * A LwM2M path description given at the registration time by the client.

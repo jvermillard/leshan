@@ -52,8 +52,8 @@ import leshan.server.request.ExceptionConsumer;
 import leshan.server.request.LwM2mRequest;
 import leshan.server.request.ResponseConsumer;
 import leshan.server.security.SecurityRegistry;
+import leshan.util.Validate;
 
-import org.apache.commons.lang.Validate;
 import org.eclipse.californium.core.CoapServer;
 import org.eclipse.californium.core.network.CoAPEndpoint;
 import org.eclipse.californium.core.network.Endpoint;

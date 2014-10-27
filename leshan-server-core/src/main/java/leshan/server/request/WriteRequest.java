@@ -34,8 +34,7 @@ import leshan.server.impl.objectspec.ResourceSpec;
 import leshan.server.impl.objectspec.Resources;
 import leshan.server.node.LwM2mNode;
 import leshan.server.node.LwM2mPath;
-
-import org.apache.commons.lang.Validate;
+import leshan.util.Validate;
 
 /**
  * The request to change the value of a Resource, an array of Resources Instances or multiple Resources from an Object
