@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
-import leshan.server.impl.node.LwM2mNodeEncoder;
 import leshan.server.impl.objectspec.Resources;
 import leshan.server.node.LwM2mObjectInstance;
 import leshan.server.node.LwM2mPath;
@@ -67,6 +66,16 @@ public class LwM2mNodeEncoderTest {
 
     @Test
     public void text_encode_date_as_long() {
+
+        byte[] encoded = LwM2mNodeEncoder.encode(
+                new LwM2mResource(13, Value.newStringValue("2010-01-01T12:00:00+01:00")), ContentFormat.TEXT,
+                new LwM2mPath("/3/0/13"));
+
+        Assert.assertEquals("1262343600", new String(encoded, Charsets.UTF_8));
+    }
+
+    @Test
+    public void text_encode_date_as_iso_string() {
 
         byte[] encoded = LwM2mNodeEncoder.encode(new LwM2mResource(13, Value.newLongValue(1367491215000L)),
                 ContentFormat.TEXT, new LwM2mPath("/3/0/13"));

@@ -36,8 +36,8 @@ import java.util.Date;
 import java.util.Map.Entry;
 
 import leshan.server.impl.objectspec.ResourceSpec;
-import leshan.server.impl.objectspec.Resources;
 import leshan.server.impl.objectspec.ResourceSpec.Type;
+import leshan.server.impl.objectspec.Resources;
 import leshan.server.node.LwM2mNode;
 import leshan.server.node.LwM2mNodeVisitor;
 import leshan.server.node.LwM2mObject;
@@ -57,8 +57,6 @@ import org.apache.commons.io.Charsets;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -274,9 +272,9 @@ public class LwM2mNodeEncoder {
             case STRING:
                 LOG.debug("Trying to convert string value {} to date", value.value);
                 // let's assume we received an ISO 8601 format date
-                DateTimeFormatter parser = ISODateTimeFormat.dateTimeParser();
                 try {
-                    return Value.newDateValue(parser.parseDateTime((String) value.value).toDate());
+                    return Value.newDateValue(javax.xml.bind.DatatypeConverter.parseDateTime((String) value.value)
+                            .getTime());
                 } catch (IllegalArgumentException e) {
                     LOG.debug("Unable to convert string to date", e);
                 }
