@@ -1,5 +1,5 @@
-MAINTAINER jvermillard@gmail.com
 FROM debian:7.4
+MAINTAINER jvermillard@gmail.com
 
 RUN apt-get update
 RUN apt-get install -y openjdk-7-jre-headless wget
