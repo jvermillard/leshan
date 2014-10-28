@@ -40,10 +40,10 @@
   </Appenders>
  
   <Loggers>
-    <Logger name="leshan.server.lwm2m" level="trace" additivity="false">
+    <Logger name="leshan" level="warn" additivity="false" >
       <AppenderRef ref="STDOUT"/>
     </Logger>
-    <Logger name="leshan.server.servlet" level="trace" additivity="false">
+    <Logger name="leshan.standalone.servlet" level="warn" additivity="false">
       <AppenderRef ref="STDOUT"/>
     </Logger>
   

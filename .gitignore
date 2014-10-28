@@ -4,7 +4,7 @@ target
 leshan-standalone/Californium.properties
 leshan-standalone/data
 leshan-bs-server/data
-*.properties
+Californium.properties
 bin/
 # Package Files #
 *.jar
