@@ -43,7 +43,6 @@ public abstract class ClientResourceBase extends CoapResource implements LinkFor
 
     @Override
     public void notifyObserverRelations() {
-        System.out.println("Getting Notified!");
         super.notifyObserverRelations();
     }
 

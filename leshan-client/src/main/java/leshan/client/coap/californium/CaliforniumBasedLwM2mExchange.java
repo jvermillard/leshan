@@ -119,7 +119,6 @@ public class CaliforniumBasedLwM2mExchange implements LwM2mExchange {
             return null;
         }
         final List<String> uriQueries = exchange.advanced().getRequest().getOptions().getURIQueries();
-        System.out.println(uriQueries);
         return ObserveSpecParser.parse(uriQueries);
     }
 

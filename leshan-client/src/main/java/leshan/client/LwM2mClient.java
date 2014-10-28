@@ -112,8 +112,6 @@ public class LwM2mClient {
         if (endpoint == null) {
             endpoint = new CoAPEndpoint(local);
         }
-        System.out.println("Endpoint: " + endpoint);
-        System.out.println("Destination: " + destination);
 
         // TODO: EDGEBOX-3507 Andrew Summers 9/29/14
         // This shouldn't be necessary. Figure out if we
@@ -132,7 +130,6 @@ public class LwM2mClient {
                 request.setDestinationPort(destination.getPort());
                 request.setSource(local.getAddress());
                 request.setSourcePort(local.getPort());
-                System.out.println("Sending request to: " + request.getDestination() + " from " + request.getSource());
             }
 
             @Override
@@ -143,7 +140,6 @@ public class LwM2mClient {
 
             @Override
             public void receiveResponse(final Response response) {
-                System.out.println("Received response: " + response.getCode());
             }
 
             @Override
