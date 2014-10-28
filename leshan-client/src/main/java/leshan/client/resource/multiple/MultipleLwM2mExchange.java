@@ -46,6 +46,7 @@ import leshan.tlv.Tlv;
 import leshan.tlv.Tlv.TlvType;
 import leshan.tlv.TlvDecoder;
 import leshan.tlv.TlvEncoder;
+import leshan.tlv.TlvException;
 
 public class MultipleLwM2mExchange extends TypedLwM2mExchange<Map<Integer, byte[]>> {
 
@@ -60,7 +61,12 @@ public class MultipleLwM2mExchange extends TypedLwM2mExchange<Map<Integer, byte[
 
     @Override
     protected Map<Integer, byte[]> convertFromBytes(final byte[] value) {
-        final Tlv[] tlvs = TlvDecoder.decode(ByteBuffer.wrap(value));
+        final Tlv[] tlvs;
+        try {
+            tlvs = TlvDecoder.decode(ByteBuffer.wrap(value));
+        } catch (TlvException e) {
+            throw new IllegalStateException(e);
+        }
         final Map<Integer, byte[]> result = new HashMap<>();
         for (final Tlv tlv : tlvs) {
             if (tlv.getType() != TlvType.RESOURCE_INSTANCE) {
@@ -69,6 +75,7 @@ public class MultipleLwM2mExchange extends TypedLwM2mExchange<Map<Integer, byte[
             result.put(tlv.getIdentifier(), tlv.getValue());
         }
         return result;
+
     }
 
     @Override

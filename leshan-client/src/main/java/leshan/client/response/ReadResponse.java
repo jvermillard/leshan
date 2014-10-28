@@ -43,6 +43,7 @@ import leshan.tlv.Tlv;
 import leshan.tlv.Tlv.TlvType;
 import leshan.tlv.TlvDecoder;
 import leshan.tlv.TlvEncoder;
+import leshan.tlv.TlvException;
 
 public class ReadResponse extends BaseLwM2mResponse {
 
@@ -77,8 +78,12 @@ public class ReadResponse extends BaseLwM2mResponse {
 
         public MultipleReadResponse(final ResponseCode code, final Map<Integer, byte[]> readValues) {
             super(code, getPayload(readValues));
-            tlvPayload = new Tlv(TlvType.MULTIPLE_RESOURCE, TlvDecoder.decode(ByteBuffer.wrap(getResponsePayload())),
-                    null, 0);
+            try {
+                tlvPayload = new Tlv(TlvType.MULTIPLE_RESOURCE,
+                        TlvDecoder.decode(ByteBuffer.wrap(getResponsePayload())), null, 0);
+            } catch (TlvException e) {
+                throw new IllegalStateException(e);
+            }
         }
 
         @Override

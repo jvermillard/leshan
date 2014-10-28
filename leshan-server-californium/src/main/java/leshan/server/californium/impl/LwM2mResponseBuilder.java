@@ -264,7 +264,7 @@ public class LwM2mResponseBuilder<T extends ClientResponse> implements LwM2mRequ
                     ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()), path);
         } catch (InvalidValueException e) {
             String msg = String.format("[%s] ([%s])", e.getMessage(), e.getPath().toString());
-            throw new ResourceAccessException(code, path.toString(), msg);
+            throw new ResourceAccessException(code, path.toString(), msg, e);
         }
         return new ValueResponse(code, content);
     }

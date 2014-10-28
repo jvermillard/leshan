@@ -30,6 +30,8 @@
 package leshan.tlv;
 
 import java.math.BigInteger;
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -46,12 +48,14 @@ public class TlvDecoder {
 
     private static final Logger LOG = LoggerFactory.getLogger(TlvDecoder.class);
 
-    public static Tlv[] decode(ByteBuffer input) {
+    public static Tlv[] decode(ByteBuffer input) throws TlvException {
 
         List<Tlv> tlvs = new ArrayList<>();
 
         while (input.remaining() > 0) {
             input.order(ByteOrder.BIG_ENDIAN);
+
+            // decode type
             int typeByte = input.get() & 0xFF;
             TlvType type;
             switch (typeByte & 0b1100_0000) {
@@ -68,58 +72,74 @@ public class TlvDecoder {
                 type = TlvType.RESOURCE_VALUE;
                 break;
             default:
-                throw new IllegalArgumentException("unknown type : " + (typeByte & 0b1100_0000));
+                throw new TlvException("unknown type : " + (typeByte & 0b1100_0000));
             }
 
-            int identifier;
             // decode identifier
-            if ((typeByte & 0b0010_0000) == 0) {
-                identifier = input.get() & 0xFF;
-            } else {
-                identifier = input.getShort() & 0xFFFF;
+            int identifier;
+            try {
+                if ((typeByte & 0b0010_0000) == 0) {
+                    identifier = input.get() & 0xFF;
+                } else {
+                    identifier = input.getShort() & 0xFFFF;
+                }
+            } catch (BufferUnderflowException e) {
+                throw new TlvException("Invalild 'identifier' length", e);
             }
-
-            int length;
-            int lengthType = typeByte & 0b0001_1000;
 
             // decode length
-            switch (lengthType) {
-            case 0b0000_0000:
-                // 2 bit length
-                length = typeByte & 0b0000_0111;
-                break;
-            case 0b0000_1000:
-                // 8 bit length
-                length = input.get() & 0xFF;
-                break;
-            case 0b0001_0000:
-                // 16 bit length
-                length = input.getShort() & 0xFFFF;
-                break;
-            case 0b0001_1000:
-                // 24 bit length
-                length = ((input.get() & 0xFF) << 16) + input.getShort() & 0xFFFF;
-                break;
-            default:
-                throw new IllegalArgumentException("unknown length type : " + (typeByte & 0b0001_1000));
+            int length;
+            int lengthType = typeByte & 0b0001_1000;
+            try {
+                switch (lengthType) {
+                case 0b0000_0000:
+                    // 2 bit length
+                    length = typeByte & 0b0000_0111;
+                    break;
+                case 0b0000_1000:
+                    // 8 bit length
+                    length = input.get() & 0xFF;
+                    break;
+                case 0b0001_0000:
+                    // 16 bit length
+                    length = input.getShort() & 0xFFFF;
+                    break;
+                case 0b0001_1000:
+                    // 24 bit length
+                    length = ((input.get() & 0xFF) << 16) + input.getShort() & 0xFFFF;
+                    break;
+                default:
+                    throw new TlvException("unknown length type : " + (typeByte & 0b0001_1000));
+                }
+            } catch (BufferUnderflowException e) {
+                throw new TlvException("Invalild 'length' length", e);
             }
 
+            // decode value
             if (type == TlvType.RESOURCE_VALUE || type == TlvType.RESOURCE_INSTANCE) {
-                byte[] payload = new byte[length];
-                input.get(payload);
-                tlvs.add(new Tlv(type, null, payload, identifier));
+                try {
+                    byte[] payload = new byte[length];
+                    input.get(payload);
+                    tlvs.add(new Tlv(type, null, payload, identifier));
+                } catch (BufferOverflowException e) {
+                    throw new TlvException("Invalild 'value' length", e);
+                }
             } else {
-                // create a view of the contained TLVs
-                ByteBuffer slice = input.slice();
-                slice.limit(length);
+                try {
+                    // create a view of the contained TLVs
+                    ByteBuffer slice = input.slice();
+                    slice.limit(length);
 
-                Tlv[] children = decode(slice);
+                    Tlv[] children = decode(slice);
 
-                // skip the children, it will be decoded by the view
-                input.position(input.position() + length);
+                    // skip the children, it will be decoded by the view
+                    input.position(input.position() + length);
 
-                Tlv tlv = new Tlv(type, children, null, identifier);
-                tlvs.add(tlv);
+                    Tlv tlv = new Tlv(type, children, null, identifier);
+                    tlvs.add(tlv);
+                } catch (IllegalArgumentException e) {
+                    throw new TlvException("Invalild 'value' length", e);
+                }
             }
         }
 
@@ -136,7 +156,7 @@ public class TlvDecoder {
     /**
      * Decodes a byte array into a boolean value.
      */
-    public static boolean decodeBoolean(byte[] value) {
+    public static boolean decodeBoolean(byte[] value) throws TlvException {
         if (value.length == 1) {
             if (value[0] == 0) {
                 return false;
@@ -147,25 +167,25 @@ public class TlvDecoder {
                 return false;
             }
         }
-        throw new IllegalArgumentException("Invalid size");
+        throw new TlvException("Invalid length for a boolean value: " + value.length);
     }
 
     /**
      * Decodes a byte array into a date value.
      */
-    public static Date decodeDate(byte[] value) {
+    public static Date decodeDate(byte[] value) throws TlvException {
         BigInteger bi = new BigInteger(value);
         if (value.length <= 8) {
             return new Date(bi.longValue() * 1000L);
         } else {
-            throw new IllegalArgumentException("Invalid length for a time value: " + value.length);
+            throw new TlvException("Invalid length for a time value: " + value.length);
         }
     }
 
     /**
      * Decodes a byte array into an integer value.
      */
-    public static Number decodeInteger(byte[] value) {
+    public static Number decodeInteger(byte[] value) throws TlvException {
         BigInteger bi = new BigInteger(value);
         if (value.length == 1) {
             return bi.byteValue();
@@ -176,21 +196,21 @@ public class TlvDecoder {
         } else if (value.length <= 8) {
             return bi.longValue();
         } else {
-            throw new IllegalArgumentException("Invalid length for an integer value: " + value.length);
+            throw new TlvException("Invalid length for an integer value: " + value.length);
         }
     }
 
     /**
      * Decodes a byte array into a float value.
      */
-    public static Number decodeFloat(byte[] value) {
+    public static Number decodeFloat(byte[] value) throws TlvException {
         ByteBuffer floatBb = ByteBuffer.wrap(value);
         if (value.length == 4) {
             return floatBb.getFloat();
         } else if (value.length == 8) {
             return floatBb.getDouble();
         } else {
-            throw new IllegalArgumentException("Invalid length for a float value: " + value.length);
+            throw new TlvException("Invalid length for a float value: " + value.length);
         }
     }
 }

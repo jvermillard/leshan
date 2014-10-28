@@ -1,7 +1,5 @@
 /*
- * Copyright (c) 2013, Sierra Wireless,
- * Copyright (c) 2014, Zebra Technologies,
- * 
+ * Copyright (c) 2014, Sierra Wireless
  *
  * All rights reserved.
  *
@@ -29,31 +27,18 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.client.exchange.aggregate;
+package leshan.tlv;
 
-import java.nio.ByteBuffer;
+public class TlvException extends Exception {
 
-import leshan.client.exchange.LwM2mExchange;
-import leshan.client.response.LwM2mResponse;
-import leshan.tlv.Tlv;
-import leshan.tlv.Tlv.TlvType;
-import leshan.tlv.TlvDecoder;
-import leshan.tlv.TlvException;
-
-public class LwM2mObjectReadResponseAggregator extends LwM2mReadResponseAggregator {
-
-    public LwM2mObjectReadResponseAggregator(final LwM2mExchange exchange, final int numExpectedResults) {
-        super(exchange, numExpectedResults);
+    public TlvException(String message) {
+        super(message);
     }
 
-    @Override
-    protected Tlv createTlv(final int id, final LwM2mResponse response) {
-        try {
-            return new Tlv(TlvType.OBJECT_INSTANCE, TlvDecoder.decode(ByteBuffer.wrap(response.getResponsePayload())),
-                    null, id);
-        } catch (TlvException e) {
-            throw new IllegalStateException(e);
-        }
+    public TlvException(String message, Exception cause) {
+        super(message, cause);
     }
+
+    private static final long serialVersionUID = 9017593873541376092L;
 
 }

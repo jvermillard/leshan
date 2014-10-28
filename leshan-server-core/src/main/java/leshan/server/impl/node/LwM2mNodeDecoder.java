@@ -44,6 +44,7 @@ import leshan.server.node.Value;
 import leshan.server.request.ContentFormat;
 import leshan.tlv.Tlv;
 import leshan.tlv.TlvDecoder;
+import leshan.tlv.TlvException;
 import leshan.util.Charsets;
 import leshan.util.Validate;
 
@@ -101,13 +102,16 @@ public class LwM2mNodeDecoder {
             return new LwM2mResource(path.getResourceId(), value);
 
         case TLV:
-            Tlv[] tlvs = TlvDecoder.decode(ByteBuffer.wrap(content));
-            return parseTlv(tlvs, path);
-
+            try {
+                Tlv[] tlvs = TlvDecoder.decode(ByteBuffer.wrap(content));
+                return parseTlv(tlvs, path);
+            } catch (TlvException e) {
+                throw new InvalidValueException("Unable to decode tlv.", path, e);
+            }
         case JSON:
         case LINK:
         case OPAQUE:
-            throw new IllegalStateException("Content format " + format + " not yet implemented");
+            throw new InvalidValueException("Content format " + format + " not yet implemented", path);
         }
         return null;
 
@@ -275,7 +279,7 @@ public class LwM2mNodeDecoder {
             default:
                 return Value.newBinaryValue(value);
             }
-        } catch (IllegalArgumentException e) {
+        } catch (TlvException e) {
             throw new InvalidValueException("Invalid content for type " + rscDesc.type, rscPath, e);
         }
     }

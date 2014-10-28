@@ -44,6 +44,7 @@ import leshan.client.exchange.aggregate.LwM2mResponseAggregator;
 import leshan.client.response.CreateResponse;
 import leshan.tlv.Tlv;
 import leshan.tlv.TlvDecoder;
+import leshan.tlv.TlvException;
 
 public class LwM2mClientObjectInstance extends LwM2mClientNode {
 
@@ -72,7 +73,12 @@ public class LwM2mClientObjectInstance extends LwM2mClientNode {
 
     public void createInstance(final LwM2mExchange exchange) {
         final byte[] payload = exchange.getRequestPayload();
-        final Tlv[] tlvs = TlvDecoder.decode(ByteBuffer.wrap(payload));
+        Tlv[] tlvs;
+        try {
+            tlvs = TlvDecoder.decode(ByteBuffer.wrap(payload));
+        } catch (TlvException e) {
+            throw new IllegalStateException(e);
+        }
 
         if (!definition.hasAllRequiredResourceIds(tlvs)) {
             exchange.respond(CreateResponse.invalidResource());
