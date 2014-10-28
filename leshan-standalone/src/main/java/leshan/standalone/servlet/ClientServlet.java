@@ -146,11 +146,11 @@ public class ClientServlet extends HttpServlet {
                 resp.getWriter().format("No registered client with id '%s'", clientEndpoint).flush();
             }
         } catch (IllegalArgumentException e) {
-            LOG.debug("Invalid request", e);
+            LOG.warn("Invalid request", e);
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().append(e.getMessage()).flush();
         } catch (ResourceAccessException e) {
-            LOG.debug(String.format("Error accessing resource %s%s.", req.getServletPath(), req.getPathInfo()), e);
+            LOG.warn(String.format("Error accessing resource %s%s.", req.getServletPath(), req.getPathInfo()), e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             resp.getWriter().append(e.getMessage()).flush();
         }
@@ -181,11 +181,11 @@ public class ClientServlet extends HttpServlet {
                 resp.getWriter().format("No registered client with id '%s'", clientEndpoint).flush();
             }
         } catch (IllegalArgumentException e) {
-            LOG.debug("Invalid request", e);
+            LOG.warn("Invalid request", e);
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().append(e.getMessage()).flush();
         } catch (ResourceAccessException e) {
-            LOG.debug(String.format("Error accessing resource %s%s.", req.getServletPath(), req.getPathInfo()), e);
+            LOG.warn(String.format("Error accessing resource %s%s.", req.getServletPath(), req.getPathInfo()), e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             resp.getWriter().append(e.getMessage()).flush();
         }
@@ -213,11 +213,11 @@ public class ClientServlet extends HttpServlet {
                     resp.getWriter().format("no registered client with id '%s'", clientEndpoint).flush();
                 }
             } catch (IllegalArgumentException e) {
-                LOG.debug("Invalid request", e);
+                LOG.warn("Invalid request", e);
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 resp.getWriter().append(e.getMessage()).flush();
             } catch (ResourceAccessException e) {
-                LOG.debug(String.format("Error accessing resource %s%s.", req.getServletPath(), req.getPathInfo()), e);
+                LOG.warn(String.format("Error accessing resource %s%s.", req.getServletPath(), req.getPathInfo()), e);
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 resp.getWriter().append(e.getMessage()).flush();
             }
@@ -239,11 +239,11 @@ public class ClientServlet extends HttpServlet {
                     resp.getWriter().format("no registered client with id '%s'", clientEndpoint).flush();
                 }
             } catch (IllegalArgumentException e) {
-                LOG.debug("Invalid request", e);
+                LOG.warn("Invalid request", e);
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 resp.getWriter().append(e.getMessage()).flush();
             } catch (ResourceAccessException e) {
-                LOG.debug(String.format("Error accessing resource %s%s.", req.getServletPath(), req.getPathInfo()), e);
+                LOG.warn(String.format("Error accessing resource %s%s.", req.getServletPath(), req.getPathInfo()), e);
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 resp.getWriter().append(e.getMessage()).flush();
             }
@@ -262,11 +262,11 @@ public class ClientServlet extends HttpServlet {
                     resp.getWriter().format("no registered client with id '%s'", clientEndpoint).flush();
                 }
             } catch (IllegalArgumentException e) {
-                LOG.debug("Invalid request", e);
+                LOG.warn("Invalid request", e);
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 resp.getWriter().append(e.getMessage()).flush();
             } catch (ResourceAccessException e) {
-                LOG.debug(String.format("Error accessing resource %s%s.", req.getServletPath(), req.getPathInfo()), e);
+                LOG.warn(String.format("Error accessing resource %s%s.", req.getServletPath(), req.getPathInfo()), e);
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 resp.getWriter().append(e.getMessage()).flush();
             }
@@ -292,11 +292,11 @@ public class ClientServlet extends HttpServlet {
                     resp.getWriter().format("no registered client with id '%s'", clientEndpoint).flush();
                 }
             } catch (IllegalArgumentException e) {
-                LOG.debug("Invalid request", e);
+                LOG.warn("Invalid request", e);
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 resp.getWriter().append(e.getMessage()).flush();
             } catch (ResourceAccessException e) {
-                LOG.debug(String.format("Error accessing resource %s%s.", req.getServletPath(), req.getPathInfo()), e);
+                LOG.warn(String.format("Error accessing resource %s%s.", req.getServletPath(), req.getPathInfo()), e);
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                 resp.getWriter().append(e.getMessage()).flush();
             }
@@ -316,11 +316,11 @@ public class ClientServlet extends HttpServlet {
                 resp.getWriter().format("no registered client with id '%s'", clientEndpoint).flush();
             }
         } catch (IllegalArgumentException e) {
-            LOG.debug("Invalid request", e);
+            LOG.warn("Invalid request", e);
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().append(e.getMessage()).flush();
         } catch (ResourceAccessException e) {
-            LOG.debug(String.format("Error accessing resource %s%s.", req.getServletPath(), req.getPathInfo()), e);
+            LOG.warn(String.format("Error accessing resource %s%s.", req.getServletPath(), req.getPathInfo()), e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             resp.getWriter().append(e.getMessage()).flush();
         }

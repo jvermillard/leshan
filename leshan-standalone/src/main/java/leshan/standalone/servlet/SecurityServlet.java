@@ -98,15 +98,15 @@ public class SecurityServlet extends HttpServlet {
             resp.setStatus(HttpServletResponse.SC_OK);
 
         } catch (NonUniqueSecurityInfoException e) {
-            LOG.debug("Non unique security info: " + e.getMessage());
+            LOG.warn("Non unique security info: " + e.getMessage());
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().append(e.getMessage()).flush();
         } catch (JsonParseException e) {
-            LOG.debug("Could not parse request body", e);
+            LOG.warn("Could not parse request body", e);
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             resp.getWriter().append("Invalid request body").flush();
         } catch (RuntimeException e) {
-            LOG.error("unexpected error for request " + req.getPathInfo(), e);
+            LOG.warn("unexpected error for request " + req.getPathInfo(), e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
