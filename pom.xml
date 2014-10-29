@@ -57,7 +57,9 @@
         <!--module>leshan-client-core</module-->
         <!--module>leshan-client-californium</module-->
 
-        <module>leshan-integration-tests</module>
+        <!-- Integration tests moved in a profiles waiting it was stable -->
+        <!--<module>leshan-integration-tests</module>--> 
+
         <module>leshan-client-example</module>
         <module>leshan-standalone</module>
         <module>leshan-bs-server</module>
@@ -117,23 +119,9 @@
             <activation>
                 <activeByDefault>false</activeByDefault>
             </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.17</version>
-                        <executions>
-                            <execution>
-                            <goals>
-                                <goal>integration-test</goal>
-                                <goal>verify</goal>
-                            </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
+            <modules>
+                <module>leshan-integration-tests</module>
+            </modules>
         </profile>
         <profile>
             <!-- this profile generate all the needed artifact and signatures needed for releasing on maven central -->
