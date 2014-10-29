@@ -54,10 +54,10 @@ import leshan.util.Charsets;
 import leshan.util.StringUtils;
 import leshan.util.Validate;
 
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.sun.org.apache.xerces.internal.impl.dv.util.HexBin;
 
 public class LwM2mNodeEncoder {
 
@@ -296,12 +296,8 @@ public class LwM2mNodeEncoder {
         case OPAQUE:
             if (value.type == DataType.STRING) {
                 // let's assume we received an hexadecimal string
-                try {
-                    LOG.debug("Trying to convert hexadecimal string {} to byte array", value.value);
-                    return Value.newBinaryValue(Hex.decodeHex(((String) value.value).toCharArray()));
-                } catch (DecoderException e) {
-                    // actually it is not
-                }
+                LOG.debug("Trying to convert hexadecimal string {} to byte array", value.value);
+                return Value.newBinaryValue(HexBin.decode((String) value.value));
             }
             break;
         default:
