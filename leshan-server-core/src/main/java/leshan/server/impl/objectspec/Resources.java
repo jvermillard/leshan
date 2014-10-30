@@ -99,4 +99,17 @@ public class Resources {
         }
         return null;
     }
+    /**
+     * Returns the description of a given object.
+     * 
+     * @param objectId the object identifier
+     * @return the object specification or <code>null</code> if not found
+     */
+    public static ObjectSpec getObjectSpec(int objectId) {
+        ObjectSpec object = OBJECTS.get(objectId);
+        if (object != null) {
+            return object;
+        }
+        return null;
+    }
 }
