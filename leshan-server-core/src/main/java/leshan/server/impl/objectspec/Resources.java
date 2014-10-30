@@ -90,13 +90,23 @@ public class Resources {
      * 
      * @param objectId the object identifier
      * @param resourceId the resource identifier
-     * @return the resource description or <code>null</code> if not found
+     * @return the resource specification or <code>null</code> if not found
      */
-    public static ResourceSpec getDescription(int objectId, int resourceId) {
+    public static ResourceSpec getResourceSpec(int objectId, int resourceId) {
         ObjectSpec object = OBJECTS.get(objectId);
         if (object != null) {
             return object.resources.get(resourceId);
         }
         return null;
+    }
+
+    /**
+     * Returns the description of a given object.
+     * 
+     * @param objectId the object identifier
+     * @return the object specification or <code>null</code> if not found
+     */
+    public static ObjectSpec getObjectSpec(int objectId) {
+        return OBJECTS.get(objectId);
     }
 }

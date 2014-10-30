@@ -127,7 +127,7 @@ public class LwM2mNodeEncoder {
         public void visit(LwM2mResource resource) {
             LOG.trace("Encoding resource {} into TLV", resource);
 
-            ResourceSpec rSpec = Resources.getDescription(objectId, resource.getId());
+            ResourceSpec rSpec = Resources.getResourceSpec(objectId, resource.getId());
             Type expectedType = rSpec != null ? rSpec.type : null;
 
             Tlv rTlv = null;
@@ -197,7 +197,7 @@ public class LwM2mNodeEncoder {
             }
             LOG.trace("Encoding resource {} into text", resource);
 
-            ResourceSpec rSpec = Resources.getDescription(objectId, resource.getId());
+            ResourceSpec rSpec = Resources.getResourceSpec(objectId, resource.getId());
             Type expectedType = rSpec != null ? rSpec.type : null;
             Value<?> val = convertValue(resource.getValue(), expectedType);
 

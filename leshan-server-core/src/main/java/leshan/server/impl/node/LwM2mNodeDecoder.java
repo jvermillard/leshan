@@ -72,7 +72,7 @@ public class LwM2mNodeDecoder {
         // default to plain/text
         if (format == null) {
             if (path.isResource()) {
-                ResourceSpec rDesc = Resources.getDescription(path.getObjectId(), path.getResourceId());
+                ResourceSpec rDesc = Resources.getResourceSpec(path.getObjectId(), path.getResourceId());
                 if (rDesc != null && rDesc.multiple) {
                     format = ContentFormat.TLV;
                 } else {
@@ -89,7 +89,7 @@ public class LwM2mNodeDecoder {
         case TEXT:
             // single resource value
             Validate.notNull(path.getResourceId());
-            ResourceSpec rDesc = Resources.getDescription(path.getObjectId(), path.getResourceId());
+            ResourceSpec rDesc = Resources.getResourceSpec(path.getObjectId(), path.getResourceId());
 
             String strValue = new String(content, Charsets.UTF_8);
             Value<?> value = null;
@@ -241,7 +241,7 @@ public class LwM2mNodeDecoder {
 
     private static Value<?> parseTlvValue(byte[] value, LwM2mPath rscPath) throws InvalidValueException {
 
-        ResourceSpec rscDesc = Resources.getDescription(rscPath.getObjectId(), rscPath.getResourceId());
+        ResourceSpec rscDesc = Resources.getResourceSpec(rscPath.getObjectId(), rscPath.getResourceId());
         if (rscDesc == null) {
             LOG.trace("TLV value for path {} and unknown type: {}", rscPath, value);
             // no resource description... opaque
