@@ -36,7 +36,7 @@
         <artifactId>leshan</artifactId>
         <version>0.1.8-SNAPSHOT</version>
     </parent>
-    <artifactId>leshan-server-californium</artifactId>
+    <artifactId>leshan-server-cf</artifactId>
     <name>leshan - server californium</name>
     <description>A transport implementation for leshan server based on CoAP Californium</description>
 

@@ -51,7 +51,7 @@
     <modules>
         <module>leshan-core</module>
         <module>leshan-server-core</module>
-        <module>leshan-server-californium</module>
+        <module>leshan-server-cf</module>
         <module>leshan-client</module>
 
         <!--module>leshan-client-core</module-->
@@ -286,7 +286,7 @@
             </dependency>
             <dependency>
                 <groupId>org.github.leshan</groupId>
-                <artifactId>leshan-server-californium</artifactId>
+                <artifactId>leshan-server-cf</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

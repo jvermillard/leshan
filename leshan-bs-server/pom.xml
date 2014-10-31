@@ -43,8 +43,7 @@
     <dependencies>
         <dependency>
             <groupId>org.github.leshan</groupId>
-            <artifactId>leshan-server-californium</artifactId>
-            <version>${project.version}</version>
+            <artifactId>leshan-server-cf</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
