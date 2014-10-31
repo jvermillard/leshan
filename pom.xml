@@ -114,6 +114,16 @@
 
     <profiles>
         <profile>
+            <!-- This profile build the all in one jar -->
+            <id>all</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <modules>
+                <module>leshan-all</module>
+            </modules>
+        </profile>
+        <profile>
             <!-- This profile includes all the tests, even the integration ones -->
             <id>integration</id>
             <activation>
