@@ -97,4 +97,3 @@ Now, you need to eclipsify leshan java projects,so run:
 ```
 mvn eclipse:eclipse
 ```
-We advise you to activate *Format source code* and *Organized imports* on *Save Actions*.
