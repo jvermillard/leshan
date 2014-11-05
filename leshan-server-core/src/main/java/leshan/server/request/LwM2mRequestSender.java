@@ -29,7 +29,9 @@
  */
 package leshan.server.request;
 
-import leshan.server.response.ClientResponse;
+import leshan.core.response.ClientResponse;
+import leshan.core.response.ExceptionConsumer;
+import leshan.core.response.ResponseConsumer;
 
 public interface LwM2mRequestSender {
     /**

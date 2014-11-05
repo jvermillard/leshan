@@ -29,7 +29,7 @@
  */
 package leshan.server.observation;
 
-import leshan.server.node.LwM2mNode;
+import leshan.core.node.LwM2mNode;
 
 public interface ObservationListener {
 

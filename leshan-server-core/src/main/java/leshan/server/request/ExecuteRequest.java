@@ -29,9 +29,10 @@
  */
 package leshan.server.request;
 
+import leshan.core.node.LwM2mPath;
+import leshan.core.request.ContentFormat;
+import leshan.core.response.ClientResponse;
 import leshan.server.client.Client;
-import leshan.server.node.LwM2mPath;
-import leshan.server.response.ClientResponse;
 
 /**
  * A request for executing resources on a client.

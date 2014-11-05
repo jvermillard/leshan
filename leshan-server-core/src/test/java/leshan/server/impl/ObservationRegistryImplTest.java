@@ -31,9 +31,9 @@ package leshan.server.impl;
 
 import java.io.IOException;
 
+import leshan.core.node.LwM2mPath;
 import leshan.server.client.Client;
 import leshan.server.impl.ObservationRegistryImpl;
-import leshan.server.node.LwM2mPath;
 import leshan.server.observation.Observation;
 import leshan.server.observation.ObservationListener;
 

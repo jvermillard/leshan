@@ -31,10 +31,10 @@ package leshan.standalone.servlet.json;
 
 import java.lang.reflect.Type;
 
-import leshan.server.node.LwM2mNode;
-import leshan.server.node.LwM2mObject;
-import leshan.server.node.LwM2mObjectInstance;
-import leshan.server.node.LwM2mResource;
+import leshan.core.node.LwM2mNode;
+import leshan.core.node.LwM2mObject;
+import leshan.core.node.LwM2mObjectInstance;
+import leshan.core.node.LwM2mResource;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

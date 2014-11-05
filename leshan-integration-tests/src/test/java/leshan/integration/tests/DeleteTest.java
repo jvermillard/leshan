@@ -40,9 +40,9 @@ import static leshan.integration.tests.IntegrationTestHelper.GOOD_OBJECT_INSTANC
 import static leshan.integration.tests.IntegrationTestHelper.assertEmptyResponse;
 import static leshan.integration.tests.IntegrationTestHelper.assertResponse;
 import static leshan.integration.tests.IntegrationTestHelper.createGoodObjectInstance;
-import leshan.server.node.LwM2mObject;
-import leshan.server.node.LwM2mObjectInstance;
-import leshan.server.response.ClientResponse;
+import leshan.core.node.LwM2mObject;
+import leshan.core.node.LwM2mObjectInstance;
+import leshan.core.response.ClientResponse;
 
 import org.junit.After;
 import org.junit.Test;

@@ -33,15 +33,15 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import leshan.ResponseCode;
+import leshan.core.node.LwM2mNode;
+import leshan.core.node.LwM2mPath;
+import leshan.core.node.codec.InvalidValueException;
+import leshan.core.node.codec.LwM2mNodeDecoder;
+import leshan.core.request.ContentFormat;
+import leshan.core.response.ValueResponse;
 import leshan.server.client.Client;
-import leshan.server.impl.node.InvalidValueException;
-import leshan.server.impl.node.LwM2mNodeDecoder;
-import leshan.server.node.LwM2mNode;
-import leshan.server.node.LwM2mPath;
 import leshan.server.observation.Observation;
 import leshan.server.observation.ObservationListener;
-import leshan.server.request.ContentFormat;
-import leshan.server.response.ValueResponse;
 import leshan.util.Validate;
 
 import org.eclipse.californium.core.coap.CoAP;

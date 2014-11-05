@@ -40,10 +40,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import leshan.core.node.LwM2mNode;
 import leshan.server.LwM2mServer;
 import leshan.server.client.Client;
 import leshan.server.client.ClientRegistryListener;
-import leshan.server.node.LwM2mNode;
 import leshan.server.observation.Observation;
 import leshan.server.observation.ObservationRegistryListener;
 import leshan.standalone.servlet.json.ClientSerializer;

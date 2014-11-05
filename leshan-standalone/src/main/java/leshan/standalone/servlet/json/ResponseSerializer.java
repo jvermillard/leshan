@@ -31,8 +31,8 @@ package leshan.standalone.servlet.json;
 
 import java.lang.reflect.Type;
 
-import leshan.server.response.ClientResponse;
-import leshan.server.response.ValueResponse;
+import leshan.core.response.ClientResponse;
+import leshan.core.response.ValueResponse;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

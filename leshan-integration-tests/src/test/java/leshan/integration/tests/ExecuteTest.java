@@ -38,9 +38,9 @@ import static leshan.integration.tests.IntegrationTestHelper.GOOD_OBJECT_ID;
 import static leshan.integration.tests.IntegrationTestHelper.GOOD_OBJECT_INSTANCE_ID;
 import static leshan.integration.tests.IntegrationTestHelper.SECOND_RESOURCE_ID;
 import leshan.ResponseCode;
-import leshan.server.request.ContentFormat;
+import leshan.core.request.ContentFormat;
+import leshan.core.response.ClientResponse;
 import leshan.server.request.ExecuteRequest;
-import leshan.server.response.ClientResponse;
 
 import org.junit.After;
 import org.junit.Test;

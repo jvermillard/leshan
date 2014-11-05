@@ -30,9 +30,9 @@
 package leshan.server.request;
 
 import leshan.ObserveSpec;
+import leshan.core.node.LwM2mPath;
+import leshan.core.response.ClientResponse;
 import leshan.server.client.Client;
-import leshan.server.node.LwM2mPath;
-import leshan.server.response.ClientResponse;
 import leshan.util.Validate;
 
 public class WriteAttributesRequest extends AbstractLwM2mRequest<ClientResponse> {

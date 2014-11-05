@@ -33,11 +33,11 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import leshan.server.node.LwM2mNode;
-import leshan.server.node.LwM2mObject;
-import leshan.server.node.LwM2mObjectInstance;
-import leshan.server.node.LwM2mResource;
-import leshan.server.node.Value;
+import leshan.core.node.LwM2mNode;
+import leshan.core.node.LwM2mObject;
+import leshan.core.node.LwM2mObjectInstance;
+import leshan.core.node.LwM2mResource;
+import leshan.core.node.Value;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;

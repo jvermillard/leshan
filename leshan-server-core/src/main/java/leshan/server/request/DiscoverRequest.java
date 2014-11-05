@@ -29,9 +29,9 @@
  */
 package leshan.server.request;
 
+import leshan.core.node.LwM2mPath;
+import leshan.core.response.DiscoverResponse;
 import leshan.server.client.Client;
-import leshan.server.node.LwM2mPath;
-import leshan.server.response.DiscoverResponse;
 
 public class DiscoverRequest extends AbstractLwM2mRequest<DiscoverResponse> {
 

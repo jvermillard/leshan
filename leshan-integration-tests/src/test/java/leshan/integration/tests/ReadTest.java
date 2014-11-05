@@ -49,11 +49,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import leshan.ResponseCode;
-import leshan.server.node.LwM2mNode;
-import leshan.server.node.LwM2mObject;
-import leshan.server.node.LwM2mObjectInstance;
-import leshan.server.node.LwM2mResource;
-import leshan.server.node.Value;
+import leshan.core.node.LwM2mNode;
+import leshan.core.node.LwM2mObject;
+import leshan.core.node.LwM2mObjectInstance;
+import leshan.core.node.LwM2mResource;
+import leshan.core.node.Value;
 import leshan.tlv.Tlv;
 import leshan.tlv.Tlv.TlvType;
 import leshan.tlv.TlvEncoder;

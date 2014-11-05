@@ -37,8 +37,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import leshan.core.node.LwM2mNode;
 import leshan.server.client.Client;
-import leshan.server.node.LwM2mNode;
 import leshan.server.observation.Observation;
 import leshan.server.observation.ObservationListener;
 import leshan.server.observation.ObservationRegistry;

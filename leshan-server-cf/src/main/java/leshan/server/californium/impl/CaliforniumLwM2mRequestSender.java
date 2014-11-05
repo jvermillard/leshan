@@ -38,16 +38,16 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import leshan.core.response.ClientResponse;
+import leshan.core.response.ExceptionConsumer;
+import leshan.core.response.ResponseConsumer;
 import leshan.server.client.Client;
 import leshan.server.observation.ObservationRegistry;
-import leshan.server.request.ExceptionConsumer;
 import leshan.server.request.LwM2mRequest;
 import leshan.server.request.LwM2mRequestSender;
 import leshan.server.request.RejectionException;
 import leshan.server.request.RequestTimeoutException;
 import leshan.server.request.ResourceAccessException;
-import leshan.server.request.ResponseConsumer;
-import leshan.server.response.ClientResponse;
 import leshan.util.Validate;
 
 import org.eclipse.californium.core.coap.MessageObserverAdapter;

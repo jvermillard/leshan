@@ -39,9 +39,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import leshan.ResponseCode;
-import leshan.server.node.LwM2mObjectInstance;
-import leshan.server.node.LwM2mResource;
-import leshan.server.node.Value;
+import leshan.core.node.LwM2mObjectInstance;
+import leshan.core.node.LwM2mResource;
+import leshan.core.node.Value;
 
 import org.junit.After;
 import org.junit.Ignore;

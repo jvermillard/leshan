@@ -34,6 +34,10 @@ import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.Set;
 
+import leshan.core.objectspec.Resources;
+import leshan.core.response.ClientResponse;
+import leshan.core.response.ExceptionConsumer;
+import leshan.core.response.ResponseConsumer;
 import leshan.server.LwM2mServer;
 import leshan.server.californium.impl.CaliforniumLwM2mRequestSender;
 import leshan.server.californium.impl.LwM2mPskStore;
@@ -45,12 +49,8 @@ import leshan.server.client.ClientRegistryListener;
 import leshan.server.impl.ClientRegistryImpl;
 import leshan.server.impl.ObservationRegistryImpl;
 import leshan.server.impl.SecurityRegistryImpl;
-import leshan.server.impl.objectspec.Resources;
 import leshan.server.observation.ObservationRegistry;
-import leshan.server.request.ExceptionConsumer;
 import leshan.server.request.LwM2mRequest;
-import leshan.server.request.ResponseConsumer;
-import leshan.server.response.ClientResponse;
 import leshan.server.security.SecurityRegistry;
 import leshan.util.Validate;
 

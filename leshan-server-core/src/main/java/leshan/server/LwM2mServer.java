@@ -29,12 +29,12 @@
  */
 package leshan.server;
 
+import leshan.core.response.ClientResponse;
+import leshan.core.response.ExceptionConsumer;
+import leshan.core.response.ResponseConsumer;
 import leshan.server.client.ClientRegistry;
 import leshan.server.observation.ObservationRegistry;
-import leshan.server.request.ExceptionConsumer;
 import leshan.server.request.LwM2mRequest;
-import leshan.server.request.ResponseConsumer;
-import leshan.server.response.ClientResponse;
 import leshan.server.security.SecurityRegistry;
 
 /**

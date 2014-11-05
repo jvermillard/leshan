@@ -29,9 +29,9 @@
  */
 package leshan.server.request;
 
+import leshan.core.node.LwM2mPath;
+import leshan.core.response.ValueResponse;
 import leshan.server.client.Client;
-import leshan.server.node.LwM2mPath;
-import leshan.server.response.ValueResponse;
 
 /**
  * A Lightweight M2M request for retrieving the values of resources from a LWM2M Client.
