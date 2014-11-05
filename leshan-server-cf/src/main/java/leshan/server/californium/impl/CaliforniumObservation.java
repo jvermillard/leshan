@@ -41,7 +41,7 @@ import leshan.server.node.LwM2mPath;
 import leshan.server.observation.Observation;
 import leshan.server.observation.ObservationListener;
 import leshan.server.request.ContentFormat;
-import leshan.server.request.ValueResponse;
+import leshan.server.response.ValueResponse;
 import leshan.util.Validate;
 
 import org.eclipse.californium.core.coap.CoAP;

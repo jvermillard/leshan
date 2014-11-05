@@ -27,57 +27,39 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.request;
+package leshan.server.response;
 
-/**
- * Data format defined by the LWM2M specification
- */
-public enum ContentFormat {
+import java.util.Arrays;
 
-    // TODO: update media type codes once they have been assigned by IANA
-    LINK("application/link-format", 40), TEXT("application/vnd.oma.lwm2m+text", 1541), TLV(
-            "application/vnd.oma.lwm2m+tlv", 1542), JSON("application/vnd.oma.lwm2m+json", 1543), OPAQUE(
-            "application/vnd.oma.lwm2m+opaque", 1544);
+import leshan.LinkObject;
+import leshan.ResponseCode;
+import leshan.util.Validate;
 
-    private final String mediaType;
-    private final int code;
+public class DiscoverResponse extends ClientResponse {
 
-    private ContentFormat(String mediaType, int code) {
-        this.mediaType = mediaType;
-        this.code = code;
+    private final LinkObject[] links;
+
+    public DiscoverResponse(ResponseCode code) {
+        this(code, null);
     }
 
-    public String getMediaType() {
-        return this.mediaType;
-    }
-
-    public int getCode() {
-        return this.code;
+    public DiscoverResponse(ResponseCode code, LinkObject[] links) {
+        super(code);
+        if (ResponseCode.CONTENT.equals(code)) {
+            Validate.notNull(links);
+            this.links = Arrays.copyOf(links, links.length);
+        } else {
+            this.links = null;
+        }
     }
 
     /**
-     * Find the {@link ContentFormat} for the given media type (<code>null</code> if not found)
+     * Get the list of {@link LinkObject} returned as response payload.
+     *
+     * @return the object links or <code>null</code> if the client returned an error response.
      */
-    public static ContentFormat fromMediaType(String mediaType) {
-        for (ContentFormat t : ContentFormat.values()) {
-            if (t.getMediaType().equals(mediaType)) {
-                return t;
-            }
-        }
-        return null;
+    public LinkObject[] getObjectLinks() {
+        return links != null ? links.clone() : null;
     }
 
-    /**
-     * Finds the {@link ContentFormat} for a given media type code.
-     * 
-     * @return the media type or <code>null</code> if the given code is unknown
-     */
-    public static ContentFormat fromCode(int code) {
-        for (ContentFormat t : ContentFormat.values()) {
-            if (t.getCode() == code) {
-                return t;
-            }
-        }
-        return null;
-    }
 }

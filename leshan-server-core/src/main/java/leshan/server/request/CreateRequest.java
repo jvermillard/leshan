@@ -33,6 +33,7 @@ import leshan.server.client.Client;
 import leshan.server.node.LwM2mNode;
 import leshan.server.node.LwM2mObjectInstance;
 import leshan.server.node.LwM2mPath;
+import leshan.server.response.CreateResponse;
 
 /**
  * A Lightweight M2M request for creating resources on a client.

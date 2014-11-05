@@ -31,18 +31,18 @@ package leshan.server;
 
 import leshan.server.client.ClientRegistry;
 import leshan.server.observation.ObservationRegistry;
-import leshan.server.request.ClientResponse;
 import leshan.server.request.ExceptionConsumer;
 import leshan.server.request.LwM2mRequest;
 import leshan.server.request.ResponseConsumer;
+import leshan.server.response.ClientResponse;
 import leshan.server.security.SecurityRegistry;
 
 /**
  * An OMA Lightweight M2M device management server.
- * 
+ *
  * Will receive client registration through the "/rd" resource.
  * Is able to send requests (Read, Write, Create, Delete, Execute, Discover, Observer) to specified clients.
- * 
+ *
  * It's your main entry point for using the Leshan-core API.
  */
 public interface LwM2mServer {
@@ -53,7 +53,7 @@ public interface LwM2mServer {
     void start();
 
     /**
-     * Stop the server, release the resources (like UDP ports). 
+     * Stop the server, release the resources (like UDP ports).
      */
     void stop();
 

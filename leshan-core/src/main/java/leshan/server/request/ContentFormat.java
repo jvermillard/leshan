@@ -29,34 +29,55 @@
  */
 package leshan.server.request;
 
-import leshan.ResponseCode;
-import leshan.server.node.LwM2mNode;
-import leshan.util.Validate;
+/**
+ * Data format defined by the LWM2M specification
+ */
+public enum ContentFormat {
 
-public class ValueResponse extends ClientResponse {
+    // TODO: update media type codes once they have been assigned by IANA
+    LINK("application/link-format", 40), TEXT("application/vnd.oma.lwm2m+text", 1541), TLV(
+            "application/vnd.oma.lwm2m+tlv", 1542), JSON("application/vnd.oma.lwm2m+json", 1543), OPAQUE(
+            "application/vnd.oma.lwm2m+opaque", 1544);
 
-    private final LwM2mNode content;
+    private final String mediaType;
+    private final int code;
 
-    public ValueResponse(ResponseCode code) {
-        this(code, null);
+    private ContentFormat(String mediaType, int code) {
+        this.mediaType = mediaType;
+        this.code = code;
     }
 
-    public ValueResponse(ResponseCode code, LwM2mNode content) {
-        super(code);
+    public String getMediaType() {
+        return this.mediaType;
+    }
 
-        if (ResponseCode.CONTENT.equals(code)) {
-            Validate.notNull(content);
-        }
-        this.content = content;
+    public int getCode() {
+        return this.code;
     }
 
     /**
-     * Get the {@link LwM2mNode} value returned as response payload.
-     * 
-     * @return the value or <code>null</code> if the client returned an error response.
+     * Find the {@link ContentFormat} for the given media type (<code>null</code> if not found)
      */
-    public LwM2mNode getContent() {
-        return content;
+    public static ContentFormat fromMediaType(String mediaType) {
+        for (ContentFormat t : ContentFormat.values()) {
+            if (t.getMediaType().equals(mediaType)) {
+                return t;
+            }
+        }
+        return null;
     }
 
+    /**
+     * Finds the {@link ContentFormat} for a given media type code.
+     *
+     * @return the media type or <code>null</code> if the given code is unknown
+     */
+    public static ContentFormat fromCode(int code) {
+        for (ContentFormat t : ContentFormat.values()) {
+            if (t.getCode() == code) {
+                return t;
+            }
+        }
+        return null;
+    }
 }

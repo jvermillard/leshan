@@ -31,6 +31,7 @@ package leshan.server.request;
 
 import leshan.server.client.Client;
 import leshan.server.node.LwM2mPath;
+import leshan.server.response.ClientResponse;
 
 /**
  * A request for executing resources on a client.
@@ -40,41 +41,41 @@ public class ExecuteRequest extends AbstractLwM2mRequest<ClientResponse> {
     private final byte[] parameters;
     private final ContentFormat contentFormat;
 
-    public ExecuteRequest(Client client, String path) {
+    public ExecuteRequest(final Client client, final String path) {
         this(client, new LwM2mPath(path), null, null);
     }
 
-    public ExecuteRequest(Client client, String path, byte[] parameters, ContentFormat format) {
+    public ExecuteRequest(final Client client, final String path, final byte[] parameters, final ContentFormat format) {
         this(client, new LwM2mPath(path), parameters, format);
     }
 
     /**
      * Creates a new <em>execute</em> request for a resource that does not require any parameters.
-     * 
+     *
      * @param client the LWM2M Client to execute the resource on
      * @param objectId the resource's object ID
      * @param objectInstanceId the resource's object instance ID
      * @param resourceId the resource's ID
      */
-    public ExecuteRequest(Client client, int objectId, int objectInstanceId, int resourceId) {
+    public ExecuteRequest(final Client client, final int objectId, final int objectInstanceId, final int resourceId) {
         this(client, new LwM2mPath(objectId, objectInstanceId, resourceId), null, null);
     }
 
     /**
      * Creates a new <em>execute</em> request for a resource accepting parameters encoded as plain text or JSON.
-     * 
+     *
      * @param client the LWM2M Client to execute the resource on
      * @param objectId the resource's object ID
      * @param objectInstanceId the resource's object instance ID
      * @param resourceId the resource's ID
      * @param parameters the parameters
      */
-    public ExecuteRequest(Client client, int objectId, int objectInstanceId, int resourceId, byte[] parameters,
-            ContentFormat format) {
+    public ExecuteRequest(final Client client, final int objectId, final int objectInstanceId, final int resourceId, final byte[] parameters,
+            final ContentFormat format) {
         this(client, new LwM2mPath(objectId, objectInstanceId, resourceId), parameters, format);
     }
 
-    private ExecuteRequest(Client client, LwM2mPath path, byte[] parameters, ContentFormat format) {
+    private ExecuteRequest(final Client client, final LwM2mPath path, final byte[] parameters, final ContentFormat format) {
         super(client, path);
 
         this.parameters = parameters;
@@ -87,7 +88,7 @@ public class ExecuteRequest extends AbstractLwM2mRequest<ClientResponse> {
     }
 
     @Override
-    public void accept(LwM2mRequestVisitor visitor) {
+    public void accept(final LwM2mRequestVisitor visitor) {
         visitor.visit(this);
     }
 

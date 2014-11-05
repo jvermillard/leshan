@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Sierra Wireless
+ * Copyright (c) 2014, Sierra Wireless
  *
  * All rights reserved.
  *
@@ -29,35 +29,13 @@
  */
 package leshan.server.request;
 
-import leshan.ResponseCode;
-import leshan.util.Validate;
+import leshan.server.response.ClientResponse;
 
 /**
- * A response to a server request.
+ * Functional interface consuming a response to a LWM2M request
  */
-public class ClientResponse {
+public interface ResponseConsumer<T extends ClientResponse> {
 
-    protected final ResponseCode code;
-
-    public ClientResponse(ResponseCode code) {
-        Validate.notNull(code);
-        this.code = code;
-    }
-
-    /**
-     * Gets the response code.
-     * 
-     * @return the code
-     */
-    public final ResponseCode getCode() {
-        return this.code;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("ClientResponse [code=").append(code).append("]");
-        return builder.toString();
-    }
+    void accept(T response);
 
 }

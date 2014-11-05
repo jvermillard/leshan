@@ -57,7 +57,7 @@ public class LwM2mNodeDecoder {
 
     /**
      * Deserializes a binary content into a {@link LwM2mNode}.
-     * 
+     *
      * @param content the content
      * @param format the content format
      * @param path the path of the node to build

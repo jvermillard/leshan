@@ -31,11 +31,12 @@ package leshan.server.request;
 
 import leshan.server.client.Client;
 import leshan.server.node.LwM2mPath;
+import leshan.server.response.ClientResponse;
 import leshan.util.Validate;
 
 /**
  * A base class for concrete LWM2M request types.
- * 
+ *
  * Provides generic support for specifying the target client and the resource path.
  */
 public abstract class AbstractLwM2mRequest<T extends ClientResponse> implements LwM2mRequest<T> {
@@ -43,7 +44,7 @@ public abstract class AbstractLwM2mRequest<T extends ClientResponse> implements 
     private final Client client;
     private final LwM2mPath path;
 
-    protected AbstractLwM2mRequest(Client client, LwM2mPath path) {
+    protected AbstractLwM2mRequest(final Client client, final LwM2mPath path) {
         Validate.notNull(client);
         Validate.notNull(path);
         this.client = client;

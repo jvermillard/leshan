@@ -45,7 +45,7 @@
             <groupId>org.github.leshan</groupId>
             <artifactId>leshan-core</artifactId>
         </dependency>
-         <dependency>
+        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>

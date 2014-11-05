@@ -29,6 +29,8 @@
  */
 package leshan.server.request;
 
+import leshan.server.response.ClientResponse;
+
 public interface LwM2mRequestSender {
     /**
      * Send a Lightweight M2M request synchronously. Will block until a response is received from the remote client.

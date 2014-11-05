@@ -31,6 +31,7 @@ package leshan.server.request;
 
 import leshan.server.client.Client;
 import leshan.server.node.LwM2mPath;
+import leshan.server.response.ClientResponse;
 
 /**
  * A Lightweight M2M request.
@@ -39,14 +40,14 @@ public interface LwM2mRequest<T extends ClientResponse> {
 
     /**
      * Gets the LWM2M Client the request is targeted at.
-     * 
+     *
      * @return the client
      */
     Client getClient();
 
     /**
      * Gets the requested resource path.
-     * 
+     *
      * @return the request path
      */
     LwM2mPath getPath();

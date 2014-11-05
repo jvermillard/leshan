@@ -31,12 +31,13 @@ package leshan.server.request;
 
 import leshan.server.client.Client;
 import leshan.server.node.LwM2mPath;
+import leshan.server.response.DiscoverResponse;
 
 public class DiscoverRequest extends AbstractLwM2mRequest<DiscoverResponse> {
 
     /**
      * Creates a request for discovering the resources implemented by a client for a particular object type.
-     * 
+     *
      * @param client the LWM2M Client to discover resources for
      * @param objectId the object type
      */
@@ -46,7 +47,7 @@ public class DiscoverRequest extends AbstractLwM2mRequest<DiscoverResponse> {
 
     /**
      * Creates a request for discovering the resources implemented by a client for a particular object instance.
-     * 
+     *
      * @param client the LWM2M Client to discover resources for
      * @param objectId the object type
      * @param objectInstanceId the object instance
@@ -57,7 +58,7 @@ public class DiscoverRequest extends AbstractLwM2mRequest<DiscoverResponse> {
 
     /**
      * Creates a request for discovering the attributes of a particular resource implemented by a client.
-     * 
+     *
      * @param client the LWM2M Client to discover resources for
      * @param objectId the object type
      * @param objectInstanceId the object instance
@@ -70,7 +71,7 @@ public class DiscoverRequest extends AbstractLwM2mRequest<DiscoverResponse> {
     /**
      * Create a request for discovering the attributes of a particular object/instance/resource targeted by a specific
      * path.
-     * 
+     *
      * @param client the LWM2M Client to discover resources for
      * @param target the target path
      */

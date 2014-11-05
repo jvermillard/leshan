@@ -31,6 +31,7 @@ package leshan.server.request;
 
 import leshan.server.client.Client;
 import leshan.server.node.LwM2mPath;
+import leshan.server.response.ValueResponse;
 
 public class ObserveRequest extends AbstractLwM2mRequest<ValueResponse> {
 

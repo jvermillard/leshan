@@ -27,39 +27,37 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.request;
+package leshan.server.response;
 
-import java.util.Arrays;
-
-import leshan.LinkObject;
 import leshan.ResponseCode;
 import leshan.util.Validate;
 
-public class DiscoverResponse extends ClientResponse {
+/**
+ * A response to a server request.
+ */
+public class ClientResponse {
 
-    private final LinkObject[] links;
+    protected final ResponseCode code;
 
-    public DiscoverResponse(ResponseCode code) {
-        this(code, null);
-    }
-
-    public DiscoverResponse(ResponseCode code, LinkObject[] links) {
-        super(code);
-        if (ResponseCode.CONTENT.equals(code)) {
-            Validate.notNull(links);
-            this.links = Arrays.copyOf(links, links.length);
-        } else {
-            this.links = null;
-        }
+    public ClientResponse(final ResponseCode code) {
+        Validate.notNull(code);
+        this.code = code;
     }
 
     /**
-     * Get the list of {@link LinkObject} returned as response payload.
-     * 
-     * @return the object links or <code>null</code> if the client returned an error response.
+     * Gets the response code.
+     *
+     * @return the code
      */
-    public LinkObject[] getObjectLinks() {
-        return links != null ? links.clone() : null;
+    public final ResponseCode getCode() {
+        return this.code;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder();
+        builder.append("ClientResponse [code=").append(code).append("]");
+        return builder.toString();
     }
 
 }

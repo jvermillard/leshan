@@ -31,30 +31,31 @@ package leshan.server.request;
 
 import leshan.server.client.Client;
 import leshan.server.node.LwM2mPath;
+import leshan.server.response.ClientResponse;
 
 public class DeleteRequest extends AbstractLwM2mRequest<ClientResponse> {
 
     /**
      * Creates a request for deleting a particular object instance implemented by a client.
-     * 
+     *
      * @param client the LWM2M Client to delete the object instance on
      * @param objectId the object type
      * @param objectInstanceId the object instance
      */
-    public DeleteRequest(Client client, int objectId, int objectInstanceId) {
+    public DeleteRequest(final Client client, final int objectId, final int objectInstanceId) {
         this(client, new LwM2mPath(objectId, objectInstanceId));
     }
 
-    public DeleteRequest(Client client, String target) {
+    public DeleteRequest(final Client client, final String target) {
         super(client, new LwM2mPath(target));
     }
 
-    private DeleteRequest(Client client, LwM2mPath target) {
+    private DeleteRequest(final Client client, final LwM2mPath target) {
         super(client, target);
     }
 
     @Override
-    public void accept(LwM2mRequestVisitor visitor) {
+    public void accept(final LwM2mRequestVisitor visitor) {
         visitor.visit(this);
     }
 

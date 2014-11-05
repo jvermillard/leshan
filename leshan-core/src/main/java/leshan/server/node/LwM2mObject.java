@@ -36,21 +36,24 @@ import java.util.Map;
 import leshan.util.Validate;
 
 /**
- * An instance of {@link LwM2mObject}.
+ * The top level element in the LWM2M resource tree.
+ * <p>
+ * An Objects defines a grouping of Resources and may consist of multiple instances.
+ * </p>
  */
-public class LwM2mObjectInstance implements LwM2mNode {
+public class LwM2mObject implements LwM2mNode {
 
-    private final int id;
+    private int id;
 
-    private final Map<Integer, LwM2mResource> resources;
+    private final Map<Integer, LwM2mObjectInstance> instances;
 
-    public LwM2mObjectInstance(int id, LwM2mResource[] resources) {
-        Validate.notNull(resources);
+    public LwM2mObject(int id, LwM2mObjectInstance[] instances) {
+        Validate.notNull(instances);
 
         this.id = id;
-        this.resources = new HashMap<>(resources.length);
-        for (LwM2mResource resource : resources) {
-            this.resources.put(resource.getId(), resource);
+        this.instances = new HashMap<>(instances.length);
+        for (LwM2mObjectInstance instance : instances) {
+            this.instances.put(instance.getId(), instance);
         }
     }
 
@@ -68,26 +71,17 @@ public class LwM2mObjectInstance implements LwM2mNode {
     }
 
     /**
-     * Returns a map of resources by id.
-     * 
-     * @return the resources
+     * Returns a map of object intances by id.
+     *
+     * @return the instances
      */
-    public Map<Integer, LwM2mResource> getResources() {
-        return Collections.unmodifiableMap(resources);
+    public Map<Integer, LwM2mObjectInstance> getInstances() {
+        return Collections.unmodifiableMap(instances);
     }
 
     @Override
     public String toString() {
-        return String.format("LwM2mObjectInstance [id=%s, resources=%s]", id, resources);
-    }
-
-    public String prettyPrint() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("LwM2mObjectInstance [id=").append(id).append("]");
-        for (LwM2mResource r : resources.values()) {
-            builder.append("\n\t").append(r);
-        }
-        return builder.toString();
+        return String.format("LwM2mObject [id=%s, instances=%s]", id, instances);
     }
 
     @Override
@@ -95,26 +89,32 @@ public class LwM2mObjectInstance implements LwM2mNode {
         final int prime = 31;
         int result = 1;
         result = prime * result + id;
-        result = prime * result + ((resources == null) ? 0 : resources.hashCode());
+        result = prime * result + ((instances == null) ? 0 : instances.hashCode());
         return result;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
-        LwM2mObjectInstance other = (LwM2mObjectInstance) obj;
-        if (id != other.id)
+        }
+        LwM2mObject other = (LwM2mObject) obj;
+        if (id != other.id) {
             return false;
-        if (resources == null) {
-            if (other.resources != null)
+        }
+        if (instances == null) {
+            if (other.instances != null) {
                 return false;
-        } else if (!resources.equals(other.resources))
+            }
+        } else if (!instances.equals(other.instances)) {
             return false;
+        }
         return true;
     }
 

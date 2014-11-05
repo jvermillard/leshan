@@ -1,4 +1,4 @@
-package leshan.server.request;
+package leshan.server.response;
 
 import leshan.ResponseCode;
 
@@ -9,14 +9,14 @@ public class CreateResponse extends ClientResponse {
 	public CreateResponse(ResponseCode code) {
 		super(code);
 	}
-	
+
 	public CreateResponse(ResponseCode code, String location) {
 		super(code);
 		this.location = location;
 	}
-	
+
 	public String getLocation() {
 		return location;
 	}
-	
+
 }

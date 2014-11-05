@@ -87,7 +87,7 @@ public class Resources {
 
     /**
      * Returns the description of a given resource.
-     * 
+     *
      * @param objectId the object identifier
      * @param resourceId the resource identifier
      * @return the resource specification or <code>null</code> if not found
@@ -102,7 +102,7 @@ public class Resources {
 
     /**
      * Returns the description of a given object.
-     * 
+     *
      * @param objectId the object identifier
      * @return the object specification or <code>null</code> if not found
      */

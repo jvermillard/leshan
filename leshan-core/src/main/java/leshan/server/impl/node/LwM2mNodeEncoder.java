@@ -65,7 +65,7 @@ public class LwM2mNodeEncoder {
 
     /**
      * Serializes a {@link LwM2mNode} with the given content format.
-     * 
+     *
      * @param node the object/instance/resource to serialize
      * @param format the content format
      * @param path the path of the node to serialize

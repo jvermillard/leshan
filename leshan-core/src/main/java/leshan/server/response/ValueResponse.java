@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Sierra Wireless
+ * Copyright (c) 2013, Sierra Wireless
  *
  * All rights reserved.
  *
@@ -27,13 +27,36 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.request;
+package leshan.server.response;
 
-/**
- * Functional interface consuming a response to a LWM2M request
- */
-public interface ResponseConsumer<T extends ClientResponse> {
-    
-    void accept(T response);
+import leshan.ResponseCode;
+import leshan.server.node.LwM2mNode;
+import leshan.util.Validate;
+
+public class ValueResponse extends ClientResponse {
+
+    private final LwM2mNode content;
+
+    public ValueResponse(ResponseCode code) {
+        this(code, null);
+    }
+
+    public ValueResponse(ResponseCode code, LwM2mNode content) {
+        super(code);
+
+        if (ResponseCode.CONTENT.equals(code)) {
+            Validate.notNull(content);
+        }
+        this.content = content;
+    }
+
+    /**
+     * Get the {@link LwM2mNode} value returned as response payload.
+     *
+     * @return the value or <code>null</code> if the client returned an error response.
+     */
+    public LwM2mNode getContent() {
+        return content;
+    }
 
 }

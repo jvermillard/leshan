@@ -37,7 +37,7 @@ import leshan.ResponseCode;
 import leshan.server.node.LwM2mObjectInstance;
 import leshan.server.node.LwM2mResource;
 import leshan.server.node.Value;
-import leshan.server.request.CreateResponse;
+import leshan.server.response.CreateResponse;
 
 import org.junit.After;
 import org.junit.Test;

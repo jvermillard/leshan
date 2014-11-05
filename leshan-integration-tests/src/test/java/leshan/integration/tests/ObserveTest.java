@@ -47,7 +47,7 @@ import leshan.server.node.LwM2mResource;
 import leshan.server.node.Value;
 import leshan.server.observation.Observation;
 import leshan.server.observation.ObservationRegistryListener;
-import leshan.server.request.ValueResponse;
+import leshan.server.response.ValueResponse;
 
 import org.junit.After;
 import org.junit.Before;
