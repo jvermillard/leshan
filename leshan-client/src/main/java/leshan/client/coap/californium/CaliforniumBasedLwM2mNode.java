@@ -55,6 +55,10 @@ public abstract class CaliforniumBasedLwM2mNode<T extends LwM2mClientNode> exten
         setObservable(true);
         this.node = node;
     }
+    
+    public T getLwM2mClientObject() {
+        return node;
+    }
 
     @Override
     public void handleGET(final CoapExchange coapExchange) {
