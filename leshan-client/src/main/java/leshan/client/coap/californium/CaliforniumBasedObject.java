@@ -48,7 +48,7 @@ public class CaliforniumBasedObject extends CaliforniumBasedLwM2mNode<LwM2mClien
             createMandatoryObjectInstance(def);
         }
     }
-
+    
     private void createMandatoryObjectInstance(final LwM2mClientObjectDefinition def) {
         LwM2mClientObjectInstance instance = node.createMandatoryInstance();
         onSuccessfulCreate(instance);

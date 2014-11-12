@@ -99,9 +99,41 @@
 				</executions>
 				<configuration>
 					<instructions>
-						<Export-Package>leshan.client,leshan.client.bootstrap,leshan.client.coap,leshan.client.coap.californium,leshan.client.exchange,leshan.client.exchange.aggregate,leshan.client.register,leshan.client.request,leshan.client.resource,leshan.client.resource.bool,leshan.client.resource.decimal,leshan.client.resource.integer,leshan.client.resource.multiple,leshan.client.resource.opaque,leshan.client.resource.string,leshan.client.resource.time,leshan.client.response,leshan.client.util</Export-Package>
-						<Embed-Dependency>*;scope=compile|runtime</Embed-Dependency>
-						<Embed-Transitive>true</Embed-Transitive>
+						<Export-Package>
+						    leshan.client,
+						    leshan.client.bootstrap,
+						    leshan.client.coap.californium,
+						    leshan.client.exchange,
+						    leshan.client.exchange.aggregate,
+						    leshan.client.register,
+						    leshan.client.request,
+						    leshan.client.resource,
+						    leshan.client.resource.bool,
+						    leshan.client.resource.decimal,
+						    leshan.client.resource.integer,
+						    leshan.client.resource.multiple,
+						    leshan.client.resource.opaque,
+						    leshan.client.resource.string,
+						    leshan.client.resource.time,
+						    leshan.client.response,
+						    leshan.client.util
+						</Export-Package>
+                        <Import-Package>
+                            javax.crypto,
+                            javax.crypto.spec,
+                            javax.security.auth.x500,
+                            org.slf4j;version="0.0.0",
+                            org.eclipse.californium.core,
+                            org.eclipse.californium.core.coap,
+                            org.eclipse.californium.core.network,
+                            org.eclipse.californium.core.network.interceptors,
+                            org.eclipse.californium.core.server,
+                            org.eclipse.californium.core.server.resources,
+                            org.eclipse.californium.core.observe,
+                            org.eclipse.californium.elements
+                        </Import-Package>
+<!--                         <Embed-Transitive>true</Embed-Transitive>  -->
+						<Embed-Dependency>*;scope=compile|runtime;inline=true;artifactId=!californium-core|scandium|slf4j-api</Embed-Dependency>
 					</instructions>
 				</configuration>
 			</plugin>
