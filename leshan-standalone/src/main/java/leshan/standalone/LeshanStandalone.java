@@ -34,6 +34,7 @@ import java.net.InetSocketAddress;
 import leshan.server.californium.LeshanServer;
 import leshan.standalone.servlet.ClientServlet;
 import leshan.standalone.servlet.EventServlet;
+import leshan.standalone.servlet.ObjectSpecServlet;
 import leshan.standalone.servlet.SecurityServlet;
 
 import org.eclipse.jetty.server.Server;
@@ -61,8 +62,8 @@ public class LeshanStandalone {
             String[] add = iface.split(":");
             String[] adds = ifaces.split(":");
             // user specified the iface to be bound
-            lwServer = new LeshanServer(new InetSocketAddress(add[0], Integer.parseInt(add[1])),
-                    new InetSocketAddress(adds[0], Integer.parseInt(adds[1])));
+            lwServer = new LeshanServer(new InetSocketAddress(add[0], Integer.parseInt(add[1])), new InetSocketAddress(
+                    adds[0], Integer.parseInt(adds[1])));
         }
         lwServer.start();
 
@@ -91,6 +92,9 @@ public class LeshanStandalone {
 
         ServletHolder securityServletHolder = new ServletHolder(new SecurityServlet(lwServer.getSecurityRegistry()));
         root.addServlet(securityServletHolder, "/api/security/*");
+
+        ServletHolder objectSpecServletHolder = new ServletHolder(new ObjectSpecServlet());
+        root.addServlet(objectSpecServletHolder, "/api/objectspecs/*");
 
         // Start jetty
         try {
