@@ -32,18 +32,24 @@
 
 package leshan.integration.tests;
 
-import static leshan.ResponseCode.*;
-import static leshan.integration.tests.IntegrationTestHelper.*;
-import leshan.server.node.LwM2mObject;
-import leshan.server.node.LwM2mObjectInstance;
-import leshan.server.request.ClientResponse;
+import static leshan.ResponseCode.CONTENT;
+import static leshan.ResponseCode.DELETED;
+import static leshan.ResponseCode.NOT_FOUND;
+import static leshan.integration.tests.IntegrationTestHelper.GOOD_OBJECT_ID;
+import static leshan.integration.tests.IntegrationTestHelper.GOOD_OBJECT_INSTANCE_ID;
+import static leshan.integration.tests.IntegrationTestHelper.assertEmptyResponse;
+import static leshan.integration.tests.IntegrationTestHelper.assertResponse;
+import static leshan.integration.tests.IntegrationTestHelper.createGoodObjectInstance;
+import leshan.core.node.LwM2mObject;
+import leshan.core.node.LwM2mObjectInstance;
+import leshan.core.response.ClientResponse;
 
 import org.junit.After;
 import org.junit.Test;
 
 public class DeleteTest {
 
-    private IntegrationTestHelper helper = new IntegrationTestHelper();
+    private final IntegrationTestHelper helper = new IntegrationTestHelper();
 
     @After
     public void stop() {

@@ -29,8 +29,8 @@
  */
 package leshan.server.observation;
 
+import leshan.core.node.LwM2mPath;
 import leshan.server.client.Client;
-import leshan.server.node.LwM2mPath;
 
 /**
  * An observation of a resource provided by a LWM2M Client.

@@ -29,11 +29,13 @@
  */
 package leshan.server.request;
 
+import leshan.core.node.LwM2mNode;
+import leshan.core.node.LwM2mPath;
+import leshan.core.objectspec.ResourceSpec;
+import leshan.core.objectspec.Resources;
+import leshan.core.request.ContentFormat;
+import leshan.core.response.ClientResponse;
 import leshan.server.client.Client;
-import leshan.server.impl.objectspec.ResourceSpec;
-import leshan.server.impl.objectspec.Resources;
-import leshan.server.node.LwM2mNode;
-import leshan.server.node.LwM2mPath;
 import leshan.util.Validate;
 
 /**
@@ -47,17 +49,17 @@ public class WriteRequest extends AbstractLwM2mRequest<ClientResponse> {
 
     private final boolean replaceRequest;
 
-    public WriteRequest(Client client, int objectId, int objectInstanceId, int resourceId, LwM2mNode node,
-            ContentFormat contentFormat, boolean replaceResources) {
+    public WriteRequest(final Client client, final int objectId, final int objectInstanceId, final int resourceId, final LwM2mNode node,
+            final ContentFormat contentFormat, final boolean replaceResources) {
         this(client, new LwM2mPath(objectId, objectInstanceId, resourceId), node, contentFormat, replaceResources);
     }
 
-    public WriteRequest(Client client, String target, LwM2mNode node, ContentFormat contentFormat,
-            boolean replaceResources) {
+    public WriteRequest(final Client client, final String target, final LwM2mNode node, final ContentFormat contentFormat,
+            final boolean replaceResources) {
         this(client, new LwM2mPath(target), node, contentFormat, replaceResources);
     }
 
-    private WriteRequest(Client client, LwM2mPath target, LwM2mNode node, ContentFormat format, boolean replaceResources) {
+    private WriteRequest(final Client client, final LwM2mPath target, final LwM2mNode node, ContentFormat format, final boolean replaceResources) {
         super(client, target);
         Validate.notNull(node);
 
@@ -66,7 +68,7 @@ public class WriteRequest extends AbstractLwM2mRequest<ClientResponse> {
             if (!getPath().isResource()) {
                 throw new IllegalArgumentException("Text format must be used only for single resources");
             } else {
-                ResourceSpec description = Resources.getResourceSpec(getPath().getObjectId(), getPath().getObjectId());
+                final ResourceSpec description = Resources.getResourceSpec(getPath().getObjectId(), getPath().getObjectId());
                 if (description != null && description.multiple) {
                     throw new IllegalArgumentException("Text format must be used only for single resources");
                 }
@@ -77,11 +79,12 @@ public class WriteRequest extends AbstractLwM2mRequest<ClientResponse> {
         if (format == null) {
             // use text for single resource
             if (getPath().isResource()) {
-                ResourceSpec description = Resources.getResourceSpec(getPath().getObjectId(), getPath().getObjectId());
-                if (description != null && !description.multiple)
-                    format = ContentFormat.TEXT;
-                else
-                    format = ContentFormat.TLV;
+                final ResourceSpec description = Resources.getResourceSpec(getPath().getObjectId(), getPath().getObjectId());
+                if (description != null && !description.multiple) {
+					format = ContentFormat.TEXT;
+				} else {
+					format = ContentFormat.TLV;
+				}
             } else {
                 format = ContentFormat.TLV;
             }
@@ -95,7 +98,7 @@ public class WriteRequest extends AbstractLwM2mRequest<ClientResponse> {
     /**
      * Checks whether this write request is supposed to replace all resources or do a partial update only (see section
      * 5.3.3 of the LW M2M spec).
-     * 
+     *
      * @return <code>true</code> if all resources are to be replaced
      */
     public boolean isReplaceRequest() {
@@ -111,7 +114,7 @@ public class WriteRequest extends AbstractLwM2mRequest<ClientResponse> {
     }
 
     @Override
-    public void accept(LwM2mRequestVisitor visitor) {
+    public void accept(final LwM2mRequestVisitor visitor) {
         visitor.visit(this);
     }
 

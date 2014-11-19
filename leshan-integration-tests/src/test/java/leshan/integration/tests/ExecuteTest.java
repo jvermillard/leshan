@@ -33,10 +33,13 @@
 package leshan.integration.tests;
 
 import static leshan.ResponseCode.METHOD_NOT_ALLOWED;
-import static leshan.integration.tests.IntegrationTestHelper.*;
+import static leshan.integration.tests.IntegrationTestHelper.EXECUTABLE_RESOURCE_ID;
+import static leshan.integration.tests.IntegrationTestHelper.GOOD_OBJECT_ID;
+import static leshan.integration.tests.IntegrationTestHelper.GOOD_OBJECT_INSTANCE_ID;
+import static leshan.integration.tests.IntegrationTestHelper.SECOND_RESOURCE_ID;
 import leshan.ResponseCode;
-import leshan.server.request.ClientResponse;
-import leshan.server.request.ContentFormat;
+import leshan.core.request.ContentFormat;
+import leshan.core.response.ClientResponse;
 import leshan.server.request.ExecuteRequest;
 
 import org.junit.After;
@@ -44,7 +47,7 @@ import org.junit.Test;
 
 public class ExecuteTest {
 
-    private IntegrationTestHelper helper = new IntegrationTestHelper();
+    private final IntegrationTestHelper helper = new IntegrationTestHelper();
 
     @After
     public void stop() {

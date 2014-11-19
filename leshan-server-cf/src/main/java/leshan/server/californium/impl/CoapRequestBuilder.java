@@ -29,9 +29,9 @@
  */
 package leshan.server.californium.impl;
 
+import leshan.core.node.LwM2mPath;
+import leshan.core.node.codec.LwM2mNodeEncoder;
 import leshan.server.client.Client;
-import leshan.server.impl.node.LwM2mNodeEncoder;
-import leshan.server.node.LwM2mPath;
 import leshan.server.request.CreateRequest;
 import leshan.server.request.DeleteRequest;
 import leshan.server.request.DiscoverRequest;

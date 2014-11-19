@@ -37,7 +37,7 @@ import static leshan.integration.tests.IntegrationTestHelper.*;
 import static org.junit.Assert.assertEquals;
 import leshan.LinkObject;
 import leshan.ResponseCode;
-import leshan.server.request.DiscoverResponse;
+import leshan.core.response.DiscoverResponse;
 
 import org.junit.After;
 import org.junit.Test;

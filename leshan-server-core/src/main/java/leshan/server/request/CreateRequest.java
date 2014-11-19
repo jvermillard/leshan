@@ -29,10 +29,12 @@
  */
 package leshan.server.request;
 
+import leshan.core.node.LwM2mNode;
+import leshan.core.node.LwM2mObjectInstance;
+import leshan.core.node.LwM2mPath;
+import leshan.core.request.ContentFormat;
+import leshan.core.response.CreateResponse;
 import leshan.server.client.Client;
-import leshan.server.node.LwM2mNode;
-import leshan.server.node.LwM2mObjectInstance;
-import leshan.server.node.LwM2mPath;
 
 /**
  * A Lightweight M2M request for creating resources on a client.

@@ -31,25 +31,25 @@ package leshan.server.californium.impl;
 
 import leshan.LinkObject;
 import leshan.ResponseCode;
+import leshan.core.node.LwM2mNode;
+import leshan.core.node.LwM2mPath;
+import leshan.core.node.codec.InvalidValueException;
+import leshan.core.node.codec.LwM2mNodeDecoder;
+import leshan.core.request.ContentFormat;
+import leshan.core.response.ClientResponse;
+import leshan.core.response.CreateResponse;
+import leshan.core.response.DiscoverResponse;
+import leshan.core.response.ValueResponse;
 import leshan.server.client.Client;
-import leshan.server.impl.node.InvalidValueException;
-import leshan.server.impl.node.LwM2mNodeDecoder;
-import leshan.server.node.LwM2mNode;
-import leshan.server.node.LwM2mPath;
 import leshan.server.observation.ObservationRegistry;
-import leshan.server.request.ClientResponse;
-import leshan.server.request.ContentFormat;
 import leshan.server.request.CreateRequest;
-import leshan.server.request.CreateResponse;
 import leshan.server.request.DeleteRequest;
 import leshan.server.request.DiscoverRequest;
-import leshan.server.request.DiscoverResponse;
 import leshan.server.request.ExecuteRequest;
 import leshan.server.request.LwM2mRequestVisitor;
 import leshan.server.request.ObserveRequest;
 import leshan.server.request.ReadRequest;
 import leshan.server.request.ResourceAccessException;
-import leshan.server.request.ValueResponse;
 import leshan.server.request.WriteAttributesRequest;
 import leshan.server.request.WriteRequest;
 import leshan.util.Validate;
@@ -66,11 +66,11 @@ public class LwM2mResponseBuilder<T extends ClientResponse> implements LwM2mRequ
     private static final Logger LOG = LoggerFactory.getLogger(LwM2mResponseBuilder.class);
 
     private ClientResponse lwM2mresponse;
-    private Request coapRequest;
-    private Response coapResponse;
-    private ObservationRegistry observationRegistry;
+    private final Request coapRequest;
+    private final Response coapResponse;
+    private final ObservationRegistry observationRegistry;
 
-    public static ResponseCode fromCoapCode(int code) {
+    public static ResponseCode fromCoapCode(final int code) {
         Validate.notNull(code);
 
         if (code == CoAP.ResponseCode.CREATED.value) {
@@ -96,7 +96,7 @@ public class LwM2mResponseBuilder<T extends ClientResponse> implements LwM2mRequ
         }
     }
 
-    public LwM2mResponseBuilder(Request coapRequest, Response coapResponse, ObservationRegistry observationRegistry) {
+    public LwM2mResponseBuilder(final Request coapRequest, final Response coapResponse, final ObservationRegistry observationRegistry) {
         super();
         this.coapRequest = coapRequest;
         this.coapResponse = coapResponse;
@@ -104,7 +104,7 @@ public class LwM2mResponseBuilder<T extends ClientResponse> implements LwM2mRequ
     }
 
     @Override
-    public void visit(ReadRequest request) {
+    public void visit(final ReadRequest request) {
         switch (coapResponse.getCode()) {
         case CONTENT:
             lwM2mresponse = buildContentResponse(request.getPath(), coapResponse);
@@ -120,7 +120,7 @@ public class LwM2mResponseBuilder<T extends ClientResponse> implements LwM2mRequ
     }
 
     @Override
-    public void visit(DiscoverRequest request) {
+    public void visit(final DiscoverRequest request) {
         switch (coapResponse.getCode()) {
         case CONTENT:
             LinkObject[] links = null;
@@ -145,7 +145,7 @@ public class LwM2mResponseBuilder<T extends ClientResponse> implements LwM2mRequ
     }
 
     @Override
-    public void visit(WriteRequest request) {
+    public void visit(final WriteRequest request) {
         switch (coapResponse.getCode()) {
         case CHANGED:
             lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
@@ -162,7 +162,7 @@ public class LwM2mResponseBuilder<T extends ClientResponse> implements LwM2mRequ
     }
 
     @Override
-    public void visit(WriteAttributesRequest request) {
+    public void visit(final WriteAttributesRequest request) {
         switch (coapResponse.getCode()) {
         case CHANGED:
             lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
@@ -179,7 +179,7 @@ public class LwM2mResponseBuilder<T extends ClientResponse> implements LwM2mRequ
     }
 
     @Override
-    public void visit(ExecuteRequest request) {
+    public void visit(final ExecuteRequest request) {
         switch (coapResponse.getCode()) {
         case CHANGED:
             lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
@@ -197,7 +197,7 @@ public class LwM2mResponseBuilder<T extends ClientResponse> implements LwM2mRequ
     }
 
     @Override
-    public void visit(CreateRequest request) {
+    public void visit(final CreateRequest request) {
         switch (coapResponse.getCode()) {
         case CREATED:
             lwM2mresponse = new CreateResponse(fromCoapCode(coapResponse.getCode().value), coapResponse.getOptions()
@@ -215,7 +215,7 @@ public class LwM2mResponseBuilder<T extends ClientResponse> implements LwM2mRequ
     }
 
     @Override
-    public void visit(DeleteRequest request) {
+    public void visit(final DeleteRequest request) {
         switch (coapResponse.getCode()) {
         case DELETED:
             lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
@@ -231,7 +231,7 @@ public class LwM2mResponseBuilder<T extends ClientResponse> implements LwM2mRequ
     }
 
     @Override
-    public void visit(ObserveRequest request) {
+    public void visit(final ObserveRequest request) {
         switch (coapResponse.getCode()) {
         case CHANGED:
             // ignore changed response (this is probably a NOTIFY)
@@ -241,7 +241,7 @@ public class LwM2mResponseBuilder<T extends ClientResponse> implements LwM2mRequ
             lwM2mresponse = buildContentResponse(request.getPath(), coapResponse);
             if (coapResponse.getOptions().hasObserve()) {
                 // observe request succeed so we can add and observation to registry
-                CaliforniumObservation observation = new CaliforniumObservation(coapRequest, request.getClient(),
+                final CaliforniumObservation observation = new CaliforniumObservation(coapRequest, request.getClient(),
                         request.getPath());
                 coapRequest.addMessageObserver(observation);
                 observationRegistry.addObservation(observation);
@@ -256,14 +256,14 @@ public class LwM2mResponseBuilder<T extends ClientResponse> implements LwM2mRequ
         }
     }
 
-    private ValueResponse buildContentResponse(LwM2mPath path, Response coapResponse) {
-        ResponseCode code = ResponseCode.CONTENT;
+    private ValueResponse buildContentResponse(final LwM2mPath path, final Response coapResponse) {
+        final ResponseCode code = ResponseCode.CONTENT;
         LwM2mNode content;
         try {
             content = LwM2mNodeDecoder.decode(coapResponse.getPayload(),
                     ContentFormat.fromCode(coapResponse.getOptions().getContentFormat()), path);
-        } catch (InvalidValueException e) {
-            String msg = String.format("[%s] ([%s])", e.getMessage(), e.getPath().toString());
+        } catch (final InvalidValueException e) {
+            final String msg = String.format("[%s] ([%s])", e.getMessage(), e.getPath().toString());
             throw new ResourceAccessException(code, path.toString(), msg, e);
         }
         return new ValueResponse(code, content);
@@ -276,13 +276,13 @@ public class LwM2mResponseBuilder<T extends ClientResponse> implements LwM2mRequ
 
     /**
      * Throws a generic {@link ResourceAccessException} indicating that the client returned an unexpected response code.
-     * 
+     *
      * @param request
      * @param coapRequest
      * @param coapResponse
      */
-    private void handleUnexpectedResponseCode(Client client, Request coapRequest, Response coapResponse) {
-        String msg = String.format("Client [%s] returned unexpected response code [%s]", client.getEndpoint(),
+    private void handleUnexpectedResponseCode(final Client client, final Request coapRequest, final Response coapResponse) {
+        final String msg = String.format("Client [%s] returned unexpected response code [%s]", client.getEndpoint(),
                 coapResponse.getCode());
         throw new ResourceAccessException(fromCoapCode(coapResponse.getCode().value), coapRequest.getURI(), msg);
     }

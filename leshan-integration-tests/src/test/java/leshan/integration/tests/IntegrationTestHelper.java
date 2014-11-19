@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
- * 
+ *
  *
  * All rights reserved.
  *
@@ -53,27 +53,27 @@ import leshan.client.resource.multiple.MultipleLwM2mResource;
 import leshan.client.resource.string.StringLwM2mExchange;
 import leshan.client.resource.string.StringLwM2mResource;
 import leshan.client.response.ExecuteResponse;
+import leshan.core.node.LwM2mNode;
+import leshan.core.node.LwM2mObjectInstance;
+import leshan.core.node.LwM2mResource;
+import leshan.core.node.Value;
+import leshan.core.request.ContentFormat;
+import leshan.core.response.ClientResponse;
+import leshan.core.response.CreateResponse;
+import leshan.core.response.DiscoverResponse;
+import leshan.core.response.ValueResponse;
 import leshan.server.LwM2mServer;
 import leshan.server.californium.LeshanServer;
 import leshan.server.client.Client;
 import leshan.server.impl.ClientRegistryImpl;
 import leshan.server.impl.ObservationRegistryImpl;
 import leshan.server.impl.SecurityRegistryImpl;
-import leshan.server.node.LwM2mNode;
-import leshan.server.node.LwM2mObjectInstance;
-import leshan.server.node.LwM2mResource;
-import leshan.server.node.Value;
 import leshan.server.observation.ObservationRegistry;
-import leshan.server.request.ClientResponse;
-import leshan.server.request.ContentFormat;
 import leshan.server.request.CreateRequest;
-import leshan.server.request.CreateResponse;
 import leshan.server.request.DeleteRequest;
 import leshan.server.request.DiscoverRequest;
-import leshan.server.request.DiscoverResponse;
 import leshan.server.request.ObserveRequest;
 import leshan.server.request.ReadRequest;
-import leshan.server.request.ValueResponse;
 import leshan.server.request.WriteAttributesRequest;
 import leshan.server.request.WriteRequest;
 import leshan.server.security.SecurityRegistry;
@@ -83,7 +83,7 @@ import org.eclipse.californium.core.coap.LinkFormat;
 
 /**
  * Helper for running a server and executing a client against it.
- * 
+ *
  */
 public final class IntegrationTestHelper {
 
@@ -119,7 +119,7 @@ public final class IntegrationTestHelper {
     private final String clientDataModel = "</lwm2m>;rt=\"oma.lwm2m\", </lwm2m/1/101>, </lwm2m/1/102>, </lwm2m/2/0>, </lwm2m/2/1>, </lwm2m/2/2>, </lwm2m/3/0>, </lwm2m/4/0>, </lwm2m/5>";
 
     LwM2mServer server;
-    private ClientRegistryImpl clientRegistry;
+    private final ClientRegistryImpl clientRegistry;
 
     Map<String, String> clientParameters = new HashMap<>();
     LwM2mClient client;
@@ -132,7 +132,7 @@ public final class IntegrationTestHelper {
 
     Set<WebLink> objectsAndInstances = LinkFormat.parse(clientDataModel);
 
-    private InetSocketAddress serverAddress = new InetSocketAddress(5683);
+    private final InetSocketAddress serverAddress = new InetSocketAddress(5683);
 
     public IntegrationTestHelper() {
         final InetSocketAddress serverAddressSecure = new InetSocketAddress(5684);

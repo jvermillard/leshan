@@ -34,10 +34,10 @@ package leshan.integration.tests;
 
 import static org.junit.Assert.assertEquals;
 import leshan.ResponseCode;
-import leshan.server.node.LwM2mObjectInstance;
-import leshan.server.node.LwM2mResource;
-import leshan.server.node.Value;
-import leshan.server.request.CreateResponse;
+import leshan.core.node.LwM2mObjectInstance;
+import leshan.core.node.LwM2mResource;
+import leshan.core.node.Value;
+import leshan.core.response.CreateResponse;
 
 import org.junit.After;
 import org.junit.Test;

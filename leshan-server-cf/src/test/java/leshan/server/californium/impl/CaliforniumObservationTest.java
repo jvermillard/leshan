@@ -31,9 +31,9 @@ package leshan.server.californium.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import leshan.server.node.LwM2mNode;
-import leshan.server.node.LwM2mPath;
-import leshan.server.node.LwM2mResource;
+import leshan.core.node.LwM2mNode;
+import leshan.core.node.LwM2mPath;
+import leshan.core.node.LwM2mResource;
 import leshan.server.observation.Observation;
 import leshan.server.observation.ObservationListener;
 

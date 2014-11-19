@@ -30,39 +30,40 @@
 package leshan.server.request;
 
 import leshan.ObserveSpec;
+import leshan.core.node.LwM2mPath;
+import leshan.core.response.ClientResponse;
 import leshan.server.client.Client;
-import leshan.server.node.LwM2mPath;
 import leshan.util.Validate;
 
 public class WriteAttributesRequest extends AbstractLwM2mRequest<ClientResponse> {
 
     private final ObserveSpec observeSpec;
 
-    public WriteAttributesRequest(Client client, int objectId, ObserveSpec observeSpec) {
+    public WriteAttributesRequest(final Client client, final int objectId, final ObserveSpec observeSpec) {
         this(client, new LwM2mPath(objectId), observeSpec);
     }
 
-    public WriteAttributesRequest(Client client, int objectId, int objectInstanceId, ObserveSpec observeSpec) {
+    public WriteAttributesRequest(final Client client, final int objectId, final int objectInstanceId, final ObserveSpec observeSpec) {
         this(client, new LwM2mPath(objectId, objectInstanceId), observeSpec);
     }
 
-    public WriteAttributesRequest(Client client, int objectId, int objectInstanceId, int resourceId,
-            ObserveSpec observeSpec) {
+    public WriteAttributesRequest(final Client client, final int objectId, final int objectInstanceId, final int resourceId,
+            final ObserveSpec observeSpec) {
         this(client, new LwM2mPath(objectId, objectInstanceId, resourceId), observeSpec);
     }
 
-    public WriteAttributesRequest(Client client, String path, ObserveSpec observeSpec) {
+    public WriteAttributesRequest(final Client client, final String path, final ObserveSpec observeSpec) {
         this(client, new LwM2mPath(path), observeSpec);
     }
 
-    private WriteAttributesRequest(Client client, LwM2mPath path, ObserveSpec observeSpec) {
+    private WriteAttributesRequest(final Client client, final LwM2mPath path, final ObserveSpec observeSpec) {
         super(client, path);
         Validate.notNull(observeSpec);
         this.observeSpec = observeSpec;
     }
 
     @Override
-    public void accept(LwM2mRequestVisitor visitor) {
+    public void accept(final LwM2mRequestVisitor visitor) {
         visitor.visit(this);
     }
 
