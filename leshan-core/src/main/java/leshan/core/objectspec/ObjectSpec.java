@@ -29,6 +29,7 @@
  */
 package leshan.core.objectspec;
 
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -51,7 +52,7 @@ public class ObjectSpec {
         this.description = description;
         this.multiple = multiple;
         this.mandatory = mandatory;
-        this.resources = resources;
+        this.resources = Collections.unmodifiableMap(resources);
     }
 
     @Override
