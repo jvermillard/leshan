@@ -101,7 +101,9 @@ lwClientControllers.controller('ClientDetailCtrl', [
             $scope.client = data;
 
             // update resource tree with client details
-            $scope.objects = lwResources.buildResourceTree($scope.client.objectLinks);
+            lwResources.buildResourceTree($scope.client.objectLinks,function (objects){
+                $scope.objects = objects;
+            });
 
             // listen for clients registration/deregistration/observe
             $scope.eventsource = new EventSource('event?ep=' + $routeParams.clientId);
@@ -110,7 +112,9 @@ lwClientControllers.controller('ClientDetailCtrl', [
                 $scope.$apply(function() {
                     $scope.deregistered = false;
                     $scope.client = JSON.parse(msg.data);
-                    $scope.objects = lwResources.buildResourceTree($scope.client.objectLinks);
+                    lwResources.buildResourceTree($scope.client.objectLinks,function (objects){
+                        $scope.objects = objects;
+                    });
                 });
             }
             $scope.eventsource.addEventListener('REGISTRATION', registerCallback, false);
