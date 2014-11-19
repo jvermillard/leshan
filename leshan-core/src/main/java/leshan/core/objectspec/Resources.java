@@ -33,6 +33,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -108,5 +110,12 @@ public class Resources {
      */
     public static ObjectSpec getObjectSpec(int objectId) {
         return OBJECTS.get(objectId);
+    }
+
+    /**
+     * @return all the objects descriptions known.
+     */
+    public static Collection<ObjectSpec> getObjectSpecs() {
+        return Collections.unmodifiableCollection(OBJECTS.values());
     }
 }
