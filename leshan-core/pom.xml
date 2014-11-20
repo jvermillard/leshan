@@ -80,7 +80,14 @@
                     <instructions>
                         <Export-Package>
                             leshan,
+                            leshan.core.node,
+                            leshan.core.node.codec,
+                            leshan.core.objectspec,
+                            leshan.core.objectspec.json,
+                            leshan.core.request,
+                            leshan.core.response,
                             leshan.tlv,
+                            leshan.util,
                         </Export-Package>
                         <Import-Package>
                             org.eclipse.californium.*;version="[1.0.0, 1.1)",
