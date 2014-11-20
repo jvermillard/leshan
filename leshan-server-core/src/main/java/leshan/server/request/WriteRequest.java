@@ -49,17 +49,18 @@ public class WriteRequest extends AbstractLwM2mRequest<ClientResponse> {
 
     private final boolean replaceRequest;
 
-    public WriteRequest(final Client client, final int objectId, final int objectInstanceId, final int resourceId, final LwM2mNode node,
-            final ContentFormat contentFormat, final boolean replaceResources) {
+    public WriteRequest(final Client client, final int objectId, final int objectInstanceId, final int resourceId,
+            final LwM2mNode node, final ContentFormat contentFormat, final boolean replaceResources) {
         this(client, new LwM2mPath(objectId, objectInstanceId, resourceId), node, contentFormat, replaceResources);
     }
 
-    public WriteRequest(final Client client, final String target, final LwM2mNode node, final ContentFormat contentFormat,
-            final boolean replaceResources) {
+    public WriteRequest(final Client client, final String target, final LwM2mNode node,
+            final ContentFormat contentFormat, final boolean replaceResources) {
         this(client, new LwM2mPath(target), node, contentFormat, replaceResources);
     }
 
-    private WriteRequest(final Client client, final LwM2mPath target, final LwM2mNode node, ContentFormat format, final boolean replaceResources) {
+    private WriteRequest(final Client client, final LwM2mPath target, final LwM2mNode node, ContentFormat format,
+            final boolean replaceResources) {
         super(client, target);
         Validate.notNull(node);
 
@@ -68,7 +69,8 @@ public class WriteRequest extends AbstractLwM2mRequest<ClientResponse> {
             if (!getPath().isResource()) {
                 throw new IllegalArgumentException("Text format must be used only for single resources");
             } else {
-                final ResourceSpec description = Resources.getResourceSpec(getPath().getObjectId(), getPath().getObjectId());
+                final ResourceSpec description = Resources.getResourceSpec(getPath().getObjectId(), getPath()
+                        .getResourceId());
                 if (description != null && description.multiple) {
                     throw new IllegalArgumentException("Text format must be used only for single resources");
                 }
@@ -79,12 +81,13 @@ public class WriteRequest extends AbstractLwM2mRequest<ClientResponse> {
         if (format == null) {
             // use text for single resource
             if (getPath().isResource()) {
-                final ResourceSpec description = Resources.getResourceSpec(getPath().getObjectId(), getPath().getObjectId());
+                final ResourceSpec description = Resources.getResourceSpec(getPath().getObjectId(), getPath()
+                        .getResourceId());
                 if (description != null && !description.multiple) {
-					format = ContentFormat.TEXT;
-				} else {
-					format = ContentFormat.TLV;
-				}
+                    format = ContentFormat.TEXT;
+                } else {
+                    format = ContentFormat.TLV;
+                }
             } else {
                 format = ContentFormat.TLV;
             }
