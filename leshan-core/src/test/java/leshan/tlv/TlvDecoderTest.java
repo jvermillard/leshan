@@ -72,4 +72,15 @@ public class TlvDecoderTest {
         }
         return bytes;
     }
+    
+    @Test
+    public void testHexStringToByteArray()
+    {
+        String   dataStr = "C800144F70656E204D6F62696C6520416C6C69616E6365C801164C69676874776569676874204D324D20436C69656E74C80209333435303030313233C303312E30860641000141010588070842000ED842011388870841007D42010384C10964C10A0F830B410000C40D5182428FC60E2B30323A3030C10F55";
+        byte[] dataBytes1 = com.sun.org.apache.xerces.internal.impl.dv.util.HexBin.decode((String) dataStr);
+        byte[] dataBytes2 = javax.xml.bind.DatatypeConverter.parseHexBinary(dataStr);
+        byte[] dataBytes3 = hexStringToByteArray(dataStr);
+        Assert.assertArrayEquals(dataBytes1, dataBytes3);
+        Assert.assertArrayEquals(dataBytes1, dataBytes2);
+    }
 }
