@@ -57,8 +57,6 @@ import leshan.util.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.org.apache.xerces.internal.impl.dv.util.HexBin;
-
 public class LwM2mNodeEncoder {
 
     private static final Logger LOG = LoggerFactory.getLogger(LwM2mNodeEncoder.class);
@@ -297,7 +295,7 @@ public class LwM2mNodeEncoder {
             if (value.type == DataType.STRING) {
                 // let's assume we received an hexadecimal string
                 LOG.debug("Trying to convert hexadecimal string {} to byte array", value.value);
-                return Value.newBinaryValue(HexBin.decode((String) value.value));
+                return Value.newBinaryValue(javax.xml.bind.DatatypeConverter.parseHexBinary((String) value.value));
             }
             break;
         default:

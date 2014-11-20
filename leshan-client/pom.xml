@@ -119,6 +119,10 @@
 						    leshan.client.util
 						</Export-Package>
                         <Import-Package>
+                            javax.xml.bind, 
+                            javax.xml.parsers, 
+                            org.w3c.dom, 
+                            org.xml.sax,
                             javax.crypto,
                             javax.crypto.spec,
                             javax.security.auth.x500,
@@ -132,7 +136,7 @@
                             org.eclipse.californium.core.observe,
                             org.eclipse.californium.elements
                         </Import-Package>
-<!--                         <Embed-Transitive>true</Embed-Transitive>  -->
+                        <Embed-Transitive>true</Embed-Transitive>
 						<Embed-Dependency>*;scope=compile|runtime;inline=true;artifactId=!californium-core|scandium|slf4j-api</Embed-Dependency>
 					</instructions>
 				</configuration>
