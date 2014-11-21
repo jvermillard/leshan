@@ -1,0 +1,84 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.github.leshan</groupId>
+		<artifactId>leshan</artifactId>
+		<version>0.1.8-SNAPSHOT</version>
+	</parent>
+	<artifactId>leshan-osgi</artifactId>
+	<packaging>bundle</packaging>
+
+	<name>leshan - OSGi</name>
+	<description>Integration with OSGi Device Access</description>
+	<properties>
+		<osgi.version>4.3.1</osgi.version>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>2.3.7</version>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Import-Package>
+							org.eclipse.californium.*;version="[${californium.version}, 2)",
+							leshan.server.client.*;version="${project.version}",
+							leshan.core.node.*;version="${project.version}",
+							org.apache.commons.lang.*;version="[2.6, 3)",
+							*
+						</Import-Package>
+						<Embed-Dependency>scandium;inline=true</Embed-Dependency>
+						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+					</instructions>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>org.github.leshan</groupId>
+			<artifactId>leshan-server-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.github.leshan</groupId>
+			<artifactId>leshan-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.californium</groupId>
+			<artifactId>californium-osgi</artifactId>
+			<version>${californium.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.compendium</artifactId>
+			<scope>provided</scope>
+			<version>${osgi.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<scope>provided</scope>
+			<version>${osgi.version}</version>
+		</dependency>
+
+
+		<!-- ******************************** -->
+		<!-- ********* TEST ***************** -->
+		<!-- ******************************** -->
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+</project>
