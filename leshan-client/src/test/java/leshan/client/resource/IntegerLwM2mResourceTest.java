@@ -48,7 +48,7 @@ public class IntegerLwM2mResourceTest {
     @Test
     public void testWriteGoodValue() {
         final LwM2mExchange exchange = mock(LwM2mExchange.class);
-        when(exchange.getRequestPayload()).thenReturn(Integer.toString(42).getBytes());
+        when(exchange.getRequestPayload()).thenReturn(new byte[] { 42 });
 
         final ReadableWriteableTestResource testResource = new ReadableWriteableTestResource();
         testResource.write(exchange);
@@ -60,7 +60,7 @@ public class IntegerLwM2mResourceTest {
     @Test
     public void testWriteBadValue() {
         final LwM2mExchange exchange = mock(LwM2mExchange.class);
-        when(exchange.getRequestPayload()).thenReturn("badwolf".getBytes());
+        when(exchange.getRequestPayload()).thenReturn(new byte[] { 21, 34, 34, 40, 29, 32, 28, 76, 56 });
 
         final ReadableWriteableTestResource testResource = new ReadableWriteableTestResource(8675309);
         testResource.write(exchange);
@@ -77,7 +77,7 @@ public class IntegerLwM2mResourceTest {
         testResource.read(exchange);
 
         assertEquals(84, testResource.value);
-        verify(exchange).respond(ReadResponse.success(Integer.toString(84).getBytes()));
+        verify(exchange).respond(ReadResponse.success(new byte[] { 84 }));
     }
 
     @Test

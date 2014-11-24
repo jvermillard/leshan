@@ -33,6 +33,9 @@ package leshan.client.resource.integer;
 
 import leshan.client.exchange.LwM2mExchange;
 import leshan.client.resource.TypedLwM2mExchange;
+import leshan.tlv.TlvDecoder;
+import leshan.tlv.TlvEncoder;
+import leshan.tlv.TlvException;
 
 public class IntegerLwM2mExchange extends TypedLwM2mExchange<Integer> {
 
@@ -42,12 +45,16 @@ public class IntegerLwM2mExchange extends TypedLwM2mExchange<Integer> {
 
     @Override
     protected Integer convertFromBytes(final byte[] value) {
-        return Integer.parseInt(new String(value));
+        try {
+            return TlvDecoder.decodeInteger(value).intValue();
+        } catch (TlvException ex) {
+            throw new IllegalStateException("unable to convert bytes to expected Integer value", ex);
+        }
     }
 
     @Override
     protected byte[] convertToBytes(final Integer value) {
-        return Integer.toString(value).getBytes();
+        return TlvEncoder.encodeInteger(value);
     }
 
 }
