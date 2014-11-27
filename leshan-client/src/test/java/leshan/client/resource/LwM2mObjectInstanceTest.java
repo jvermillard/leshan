@@ -1,6 +1,7 @@
 /*
  * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
+ * Copyright (c) 2014, Bosch Software Innovations GmbH,
  * 
  *
  * All rights reserved.
@@ -99,7 +100,7 @@ public class LwM2mObjectInstanceTest {
     }
 
     private void initializeObjectWithMultipleResource(final int resourceId, final Map<Integer, byte[]> values) {
-        definition = new LwM2mClientObjectDefinition(101, MANDATORY, SINGLE, new SingleResourceDefinition(resourceId,
+        definition = new LwM2mClientObjectDefinition(101, MANDATORY, SINGLE, new MultipleResourceDefinition(resourceId,
                 new SampleMultipleResource(values), !REQUIRED));
     }
 

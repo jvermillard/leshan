@@ -1,7 +1,8 @@
 /*
  * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
- * 
+ * Copyright (c) 2014, Bosch Software Innovations GmbH,
+ *
  *
  * All rights reserved.
  *
@@ -47,6 +48,7 @@ import leshan.client.LwM2mClient;
 import leshan.client.exchange.LwM2mExchange;
 import leshan.client.register.RegisterUplink;
 import leshan.client.resource.LwM2mClientObjectDefinition;
+import leshan.client.resource.MultipleResourceDefinition;
 import leshan.client.resource.SingleResourceDefinition;
 import leshan.client.resource.integer.IntegerLwM2mExchange;
 import leshan.client.resource.integer.IntegerLwM2mResource;
@@ -125,7 +127,7 @@ public class LeshanClientExample {
         final MultipleLwM2mResource powerAvailablePowerResource = new IntegerMultipleResource(new Integer[] { 0, 4 });
         final MultipleLwM2mResource powerSourceVoltageResource = new IntegerMultipleResource(new Integer[] { 12000,
                                 5000 });
-        final MultipleLwM2mResource powerSourceCurrentResource = new IntegerMultipleResource(new Integer[] { 150, 75 });
+        final IntegerMultipleResource powerSourceCurrentResource = new IntegerMultipleResource(new Integer[] { 150, 75 });
         final IntegerValueResource batteryLevelResource = new IntegerValueResource(92, 9);
         final MemoryFreeResource memoryFreeResource = new MemoryFreeResource();
         final IntegerMultipleResource errorCodeResource = new IntegerMultipleResource(new Integer[] { 0 });
@@ -140,10 +142,10 @@ public class LeshanClientExample {
                         modelResource, true), new SingleResourceDefinition(2, serialNumberResource, true),
                 new SingleResourceDefinition(3, firmwareResource, true), new SingleResourceDefinition(4,
                         rebootResource, true), new SingleResourceDefinition(5, factoryResetResource, true),
-                new SingleResourceDefinition(6, powerAvailablePowerResource, true), new SingleResourceDefinition(7,
-                        powerSourceVoltageResource, true), new SingleResourceDefinition(8, powerSourceCurrentResource,
+                new MultipleResourceDefinition(6, powerAvailablePowerResource, true), new MultipleResourceDefinition(7,
+                        powerSourceVoltageResource, true), new MultipleResourceDefinition(8, powerSourceCurrentResource,
                         true), new SingleResourceDefinition(9, batteryLevelResource, true),
-                new SingleResourceDefinition(10, memoryFreeResource, true), new SingleResourceDefinition(11,
+                new SingleResourceDefinition(10, memoryFreeResource, true), new MultipleResourceDefinition(11,
                         errorCodeResource, true), new SingleResourceDefinition(12, new ExecutableResource(12), true),
                 new SingleResourceDefinition(13, currentTimeResource, true), new SingleResourceDefinition(14,
                         utcOffsetResource, true), new SingleResourceDefinition(15, timezoneResource, true),
