@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import leshan.bootstrap.ConfigurationChecker.ConfigurationException;
 import leshan.server.bootstrap.BootstrapConfig;
 import leshan.server.bootstrap.BootstrapStore;
 
@@ -80,7 +81,9 @@ public class BootstrapStoreImpl implements BootstrapStore {
         return bootstrapByEndpoint.get(endpoint);
     }
 
-    public void addConfig(String endpoint, BootstrapConfig config) {
+    public void addConfig(String endpoint, BootstrapConfig config) throws ConfigurationException {
+        ConfigurationChecker.verify(config);
+        // check the configuration
         bootstrapByEndpoint.put(endpoint, config);
         saveToFile();
     }

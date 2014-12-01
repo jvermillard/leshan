@@ -39,6 +39,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import leshan.bootstrap.BootstrapStoreImpl;
+import leshan.bootstrap.ConfigurationChecker.ConfigurationException;
 import leshan.server.bootstrap.BootstrapConfig;
 
 import org.apache.commons.io.Charsets;
@@ -105,6 +106,8 @@ public class BootstrapServlet extends HttpServlet {
             }
         } catch (JsonSyntaxException jsonEx) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, jsonEx.getMessage());
+        } catch (ConfigurationException e) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         }
     }
 
