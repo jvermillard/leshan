@@ -26,7 +26,7 @@ https://groups.google.com/d/forum/leshan-lwm2m
 Test Sandbox
 ------------
 
-You can try it live on our server demo instance: http://54.228.25.31/
+You can try it live on our server demo instance: http://54.246.90.121/
 
 
 Server
