@@ -34,6 +34,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -67,20 +69,30 @@ public class SecurityRegistryImpl implements SecurityRegistry {
     // the name of the file used to persist the registry content
     private final String filename;
 
+    private PublicKey serverPublicKey;
+
+    private PrivateKey serverPrivateKey;
+
     // default location for persistence
     private static final String DEFAULT_FILE = "data/security.data";
 
     public SecurityRegistryImpl() {
-        this(DEFAULT_FILE);
+        this(DEFAULT_FILE, null, null);
+    }
+
+    public SecurityRegistryImpl(PrivateKey serverPrivateKey, PublicKey serverPublicKey) {
+        this(DEFAULT_FILE, serverPrivateKey, serverPublicKey);
     }
 
     /**
      * @param file the file path to persist the registry
      */
-    public SecurityRegistryImpl(String file) {
+    public SecurityRegistryImpl(String file, PrivateKey serverPrivateKey, PublicKey serverPublicKey) {
         Validate.notEmpty(file);
 
         this.filename = file;
+        this.serverPrivateKey = serverPrivateKey;
+        this.serverPublicKey = serverPublicKey;
         this.loadFromFile();
     }
 
@@ -107,19 +119,17 @@ public class SecurityRegistryImpl implements SecurityRegistry {
 
     @Override
     public synchronized SecurityInfo add(SecurityInfo info) throws NonUniqueSecurityInfoException {
+        String identity = info.getIdentity();
+        if (identity != null) {
+            SecurityInfo infoByIdentity = securityByIdentity.get(info.getIdentity());
+            if (infoByIdentity != null && !info.getEndpoint().equals(infoByIdentity.getEndpoint())) {
+                throw new NonUniqueSecurityInfoException("PSK Identity " + info.getIdentity() + " is already used");
+            }
 
-        SecurityInfo infoByIdentity = securityByIdentity.get(info.getIdentity());
-        if (infoByIdentity != null && !info.getEndpoint().equals(infoByIdentity.getEndpoint())) {
-            throw new NonUniqueSecurityInfoException("PSK Identity " + info.getIdentity() + " is already used");
+            securityByIdentity.put(info.getIdentity(), info);
         }
 
         SecurityInfo previous = securityByEp.put(info.getEndpoint(), info);
-        if (previous != null) {
-            securityByIdentity.remove(previous.getIdentity());
-        }
-        if (info.getIdentity() != null) {
-            securityByIdentity.put(info.getIdentity(), info);
-        }
 
         this.saveToFile();
 
@@ -187,5 +197,15 @@ public class SecurityRegistryImpl implements SecurityRegistry {
         } catch (Exception e) {
             LOG.debug("Could not save security infos to file", e);
         }
+    }
+
+    @Override
+    public PublicKey getServerPublicKey() {
+        return serverPublicKey;
+    }
+
+    @Override
+    public PrivateKey getServerPrivateKey() {
+        return serverPrivateKey;
     }
 }

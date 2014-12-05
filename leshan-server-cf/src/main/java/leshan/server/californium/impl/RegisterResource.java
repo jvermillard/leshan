@@ -30,7 +30,10 @@
 package leshan.server.californium.impl;
 
 import java.net.InetSocketAddress;
+import java.security.PublicKey;
 import java.util.List;
+
+import javax.xml.bind.DatatypeConverter;
 
 import leshan.LinkObject;
 import leshan.server.client.BindingMode;
@@ -141,25 +144,57 @@ public class RegisterResource extends CoapResource {
                 // if this is a secure end-point, we must check that the registering client is using the right identity.
                 if (exchange.advanced().getEndpoint() instanceof SecureEndpoint) {
                     String pskIdentity = ((SecureEndpoint) exchange.advanced().getEndpoint()).getPskIdentity(request);
-                    LOG.debug("Registration request received using the secure endpoint {} with identity {}",
-                            registrationEndpoint, pskIdentity);
+                    PublicKey rpk = ((SecureEndpoint) exchange.advanced().getEndpoint()).getRawPublicKey(request);
 
-                    if (securityInfo == null || pskIdentity == null || !pskIdentity.equals(securityInfo.getIdentity())) {
-                        LOG.warn("Invalid identity for client {}: expected '{}' but was '{}'", endpoint,
-                                securityInfo == null ? null : securityInfo.getIdentity(), pskIdentity);
-                        exchange.respond(ResponseCode.BAD_REQUEST, "Invalid identity");
+                    if (pskIdentity != null) {
+                        // Manage PSK authentication
+                        // ----------------------------------------------------
+                        LOG.debug("Registration request received using the secure endpoint {} with identity {}",
+                                registrationEndpoint, pskIdentity);
 
-                        // kill the TLS Session
-                        ((SecureEndpoint) exchange.advanced().getEndpoint()).getDTLSConnector().close(
-                                new InetSocketAddress(request.getSource(), request.getSourcePort()));
-                        return;
+                        if (securityInfo == null || pskIdentity == null
+                                || !pskIdentity.equals(securityInfo.getIdentity())) {
+                            LOG.warn("Invalid identity for client {}: expected '{}' but was '{}'", endpoint,
+                                    securityInfo == null ? null : securityInfo.getIdentity(), pskIdentity);
+                            exchange.respond(ResponseCode.BAD_REQUEST, "Invalid identity");
 
+                            // kill the TLS Session
+                            ((SecureEndpoint) exchange.advanced().getEndpoint()).getDTLSConnector().close(
+                                    new InetSocketAddress(request.getSource(), request.getSourcePort()));
+                            return;
+
+                        } else {
+                            LOG.debug("authenticated client {} using DTLS PSK", endpoint);
+                        }
+                    } else if (rpk != null) {
+                        // Manage RPK authentication
+                        // ----------------------------------------------------
+                        LOG.debug("Registration request received using the secure endpoint {} with rpk {}",
+                                registrationEndpoint, DatatypeConverter.printHexBinary(rpk.getEncoded()));
+
+                        if (securityInfo == null || rpk == null || !rpk.equals(securityInfo.getRawPublicKey())) {
+                            LOG.warn("Invalid rpk for client {}: expected \n'{}'\n but was \n'{}'", endpoint,
+                                    DatatypeConverter.printHexBinary(securityInfo.getRawPublicKey().getEncoded()),
+                                    DatatypeConverter.printHexBinary(rpk.getEncoded()));
+                            exchange.respond(ResponseCode.BAD_REQUEST, "Invalid rpk");
+
+                            // kill the TLS Session
+                            ((SecureEndpoint) exchange.advanced().getEndpoint()).getDTLSConnector().close(
+                                    new InetSocketAddress(request.getSource(), request.getSourcePort()));
+                            return;
+
+                        } else {
+                            LOG.debug("authenticated client {} using DTLS RPK", endpoint);
+                        }
                     } else {
-                        LOG.debug("authenticated client {} using DTLS PSK", endpoint);
+                        LOG.warn("Unable to authenticate client {}: unknown authentication mode.", endpoint);
+                        exchange.respond(ResponseCode.BAD_REQUEST,
+                                "Client must connect thru DTLS with PSK or RPK (port 5684)");
+                        return;
                     }
                 } else {
                     if (securityInfo != null) {
-                        LOG.warn("client {} must connect using DTLS PSK", endpoint);
+                        LOG.warn("client {} must connect using DTLS", endpoint);
                         exchange.respond(ResponseCode.BAD_REQUEST, "Client must connect thru DTLS (port 5684)");
                         return;
                     }

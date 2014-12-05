@@ -30,6 +30,7 @@
 package leshan.server.security;
 
 import java.io.Serializable;
+import java.security.PublicKey;
 
 import leshan.util.Validate;
 
@@ -54,11 +55,14 @@ public class SecurityInfo implements Serializable {
     private final String identity;
     private final byte[] preSharedKey;
 
-    private SecurityInfo(String endpoint, String identity, byte[] preSharedKey) {
+    private final PublicKey rawPublicKey;
+
+    private SecurityInfo(String endpoint, String identity, byte[] preSharedKey, PublicKey rawPublicKey) {
         Validate.notEmpty(endpoint);
         this.endpoint = endpoint;
         this.identity = identity;
         this.preSharedKey = preSharedKey;
+        this.rawPublicKey = rawPublicKey;
     }
 
     /**
@@ -67,7 +71,15 @@ public class SecurityInfo implements Serializable {
     public static SecurityInfo newPreSharedKeyInfo(String endpoint, String identity, byte[] preSharedKey) {
         Validate.notEmpty(identity);
         Validate.notNull(preSharedKey);
-        return new SecurityInfo(endpoint, identity, preSharedKey);
+        return new SecurityInfo(endpoint, identity, preSharedKey, null);
+    }
+
+    /**
+     * Construct a {@link SecurityInfo} when using DTLS with Raw Public Key (RPK).
+     */
+    public static SecurityInfo newRawPublicKeyInfo(String endpoint, PublicKey rawPublicKey) {
+        Validate.notNull(rawPublicKey);
+        return new SecurityInfo(endpoint, null, null, rawPublicKey);
     }
 
     public String getEndpoint() {
@@ -82,4 +94,7 @@ public class SecurityInfo implements Serializable {
         return preSharedKey;
     }
 
+    public PublicKey getRawPublicKey() {
+        return rawPublicKey;
+    }
 }

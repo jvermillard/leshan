@@ -29,6 +29,8 @@
  */
 package leshan.server.security;
 
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.util.Collection;
 
 public interface SecurityRegistry extends SecurityStore {
@@ -59,4 +61,13 @@ public interface SecurityRegistry extends SecurityStore {
      */
     SecurityInfo remove(String endpoint);
 
+    /**
+     * Returns the Server Public Key
+     */
+    PublicKey getServerPublicKey();
+
+    /**
+     * Returns the Server Private Key
+     */
+    PrivateKey getServerPrivateKey();
 }

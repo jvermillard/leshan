@@ -30,6 +30,7 @@
 package leshan.server.californium.impl;
 
 import java.net.InetSocketAddress;
+import java.security.PublicKey;
 
 import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.core.network.CoAPEndpoint;
@@ -53,10 +54,20 @@ public class SecureEndpoint extends CoAPEndpoint {
      * Returns the PSK identity from the DTLS session associated with the given request.
      * 
      * @param request the CoAP request
-     * @return the PSK identity of the client of <code>null</code> if not found.
+     * @return the PSK identity of the client or <code>null</code> if not found.
      */
     public String getPskIdentity(Request request) {
         return this.getSession(request).getPskIdentity();
+    }
+
+    /**
+     * Returns the Raw Public Key (RPK) from the DTLS session associated with the given request.
+     * 
+     * @param request the CoAP request
+     * @return the Raw Public Key of the client or <code>null</code> if not found.
+     */
+    public PublicKey getRawPublicKey(Request request) {
+        return this.getSession(request).getPeerRawPublicKey();
     }
 
     public DTLSConnector getDTLSConnector() {
@@ -66,5 +77,4 @@ public class SecureEndpoint extends CoAPEndpoint {
     private DTLSSession getSession(Request request) {
         return connector.getSessionByAddress(new InetSocketAddress(request.getSource(), request.getSourcePort()));
     }
-
 }

@@ -30,6 +30,9 @@
 package leshan.standalone.servlet.json;
 
 import java.lang.reflect.Type;
+import java.security.PublicKey;
+import java.security.interfaces.ECPublicKey;
+import java.util.Arrays;
 
 import leshan.server.security.SecurityInfo;
 
@@ -37,6 +40,7 @@ import org.apache.commons.codec.binary.Hex;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
@@ -55,7 +59,31 @@ public class SecuritySerializer implements JsonSerializer<SecurityInfo> {
             element.add("psk", psk);
         }
 
+        if (src.getRawPublicKey() != null) {
+            JsonObject rpk = new JsonObject();
+            PublicKey rawPublicKey = src.getRawPublicKey();
+            if (rawPublicKey instanceof ECPublicKey) {
+                ECPublicKey ecPublicKey = (ECPublicKey) rawPublicKey;
+                // Get x coordinate
+                byte[] x = ecPublicKey.getW().getAffineX().toByteArray();
+                if (x[0] == 0)
+                    x = Arrays.copyOfRange(x, 1, x.length);
+                rpk.addProperty("x", Hex.encodeHexString(x));
+
+                // Get Y coordinate
+                byte[] y = ecPublicKey.getW().getAffineY().toByteArray();
+                if (y[0] == 0)
+                    y = Arrays.copyOfRange(y, 1, y.length);
+                rpk.addProperty("y", Hex.encodeHexString(y));
+
+                // Get Curves params
+                rpk.addProperty("params", ecPublicKey.getParams().toString());
+            } else {
+                throw new JsonParseException("Unsupported Public Key Format (only ECPublicKey supported).");
+            }
+            element.add("rpk", rpk);
+        }
+
         return element;
     }
-
 }

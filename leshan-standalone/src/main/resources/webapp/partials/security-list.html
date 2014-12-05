@@ -1,3 +1,12 @@
+<div class="well well-sm" ng-if="serverSecurityInfo && serverSecurityInfo.rpk">
+	<h4>The Leshan public key</h4>
+	<p>
+		<u>Elliptic Curve parameters :</u> <code>{{serverSecurityInfo.rpk.params}}</code> <br/>
+		<u>Public x coord :</u> <code>{{serverSecurityInfo.rpk.x}}</code><br/>
+		<u>Public y coord :</u> <code>{{serverSecurityInfo.rpk.y}}</code>
+	</p>
+</div>
+
 <div>
 	<button class="btn btn-default center-block" ng-click="showModal()" >Add
 		new client security configuration</button>
@@ -9,18 +18,25 @@
 	<thead>
 		<tr>
 			<th>Client Endpoint</th>
-			<th>Security mode</th>
-			<th>Identity</th>
-			<th>Key</th>
+			<th>Security Mode</th>
+			<th>Security Information</th>
 			<th></th>
 		</tr>
 	</thead>
 	<tbody>
 		<tr ng-repeat="(endpoint, security) in securityInfos">
-	        <td>{{ endpoint }}</td>
-	        <td>Pre-Shared Key</td>
-	        <td>{{ security.psk.identity }}</td>
-	        <td>{{ security.psk.key }}</td>
+			<td>{{ endpoint }}</td>
+			<td ng-if="security.psk">Pre-Shared Key</td>
+			<td ng-if="security.psk">
+				Identity : <code>{{ security.psk.identity }}</code><br/>
+				Key : <code>{{ security.psk.key }}</code>
+			</td>
+			<td ng-if="security.rpk">Raw Public Key <br/><small class="text-muted" >(Elliptic Curve)</small></td>
+			<td ng-if="security.rpk">
+				Params : <code>{{ security.rpk.params }}</code><br/> 
+				X : <code>{{ security.rpk.x }}</code><br/>
+				Y : <code>{{ security.rpk.y }}</code>
+			</td>
 			<td><button type="button" class="btn btn-default btn-xs" ng-click="remove(endpoint)">
 					<span class="glyphicon glyphicon-remove"></button></td>
 		</tr>
@@ -54,7 +70,7 @@
 						<div class="col-sm-8">
 							<select class="form-control" id="securityMode" ng-model="securityMode">
 								<option value="psk">Pre-Shared Key</option>
-								<option value="rpk">Raw Public Key Certificate</option>
+								<option value="rpk">Raw Public Key (Elliptic Curves)</option>
 							</select>
 						</div>
 					</div>
@@ -83,15 +99,36 @@
 					</div>
 
 					<!-- RPK inputs -->
-					<div class="form-group" ng-class="{'hidden': securityMode!='rpk'}" show-errors>
-						<label for="rpkValue" class="col-sm-4 control-label">Public
-							key</label>
+					<div class="form-group"  style="resize:none" ng-class="{'hidden': securityMode!='rpk'}" show-errors>
+						<label for="rpkXValue" class="col-sm-4 control-label">X public key part</label>
 						<div class="col-sm-8">
-							<input class="form-control" id="rpkValue" name="rpkValue" ng-model="rpkValue"
-							ng-required="securityMode=='rpk'">
+							<textarea class="form-control" rows="3" id="rpkXValue" name="rpkXValue" ng-model="rpkXValue"
+							ng-required="securityMode=='rpk'" ng-pattern="/^[0-9a-fA-F]+$/" ng-maxlength="64"></textarea>
+							<p class="help-block" ng-if="form.rpkXValue.$error.required">X public key  part is required</p>
+							<p class="help-block" ng-if="form.rpkXValue.$error.pattern">Hexadecimal format is expected</p>
+							<p class="help-block" ng-if="form.rpkXValue.$error.maxlength">X public key part is too long</p>
+						</div>
+					</div>
+					
+					<div class="form-group"  style="resize:none" ng-class="{'hidden': securityMode!='rpk'}" show-errors>
+						<label for="rpkYValue" class="col-sm-4 control-label">Y public key part</label>
+						<div class="col-sm-8">
+							<textarea class="form-control" rows="3" id="rpkYValue" name="rpkYValue" ng-model="rpkYValue"
+							ng-required="securityMode=='rpk'" ng-pattern="/^[0-9a-fA-F]+$/" ng-maxlength="64"></textarea>
+							<p class="help-block" ng-if="form.rpkYValue.$error.required">Y public key part is required</p>
+							<p class="help-block" ng-if="form.rpkYValue.$error.pattern">Hexadecimal format is expected</p>
+							<p class="help-block" ng-if="form.rpkYValue.$error.maxlength">Y public key part is too long</p>
+						</div>
+					</div>
+					
+					<div class="form-group"  style="resize:none" ng-class="{'hidden': securityMode!='rpk'}">
+						<label for="rpkParamsValue" class="col-sm-4 control-label">EC parameters :</label>
+						<div class="col-sm-8">
+							<input class="form-control" id="rpkParamsValue" name="rpkParamsValue" ng-model="rpkParamsValue" type="text" placeholder="{{defaultParams}}">
 						</div>
 					</div>
 
+					<!-- Certificates input -->
 					<!-- TODO -->
 
 				</form>

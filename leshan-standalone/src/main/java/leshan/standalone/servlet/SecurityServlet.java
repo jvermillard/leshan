@@ -31,6 +31,7 @@ package leshan.standalone.servlet;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.security.PublicKey;
 import java.util.Collection;
 
 import javax.servlet.ServletException;
@@ -83,8 +84,9 @@ public class SecurityServlet extends HttpServlet {
      */
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String[] path = StringUtils.split(req.getPathInfo(), '/');
 
-        if (StringUtils.isNotBlank(req.getPathInfo())) {
+        if (path.length != 1 && "clients".equals(path[0])) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
@@ -116,12 +118,33 @@ public class SecurityServlet extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        Collection<SecurityInfo> infos = this.registry.getAll();
+        String[] path = StringUtils.split(req.getPathInfo(), '/');
 
-        String json = this.gsonSer.toJson(infos);
-        resp.setContentType("application/json");
-        resp.getOutputStream().write(json.getBytes("UTF-8"));
-        resp.setStatus(HttpServletResponse.SC_OK);
+        if (path.length != 1) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+            return;
+        }
+
+        if ("clients".equals(path[0])) {
+            Collection<SecurityInfo> infos = this.registry.getAll();
+
+            String json = this.gsonSer.toJson(infos);
+            resp.setContentType("application/json");
+            resp.getOutputStream().write(json.getBytes("UTF-8"));
+            resp.setStatus(HttpServletResponse.SC_OK);
+            return;
+        }
+
+        if ("server".equals(path[0])) {
+            PublicKey publicKey = this.registry.getServerPublicKey();
+            String json = this.gsonSer.toJson(SecurityInfo.newRawPublicKeyInfo("leshan", publicKey));
+            resp.setContentType("application/json");
+            resp.getOutputStream().write(json.getBytes("UTF-8"));
+            resp.setStatus(HttpServletResponse.SC_OK);
+            return;
+        }
+
+        resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
     }
 
     /**
@@ -129,12 +152,13 @@ public class SecurityServlet extends HttpServlet {
      */
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String[] path = StringUtils.split(req.getPathInfo(), "/");
-        if (path.length != 1) {
+        String[] path = StringUtils.split(req.getPathInfo(), '/');
+
+        if (path.length != 2 && !"clients".equals(path[0])) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
-        String endpoint = path[0];
+        String endpoint = path[1];
 
         LOG.debug("Removing security info for end-point {}", endpoint);
         if (this.registry.remove(endpoint) != null) {
