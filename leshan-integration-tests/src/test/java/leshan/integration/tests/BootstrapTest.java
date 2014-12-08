@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2014, Zebra Technologies,
- * 
+ *
  *
  * All rights reserved.
  *
@@ -28,23 +28,30 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.client;
 
-import leshan.LinkObject;
-import leshan.client.request.LwM2mClientRequest;
+package leshan.integration.tests;
+
+import static org.junit.Assert.assertTrue;
 import leshan.client.response.OperationResponse;
-import leshan.client.util.ResponseCallback;
 
-public interface LwM2mClient {
+import org.junit.After;
+import org.junit.Ignore;
+import org.junit.Test;
 
-    public void start();
+public class BootstrapTest {
 
-    public void stop();
+    private final IntegrationTestHelper helper = new IntegrationTestHelper(true);
 
-    public OperationResponse send(LwM2mClientRequest request);
+    @After
+    public void stop() {
+        helper.stop();
+    }
 
-    public void send(LwM2mClientRequest request, ResponseCallback callback);
+    @Ignore
+    @Test
+    public void boostrap_device_exists() {
+        final OperationResponse bootstrap = helper.bootstrap();
 
-    public LinkObject[] getObjectModel(Integer... ids);
-
+        assertTrue(bootstrap.isSuccess());
+    }
 }

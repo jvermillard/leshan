@@ -28,23 +28,22 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.client;
+package leshan.client.request;
 
-import leshan.LinkObject;
-import leshan.client.request.LwM2mClientRequest;
-import leshan.client.response.OperationResponse;
-import leshan.client.util.ResponseCallback;
+public abstract class AbstractLwM2mClientRequest implements LwM2mClientRequest {
+    protected static final long DEFAULT_TIMEOUT_MS = 500;
 
-public interface LwM2mClient {
+    private final long timeout;
 
-    public void start();
+    public AbstractLwM2mClientRequest() {
+        this(DEFAULT_TIMEOUT_MS);
+    }
 
-    public void stop();
+    public AbstractLwM2mClientRequest(final long timeout) {
+        this.timeout = timeout;
+    }
 
-    public OperationResponse send(LwM2mClientRequest request);
-
-    public void send(LwM2mClientRequest request, ResponseCallback callback);
-
-    public LinkObject[] getObjectModel(Integer... ids);
-
+    public final long getTimeout() {
+        return timeout;
+    }
 }

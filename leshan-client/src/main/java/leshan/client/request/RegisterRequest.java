@@ -1,5 +1,4 @@
 /*
- * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
  * 
  *
@@ -29,45 +28,32 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.client.bootstrap;
+package leshan.client.request;
 
-import java.net.InetSocketAddress;
-import java.util.Collections;
+import java.util.Map;
 
-import leshan.client.Uplink;
-import leshan.client.response.Callback;
-import leshan.client.response.OperationResponse;
-import leshan.util.Validate;
+public class RegisterRequest extends AbstractLwM2mClientRequest implements LwM2mContentRequest, LwM2mIdentifierRequest {
+    private final Map<String, String> clientParameters;
+    private final String clientEndpointIdentifier;
 
-import org.eclipse.californium.core.coap.Request;
-import org.eclipse.californium.core.network.CoAPEndpoint;
-
-public class BootstrapUplink extends Uplink {
-    private static final String ENDPOINT = "ep";
-
-    public BootstrapUplink(final InetSocketAddress destination, final CoAPEndpoint origin,
-            final BootstrapDownlink downlink) {
-        super(destination, origin);
-        Validate.notNull(downlink, "BootstrapDownlink must not be null");
+    public RegisterRequest(final String clientEndpointIdentifier, final Map<String, String> clientParameters) {
+        this.clientEndpointIdentifier = clientEndpointIdentifier;
+        this.clientParameters = clientParameters;
     }
 
-    public OperationResponse bootstrap(final String endpointName, final long timeout) {
-        final Request request = Request.newPost();
-        final BootstrapEndpoint bootstrapEndpoint = new BootstrapEndpoint(Collections.singletonMap(ENDPOINT,
-                endpointName));
-        request.setURI(bootstrapEndpoint.toString());
-        checkStarted(origin);
-
-        return sendSyncRequest(timeout, request);
+    @Override
+    public void accept(final LwM2mClientRequestVisitor visitor) {
+        visitor.visit(this);
     }
 
-    public void bootstrap(final String endpointName, final Callback callback) {
-        final Request request = Request.newPost();
-        final BootstrapEndpoint bootstrapEndpoint = new BootstrapEndpoint(Collections.singletonMap(ENDPOINT,
-                endpointName));
-        request.setURI(bootstrapEndpoint.toString());
+    @Override
+    public Map<String, String> getClientParameters() {
+        return clientParameters;
+    }
 
-        sendAsyncRequest(callback, request);
+    @Override
+    public String getClientEndpointIdentifier() {
+        return clientEndpointIdentifier;
     }
 
 }

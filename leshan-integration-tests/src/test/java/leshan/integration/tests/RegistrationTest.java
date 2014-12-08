@@ -33,20 +33,26 @@
 package leshan.integration.tests;
 
 import static com.jayway.awaitility.Awaitility.await;
-import static leshan.integration.tests.IntegrationTestHelper.*;
 import static org.junit.Assert.*;
-import leshan.client.LwM2mClient;
-import leshan.client.register.RegisterUplink;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import leshan.client.californium.LeshanClient;
+import leshan.client.request.AbstractLwM2mClientRequest;
+import leshan.client.request.RegisterRequest;
+import leshan.client.request.identifier.ClientIdentifier;
 import leshan.client.resource.LwM2mClientObjectDefinition;
 import leshan.client.response.OperationResponse;
 import leshan.client.util.ResponseCallback;
+import leshan.server.client.Client;
 
 import org.junit.After;
 import org.junit.Test;
 
 public class RegistrationTest {
 
-    private IntegrationTestHelper helper = new IntegrationTestHelper();
+    private final IntegrationTestHelper helper = new IntegrationTestHelper();
 
     @After
     public void stop() {
@@ -55,8 +61,7 @@ public class RegistrationTest {
 
     @Test
     public void registered_device_exists() {
-        final RegisterUplink registerUplink = helper.registerAndGetUplink();
-        final OperationResponse register = registerUplink.register(ENDPOINT, helper.clientParameters, TIMEOUT_MS);
+        final OperationResponse register = helper.register();
 
         assertTrue(register.isSuccess());
         assertNotNull(helper.getClient());
@@ -64,25 +69,93 @@ public class RegistrationTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void fail_to_create_client_with_null() {
-        helper.client = new LwM2mClient((LwM2mClientObjectDefinition[]) null);
+        helper.client = new LeshanClient(helper.clientAddress, helper.serverAddress,
+                (LwM2mClientObjectDefinition[]) null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void fail_to_create_client_with_same_object_twice() {
         final LwM2mClientObjectDefinition objectOne = new LwM2mClientObjectDefinition(1, false, false);
-        helper.client = new LwM2mClient(objectOne, objectOne);
+        helper.client = new LeshanClient(helper.clientAddress, helper.serverAddress, objectOne, objectOne);
     }
 
     @Test
     public void registered_device_exists_async() {
-        final RegisterUplink registerUplink = helper.registerAndGetUplink();
-        final ResponseCallback callback = new ResponseCallback();
-        registerUplink.register(ENDPOINT, helper.clientParameters, callback);
-
-        await().untilTrue(callback.isCalled());
+        final ResponseCallback callback = registerDeviceAsynch();
 
         assertTrue(callback.isSuccess());
         assertNotNull(helper.getClient());
+    }
+
+    @Test
+    public void wont_send_synchronous_if_not_started() {
+        final AbstractLwM2mClientRequest registerRequest = new RegisterRequest(helper.ENDPOINT_IDENTIFIER,
+                helper.clientParameters);
+
+        final OperationResponse response = helper.client.send(registerRequest);
+
+        assertFalse(response.isSuccess());
+    }
+
+    @Test
+    public void wont_send_asynchronous_if_not_started() {
+        final AbstractLwM2mClientRequest registerRequest = new RegisterRequest(helper.ENDPOINT_IDENTIFIER,
+                helper.clientParameters);
+
+        final ResponseCallback callback = new ResponseCallback();
+        helper.client.send(registerRequest, callback);
+
+        assertTrue(callback.isCalled().get());
+        assertFalse(callback.isSuccess());
+    }
+
+    @Test
+    public void registered_device_updated() {
+        final OperationResponse register = helper.register();
+
+        final ClientIdentifier clientIdentifier = register.getClientIdentifier();
+
+        final Map<String, String> updatedParameters = new HashMap<>();
+        final int updatedLifetime = 1337;
+        updatedParameters.put("lt", Integer.toString(updatedLifetime));
+
+        final OperationResponse update = helper.update(clientIdentifier, updatedParameters);
+        final Client client = helper.getClient();
+
+        assertTrue(update.isSuccess());
+        assertEquals(updatedLifetime, client.getLifeTimeInSec());
+        assertNotNull(client);
+    }
+
+    @Test
+    public void deregister_registered_device_then_reregister_async() {
+        ResponseCallback registerCallback = registerDeviceAsynch();
+
+        final ClientIdentifier clientIdentifier = registerCallback.getResponse().getClientIdentifier();
+
+        final ResponseCallback deregisterCallback = new ResponseCallback();
+
+        helper.deregister(clientIdentifier, deregisterCallback);
+
+        await().untilTrue(deregisterCallback.isCalled());
+
+        assertTrue(deregisterCallback.isSuccess());
+        assertNull(helper.getClient());
+
+        registerCallback = registerDeviceAsynch();
+
+        assertTrue(registerCallback.isSuccess());
+        assertNotNull(helper.getClient());
+    }
+
+    private ResponseCallback registerDeviceAsynch() {
+        final ResponseCallback registerCallback = new ResponseCallback();
+
+        helper.register(registerCallback);
+
+        await().untilTrue(registerCallback.isCalled());
+
+        return registerCallback;
     }
 
 }

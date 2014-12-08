@@ -1,5 +1,4 @@
 /*
- * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
  * 
  *
@@ -29,17 +28,23 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.client.bootstrap;
+package leshan.client.request;
 
-public class BootstrapMessageDeliverer {
+public class BootstrapRequest extends AbstractLwM2mClientRequest implements LwM2mIdentifierRequest {
+    private final String clientEndpointIdentifier;
 
-    public enum InterfaceTypes {
-        BOOTSTRAP, REGISTRATION, MANAGEMENT, REPORTING;
+    public BootstrapRequest(final String clientEndpointIdentifier) {
+        this.clientEndpointIdentifier = clientEndpointIdentifier;
     }
 
-    public enum OperationTypes {
-        CREATE, DELETE, DEREGISTER, DISCOVER, EXECUTE, NOTIFY, OBSERVE, READ, REQUEST, REGISTER, UPDATE, WRITE,
-        WRITE_ATTRIBUTES;
+    @Override
+    public void accept(final LwM2mClientRequestVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    @Override
+    public String getClientEndpointIdentifier() {
+        return clientEndpointIdentifier;
     }
 
 }

@@ -28,23 +28,34 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.client;
+package leshan.client.request;
 
-import leshan.LinkObject;
-import leshan.client.request.LwM2mClientRequest;
-import leshan.client.response.OperationResponse;
-import leshan.client.util.ResponseCallback;
+import java.util.Map;
 
-public interface LwM2mClient {
+import leshan.client.request.identifier.ClientIdentifier;
 
-    public void start();
+public class UpdateRequest extends AbstractRegisteredLwM2mClientRequest implements LwM2mContentRequest {
 
-    public void stop();
+    private final Map<String, String> updatedParameters;
 
-    public OperationResponse send(LwM2mClientRequest request);
+    public UpdateRequest(final ClientIdentifier clientIdentifier, final Map<String, String> updatedParameters) {
+        super(clientIdentifier);
+        this.updatedParameters = updatedParameters;
+    }
 
-    public void send(LwM2mClientRequest request, ResponseCallback callback);
+    public UpdateRequest(final ClientIdentifier clientIdentifier, final long timeout,
+            final Map<String, String> updatedParameters) {
+        super(clientIdentifier, timeout);
+        this.updatedParameters = updatedParameters;
+    }
 
-    public LinkObject[] getObjectModel(Integer... ids);
+    @Override
+    public Map<String, String> getClientParameters() {
+        return updatedParameters;
+    }
 
+    @Override
+    public void accept(final LwM2mClientRequestVisitor visitor) {
+        visitor.visit(this);
+    }
 }

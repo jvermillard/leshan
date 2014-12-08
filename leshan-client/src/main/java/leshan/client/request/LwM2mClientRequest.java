@@ -1,5 +1,4 @@
 /*
- * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
  * 
  *
@@ -29,26 +28,12 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.client.register;
+package leshan.client.request;
 
-import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.Map;
+public interface LwM2mClientRequest {
+    /**
+     * Accept a visitor for this request.
+     */
+    void accept(LwM2mClientRequestVisitor visitor);
 
-import leshan.client.request.Request;
-
-public class RegisterEndpoint {
-    private final Map<String, String> queryString;
-    private final InetSocketAddress destination;
-
-    public RegisterEndpoint(final InetSocketAddress destination, final Map<String, String> queryString) {
-        this.destination = destination;
-        this.queryString = new HashMap<>(queryString);
-    }
-
-    @Override
-    public String toString() {
-        return String.format("coap://%s:%s/rd?%s", destination.getHostString(), destination.getPort(),
-                Request.toQueryStringMap(queryString));
-    }
 }

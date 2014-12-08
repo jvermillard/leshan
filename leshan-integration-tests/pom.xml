@@ -42,9 +42,10 @@
 
 
     <dependencies>
-        <dependency>
+         <dependency>
             <groupId>org.github.leshan</groupId>
-            <artifactId>leshan-server-cf</artifactId>
+            <artifactId>leshan-bs-server</artifactId>
+            <version>0.1.8-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.github.leshan</groupId>

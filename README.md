@@ -67,14 +67,14 @@ Leshan-client library or use the example LeshanDevice.  To build the LeshanDevic
 
 ```
 mvn install
-cd leshan-client-standalone
+cd leshan-client-example
 mvn assembly:assembly -DdescriptorId=jar-with-dependencies
 ```
 
 Then run, setting first the hostname and port the client should use (i.e., something that isn't either 5683 or 5684 if both the server and client are running on the same machine) followed by the hostname and port of the server:
 
 ```
-java -jar target/leshan-client-*-SNAPSHOT-jar-with-dependencies.jar localhost 9000 localhost 5683
+java -jar target/leshan-client-example-*-SNAPSHOT-jar-with-dependencies.jar localhost 9000 localhost 5683
 ```
 
 The list of the registered clients: http://localhost:8080/api/clients

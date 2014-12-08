@@ -44,9 +44,12 @@ import java.util.Random;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import leshan.client.LwM2mClient;
+import leshan.client.californium.LeshanClient;
 import leshan.client.exchange.LwM2mExchange;
-import leshan.client.register.RegisterUplink;
+import leshan.client.request.AbstractRegisteredLwM2mClientRequest;
+import leshan.client.request.DeregisterRequest;
+import leshan.client.request.RegisterRequest;
+import leshan.client.request.identifier.ClientIdentifier;
 import leshan.client.resource.LwM2mClientObjectDefinition;
 import leshan.client.resource.MultipleResourceDefinition;
 import leshan.client.resource.SingleResourceDefinition;
@@ -68,14 +71,12 @@ import leshan.client.response.OperationResponse;
  * java -jar target/leshan-client-*-SNAPSHOT-jar-with-dependencies.jar 127.0.0.1 5683 9000
  */
 public class LeshanClientExample {
-    private static final int TIMEOUT_MS = 2000;
-    private String deviceLocation;
-    private final RegisterUplink registerUplink;
+    private ClientIdentifier clientIdentifier;
 
     public static void main(final String[] args) {
         if (args.length < 4) {
             System.out
-                    .println("Usage:\njava -jar target/leshan-client-*-SNAPSHOT-jar-with-dependencies.jar [Client IP] [Client port] [Server IP] [Server Port]");
+                    .println("Usage:\njava -jar target/leshan-client-example-*-SNAPSHOT-jar-with-dependencies.jar [Client IP] [Client port] [Server IP] [Server Port]");
         } else {
             new LeshanClientExample(args[0], Integer.parseInt(args[1]), args[2], Integer.parseInt(args[3]));
         }
@@ -84,33 +85,40 @@ public class LeshanClientExample {
     public LeshanClientExample(final String localHostName, final int localPort, final String serverHostName,
             final int serverPort) {
         final LwM2mClientObjectDefinition objectDevice = createObjectDefinition();
-        final LwM2mClient client = new LwM2mClient(objectDevice);
-
-        // Connect to the server provided
         final InetSocketAddress clientAddress = new InetSocketAddress(localHostName, localPort);
         final InetSocketAddress serverAddress = new InetSocketAddress(serverHostName, serverPort);
-        registerUplink = client.startRegistration(clientAddress, serverAddress);
-        final OperationResponse operationResponse = registerUplink.register(UUID.randomUUID().toString(),
-                new HashMap<String, String>(), TIMEOUT_MS);
+
+        final LeshanClient client = new LeshanClient(clientAddress, serverAddress, objectDevice);
+        // Start the client
+        client.start();
+
+        // Register to the server provided
+        final String endpointIdentifier = UUID.randomUUID().toString();
+        final RegisterRequest registerRequest = new RegisterRequest(endpointIdentifier, new HashMap<String, String>());
+        final OperationResponse operationResponse = client.send(registerRequest);
 
         // Report registration response.
         System.out.println("Device Registration (Success? " + operationResponse.isSuccess() + ")");
         if (operationResponse.isSuccess()) {
-            System.out.println("\tDevice: Registered Client Location '" + operationResponse.getLocation() + "'");
-            deviceLocation = operationResponse.getLocation();
+            System.out
+                    .println("\tDevice: Registered Client Location '" + operationResponse.getClientIdentifier() + "'");
+            clientIdentifier = operationResponse.getClientIdentifier();
         } else {
-            System.err.println("\tDevice: " + operationResponse.getErrorMessage());
+            System.err.println("\tDevice Registration Error: " + operationResponse.getErrorMessage());
             System.err
                     .println("If you're having issues connecting to the LWM2M endpoint, try using the DTLS port instead");
         }
 
-        // Deregister on shutdown.
+        // Deregister on shutdown and stop client.
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
-                if (deviceLocation != null) {
-                    System.out.println("\tDevice: Deregistering Client '" + deviceLocation + "'");
-                    registerUplink.deregister(deviceLocation, TIMEOUT_MS);
+                if (clientIdentifier != null) {
+                    System.out.println("\tDevice: Deregistering Client '" + clientIdentifier + "'");
+                    final AbstractRegisteredLwM2mClientRequest deregisterRequest = new DeregisterRequest(
+                            clientIdentifier);
+                    final OperationResponse deregisterResponse = client.send(deregisterRequest);
+                    client.stop();
                 }
             }
         });
@@ -174,7 +182,7 @@ public class LeshanClientExample {
 
         private final Map<Integer, byte[]> values;
 
-        public IntegerMultipleResource(Integer[] values) {
+        public IntegerMultipleResource(final Integer[] values) {
             this.values = new HashMap<>();
             for (int i = 0; i < values.length; i++) {
                 this.values.put(i, ByteBuffer.allocate(4).putInt(values[i]).array());

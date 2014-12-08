@@ -1,7 +1,6 @@
 /*
- * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
- *
+ * 
  *
  * All rights reserved.
  *
@@ -31,24 +30,8 @@
  */
 package leshan.client.request;
 
-import java.util.Map;
+public interface LwM2mIdentifierRequest {
 
-import leshan.util.Validate;
+    public String getClientEndpointIdentifier();
 
-public class Request {
-
-    public static String toQueryStringMap(final Map<String, String> map) {
-        Validate.notNull(map);
-
-        if (map.isEmpty()) {
-            return "";
-        }
-
-        final StringBuilder builder = new StringBuilder();
-        for (final Map.Entry<String, String> entry : map.entrySet()) {
-            builder.append(entry.getKey()).append("=").append(entry.getValue()).append("&");
-        }
-        builder.deleteCharAt(builder.length() - 1);
-        return builder.toString();
-    }
 }

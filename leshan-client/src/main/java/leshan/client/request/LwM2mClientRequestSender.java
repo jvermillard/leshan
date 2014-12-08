@@ -1,5 +1,4 @@
 /*
- * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
  * 
  *
@@ -29,22 +28,13 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.client.register;
+package leshan.client.request;
 
-import java.net.InetSocketAddress;
+import leshan.client.response.OperationResponse;
+import leshan.client.util.ResponseCallback;
 
-public class RegisteredEndpoint {
-    private final String endpointName;
-    private final InetSocketAddress destination;
+public interface LwM2mClientRequestSender {
+    OperationResponse send(LwM2mClientRequest request);
 
-    public RegisteredEndpoint(final InetSocketAddress destination, final String endpointName) {
-        this.destination = destination;
-        this.endpointName = endpointName;
-    }
-
-    @Override
-    public String toString() {
-        return destination.getHostString() + ":" + destination.getPort() + endpointName;
-    }
-
+    void send(LwM2mClientRequest request, ResponseCallback responseCallback);
 }

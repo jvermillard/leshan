@@ -31,6 +31,8 @@
  */
 package leshan.client.response;
 
+import leshan.client.request.identifier.ClientIdentifier;
+
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 import org.eclipse.californium.core.coap.Response;
 
@@ -44,10 +46,10 @@ public abstract class OperationResponse {
 
     public abstract byte[] getPayload();
 
-    public abstract String getLocation();
+    public abstract ClientIdentifier getClientIdentifier();
 
-    public static OperationResponse of(final Response response) {
-        return new SuccessfulOperationResponse(response);
+    public static OperationResponse of(final Response response, final ClientIdentifier clientIdentifier) {
+        return new SuccessfulOperationResponse(response, clientIdentifier);
     }
 
     public static OperationResponse failure(final ResponseCode responseCode, final String errorMessage) {
@@ -56,9 +58,11 @@ public abstract class OperationResponse {
 
     private static class SuccessfulOperationResponse extends OperationResponse {
         private final Response response;
+        private final ClientIdentifier clientIdentifier;
 
-        public SuccessfulOperationResponse(final Response response) {
+        public SuccessfulOperationResponse(final Response response, final ClientIdentifier clientIdentifier) {
             this.response = response;
+            this.clientIdentifier = clientIdentifier;
         }
 
         @Override
@@ -82,8 +86,8 @@ public abstract class OperationResponse {
         }
 
         @Override
-        public String getLocation() {
-            return response.getOptions().getLocationString();
+        public ClientIdentifier getClientIdentifier() {
+            return clientIdentifier;
         }
 
     }
@@ -118,7 +122,7 @@ public abstract class OperationResponse {
         }
 
         @Override
-        public String getLocation() {
+        public ClientIdentifier getClientIdentifier() {
             throw new UnsupportedOperationException("Failed Operations Do Not Have Location Paths... for NOW...");
         }
 

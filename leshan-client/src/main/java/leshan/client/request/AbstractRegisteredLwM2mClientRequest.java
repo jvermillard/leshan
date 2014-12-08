@@ -1,5 +1,4 @@
 /*
- * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
  * 
  *
@@ -29,22 +28,25 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.client.bootstrap;
+package leshan.client.request;
 
-import java.util.HashMap;
-import java.util.Map;
+import leshan.client.request.identifier.ClientIdentifier;
 
-import leshan.client.request.Request;
+public abstract class AbstractRegisteredLwM2mClientRequest extends AbstractLwM2mClientRequest {
 
-public class BootstrapEndpoint {
-    private final Map<String, String> queryString;
+    protected final ClientIdentifier clientIdentifier;
 
-    public BootstrapEndpoint(final Map<String, String> queryString) {
-        this.queryString = new HashMap<>(queryString);
+    public AbstractRegisteredLwM2mClientRequest(final ClientIdentifier clientIdentifier, final long timeout) {
+        super(timeout);
+        this.clientIdentifier = clientIdentifier;
     }
 
-    @Override
-    public String toString() {
-        return "/bs?" + Request.toQueryStringMap(queryString);
+    public AbstractRegisteredLwM2mClientRequest(final ClientIdentifier clientIdentifier) {
+        this(clientIdentifier, DEFAULT_TIMEOUT_MS);
     }
+
+    public ClientIdentifier getClientIdentifier() {
+        return clientIdentifier;
+    }
+
 }

@@ -1,5 +1,4 @@
 /*
- * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
  * 
  *
@@ -29,12 +28,10 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.client.bootstrap;
+package leshan.client.request.identifier;
 
-import leshan.client.response.OperationResponse;
+import leshan.client.californium.impl.CoapRequestVisitor;
 
-public interface BootstrapDownlink {
-    public OperationResponse write(int objectId, int objectInstanceId, int resourceId);
+public interface ClientIdentifier extends CoapRequestVisitor {
 
-    public OperationResponse delete(int objectId, int objectInstanceId);
 }
