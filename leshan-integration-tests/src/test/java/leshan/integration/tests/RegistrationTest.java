@@ -33,10 +33,9 @@
 package leshan.integration.tests;
 
 import static com.jayway.awaitility.Awaitility.await;
-import static leshan.integration.tests.IntegrationTestHelper.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import leshan.client.LwM2mClient;
-import leshan.client.register.RegisterUplink;
 import leshan.client.resource.LwM2mClientObjectDefinition;
 import leshan.client.response.OperationResponse;
 import leshan.client.util.ResponseCallback;
@@ -46,7 +45,7 @@ import org.junit.Test;
 
 public class RegistrationTest {
 
-    private IntegrationTestHelper helper = new IntegrationTestHelper();
+    private final IntegrationTestHelper helper = new IntegrationTestHelper();
 
     @After
     public void stop() {
@@ -55,8 +54,9 @@ public class RegistrationTest {
 
     @Test
     public void registered_device_exists() {
-        final RegisterUplink registerUplink = helper.registerAndGetUplink();
-        final OperationResponse register = registerUplink.register(ENDPOINT, helper.clientParameters, TIMEOUT_MS);
+//        final RegisterUplink registerUplink = helper.registerAndGetUplink();
+//        final OperationResponse register = registerUplink.register(ENDPOINT, helper.clientParameters, TIMEOUT_MS);
+        final OperationResponse register = helper.register();
 
         assertTrue(register.isSuccess());
         assertNotNull(helper.getClient());
@@ -75,9 +75,11 @@ public class RegistrationTest {
 
     @Test
     public void registered_device_exists_async() {
-        final RegisterUplink registerUplink = helper.registerAndGetUplink();
+//        final RegisterUplink registerUplink = helper.registerAndGetUplink();
         final ResponseCallback callback = new ResponseCallback();
-        registerUplink.register(ENDPOINT, helper.clientParameters, callback);
+//        registerUplink.register(ENDPOINT, helper.clientParameters, callback);
+        
+        helper.register(callback);
 
         await().untilTrue(callback.isCalled());
 

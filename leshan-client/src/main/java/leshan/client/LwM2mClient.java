@@ -38,8 +38,11 @@ import leshan.client.bootstrap.BootstrapDownlink;
 import leshan.client.bootstrap.BootstrapUplink;
 import leshan.client.coap.californium.CaliforniumBasedObject;
 import leshan.client.register.RegisterUplink;
+import leshan.client.request.RegisterRequest;
 import leshan.client.resource.LinkFormattable;
 import leshan.client.resource.LwM2mClientObjectDefinition;
+import leshan.client.response.OperationResponse;
+import leshan.client.util.ResponseCallback;
 
 import org.eclipse.californium.core.CoapServer;
 import org.eclipse.californium.core.coap.EmptyMessage;
@@ -88,14 +91,14 @@ public class LwM2mClient {
         clientSideServer.stop();
     }
 
-    public BootstrapUplink startBootstrap(final int port, final InetSocketAddress destination,
+    private BootstrapUplink startBootstrap(final int port, final InetSocketAddress destination,
             final BootstrapDownlink downlink) {
         final BootstrapUplink uplink = new BootstrapUplink(destination, new CoAPEndpoint(port), downlink);
 
         return uplink;
     }
 
-    public RegisterUplink startRegistration(final int port, final InetSocketAddress destination) {
+    private RegisterUplink startRegistration(final int port, final InetSocketAddress destination) {
         CoAPEndpoint endpoint = (CoAPEndpoint) clientSideServer.getEndpoint(port);
         if (endpoint == null) {
             endpoint = new CoAPEndpoint(port);
@@ -107,7 +110,7 @@ public class LwM2mClient {
         return new RegisterUplink(destination, endpoint, this);
     }
 
-    public RegisterUplink startRegistration(final InetSocketAddress local, final InetSocketAddress destination) {
+    private RegisterUplink startRegistration(final InetSocketAddress local, final InetSocketAddress destination) {
         CoAPEndpoint endpoint = (CoAPEndpoint) clientSideServer.getEndpoint(local);
         if (endpoint == null) {
             endpoint = new CoAPEndpoint(local);
@@ -160,6 +163,19 @@ public class LwM2mClient {
 
         return new RegisterUplink(destination, endpoint, this);
     }
+    
+    public OperationResponse send(final RegisterRequest registerRequest) {
+    	final RegisterUplink registerUplink = startRegistration(registerRequest.getClientPort(), registerRequest.getServerAddress());
+    	final OperationResponse operationResponse = registerUplink.register(registerRequest.getClientEndpoint(), registerRequest.getClientParamters(), registerRequest.getTimeoutMs());
+    	
+    	return operationResponse;
+    	
+    }
+    
+    public void send(final RegisterRequest registerRequest, final ResponseCallback callback) {
+    	final RegisterUplink registerUplink = startRegistration(registerRequest.getClientPort(), registerRequest.getServerAddress());
+    	registerUplink.register(registerRequest.getClientEndpoint(), registerRequest.getClientParamters(), callback);
+    }
 
     public LinkObject[] getObjectModel(final Integer... ids) {
         if (ids.length > 3) {
@@ -204,5 +220,6 @@ public class LwM2mClient {
 
         return LinkObject.parse(((LinkFormattable) clientResource).asLinkFormat().getBytes());
     }
+
 
 }
