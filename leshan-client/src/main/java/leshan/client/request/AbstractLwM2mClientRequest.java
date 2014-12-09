@@ -27,11 +27,11 @@ public abstract class AbstractLwM2mClientRequest implements LwM2mClientRequest {
 	}
 
 	@Override
-	public InetSocketAddress getClientEndpointAddress() {
+	public final InetSocketAddress getClientEndpointAddress() {
 		return clientEndpointAddress;
 	}
 	
-	public long getTimeout() {
+	public final long getTimeout() {
 		return timeout;
 	}
 }

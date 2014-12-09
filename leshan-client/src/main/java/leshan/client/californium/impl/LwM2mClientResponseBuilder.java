@@ -2,6 +2,7 @@ package leshan.client.californium.impl;
 
 import java.util.logging.Logger;
 
+import leshan.client.request.BootstrapRequest;
 import leshan.client.request.DeregisterRequest;
 import leshan.client.request.LwM2mClientRequestVisitor;
 import leshan.client.request.RegisterRequest;
@@ -41,6 +42,12 @@ public class LwM2mClientResponseBuilder implements LwM2mClientRequestVisitor {
 	
 	@Override
 	public void visit(final UpdateRequest request) {
+		buildResponse();
+	}
+	
+	@Override
+	public void visit(final BootstrapRequest bootstrapRequest) {
+		// TODO work might need to go here in the case of bootstrap.
 		buildResponse();
 	}
 	

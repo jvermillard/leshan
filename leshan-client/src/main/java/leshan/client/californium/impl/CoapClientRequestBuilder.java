@@ -7,6 +7,7 @@ import java.util.Map.Entry;
 import leshan.LinkObject;
 import leshan.client.request.AbstractLwM2mClientRequest;
 import leshan.client.request.AbstractRegisteredLwM2mClientRequest;
+import leshan.client.request.BootstrapRequest;
 import leshan.client.request.DeregisterRequest;
 import leshan.client.request.LwM2mClientRequestVisitor;
 import leshan.client.request.LwM2mContentRequest;
@@ -35,6 +36,18 @@ public class CoapClientRequestBuilder implements LwM2mClientRequestVisitor {
 		this.clientObjectModel = clientObjectModel;
 	}
 
+	@Override
+	public void visit(final BootstrapRequest request) {
+		coapRequest = Request.newPost();
+		buildRequestSettings(request);
+		
+		coapRequest.getOptions().addURIPath("bs");
+		coapRequest.getOptions().addURIQuery("ep=" + request.getClientEndpointIdentifier());
+		
+		parametersValid = true;
+		
+	}
+	
 	@Override
 	public void visit(final RegisterRequest request) {
 		if(!areParametersValid(request.getClientParameters())){
@@ -75,6 +88,7 @@ public class CoapClientRequestBuilder implements LwM2mClientRequestVisitor {
 		parametersValid = true;
 		
 	}
+	
 	
 	public Request getRequest() {
 		return coapRequest;

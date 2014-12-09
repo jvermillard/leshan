@@ -43,12 +43,15 @@ import java.util.Set;
 
 import leshan.ObserveSpec;
 import leshan.ResponseCode;
+import leshan.bootstrap.BootstrapStoreImpl;
 import leshan.client.LwM2mClient;
 import leshan.client.californium.LeshanClient;
 import leshan.client.exchange.LwM2mExchange;
 import leshan.client.request.AbstractLwM2mClientRequest;
 import leshan.client.request.AbstractRegisteredLwM2mClientRequest;
+import leshan.client.request.BootstrapRequest;
 import leshan.client.request.DeregisterRequest;
+import leshan.client.request.LwM2mClientRequest;
 import leshan.client.request.RegisterRequest;
 import leshan.client.request.UpdateRequest;
 import leshan.client.resource.LwM2mClientObjectDefinition;
@@ -73,6 +76,7 @@ import leshan.core.response.DiscoverResponse;
 import leshan.core.response.ValueResponse;
 import leshan.server.LwM2mServer;
 import leshan.server.californium.LeshanServer;
+import leshan.server.californium.impl.LwM2mBootstrapServerImpl;
 import leshan.server.client.Client;
 import leshan.server.impl.ClientRegistryImpl;
 import leshan.server.impl.ObservationRegistryImpl;
@@ -143,25 +147,42 @@ public final class IntegrationTestHelper {
 
 	final InetSocketAddress serverAddress = new InetSocketAddress(InetAddress.getLoopbackAddress(), 5683);
 	final InetSocketAddress clientAddress = new InetSocketAddress(InetAddress.getLoopbackAddress(), CLIENT_PORT);
-
+	private LwM2mBootstrapServerImpl bootstrapServer;
+	
 	public IntegrationTestHelper() {
+		this(false);
+	}
+
+	public IntegrationTestHelper(final boolean startBootstrap) {
 		final InetSocketAddress serverAddressSecure = new InetSocketAddress(InetAddress.getLoopbackAddress(), 5684);
 		clientRegistry = new ClientRegistryImpl();
 		observationRegistry = new ObservationRegistryImpl();
 		final SecurityRegistry securityRegistry = new SecurityRegistryImpl();
 		server = new LeshanServer(serverAddress, serverAddressSecure, clientRegistry, securityRegistry,
 				observationRegistry);
-		server.start();
 
 		firstResource = new ValueResource();
 		secondResource = new ValueResource();
 		executableResource = new ExecutableResource();
 		multipleResource = new MultipleResource();
 		intResource = new IntValueResource();
-		client = createClient();
+		
+		if(startBootstrap){
+			startBootstrapServer();
+			client = createClient(serverAddressSecure);
+		}
+		else{
+			server.start();
+			client = createClient(serverAddress);
+		}
 	}
 
-	LwM2mClient createClient() {
+	private void startBootstrapServer() {
+		bootstrapServer = new LwM2mBootstrapServerImpl(new BootstrapStoreImpl(), new SecurityRegistryImpl());
+		bootstrapServer.start();
+	}
+
+	LwM2mClient createClient(final InetSocketAddress serverAddress) {
 		final ReadWriteListenerWithBrokenWrite brokenResourceListener = new ReadWriteListenerWithBrokenWrite();
 
 		final boolean single = true;
@@ -194,6 +215,9 @@ public final class IntegrationTestHelper {
 	public void stop() {
 		client.stop();
 		server.stop();
+		if(bootstrapServer != null){
+			bootstrapServer.stop();
+		}
 	}
 
 	private AbstractLwM2mClientRequest createRegisterRequest() {
@@ -206,6 +230,18 @@ public final class IntegrationTestHelper {
 		final AbstractRegisteredLwM2mClientRequest deregisterRequest = new DeregisterRequest(clientLocation);
 		
 		return deregisterRequest;
+	}
+	
+	private LwM2mClientRequest createBoostrapRequest() {
+		return new BootstrapRequest(ENDPOINT_IDENTIFIER);
+	}
+
+	public OperationResponse bootstrap() {
+		client.start();
+		
+		final LwM2mClientRequest boostrapRequest = createBoostrapRequest();
+		final OperationResponse response = client.send(boostrapRequest);
+		return response;
 	}
 
 	public OperationResponse register() {
