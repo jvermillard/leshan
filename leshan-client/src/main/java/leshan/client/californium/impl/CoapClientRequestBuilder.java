@@ -20,7 +20,7 @@ public class CoapClientRequestBuilder implements LwM2mClientRequestVisitor {
 	@Override
 	public void visit(final RegisterRequest request) {
 		//TODO validate parameters
-		if(!areParametersValid(request.getServer().getClientParamters())){
+		if(!areParametersValid(request.getClientParameters())){
 			return;
 		}
 		//TODO remove these Endpoint classes and put that work in here.
@@ -41,10 +41,6 @@ public class CoapClientRequestBuilder implements LwM2mClientRequestVisitor {
 
 	@Override
 	public void visit(final DeregisterRequest request) {
-		//TODO validate arguments
-		if(!areParametersValid(request.getServer().getClientParamters())){
-			return;
-		}
 		coapRequest = Request.newDelete();
 		coapRequest.getOptions().setLocationPath(request.getServer().getClientEndpoint());
 		coapRequest.setDestination(request.getServer().getServerAddress().getAddress());

@@ -195,17 +195,17 @@ public final class IntegrationTestHelper {
 	}
 
 	private RegisterRequest createRegisterRequest() {
-		final RegisterRequest registerRequest = new RegisterRequest(createServer(ENDPOINT, CLIENT_PORT, clientParameters, serverAddress, TIMEOUT_MS, null));
+		final RegisterRequest registerRequest = new RegisterRequest(createServer(ENDPOINT, CLIENT_PORT, serverAddress, TIMEOUT_MS, null), clientParameters);
 		
 		return registerRequest;
 	}
 	
-	private Server createServer(final String clientEndpoint, final int clientPort, final Map<String, String> clientParameters, final InetSocketAddress serverAddress, final int timeoutMs, final String clientLocation) {
-		return new Server(clientEndpoint, clientPort, clientParameters, serverAddress, timeoutMs, clientAddress, clientLocation);
+	private Server createServer(final String clientEndpoint, final int clientPort, final InetSocketAddress serverAddress, final int timeoutMs, final String clientLocation) {
+		return new Server(clientEndpoint, serverAddress, timeoutMs, clientAddress, clientLocation);
 	}
 
 	private DeregisterRequest createDeregisterRequest(final String clientLocation) {
-		final DeregisterRequest deregisterRequest = new DeregisterRequest(createServer(ENDPOINT, CLIENT_PORT, clientParameters, serverAddress, TIMEOUT_MS, clientLocation));
+		final DeregisterRequest deregisterRequest = new DeregisterRequest(createServer(ENDPOINT, CLIENT_PORT, serverAddress, TIMEOUT_MS, clientLocation));
 		
 		return deregisterRequest;
 	}

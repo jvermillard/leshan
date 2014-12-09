@@ -92,8 +92,8 @@ public class RegistrationTest {
 	@Test
 	public void wont_send_synchronous_if_not_started(){
 		final RegisterRequest registerRequest = 
-				new RegisterRequest(new Server(helper.ENDPOINT, helper.CLIENT_PORT, 
-						helper.clientParameters, helper.serverAddress, helper.TIMEOUT_MS, helper.clientAddress));
+				new RegisterRequest(new Server(helper.ENDPOINT, 
+						 helper.serverAddress, helper.TIMEOUT_MS, helper.clientAddress), helper.clientParameters);
 
 		final OperationResponse response = helper.client.send(registerRequest);
 
@@ -103,8 +103,8 @@ public class RegistrationTest {
 	@Test
 	public void wont_send_asynchronous_if_not_started(){
 		final RegisterRequest registerRequest = 
-				new RegisterRequest(new Server(helper.ENDPOINT, helper.CLIENT_PORT, 
-						helper.clientParameters, helper.serverAddress, helper.TIMEOUT_MS, helper.clientAddress));
+				new RegisterRequest(new Server(helper.ENDPOINT,
+						helper.serverAddress, helper.TIMEOUT_MS, helper.clientAddress), helper.clientParameters);
 
 		final ResponseCallback callback = new ResponseCallback();
 		helper.client.send(registerRequest, callback);
