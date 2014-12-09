@@ -34,7 +34,9 @@ package leshan.integration.tests;
 
 import static org.junit.Assert.assertEquals;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -42,7 +44,9 @@ import java.util.Set;
 import leshan.ObserveSpec;
 import leshan.ResponseCode;
 import leshan.client.LwM2mClient;
+import leshan.client.californium.LeshanClient;
 import leshan.client.exchange.LwM2mExchange;
+import leshan.client.request.DeregisterRequest;
 import leshan.client.request.RegisterRequest;
 import leshan.client.resource.LwM2mClientObjectDefinition;
 import leshan.client.resource.SingleResourceDefinition;
@@ -54,6 +58,7 @@ import leshan.client.resource.string.StringLwM2mExchange;
 import leshan.client.resource.string.StringLwM2mResource;
 import leshan.client.response.ExecuteResponse;
 import leshan.client.response.OperationResponse;
+import leshan.client.server.Server;
 import leshan.client.util.ResponseCallback;
 import leshan.core.node.LwM2mNode;
 import leshan.core.node.LwM2mObjectInstance;
@@ -115,8 +120,8 @@ public final class IntegrationTestHelper {
 	static final int OPTIONAL_SINGLE_RESOURCE_ID = 0;
 
 	static final int BAD_OBJECT_ID = 1000;
-	static final String ENDPOINT = "epflwmtm";
-	private static final int CLIENT_PORT = 44022;
+	static final String ENDPOINT = "kdfflwmtm";
+	static final int CLIENT_PORT = 44022;
 	static final int TIMEOUT_MS = 5000;
 	private final String clientDataModel = "</lwm2m>;rt=\"oma.lwm2m\", </lwm2m/1/101>, </lwm2m/1/102>, </lwm2m/2/0>, </lwm2m/2/1>, </lwm2m/2/2>, </lwm2m/3/0>, </lwm2m/4/0>, </lwm2m/5>";
 
@@ -134,10 +139,11 @@ public final class IntegrationTestHelper {
 
 	Set<WebLink> objectsAndInstances = LinkFormat.parse(clientDataModel);
 
-	private final InetSocketAddress serverAddress = new InetSocketAddress(5683);
+	final InetSocketAddress serverAddress = new InetSocketAddress(InetAddress.getLoopbackAddress(), 5683);
+	final InetSocketAddress clientAddress = new InetSocketAddress(InetAddress.getLoopbackAddress(), CLIENT_PORT);
 
 	public IntegrationTestHelper() {
-		final InetSocketAddress serverAddressSecure = new InetSocketAddress(5684);
+		final InetSocketAddress serverAddressSecure = new InetSocketAddress(InetAddress.getLoopbackAddress(), 5684);
 		clientRegistry = new ClientRegistryImpl();
 		observationRegistry = new ObservationRegistryImpl();
 		final SecurityRegistry securityRegistry = new SecurityRegistryImpl();
@@ -178,7 +184,8 @@ public final class IntegrationTestHelper {
 		final LwM2mClientObjectDefinition optionalSingleObject = new LwM2mClientObjectDefinition(
 				OPTIONAL_SINGLE_OBJECT_ID, !mandatory, single, new SingleResourceDefinition(
 						OPTIONAL_SINGLE_RESOURCE_ID, intResource, !mandatory));
-		return new LwM2mClient(objectOne, objectTwo, objectThree, objectFour, mandatoryMultipleObject,
+		return new LeshanClient(Collections.singleton(clientAddress), Collections.singleton(serverAddress), 
+				objectOne, objectTwo, objectThree, objectFour, mandatoryMultipleObject,
 				mandatorySingleObject, optionalSingleObject);
 	}
 
@@ -188,22 +195,37 @@ public final class IntegrationTestHelper {
 	}
 
 	private RegisterRequest createRegisterRequest() {
-		final RegisterRequest registerRequest = new RegisterRequest(CLIENT_PORT, ENDPOINT, clientParameters, serverAddress, TIMEOUT_MS);
-		//        final RegisterUplink registerUplink = client.startRegistration(CLIENT_PORT, serverAddress);
-		//        return registerUplink;
+		final RegisterRequest registerRequest = new RegisterRequest(createServer(ENDPOINT, CLIENT_PORT, clientParameters, serverAddress, TIMEOUT_MS, null));
+		
 		return registerRequest;
 	}
+	
+	private Server createServer(final String clientEndpoint, final int clientPort, final Map<String, String> clientParameters, final InetSocketAddress serverAddress, final int timeoutMs, final String clientLocation) {
+		return new Server(clientEndpoint, clientPort, clientParameters, serverAddress, timeoutMs, clientAddress, clientLocation);
+	}
 
-	OperationResponse register() {
+	private DeregisterRequest createDeregisterRequest(final String clientLocation) {
+		final DeregisterRequest deregisterRequest = new DeregisterRequest(createServer(ENDPOINT, CLIENT_PORT, clientParameters, serverAddress, TIMEOUT_MS, clientLocation));
+		
+		return deregisterRequest;
+	}
+
+	public OperationResponse register() {
+		client.start();
 		final RegisterRequest registerRequest = createRegisterRequest();
-		//        registerRequest.register(ENDPOINT, clientParameters, TIMEOUT_MS);
 		final OperationResponse response = client.send(registerRequest);
 		return response;
 	}
 
 	public void register(final ResponseCallback callback) {
+		client.start();
 		final RegisterRequest registerRequest = createRegisterRequest();
 		client.send(registerRequest, callback);
+	}
+	
+	public void deregister(final String clientLocation, final ResponseCallback callback) {
+		final DeregisterRequest deregisterRequest = createDeregisterRequest(clientLocation);
+		client.send(deregisterRequest, callback);
 	}
 
 	static LwM2mObjectInstance createGoodObjectInstance(final String value0, final String value1) {
@@ -421,5 +443,6 @@ public final class IntegrationTestHelper {
 		}
 
 	}
+
 
 }

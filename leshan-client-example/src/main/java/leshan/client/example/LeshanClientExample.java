@@ -36,6 +36,7 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -43,9 +44,10 @@ import java.util.Random;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import leshan.client.LwM2mClient;
+import leshan.client.californium.LeshanClient;
 import leshan.client.exchange.LwM2mExchange;
-import leshan.client.register.RegisterUplink;
+import leshan.client.request.DeregisterRequest;
+import leshan.client.request.RegisterRequest;
 import leshan.client.resource.LwM2mClientObjectDefinition;
 import leshan.client.resource.SingleResourceDefinition;
 import leshan.client.resource.integer.IntegerLwM2mExchange;
@@ -58,6 +60,7 @@ import leshan.client.resource.time.TimeLwM2mExchange;
 import leshan.client.resource.time.TimeLwM2mResource;
 import leshan.client.response.ExecuteResponse;
 import leshan.client.response.OperationResponse;
+import leshan.client.server.Server;
 
 /*
  * To build: 
@@ -68,7 +71,6 @@ import leshan.client.response.OperationResponse;
 public class LeshanClientExample {
     private static final int TIMEOUT_MS = 2000;
     private String deviceLocation;
-    private final RegisterUplink registerUplink;
 
     public static void main(final String[] args) {
         if (args.length < 4) {
@@ -82,14 +84,21 @@ public class LeshanClientExample {
     public LeshanClientExample(final String localHostName, final int localPort, final String serverHostName,
             final int serverPort) {
         final LwM2mClientObjectDefinition objectDevice = createObjectDefinition();
-        final LwM2mClient client = new LwM2mClient(objectDevice);
-
-        // Connect to the server provided
         final InetSocketAddress clientAddress = new InetSocketAddress(localHostName, localPort);
         final InetSocketAddress serverAddress = new InetSocketAddress(serverHostName, serverPort);
-        registerUplink = client.startRegistration(clientAddress, serverAddress);
-        final OperationResponse operationResponse = registerUplink.register(UUID.randomUUID().toString(),
-                new HashMap<String, String>(), TIMEOUT_MS);
+        final LeshanClient client = new LeshanClient(Collections.singleton(clientAddress), 
+        		Collections.singleton(serverAddress),
+        		objectDevice);
+        final Server server = new Server(UUID.randomUUID().toString(), 
+        		localPort, 
+        		new HashMap<String, String>(),
+        		serverAddress,
+        		TIMEOUT_MS,
+        		clientAddress
+        		);
+		// Connect to the server provided
+        final RegisterRequest registerRequest = new RegisterRequest(server);
+        final OperationResponse operationResponse = client.send(registerRequest);
 
         // Report registration response.
         System.out.println("Device Registration (Success? " + operationResponse.isSuccess() + ")");
@@ -108,7 +117,14 @@ public class LeshanClientExample {
             public void run() {
                 if (deviceLocation != null) {
                     System.out.println("\tDevice: Deregistering Client '" + deviceLocation + "'");
-                    registerUplink.deregister(deviceLocation, TIMEOUT_MS);
+                    final Server serverDeregister = new Server(UUID.randomUUID().toString(), 
+                    		localPort, 
+                    		new HashMap<String, String>(),
+                    		serverAddress,
+                    		TIMEOUT_MS,
+                    		clientAddress,
+                    		deviceLocation);
+                    final DeregisterRequest deregisterRequest = new DeregisterRequest(serverDeregister);
                 }
             }
         });
@@ -172,7 +188,7 @@ public class LeshanClientExample {
 
         private final Map<Integer, byte[]> values;
 
-        public IntegerMultipleResource(Integer[] values) {
+        public IntegerMultipleResource(final Integer[] values) {
             this.values = new HashMap<>();
             for (int i = 0; i < values.length; i++) {
                 this.values.put(i, ByteBuffer.allocate(4).putInt(values[i]).array());

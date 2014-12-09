@@ -33,11 +33,15 @@
 package leshan.integration.tests;
 
 import static com.jayway.awaitility.Awaitility.await;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import leshan.client.LwM2mClient;
+import static org.junit.Assert.*;
+
+import java.util.Collections;
+
+import leshan.client.californium.LeshanClient;
+import leshan.client.request.RegisterRequest;
 import leshan.client.resource.LwM2mClientObjectDefinition;
 import leshan.client.response.OperationResponse;
+import leshan.client.server.Server;
 import leshan.client.util.ResponseCallback;
 
 import org.junit.After;
@@ -45,46 +49,90 @@ import org.junit.Test;
 
 public class RegistrationTest {
 
-    private final IntegrationTestHelper helper = new IntegrationTestHelper();
+	private final IntegrationTestHelper helper = new IntegrationTestHelper();
 
-    @After
-    public void stop() {
-        helper.stop();
-    }
+	@After
+	public void stop() {
+		helper.stop();
+	}
 
-    @Test
-    public void registered_device_exists() {
-//        final RegisterUplink registerUplink = helper.registerAndGetUplink();
-//        final OperationResponse register = registerUplink.register(ENDPOINT, helper.clientParameters, TIMEOUT_MS);
-        final OperationResponse register = helper.register();
+	@Test
+	public void registered_device_exists() {
+		final OperationResponse register = helper.register();
 
-        assertTrue(register.isSuccess());
-        assertNotNull(helper.getClient());
-    }
+		assertTrue(register.isSuccess());
+		assertNotNull(helper.getClient());
+	}
 
-    @Test(expected = IllegalArgumentException.class)
-    public void fail_to_create_client_with_null() {
-        helper.client = new LwM2mClient((LwM2mClientObjectDefinition[]) null);
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void fail_to_create_client_with_null() {
+		helper.client = new LeshanClient(Collections.singleton(helper.clientAddress), Collections.singleton(helper.serverAddress),
+				(LwM2mClientObjectDefinition[]) null);
+	}
 
-    @Test(expected = IllegalArgumentException.class)
-    public void fail_to_create_client_with_same_object_twice() {
-        final LwM2mClientObjectDefinition objectOne = new LwM2mClientObjectDefinition(1, false, false);
-        helper.client = new LwM2mClient(objectOne, objectOne);
-    }
+	@Test(expected = IllegalArgumentException.class)
+	public void fail_to_create_client_with_same_object_twice() {
+		final LwM2mClientObjectDefinition objectOne = new LwM2mClientObjectDefinition(1, false, false);
+		helper.client = new LeshanClient(Collections.singleton(helper.clientAddress), Collections.singleton(helper.serverAddress),
+				objectOne, objectOne);
+	}
 
-    @Test
-    public void registered_device_exists_async() {
-//        final RegisterUplink registerUplink = helper.registerAndGetUplink();
-        final ResponseCallback callback = new ResponseCallback();
-//        registerUplink.register(ENDPOINT, helper.clientParameters, callback);
-        
-        helper.register(callback);
+	@Test
+	public void registered_device_exists_async() {
+		final ResponseCallback callback = new ResponseCallback();
 
-        await().untilTrue(callback.isCalled());
+		helper.register(callback);
 
-        assertTrue(callback.isSuccess());
-        assertNotNull(helper.getClient());
-    }
+		await().untilTrue(callback.isCalled());
+
+		assertTrue(callback.isSuccess());
+		assertNotNull(helper.getClient());
+	}
+
+	@Test
+	public void wont_send_synchronous_if_not_started(){
+		final RegisterRequest registerRequest = 
+				new RegisterRequest(new Server(helper.ENDPOINT, helper.CLIENT_PORT, 
+						helper.clientParameters, helper.serverAddress, helper.TIMEOUT_MS, helper.clientAddress));
+
+		final OperationResponse response = helper.client.send(registerRequest);
+
+		assertFalse(response.isSuccess());
+	}
+
+	@Test
+	public void wont_send_asynchronous_if_not_started(){
+		final RegisterRequest registerRequest = 
+				new RegisterRequest(new Server(helper.ENDPOINT, helper.CLIENT_PORT, 
+						helper.clientParameters, helper.serverAddress, helper.TIMEOUT_MS, helper.clientAddress));
+
+		final ResponseCallback callback = new ResponseCallback();
+		helper.client.send(registerRequest, callback);
+
+		assertTrue(callback.isCalled().get());
+		assertFalse(callback.isSuccess());
+	}
+
+	@Test
+	public void deregister_registered_device_async(){
+		final ResponseCallback registerCallback = new ResponseCallback();
+
+		helper.register(registerCallback);
+
+		await().untilTrue(registerCallback.isCalled());
+		
+		assertNotNull(helper.getClient());
+		
+		final String clientLocation = registerCallback.getResponse().getLocation();
+		
+		final ResponseCallback deregisterCallback = new ResponseCallback();
+
+		helper.deregister(clientLocation, deregisterCallback);
+
+		await().untilTrue(deregisterCallback.isCalled());
+
+		assertTrue(deregisterCallback.isSuccess());
+		assertNull(helper.getClient());
+	}
 
 }

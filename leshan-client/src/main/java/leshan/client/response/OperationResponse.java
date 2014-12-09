@@ -34,7 +34,7 @@ package leshan.client.response;
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 import org.eclipse.californium.core.coap.Response;
 
-public abstract class OperationResponse {
+public abstract class OperationResponse implements ServerResponse{
 
     public abstract boolean isSuccess();
 

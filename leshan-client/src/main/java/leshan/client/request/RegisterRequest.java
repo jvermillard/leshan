@@ -1,43 +1,32 @@
 package leshan.client.request;
 
-import java.net.InetSocketAddress;
-import java.util.Map;
+import leshan.LinkObject;
+import leshan.client.server.Server;
 
-public class RegisterRequest {
+public class RegisterRequest implements LwM2mClientRequest{
+	private final Server server;
+	private LinkObject objectModel;
 
-	private final int clientPort;
-	private final InetSocketAddress serverAddress;
-	private final String clientEndpoint;
-	private final Map<String, String> clientParamters;
-	private final int timeoutMs;
+	public RegisterRequest(final Server server){
+		this.server = server;
+	}
 
-	public RegisterRequest(final int clientPort, final String endpoint, final Map<String, String> clientParameters, final InetSocketAddress serverAddress, final int timeoutMs) {
-		this.clientPort = clientPort;
-		this.clientEndpoint = endpoint;
-		this.clientParamters = clientParameters;
-		this.serverAddress = serverAddress;
-		this.timeoutMs = timeoutMs;
-		
+	@Override
+	public Server getServer() {
+		return server;
+	}
+
+	public LinkObject getObjectModel() {
+		return objectModel;
 	}
 	
-	public int getClientPort() {
-		return clientPort;
+	public void setObjectModel(final LinkObject objectModel) {
+		this.objectModel = objectModel;
 	}
-	
-	public String getClientEndpoint() {
-		return clientEndpoint;
-	}
-	
-	public Map<String, String> getClientParamters() {
-		return clientParamters;
-	}
-	
-	public InetSocketAddress getServerAddress() {
-		return serverAddress;
-	}
-	
-	public int getTimeoutMs() {
-		return timeoutMs;
+
+	@Override
+	public void accept(final LwM2mClientRequestVisitor visitor) {
+		visitor.visit(this);
 	}
 
 }
