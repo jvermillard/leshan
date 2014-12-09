@@ -32,7 +32,6 @@
 package leshan.client;
 
 import static org.junit.Assert.assertNull;
-import leshan.client.bootstrap.BootstrapDownlink;
 
 import org.eclipse.californium.core.CoapServer;
 import org.junit.Before;
@@ -43,9 +42,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LwM2mClientTest {
-    @Mock
-    private BootstrapDownlink fakeBootstrapDownlink;
-
     @Mock
     private CoapServer server;
 

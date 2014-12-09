@@ -89,13 +89,13 @@ public class LeshanClientExample {
         final LeshanClient client = new LeshanClient(Collections.singleton(clientAddress), 
         		Collections.singleton(serverAddress),
         		objectDevice);
-        final Server server = new Server(UUID.randomUUID().toString(), 
+        final Server server = new Server( 
         		serverAddress,
         		TIMEOUT_MS,
         		clientAddress
         		);
 		// Connect to the server provided
-        final RegisterRequest registerRequest = new RegisterRequest(server, new HashMap<String, String>());
+        final RegisterRequest registerRequest = new RegisterRequest(server, UUID.randomUUID().toString(), new HashMap<String, String>());
         final OperationResponse operationResponse = client.send(registerRequest);
 
         // Report registration response.
@@ -115,12 +115,10 @@ public class LeshanClientExample {
             public void run() {
                 if (deviceLocation != null) {
                     System.out.println("\tDevice: Deregistering Client '" + deviceLocation + "'");
-                    final Server serverDeregister = new Server(UUID.randomUUID().toString(), 
-                    		serverAddress,
+                    final Server serverDeregister = new Server(serverAddress,
                     		TIMEOUT_MS,
-                    		clientAddress,
-                    		deviceLocation);
-                    final DeregisterRequest deregisterRequest = new DeregisterRequest(serverDeregister);
+                    		clientAddress);
+                    final DeregisterRequest deregisterRequest = new DeregisterRequest(serverDeregister, deviceLocation);
                     client.send(deregisterRequest);
                 }
             }

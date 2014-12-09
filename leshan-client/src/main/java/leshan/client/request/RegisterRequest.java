@@ -9,9 +9,11 @@ public class RegisterRequest implements LwM2mClientRequest{
 	private final Server server;
 	private LinkObject objectModel;
 	private final Map<String, String> clientParameters;
+	private final String clientEndpoint;
 
-	public RegisterRequest(final Server server, final Map<String, String> clientParameters){
+	public RegisterRequest(final Server server, final String clientEndpoint, final Map<String, String> clientParameters){
 		this.server = server;
+		this.clientEndpoint = clientEndpoint;
 		this.clientParameters = clientParameters;
 	}
 
@@ -35,6 +37,10 @@ public class RegisterRequest implements LwM2mClientRequest{
 	
 	public Map<String, String> getClientParameters() {
 		return clientParameters;
+	}
+	
+	public String getClientEndpoint() {
+		return clientEndpoint;
 	}
 
 }

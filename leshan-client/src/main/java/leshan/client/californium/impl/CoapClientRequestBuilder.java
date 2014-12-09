@@ -19,19 +19,15 @@ public class CoapClientRequestBuilder implements LwM2mClientRequestVisitor {
 
 	@Override
 	public void visit(final RegisterRequest request) {
-		//TODO validate parameters
 		if(!areParametersValid(request.getClientParameters())){
 			return;
 		}
-		//TODO remove these Endpoint classes and put that work in here.
 		coapRequest = Request.newPost();
-		//TODO cleanup
-
 		coapRequest.setDestination(request.getServer().getServerAddress().getAddress());
 		coapRequest.setDestinationPort(request.getServer().getServerAddress().getPort());
 		
 		coapRequest.getOptions().addURIPath("rd");
-		coapRequest.getOptions().addURIQuery("ep=" + request.getServer().getClientEndpoint());
+		coapRequest.getOptions().addURIQuery("ep=" + request.getClientEndpoint());
 
 		final String payload = LinkFormatUtils.payloadize(request.getObjectModel());
 		coapRequest.setPayload(payload);
@@ -42,10 +38,9 @@ public class CoapClientRequestBuilder implements LwM2mClientRequestVisitor {
 	@Override
 	public void visit(final DeregisterRequest request) {
 		coapRequest = Request.newDelete();
-		coapRequest.getOptions().setLocationPath(request.getServer().getClientEndpoint());
 		coapRequest.setDestination(request.getServer().getServerAddress().getAddress());
 		coapRequest.setDestinationPort(request.getServer().getServerAddress().getPort());
-		final String[] locationPaths = request.getServer().getLocation().split("/");
+		final String[] locationPaths = request.getClientLocation().split("/");
 		for(final String location : locationPaths){
 			if(location.length() != 0){
 				coapRequest.getOptions().addURIPath(location);
