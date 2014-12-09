@@ -30,8 +30,13 @@
 package leshan.server.request;
 
 import leshan.core.node.LwM2mNode;
+import leshan.core.node.LwM2mObject;
+import leshan.core.node.LwM2mObjectInstance;
 import leshan.core.node.LwM2mPath;
+import leshan.core.node.LwM2mResource;
+import leshan.core.node.Value.DataType;
 import leshan.core.objectspec.ResourceSpec;
+import leshan.core.objectspec.ResourceSpec.Type;
 import leshan.core.objectspec.Resources;
 import leshan.core.request.ContentFormat;
 import leshan.core.response.ClientResponse;
@@ -64,31 +69,72 @@ public class WriteRequest extends AbstractLwM2mRequest<ClientResponse> {
         super(client, target);
         Validate.notNull(node);
 
-        // Manage Text format
-        if (ContentFormat.TEXT == format) {
+        // Validate node and path coherence
+        if (getPath().isResource()) {
+            if (!(node instanceof LwM2mResource)) {
+                throw new IllegalArgumentException(String.format("path '%s' and node type '%s' does not match",
+                        target.toString(), node.getClass().getSimpleName()));
+            }
+        }
+        if (getPath().isObjectInstance()) {
+            if (!(node instanceof LwM2mObjectInstance)) {
+                throw new IllegalArgumentException(String.format("path '%s' and node type '%s' does not match",
+                        target.toString(), node.getClass().getSimpleName()));
+            }
+        }
+        if (getPath().isObject()) {
+            if (!(node instanceof LwM2mObject)) {
+                throw new IllegalArgumentException(String.format("path '%s' and node type '%s' does not match",
+                        target.toString(), node.getClass().getSimpleName()));
+            }
+        }
+
+        // Validate content format
+        if (ContentFormat.TEXT == format || ContentFormat.OPAQUE == format) {
             if (!getPath().isResource()) {
-                throw new IllegalArgumentException("Text format must be used only for single resources");
+                throw new IllegalArgumentException(String.format("%s format must be used only for single resources",
+                        format.toString()));
             } else {
                 final ResourceSpec description = Resources.getResourceSpec(getPath().getObjectId(), getPath()
                         .getResourceId());
                 if (description != null && description.multiple) {
-                    throw new IllegalArgumentException("Text format must be used only for single resources");
+                    throw new IllegalArgumentException(String.format(
+                            "%s format must be used only for single resources", format.toString()));
+                }
+                if (((LwM2mResource) node).isMultiInstances()) {
+                    throw new IllegalArgumentException(String.format(
+                            "%s format must be used only for single resources", format.toString()));
                 }
             }
         }
 
         // Manage default format
         if (format == null) {
-            // use text for single resource
+            // Use text for single resource ...
             if (getPath().isResource()) {
+                // Use resource description to guess
                 final ResourceSpec description = Resources.getResourceSpec(getPath().getObjectId(), getPath()
                         .getResourceId());
-                if (description != null && !description.multiple) {
-                    format = ContentFormat.TEXT;
-                } else {
-                    format = ContentFormat.TLV;
+                if (description != null) {
+                    if (description.multiple) {
+                        format = ContentFormat.TLV;
+                    } else {
+                        format = description.type == Type.OPAQUE ? ContentFormat.OPAQUE : ContentFormat.TEXT;
+                    }
                 }
-            } else {
+                // If no object description available, use 'node' to guess
+                else {
+                    LwM2mResource resourceNode = ((LwM2mResource) node);
+                    if (resourceNode.isMultiInstances()) {
+                        format = ContentFormat.TLV;
+                    } else {
+                        format = resourceNode.getValue().type == DataType.OPAQUE ? ContentFormat.OPAQUE
+                                : ContentFormat.TEXT;
+                    }
+                }
+            }
+            // ... and TLV for other ones.
+            else {
                 format = ContentFormat.TLV;
             }
         }
