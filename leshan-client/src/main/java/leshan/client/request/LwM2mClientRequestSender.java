@@ -1,10 +1,10 @@
 package leshan.client.request;
 
-import leshan.client.response.ServerResponse;
+import leshan.client.response.OperationResponse;
 import leshan.client.util.ResponseCallback;
 
 public interface LwM2mClientRequestSender {
-    <T extends ServerResponse> T send(LwM2mClientRequest<T> request);
+    OperationResponse send(LwM2mClientRequest request);
 
-    <T extends ServerResponse> void send(LwM2mClientRequest<T> request, ResponseCallback<T> responseCallback);
+    void send(LwM2mClientRequest request, ResponseCallback responseCallback);
 }

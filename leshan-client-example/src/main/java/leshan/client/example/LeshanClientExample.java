@@ -60,7 +60,6 @@ import leshan.client.resource.time.TimeLwM2mExchange;
 import leshan.client.resource.time.TimeLwM2mResource;
 import leshan.client.response.ExecuteResponse;
 import leshan.client.response.OperationResponse;
-import leshan.client.server.Server;
 
 /*
  * To build: 
@@ -86,16 +85,14 @@ public class LeshanClientExample {
         final LwM2mClientObjectDefinition objectDevice = createObjectDefinition();
         final InetSocketAddress clientAddress = new InetSocketAddress(localHostName, localPort);
         final InetSocketAddress serverAddress = new InetSocketAddress(serverHostName, serverPort);
+        
         final LeshanClient client = new LeshanClient(Collections.singleton(clientAddress), 
-        		Collections.singleton(serverAddress),
-        		objectDevice);
-        final Server server = new Server( 
         		serverAddress,
-        		TIMEOUT_MS,
-        		clientAddress
-        		);
+        		objectDevice);
+        
 		// Connect to the server provided
-        final RegisterRequest registerRequest = new RegisterRequest(server, UUID.randomUUID().toString(), new HashMap<String, String>());
+        final String endpointIdentifier = UUID.randomUUID().toString();
+		final RegisterRequest registerRequest = new RegisterRequest(endpointIdentifier, new HashMap<String, String>());
         final OperationResponse operationResponse = client.send(registerRequest);
 
         // Report registration response.
@@ -115,10 +112,7 @@ public class LeshanClientExample {
             public void run() {
                 if (deviceLocation != null) {
                     System.out.println("\tDevice: Deregistering Client '" + deviceLocation + "'");
-                    final Server serverDeregister = new Server(serverAddress,
-                    		TIMEOUT_MS,
-                    		clientAddress);
-                    final DeregisterRequest deregisterRequest = new DeregisterRequest(serverDeregister, deviceLocation);
+                    final DeregisterRequest deregisterRequest = new DeregisterRequest(deviceLocation);
                     client.send(deregisterRequest);
                 }
             }

@@ -3,23 +3,15 @@ package leshan.client.request;
 import java.util.Map;
 
 import leshan.LinkObject;
-import leshan.client.server.Server;
 
-public class RegisterRequest implements LwM2mClientRequest{
-	private final Server server;
+public class RegisterRequest extends AbstractLwM2mClientRequest{
 	private LinkObject objectModel;
 	private final Map<String, String> clientParameters;
-	private final String clientEndpoint;
+	private final String clientEndpointIdentifier;
 
-	public RegisterRequest(final Server server, final String clientEndpoint, final Map<String, String> clientParameters){
-		this.server = server;
-		this.clientEndpoint = clientEndpoint;
+	public RegisterRequest(final String clientEndpointIdentifier, final Map<String, String> clientParameters){
+		this.clientEndpointIdentifier = clientEndpointIdentifier;
 		this.clientParameters = clientParameters;
-	}
-
-	@Override
-	public Server getServer() {
-		return server;
 	}
 
 	public LinkObject getObjectModel() {
@@ -39,8 +31,8 @@ public class RegisterRequest implements LwM2mClientRequest{
 		return clientParameters;
 	}
 	
-	public String getClientEndpoint() {
-		return clientEndpoint;
+	public String getClientEndpointIdentifier() {
+		return clientEndpointIdentifier;
 	}
 
 }

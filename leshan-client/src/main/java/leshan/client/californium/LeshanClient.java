@@ -61,24 +61,24 @@ public class LeshanClient implements LwM2mClient {
     private final AtomicBoolean clientServerStarted = new AtomicBoolean(false);
 	private final CaliforniumLwM2mClientRequestSender requestSender;
 
-    public LeshanClient(final Set<InetSocketAddress> clientEndpoints, final Set<InetSocketAddress> serverEndpoints, final LwM2mClientObjectDefinition... defs) {
-        this(clientEndpoints, serverEndpoints, new CoapServer(), defs);
+    public LeshanClient(final Set<InetSocketAddress> clientEndpoints, final InetSocketAddress serverAddress, final LwM2mClientObjectDefinition... objectDevice) {
+        this(clientEndpoints, serverAddress, new CoapServer(), objectDevice);
     }
 
-    public LeshanClient(final Set<InetSocketAddress> clientEndpoints, final Set<InetSocketAddress> serverEndpoints, final CoapServer server, final LwM2mClientObjectDefinition... defs) {
-        if (clientEndpoints == null || serverEndpoints == null || defs == null || defs.length == 0) {
+    public LeshanClient(final Set<InetSocketAddress> clientEndpoints, final InetSocketAddress serverAddress, final CoapServer serverLocal, final LwM2mClientObjectDefinition... objectDevice) {
+        if (clientEndpoints == null || serverLocal == null || objectDevice == null || serverAddress == null || objectDevice.length == 0){
             throw new IllegalArgumentException(
                     "LWM2M Clients must support minimum required Objects defined in the LWM2M Specification.");
         }
-        server.setMessageDeliverer(new LwM2mServerMessageDeliverer(server.getRoot()));
+        serverLocal.setMessageDeliverer(new LwM2mServerMessageDeliverer(serverLocal.getRoot()));
         for(final InetSocketAddress clientAddress :clientEndpoints){
 	        final Endpoint endpoint = new CoAPEndpoint(clientAddress);
-	        server.addEndpoint(endpoint);
+	        serverLocal.addEndpoint(endpoint);
         }
         
-        clientSideServer = server;
+        clientSideServer = serverLocal;
 
-        for (final LwM2mClientObjectDefinition def : defs) {
+        for (final LwM2mClientObjectDefinition def : objectDevice) {
             if (clientSideServer.getRoot().getChild(Integer.toString(def.getId())) != null) {
                 throw new IllegalArgumentException("Trying to load Client Object of name '" + def.getId()
                         + "' when one was already added.");
@@ -89,7 +89,7 @@ public class LeshanClient implements LwM2mClient {
             clientSideServer.add(clientObject);
         }
         
-        requestSender = new CaliforniumLwM2mClientRequestSender(server.getEndpoints());
+        requestSender = new CaliforniumLwM2mClientRequestSender(serverLocal.getEndpoints(), serverAddress);
     }
 
     @Override

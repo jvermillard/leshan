@@ -35,11 +35,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import leshan.client.response.Callback;
 import leshan.client.response.OperationResponse;
-import leshan.client.response.ServerResponse;
 
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 
-public class ResponseCallback<T extends ServerResponse> implements Callback {
+public class ResponseCallback implements Callback {
 
     private final AtomicBoolean called;
     private OperationResponse response;

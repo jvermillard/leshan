@@ -43,8 +43,6 @@ import java.util.logging.Logger;
 import leshan.client.request.LwM2mClientRequest;
 import leshan.client.request.LwM2mClientRequestSender;
 import leshan.client.response.OperationResponse;
-import leshan.client.response.ServerResponse;
-import leshan.client.server.Server;
 import leshan.client.util.ResponseCallback;
 
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
@@ -56,32 +54,29 @@ import org.eclipse.californium.core.network.Endpoint;
 public class CaliforniumLwM2mClientRequestSender implements LwM2mClientRequestSender{
     private static final Logger LOG = Logger.getLogger(CaliforniumLwM2mClientRequestSender.class.getCanonicalName());
     private final Set<Endpoint> endpoints;
+	private final InetSocketAddress serverAddress;
     
-    public CaliforniumLwM2mClientRequestSender(final List<Endpoint> endpoints){
+    public CaliforniumLwM2mClientRequestSender(final List<Endpoint> endpoints, final InetSocketAddress serverAddress){
     	this.endpoints = new HashSet<Endpoint>(endpoints);
-//        for(final InetSocketAddress serverAddress :endpoints){
-//	        final Endpoint endpoint = new CoAPEndpoint(serverAddress);
-//	        endpoints.add(endpoint);
-//        }
+    	this.serverAddress = serverAddress;
     }
   
     @Override
-    public <T extends ServerResponse> T send(final LwM2mClientRequest<T> request) {
+    public OperationResponse send(final LwM2mClientRequest request) {
         // Create the CoAP request from LwM2m request
-        final CoapClientRequestBuilder coapClientRequestBuilder = new CoapClientRequestBuilder();
+        final CoapClientRequestBuilder coapClientRequestBuilder = new CoapClientRequestBuilder(serverAddress);
         request.accept(coapClientRequestBuilder);
         if(!coapClientRequestBuilder.areParametersValid()){
-        	return (T) OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR, "Request has invalid parameters.  Not sending.");
+        	return OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR, "Request has invalid parameters.  Not sending.");
         }
         final Request coapRequest = coapClientRequestBuilder.getRequest();
 
         // Send CoAP request synchronously
-        final SyncRequestObserver<T> syncMessageObserver = new SyncRequestObserver<T>(coapRequest, request.getServer(),
-                request.getServer().getTimeoutMs()) {
+        final SyncRequestObserver syncMessageObserver = new SyncRequestObserver(coapRequest, coapClientRequestBuilder.getTimeout()){
             @Override
-            public T buildResponse(final Response coapResponse) {
+            public OperationResponse buildResponse(final Response coapResponse) {
                 // Build LwM2m response
-                final LwM2mClientResponseBuilder<T> lwm2mResponseBuilder = new LwM2mClientResponseBuilder<T>(coapRequest, coapResponse,
+                final LwM2mClientResponseBuilder lwm2mResponseBuilder = new LwM2mClientResponseBuilder(coapRequest, coapResponse,
                         CaliforniumLwM2mClientRequestSender.this);
                 request.accept(lwm2mResponseBuilder);
                 return lwm2mResponseBuilder.getResponse();
@@ -90,8 +85,7 @@ public class CaliforniumLwM2mClientRequestSender implements LwM2mClientRequestSe
         coapRequest.addMessageObserver(syncMessageObserver);
 
         // Send CoAP request asynchronously
-        //TODO consider having these be changeable at runtime as there is nothing stopping us from having RegisterRequest create an endpoint, Deregister remove one, etc
-        final Endpoint endpoint = getEndpointForServer(request.getServer());
+        final Endpoint endpoint = getEndpointForServer(request.getClientEndpointAddress());
         endpoint.sendRequest(coapRequest);
 
         // Wait for response, then return it
@@ -99,9 +93,9 @@ public class CaliforniumLwM2mClientRequestSender implements LwM2mClientRequestSe
     }
 
     @Override
-    public <T extends ServerResponse> void send(final LwM2mClientRequest<T> request, final ResponseCallback<T> responseCallback) {
+    public void send(final LwM2mClientRequest request, final ResponseCallback responseCallback) {
         // Create the CoAP request from LwM2m request
-        final CoapClientRequestBuilder coapClientRequestBuilder = new CoapClientRequestBuilder();
+        final CoapClientRequestBuilder coapClientRequestBuilder = new CoapClientRequestBuilder(serverAddress);
         request.accept(coapClientRequestBuilder);
         if(!coapClientRequestBuilder.areParametersValid()){
         	responseCallback.onFailure(OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR, "Request has invalid parameters.  Not sending."));
@@ -110,12 +104,12 @@ public class CaliforniumLwM2mClientRequestSender implements LwM2mClientRequestSe
         final Request coapRequest = coapClientRequestBuilder.getRequest();
 
         // Add CoAP request callback
-        coapRequest.addMessageObserver(new AsyncRequestObserver<T>(coapRequest, request.getServer(), responseCallback) {
+        coapRequest.addMessageObserver(new AsyncRequestObserver(coapRequest, responseCallback) {
         	
             @Override
-            public T buildResponse(final Response coapResponse) {
+            public OperationResponse buildResponse(final Response coapResponse) {
                 // Build LwM2m response
-                final LwM2mClientResponseBuilder<T> lwm2mResponseBuilder = new LwM2mClientResponseBuilder<T>(coapRequest, coapResponse,
+                final LwM2mClientResponseBuilder lwm2mResponseBuilder = new LwM2mClientResponseBuilder(coapRequest, coapResponse,
                 		CaliforniumLwM2mClientRequestSender.this);
                 request.accept(lwm2mResponseBuilder);
                 return lwm2mResponseBuilder.getResponse();
@@ -123,67 +117,57 @@ public class CaliforniumLwM2mClientRequestSender implements LwM2mClientRequestSe
         });
 
         // Send CoAP request asynchronously
-        //TODO consider having these be changeable at runtime as there is nothing stopping us from having RegisterRequest create an endpoint, Deregister remove one, etc
-        final Endpoint endpoint = getEndpointForServer(request.getServer());
+        final Endpoint endpoint = getEndpointForServer(request.getClientEndpointAddress());
         endpoint.sendRequest(coapRequest);
     }
 
-    private Endpoint getEndpointForServer(final Server server) {
+    /*
+     * TODO in the future this should allow for users to set combinations of clients to servers per request.
+     */
+    private Endpoint getEndpointForServer(final InetSocketAddress clientEndpointAddress) {
+    	if(clientEndpointAddress == null){
+    		return endpoints.iterator().next();
+    	}
+    	
         for (final Endpoint ep : endpoints) {
             final InetSocketAddress endpointAddress = ep.getAddress();
-            if (endpointAddress.equals(server.getClientAddress())) {
+            if (endpointAddress.equals(clientEndpointAddress)) {
                 return ep;
             }
         }
         throw new IllegalStateException("can't find the client endpoint to use: "
-                + server.getServerAddress());
+                + clientEndpointAddress);
     }
-    
-//    private Endpoint getEndpointForServer(final Server server) {
-//        for (final Endpoint ep : endpoints) {
-//            final InetSocketAddress endpointAddress = ep.getAddress();
-//            if (endpointAddress.equals(server.getServerAddress())) {
-//                return ep;
-//            }
-//        }
-//        throw new IllegalStateException("can't find the client endpoint to use: "
-//                + server.getServerAddress());
-//    }
 
     // ////// Request Observer Class definition/////////////
 
-    private abstract class AbstractRequestObserver<T extends ServerResponse> extends MessageObserverAdapter {
+    private abstract class AbstractRequestObserver extends MessageObserverAdapter {
         Request coapRequest;
-        Server server;
 
-        public AbstractRequestObserver(final Request coapRequest, final Server server) {
+        public AbstractRequestObserver(final Request coapRequest) {
             this.coapRequest = coapRequest;
-            this.server = server;
         }
 
-        public abstract T buildResponse(Response coapResponse);
+        public abstract OperationResponse buildResponse(Response coapResponse);
     }
 
-    private abstract class AsyncRequestObserver<T extends ServerResponse> extends AbstractRequestObserver<T> {
+    private abstract class AsyncRequestObserver extends AbstractRequestObserver {
 
-        ResponseCallback<T> responseCallback;
+        ResponseCallback responseCallback;
 
-        AsyncRequestObserver(final Request coapRequest, final Server server, final ResponseCallback<T> responseCallback) {
-            super(coapRequest, server);
+        AsyncRequestObserver(final Request coapRequest, final ResponseCallback responseCallback) {
+            super(coapRequest);
             this.responseCallback = responseCallback;
         }
 
         @Override
         public void onResponse(final Response coapResponse) {
             try {
-                final T lwM2mResponseT = buildResponse(coapResponse);
+                final OperationResponse lwM2mResponseT = buildResponse(coapResponse);
                 if (lwM2mResponseT != null) {
-                	//TODO get rid of this casting by sorting out object heirarchy
-                	responseCallback.onSuccess((OperationResponse) lwM2mResponseT);
-//                    responseCallback.accept(lwM2mResponseT);
+                	responseCallback.onSuccess(lwM2mResponseT);
                 }
             } catch (final Exception e) {
-//                errorCallback.accept(e);
             	responseCallback.onFailure(OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR, e.getLocalizedMessage()));
             } finally {
                 coapRequest.removeMessageObserver(this);
@@ -192,37 +176,33 @@ public class CaliforniumLwM2mClientRequestSender implements LwM2mClientRequestSe
 
         @Override
         public void onTimeout() {
-//            client.markLastRequestTimedout();
         	//TODO just have the responseCallback work with just an exception
-//            errorCallback.accept(new TimeoutException());
             responseCallback.onFailure(OperationResponse.failure(ResponseCode.GATEWAY_TIMEOUT, "Request Timed Out."));
         }
 
         @Override
         public void onCancel() {
             responseCallback.onFailure(OperationResponse.failure(ResponseCode.FORBIDDEN, "Request Cancelled."));
-//            errorCallback.accept(new CancellationException());
         }
 
         @Override
         public void onReject() {
             responseCallback.onFailure(OperationResponse.failure(ResponseCode.FORBIDDEN, "Request Rejected."));
-//            errorCallback.accept(new RejectionException());
         }
 
     }
 
-    private abstract class SyncRequestObserver<T extends ServerResponse> extends AbstractRequestObserver<T> {
+    private abstract class SyncRequestObserver extends AbstractRequestObserver {
 
         CountDownLatch latch = new CountDownLatch(1);
-        AtomicReference<T> ref = new AtomicReference<T>(null);
+        AtomicReference<OperationResponse> ref = new AtomicReference<OperationResponse>(null);
         AtomicBoolean coapTimeout = new AtomicBoolean(false);
         AtomicReference<RuntimeException> exception = new AtomicReference<>();
 
         long timeout;
 
-        public SyncRequestObserver(final Request coapRequest, final Server server, final long timeout) {
-            super(coapRequest, server);
+        public SyncRequestObserver(final Request coapRequest, final long timeout) {
+            super(coapRequest);
             this.timeout = timeout;
         }
 
@@ -230,7 +210,7 @@ public class CaliforniumLwM2mClientRequestSender implements LwM2mClientRequestSe
         public void onResponse(final Response coapResponse) {
             LOG.info("Received coap response: " + coapResponse);
             try {
-                final T lwM2mResponseT = buildResponse(coapResponse);
+                final OperationResponse lwM2mResponseT = buildResponse(coapResponse);
                 if (lwM2mResponseT != null) {
                     ref.set(lwM2mResponseT);
                 }
@@ -257,17 +237,15 @@ public class CaliforniumLwM2mClientRequestSender implements LwM2mClientRequestSe
             latch.countDown();
         }
 
-        public T waitForResponse() {
+        public OperationResponse waitForResponse() {
             try {
                 final boolean latchTimeout = latch.await(timeout, TimeUnit.MILLISECONDS);
                 if (!latchTimeout || coapTimeout.get()) {
-//                    client.markLastRequestTimedout();
                     coapRequest.cancel();
                     if (exception.get() != null) {
                         throw exception.get();
                     } else {
                         throw new RuntimeException("Request Timed Out: " + coapRequest.getURI() + " (timeout)");
-//                        throw new RequestTimeoutException(coapRequest.getURI(), timeout);
                     }
                 }
             } catch (final InterruptedException e) {

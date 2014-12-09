@@ -38,10 +38,10 @@ import static org.junit.Assert.*;
 import java.util.Collections;
 
 import leshan.client.californium.LeshanClient;
+import leshan.client.request.AbstractLwM2mClientRequest;
 import leshan.client.request.RegisterRequest;
 import leshan.client.resource.LwM2mClientObjectDefinition;
 import leshan.client.response.OperationResponse;
-import leshan.client.server.Server;
 import leshan.client.util.ResponseCallback;
 
 import org.junit.After;
@@ -66,24 +66,22 @@ public class RegistrationTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void fail_to_create_client_with_null() {
-		helper.client = new LeshanClient(Collections.singleton(helper.clientAddress), Collections.singleton(helper.serverAddress),
+		helper.client = new LeshanClient(Collections.singleton(helper.clientAddress),
+				helper.serverAddress,
 				(LwM2mClientObjectDefinition[]) null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void fail_to_create_client_with_same_object_twice() {
 		final LwM2mClientObjectDefinition objectOne = new LwM2mClientObjectDefinition(1, false, false);
-		helper.client = new LeshanClient(Collections.singleton(helper.clientAddress), Collections.singleton(helper.serverAddress),
+		helper.client = new LeshanClient(Collections.singleton(helper.clientAddress), 
+				helper.serverAddress,
 				objectOne, objectOne);
 	}
 
 	@Test
 	public void registered_device_exists_async() {
-		final ResponseCallback callback = new ResponseCallback();
-
-		helper.register(callback);
-
-		await().untilTrue(callback.isCalled());
+		final ResponseCallback callback = registerDeviceAsynch();
 
 		assertTrue(callback.isSuccess());
 		assertNotNull(helper.getClient());
@@ -91,9 +89,8 @@ public class RegistrationTest {
 
 	@Test
 	public void wont_send_synchronous_if_not_started(){
-		final RegisterRequest registerRequest = 
-				new RegisterRequest(new Server( 
-						 helper.serverAddress, helper.TIMEOUT_MS, helper.clientAddress), helper.ENDPOINT, helper.clientParameters);
+		final AbstractLwM2mClientRequest registerRequest = 
+				new RegisterRequest(helper.ENDPOINT_IDENTIFIER, helper.clientParameters);
 
 		final OperationResponse response = helper.client.send(registerRequest);
 
@@ -102,9 +99,8 @@ public class RegistrationTest {
 
 	@Test
 	public void wont_send_asynchronous_if_not_started(){
-		final RegisterRequest registerRequest = 
-				new RegisterRequest(new Server(
-						helper.serverAddress, helper.TIMEOUT_MS, helper.clientAddress), helper.ENDPOINT, helper.clientParameters);
+		final AbstractLwM2mClientRequest registerRequest = 
+				new RegisterRequest(helper.ENDPOINT_IDENTIFIER, helper.clientParameters);
 
 		final ResponseCallback callback = new ResponseCallback();
 		helper.client.send(registerRequest, callback);
@@ -114,14 +110,8 @@ public class RegistrationTest {
 	}
 
 	@Test
-	public void deregister_registered_device_async(){
-		final ResponseCallback registerCallback = new ResponseCallback();
-
-		helper.register(registerCallback);
-
-		await().untilTrue(registerCallback.isCalled());
-		
-		assertNotNull(helper.getClient());
+	public void deregister_registered_device_then_reregister_async(){
+		ResponseCallback registerCallback = registerDeviceAsynch();
 		
 		final String clientLocation = registerCallback.getResponse().getLocation();
 		
@@ -133,6 +123,22 @@ public class RegistrationTest {
 
 		assertTrue(deregisterCallback.isSuccess());
 		assertNull(helper.getClient());
+		
+		registerCallback = registerDeviceAsynch();
+		
+
+		assertTrue(registerCallback.isSuccess());
+		assertNotNull(helper.getClient());
+	}
+
+	private ResponseCallback registerDeviceAsynch() {
+		final ResponseCallback registerCallback = new ResponseCallback();
+
+		helper.register(registerCallback);
+
+		await().untilTrue(registerCallback.isCalled());
+		
+		return registerCallback;
 	}
 
 }
