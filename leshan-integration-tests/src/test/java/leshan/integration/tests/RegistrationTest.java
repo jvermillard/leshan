@@ -36,6 +36,8 @@ import static com.jayway.awaitility.Awaitility.await;
 import static org.junit.Assert.*;
 
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import leshan.client.californium.LeshanClient;
 import leshan.client.request.AbstractLwM2mClientRequest;
@@ -43,6 +45,7 @@ import leshan.client.request.RegisterRequest;
 import leshan.client.resource.LwM2mClientObjectDefinition;
 import leshan.client.response.OperationResponse;
 import leshan.client.util.ResponseCallback;
+import leshan.server.client.Client;
 
 import org.junit.After;
 import org.junit.Test;
@@ -107,6 +110,24 @@ public class RegistrationTest {
 
 		assertTrue(callback.isCalled().get());
 		assertFalse(callback.isSuccess());
+	}
+	
+	@Test
+	public void registered_device_updated() {
+		final OperationResponse register = helper.register();
+		
+		final String clientLocation = register.getLocation();
+		
+		final Map<String, String> updatedParameters = new HashMap<>();
+		final int updatedLifetime = 1337;
+		updatedParameters.put("lt", Integer.toString(updatedLifetime));
+		
+		final OperationResponse update = helper.update(clientLocation, updatedParameters);
+		final Client client = helper.getClient();
+		
+		assertTrue(update.isSuccess());
+		assertEquals(updatedLifetime, client.getLifeTimeInSec());
+		assertNotNull(client);
 	}
 
 	@Test

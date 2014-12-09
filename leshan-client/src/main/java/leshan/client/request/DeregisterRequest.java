@@ -1,17 +1,27 @@
 package leshan.client.request;
 
+import java.net.InetSocketAddress;
 
-public class DeregisterRequest extends AbstractLwM2mClientRequest {
 
-	private final String clientLocation;
+public class DeregisterRequest extends AbstractRegisteredLwM2mClientRequest {
+
 	public DeregisterRequest(final String clientLocation) {
-		this.clientLocation = clientLocation;
+		super(clientLocation);
 	}
-	
-	public String getClientLocation() {
-		return clientLocation;
+
+	public DeregisterRequest(final String clientLocation,
+			final InetSocketAddress clientEndpointAddress, final long timeout) {
+		super(clientLocation, clientEndpointAddress, timeout);
 	}
-	
+
+	public DeregisterRequest(final String clientLocation,
+			final InetSocketAddress clientEndpointAddress) {
+		super(clientLocation, clientEndpointAddress);
+	}
+
+	public DeregisterRequest(final String clientLocation, final long timeout) {
+		super(clientLocation, timeout);
+	}
 
 	@Override
 	public void accept(final LwM2mClientRequestVisitor visitor) {

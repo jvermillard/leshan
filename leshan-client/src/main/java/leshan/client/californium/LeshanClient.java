@@ -89,7 +89,7 @@ public class LeshanClient implements LwM2mClient {
             clientSideServer.add(clientObject);
         }
         
-        requestSender = new CaliforniumLwM2mClientRequestSender(serverLocal.getEndpoints(), serverAddress);
+        requestSender = new CaliforniumLwM2mClientRequestSender(serverLocal.getEndpoints(), serverAddress, getObjectModel());
     }
 
     @Override

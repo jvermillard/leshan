@@ -3,7 +3,7 @@ package leshan.client.request;
 import java.net.InetSocketAddress;
 
 public abstract class AbstractLwM2mClientRequest implements LwM2mClientRequest {
-	private static final long DEFAULT_TIMEOUT_MS = 500;
+	protected static final long DEFAULT_TIMEOUT_MS = 500;
 	
 	private final InetSocketAddress clientEndpointAddress;
 	private final long timeout;

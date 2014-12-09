@@ -5,6 +5,7 @@ import java.util.logging.Logger;
 import leshan.client.request.DeregisterRequest;
 import leshan.client.request.LwM2mClientRequestVisitor;
 import leshan.client.request.RegisterRequest;
+import leshan.client.request.UpdateRequest;
 import leshan.client.response.OperationResponse;
 
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
@@ -29,22 +30,21 @@ public class LwM2mClientResponseBuilder implements LwM2mClientRequestVisitor {
 	@Override
 	public void visit(final RegisterRequest request) {
 		//TODO run this through the eclipse stylesheet
-		LOG.info("Got Register Request response.");
-		if (coapResponse == null) {
-			lwM2mresponse = OperationResponse.failure(ResponseCode.GATEWAY_TIMEOUT, "Timed Out Waiting For Response.");
-		} else if (ResponseCode.isSuccess(coapResponse.getCode())) {
-			lwM2mresponse = OperationResponse.of(coapResponse);
-		} else {
-			lwM2mresponse = OperationResponse.failure(coapResponse.getCode(),
-					"Request Failed on Server " + coapResponse.getOptions());
-		}
-
+		buildResponse();
 	}
+
 
 	@Override
 	public void visit(final DeregisterRequest request) {
-		//TODO possibly need to stop the endpoint... or do we leave that now to the users or only do it in LwM2MClient.stop()?
-		LOG.info("Got Deregister Request response. " + coapResponse.getCode());
+		buildResponse();
+	}
+	
+	@Override
+	public void visit(final UpdateRequest request) {
+		buildResponse();
+	}
+	
+	private void buildResponse() {
 		if (coapResponse == null) {
 			lwM2mresponse = OperationResponse.failure(ResponseCode.GATEWAY_TIMEOUT, "Timed Out Waiting For Response.");
 		} else if (ResponseCode.isSuccess(coapResponse.getCode())) {

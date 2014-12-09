@@ -2,11 +2,16 @@ package leshan.client.californium.impl;
 
 import java.net.InetSocketAddress;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import leshan.LinkObject;
 import leshan.client.request.AbstractLwM2mClientRequest;
+import leshan.client.request.AbstractRegisteredLwM2mClientRequest;
 import leshan.client.request.DeregisterRequest;
 import leshan.client.request.LwM2mClientRequestVisitor;
+import leshan.client.request.LwM2mContentRequest;
 import leshan.client.request.RegisterRequest;
+import leshan.client.request.UpdateRequest;
 import leshan.client.util.LinkFormatUtils;
 
 import org.eclipse.californium.core.coap.Request;
@@ -23,8 +28,11 @@ public class CoapClientRequestBuilder implements LwM2mClientRequestVisitor {
 
 	private long timeout;
 
-	public CoapClientRequestBuilder(final InetSocketAddress serverAddress) {
+	private final LinkObject[] clientObjectModel;
+
+	public CoapClientRequestBuilder(final InetSocketAddress serverAddress, final LinkObject... clientObjectModel) {
 		this.serverAddress = serverAddress;
+		this.clientObjectModel = clientObjectModel;
 	}
 
 	@Override
@@ -33,28 +41,36 @@ public class CoapClientRequestBuilder implements LwM2mClientRequestVisitor {
 			return;
 		}
 		coapRequest = Request.newPost();
-		setRequestSettings(request);
+		buildRequestSettings(request);
 		
 		coapRequest.getOptions().addURIPath("rd");
 		coapRequest.getOptions().addURIQuery("ep=" + request.getClientEndpointIdentifier());
-
-		final String payload = LinkFormatUtils.payloadize(request.getObjectModel());
-		coapRequest.setPayload(payload);
+		buildRequestContent(request);
 		
 		parametersValid = true;
+	}
+	
+	@Override
+	public void visit(final UpdateRequest request) {
+		if(!areParametersValid(request.getClientParameters())){
+			return;
+		}
+		coapRequest = Request.newPut();
+		buildRequestSettings(request);
+		
+		buildLocationPath(request);
+		buildRequestContent(request);
+		
+		parametersValid = true;
+		
 	}
 
 	@Override
 	public void visit(final DeregisterRequest request) {
 		coapRequest = Request.newDelete();
-		setRequestSettings(request);
+		buildRequestSettings(request);
 		
-		final String[] locationPaths = request.getClientLocation().split("/");
-		for(final String location : locationPaths){
-			if(location.length() != 0){
-				coapRequest.getOptions().addURIPath(location);
-			}
-		}
+		buildLocationPath(request);
 		
 		parametersValid = true;
 		
@@ -76,10 +92,28 @@ public class CoapClientRequestBuilder implements LwM2mClientRequestVisitor {
 		return timeout;
 	}
 	
-	private void setRequestSettings(final AbstractLwM2mClientRequest request) {
+	private void buildLocationPath(final AbstractRegisteredLwM2mClientRequest request) {
+		final String[] locationPaths = request.getClientLocation().split("/");
+		for(final String location : locationPaths){
+			if(location.length() != 0){
+				coapRequest.getOptions().addURIPath(location);
+			}
+		}
+	}
+	
+	private void buildRequestSettings(final AbstractLwM2mClientRequest request) {
 		timeout = request.getTimeout();
 		coapRequest.setDestination(serverAddress.getAddress());
 		coapRequest.setDestinationPort(serverAddress.getPort());
+	}
+	
+	private void buildRequestContent(final LwM2mContentRequest request) {
+		for(final Entry<String, String> entry : request.getClientParameters().entrySet()){
+			coapRequest.getOptions().addURIQuery(entry.getKey() + "=" + entry.getValue());
+		}
+		
+		final String payload = LinkFormatUtils.payloadize(clientObjectModel);
+		coapRequest.setPayload(payload);
 	}
 	
 	private boolean areParametersValid(final Map<String, String> parameters) {

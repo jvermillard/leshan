@@ -46,6 +46,7 @@ import java.util.UUID;
 
 import leshan.client.californium.LeshanClient;
 import leshan.client.exchange.LwM2mExchange;
+import leshan.client.request.AbstractRegisteredLwM2mClientRequest;
 import leshan.client.request.DeregisterRequest;
 import leshan.client.request.RegisterRequest;
 import leshan.client.resource.LwM2mClientObjectDefinition;
@@ -112,7 +113,7 @@ public class LeshanClientExample {
             public void run() {
                 if (deviceLocation != null) {
                     System.out.println("\tDevice: Deregistering Client '" + deviceLocation + "'");
-                    final DeregisterRequest deregisterRequest = new DeregisterRequest(deviceLocation);
+                    final AbstractRegisteredLwM2mClientRequest deregisterRequest = new DeregisterRequest(deviceLocation);
                     client.send(deregisterRequest);
                 }
             }

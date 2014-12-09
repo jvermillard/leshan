@@ -2,10 +2,7 @@ package leshan.client.request;
 
 import java.util.Map;
 
-import leshan.LinkObject;
-
-public class RegisterRequest extends AbstractLwM2mClientRequest{
-	private LinkObject objectModel;
+public class RegisterRequest extends AbstractLwM2mClientRequest implements LwM2mContentRequest{
 	private final Map<String, String> clientParameters;
 	private final String clientEndpointIdentifier;
 
@@ -13,20 +10,13 @@ public class RegisterRequest extends AbstractLwM2mClientRequest{
 		this.clientEndpointIdentifier = clientEndpointIdentifier;
 		this.clientParameters = clientParameters;
 	}
-
-	public LinkObject getObjectModel() {
-		return objectModel;
-	}
 	
-	public void setObjectModel(final LinkObject objectModel) {
-		this.objectModel = objectModel;
-	}
-
 	@Override
 	public void accept(final LwM2mClientRequestVisitor visitor) {
 		visitor.visit(this);
 	}
 	
+	@Override
 	public Map<String, String> getClientParameters() {
 		return clientParameters;
 	}

@@ -4,5 +4,7 @@ public interface LwM2mClientRequestVisitor {
 	void visit(RegisterRequest request);
 	
 	void visit(DeregisterRequest request);
+
+	void visit(UpdateRequest updateRequest);
 	
 }

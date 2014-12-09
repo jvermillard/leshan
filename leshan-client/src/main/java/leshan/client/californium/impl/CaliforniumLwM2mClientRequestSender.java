@@ -40,6 +40,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Logger;
 
+import leshan.LinkObject;
 import leshan.client.request.LwM2mClientRequest;
 import leshan.client.request.LwM2mClientRequestSender;
 import leshan.client.response.OperationResponse;
@@ -55,16 +56,18 @@ public class CaliforniumLwM2mClientRequestSender implements LwM2mClientRequestSe
     private static final Logger LOG = Logger.getLogger(CaliforniumLwM2mClientRequestSender.class.getCanonicalName());
     private final Set<Endpoint> endpoints;
 	private final InetSocketAddress serverAddress;
+	private final LinkObject[] clientObjectModel;
     
-    public CaliforniumLwM2mClientRequestSender(final List<Endpoint> endpoints, final InetSocketAddress serverAddress){
+    public CaliforniumLwM2mClientRequestSender(final List<Endpoint> endpoints, final InetSocketAddress serverAddress, final LinkObject... linkObjects){
     	this.endpoints = new HashSet<Endpoint>(endpoints);
     	this.serverAddress = serverAddress;
+    	this.clientObjectModel = linkObjects;
     }
   
     @Override
     public OperationResponse send(final LwM2mClientRequest request) {
         // Create the CoAP request from LwM2m request
-        final CoapClientRequestBuilder coapClientRequestBuilder = new CoapClientRequestBuilder(serverAddress);
+        final CoapClientRequestBuilder coapClientRequestBuilder = new CoapClientRequestBuilder(serverAddress, clientObjectModel);
         request.accept(coapClientRequestBuilder);
         if(!coapClientRequestBuilder.areParametersValid()){
         	return OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR, "Request has invalid parameters.  Not sending.");
@@ -95,7 +98,7 @@ public class CaliforniumLwM2mClientRequestSender implements LwM2mClientRequestSe
     @Override
     public void send(final LwM2mClientRequest request, final ResponseCallback responseCallback) {
         // Create the CoAP request from LwM2m request
-        final CoapClientRequestBuilder coapClientRequestBuilder = new CoapClientRequestBuilder(serverAddress);
+        final CoapClientRequestBuilder coapClientRequestBuilder = new CoapClientRequestBuilder(serverAddress, clientObjectModel);
         request.accept(coapClientRequestBuilder);
         if(!coapClientRequestBuilder.areParametersValid()){
         	responseCallback.onFailure(OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR, "Request has invalid parameters.  Not sending."));
