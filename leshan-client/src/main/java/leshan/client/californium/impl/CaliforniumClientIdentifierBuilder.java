@@ -36,8 +36,7 @@ public class CaliforniumClientIdentifierBuilder implements LwM2mClientRequestVis
 
 	@Override
 	public void visit(final BootstrapRequest request) {
-		// TODO Auto-generated method stub
-		
+		buildClientIdentifier(request);
 	}
 	
 	private void buildClientIdentifier(final LwM2mIdentifierRequest request) {

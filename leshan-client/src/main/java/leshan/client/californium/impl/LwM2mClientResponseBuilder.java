@@ -8,7 +8,6 @@ import leshan.client.request.LwM2mClientRequest;
 import leshan.client.request.LwM2mClientRequestVisitor;
 import leshan.client.request.RegisterRequest;
 import leshan.client.request.UpdateRequest;
-import leshan.client.request.identifier.ClientIdentifier;
 import leshan.client.response.OperationResponse;
 
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
@@ -36,34 +35,36 @@ public class LwM2mClientResponseBuilder implements LwM2mClientRequestVisitor {
 	public void visit(final RegisterRequest request) {
 		//TODO run this through the eclipse stylesheet
 		buildClientIdentifier(request);
-		buildResponse(californiumClientIdentifierBuilder.getClientIdentifier());
+		buildResponse();
 	}
 
 	@Override
 	public void visit(final DeregisterRequest request) {
-		buildResponse(request.getClientIdentifier());
+		buildClientIdentifier(request);
+		buildResponse();
 	}
 	
 	@Override
 	public void visit(final UpdateRequest request) {
-		buildResponse(request.getClientIdentifier());
+		buildClientIdentifier(request);
+		buildResponse();
 	}
 	
 	@Override
 	public void visit(final BootstrapRequest request) {
 		buildClientIdentifier(request);
-		buildResponse(californiumClientIdentifierBuilder.getClientIdentifier());
+		buildResponse();
 	}
 	
 	private void buildClientIdentifier(final LwM2mClientRequest request) {
 		request.accept(californiumClientIdentifierBuilder);
 	}
 	
-	private void buildResponse(final ClientIdentifier clientIdentifier) {
+	private void buildResponse() {
 		if (coapResponse == null) {
 			lwM2mresponse = OperationResponse.failure(ResponseCode.GATEWAY_TIMEOUT, "Timed Out Waiting For Response.");
 		} else if (ResponseCode.isSuccess(coapResponse.getCode())) {
-			lwM2mresponse = OperationResponse.of(coapResponse, clientIdentifier);
+			lwM2mresponse = OperationResponse.of(coapResponse, californiumClientIdentifierBuilder.getClientIdentifier());
 		} else {
 			lwM2mresponse = OperationResponse.failure(coapResponse.getCode(),
 					"Request Failed on Server " + coapResponse.getOptions());

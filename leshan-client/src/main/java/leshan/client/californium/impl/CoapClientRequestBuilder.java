@@ -108,14 +108,6 @@ public class CoapClientRequestBuilder implements LwM2mClientRequestVisitor {
 	
 	private void buildLocationPath(final AbstractRegisteredLwM2mClientRequest request) {
 		request.getClientIdentifier().accept(coapRequest);
-		
-		//TODO goes in CaliforniumClientIdentifier on visit
-//		final String[] locationPaths = request.getClientLocation().split("/");
-//		for(final String location : locationPaths){
-//			if(location.length() != 0){
-//				coapRequest.getOptions().addURIPath(location);
-//			}
-//		}
 	}
 	
 	private void buildRequestSettings(final AbstractLwM2mClientRequest request) {
