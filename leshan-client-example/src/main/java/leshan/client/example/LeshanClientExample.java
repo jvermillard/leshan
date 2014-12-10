@@ -107,14 +107,15 @@ public class LeshanClientExample {
             System.err.println("If you're having issues connecting to the LWM2M endpoint, try using the DTLS port instead");
         }
 
-        // Deregister on shutdown.
+        // Deregister on shutdown and stop client.
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
                 if (clientIdentifier != null) {
                     System.out.println("\tDevice: Deregistering Client '" + clientIdentifier + "'");
                     final AbstractRegisteredLwM2mClientRequest deregisterRequest = new DeregisterRequest(clientIdentifier);
-                    client.send(deregisterRequest);
+                    final OperationResponse deregisterResponse = client.send(deregisterRequest);
+                    client.stop();
                 }
             }
         });
