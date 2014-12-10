@@ -44,6 +44,7 @@ import leshan.client.resource.LinkFormattable;
 import leshan.client.resource.LwM2mClientObjectDefinition;
 import leshan.client.response.OperationResponse;
 import leshan.client.util.ResponseCallback;
+import leshan.util.Validate;
 
 import org.eclipse.californium.core.CoapServer;
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
@@ -67,11 +68,12 @@ public class LeshanClient implements LwM2mClient {
 
     public LeshanClient(final InetSocketAddress clientAddress, final InetSocketAddress serverAddress,
             final CoapServer serverLocal, final LwM2mClientObjectDefinition... objectDevice) {
-        if (clientAddress == null || serverLocal == null || objectDevice == null || serverAddress == null
-                || objectDevice.length == 0) {
-            throw new IllegalArgumentException(
-                    "LWM2M Clients must support minimum required Objects defined in the LWM2M Specification.");
-        }
+        Validate.notNull(clientAddress);
+        Validate.notNull(serverLocal);
+        Validate.notNull(serverAddress);
+        Validate.notNull(objectDevice);
+        Validate.notEmpty(objectDevice);
+        
         serverLocal.setMessageDeliverer(new LwM2mServerMessageDeliverer(serverLocal.getRoot()));
         final Endpoint endpoint = new CoAPEndpoint(clientAddress);
         serverLocal.addEndpoint(endpoint);
