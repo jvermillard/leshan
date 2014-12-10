@@ -36,7 +36,7 @@ import leshan.client.request.identifier.ClientIdentifier;
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 import org.eclipse.californium.core.coap.Response;
 
-public abstract class OperationResponse{
+public abstract class OperationResponse {
 
     public abstract boolean isSuccess();
 
@@ -58,7 +58,7 @@ public abstract class OperationResponse{
 
     private static class SuccessfulOperationResponse extends OperationResponse {
         private final Response response;
-		private final ClientIdentifier clientIdentifier;
+        private final ClientIdentifier clientIdentifier;
 
         public SuccessfulOperationResponse(final Response response, final ClientIdentifier clientIdentifier) {
             this.response = response;

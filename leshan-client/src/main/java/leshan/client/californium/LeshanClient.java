@@ -58,21 +58,24 @@ public class LeshanClient implements LwM2mClient {
 
     private final CoapServer clientSideServer;
     private final AtomicBoolean clientServerStarted = new AtomicBoolean(false);
-	private final CaliforniumLwM2mClientRequestSender requestSender;
+    private final CaliforniumLwM2mClientRequestSender requestSender;
 
-    public LeshanClient(final InetSocketAddress clientAddress, final InetSocketAddress serverAddress, final LwM2mClientObjectDefinition... objectDevice) {
+    public LeshanClient(final InetSocketAddress clientAddress, final InetSocketAddress serverAddress,
+            final LwM2mClientObjectDefinition... objectDevice) {
         this(clientAddress, serverAddress, new CoapServer(), objectDevice);
     }
 
-    public LeshanClient(final InetSocketAddress clientAddress, final InetSocketAddress serverAddress, final CoapServer serverLocal, final LwM2mClientObjectDefinition... objectDevice) {
-        if (clientAddress == null || serverLocal == null || objectDevice == null || serverAddress == null || objectDevice.length == 0){
+    public LeshanClient(final InetSocketAddress clientAddress, final InetSocketAddress serverAddress,
+            final CoapServer serverLocal, final LwM2mClientObjectDefinition... objectDevice) {
+        if (clientAddress == null || serverLocal == null || objectDevice == null || serverAddress == null
+                || objectDevice.length == 0) {
             throw new IllegalArgumentException(
                     "LWM2M Clients must support minimum required Objects defined in the LWM2M Specification.");
         }
         serverLocal.setMessageDeliverer(new LwM2mServerMessageDeliverer(serverLocal.getRoot()));
         final Endpoint endpoint = new CoAPEndpoint(clientAddress);
         serverLocal.addEndpoint(endpoint);
-        
+
         clientSideServer = serverLocal;
 
         for (final LwM2mClientObjectDefinition def : objectDevice) {
@@ -85,43 +88,44 @@ public class LeshanClient implements LwM2mClient {
 
             clientSideServer.add(clientObject);
         }
-        
-        requestSender = new CaliforniumLwM2mClientRequestSender(serverLocal.getEndpoint(clientAddress), serverAddress, getObjectModel());
+
+        requestSender = new CaliforniumLwM2mClientRequestSender(serverLocal.getEndpoint(clientAddress), serverAddress,
+                getObjectModel());
     }
 
     @Override
-	public void start() {
+    public void start() {
         clientSideServer.start();
         clientServerStarted.set(true);
     }
 
     @Override
-	public void stop() {
+    public void stop() {
         clientSideServer.stop();
         clientServerStarted.set(false);
     }
 
     @Override
-	public OperationResponse send(final LwM2mClientRequest request) {
-    	if(!clientServerStarted.get()){
-    		return OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR, "Leshan Client not started so unable to send request.");
-    	}
-    	return requestSender.send(request); 
-    }
-    
-    @Override
-	public void send(final LwM2mClientRequest request, final ResponseCallback callback) {
-    	if(!clientServerStarted.get()){
-    		callback.onFailure(
-    				OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR, "Leshan Client not started so unable to send request."));
-    	}
-    	else{
-	    	requestSender.send(request, callback);
-    	}
+    public OperationResponse send(final LwM2mClientRequest request) {
+        if (!clientServerStarted.get()) {
+            return OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR,
+                    "Leshan Client not started so unable to send request.");
+        }
+        return requestSender.send(request);
     }
 
     @Override
-	public LinkObject[] getObjectModel(final Integer... ids) {
+    public void send(final LwM2mClientRequest request, final ResponseCallback callback) {
+        if (!clientServerStarted.get()) {
+            callback.onFailure(OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR,
+                    "Leshan Client not started so unable to send request."));
+        } else {
+            requestSender.send(request, callback);
+        }
+    }
+
+    @Override
+    public LinkObject[] getObjectModel(final Integer... ids) {
         if (ids.length > 3) {
             throw new IllegalArgumentException(
                     "An Object Model Only Goes 3 levels deep:  Object ID/ObjectInstance ID/Resource ID");
@@ -164,6 +168,5 @@ public class LeshanClient implements LwM2mClient {
 
         return LinkObject.parse(((LinkFormattable) clientResource).asLinkFormat().getBytes());
     }
-
 
 }

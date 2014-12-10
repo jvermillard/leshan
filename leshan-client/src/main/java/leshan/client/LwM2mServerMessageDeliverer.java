@@ -96,7 +96,7 @@ public class LwM2mServerMessageDeliverer implements MessageDeliverer {
      * Checks whether an observe relationship has to be established or canceled. This is done here to have a
      * server-global observeManager that holds the set of remote endpoints for all resources. This global knowledge is
      * required for efficient orphan handling.
-     *
+     * 
      * @param exchange the exchange of the current request
      * @param resource the target resource
      * @param path the path to the resource
@@ -133,7 +133,7 @@ public class LwM2mServerMessageDeliverer implements MessageDeliverer {
     /**
      * Searches in the resource tree for the specified path. A parent resource may accept requests to subresources,
      * e.g., to allow addresses with wildcards like <code>coap://example.com:5683/devices/*</code>
-     *
+     * 
      * @param list the path as list of resource names
      * @return the resource or null if not found
      */

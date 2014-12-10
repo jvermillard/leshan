@@ -1,4 +1,3 @@
-package leshan.client.californium.impl;
 /*
  * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
@@ -30,6 +29,8 @@ package leshan.client.californium.impl;
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package leshan.client.californium.impl;
+
 import java.net.InetSocketAddress;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -49,35 +50,39 @@ import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.core.coap.Response;
 import org.eclipse.californium.core.network.Endpoint;
 
-public class CaliforniumLwM2mClientRequestSender implements LwM2mClientRequestSender{
+public class CaliforniumLwM2mClientRequestSender implements LwM2mClientRequestSender {
     private static final Logger LOG = Logger.getLogger(CaliforniumLwM2mClientRequestSender.class.getCanonicalName());
     private final Endpoint clientEndpoint;
-	private final InetSocketAddress serverAddress;
-	private final LinkObject[] clientObjectModel;
-    
-    public CaliforniumLwM2mClientRequestSender(final Endpoint endpoint, final InetSocketAddress serverAddress, final LinkObject... linkObjects){
-    	this.clientEndpoint = endpoint;
-    	this.serverAddress = serverAddress;
-    	this.clientObjectModel = linkObjects;
+    private final InetSocketAddress serverAddress;
+    private final LinkObject[] clientObjectModel;
+
+    public CaliforniumLwM2mClientRequestSender(final Endpoint endpoint, final InetSocketAddress serverAddress,
+            final LinkObject... linkObjects) {
+        this.clientEndpoint = endpoint;
+        this.serverAddress = serverAddress;
+        this.clientObjectModel = linkObjects;
     }
-  
+
     @Override
     public OperationResponse send(final LwM2mClientRequest request) {
         // Create the CoAP request from LwM2m request
-        final CoapClientRequestBuilder coapClientRequestBuilder = new CoapClientRequestBuilder(serverAddress, clientObjectModel);
+        final CoapClientRequestBuilder coapClientRequestBuilder = new CoapClientRequestBuilder(serverAddress,
+                clientObjectModel);
         request.accept(coapClientRequestBuilder);
-        if(!coapClientRequestBuilder.areParametersValid()){
-        	return OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR, "Request has invalid parameters.  Not sending.");
+        if (!coapClientRequestBuilder.areParametersValid()) {
+            return OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR,
+                    "Request has invalid parameters.  Not sending.");
         }
         final Request coapRequest = coapClientRequestBuilder.getRequest();
 
         // Send CoAP request synchronously
-        final SyncRequestObserver syncMessageObserver = new SyncRequestObserver(coapRequest, coapClientRequestBuilder.getTimeout()){
+        final SyncRequestObserver syncMessageObserver = new SyncRequestObserver(coapRequest,
+                coapClientRequestBuilder.getTimeout()) {
             @Override
             public OperationResponse buildResponse(final Response coapResponse) {
                 // Build LwM2m response
-                final LwM2mClientResponseBuilder lwm2mResponseBuilder = new LwM2mClientResponseBuilder(coapRequest, coapResponse,
-                        CaliforniumLwM2mClientRequestSender.this);
+                final LwM2mClientResponseBuilder lwm2mResponseBuilder = new LwM2mClientResponseBuilder(coapRequest,
+                        coapResponse, CaliforniumLwM2mClientRequestSender.this);
                 request.accept(lwm2mResponseBuilder);
                 return lwm2mResponseBuilder.getResponse();
             }
@@ -94,22 +99,24 @@ public class CaliforniumLwM2mClientRequestSender implements LwM2mClientRequestSe
     @Override
     public void send(final LwM2mClientRequest request, final ResponseCallback responseCallback) {
         // Create the CoAP request from LwM2m request
-        final CoapClientRequestBuilder coapClientRequestBuilder = new CoapClientRequestBuilder(serverAddress, clientObjectModel);
+        final CoapClientRequestBuilder coapClientRequestBuilder = new CoapClientRequestBuilder(serverAddress,
+                clientObjectModel);
         request.accept(coapClientRequestBuilder);
-        if(!coapClientRequestBuilder.areParametersValid()){
-        	responseCallback.onFailure(OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR, "Request has invalid parameters.  Not sending."));
-        	return;
+        if (!coapClientRequestBuilder.areParametersValid()) {
+            responseCallback.onFailure(OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR,
+                    "Request has invalid parameters.  Not sending."));
+            return;
         }
         final Request coapRequest = coapClientRequestBuilder.getRequest();
 
         // Add CoAP request callback
         coapRequest.addMessageObserver(new AsyncRequestObserver(coapRequest, responseCallback) {
-        	
+
             @Override
             public OperationResponse buildResponse(final Response coapResponse) {
                 // Build LwM2m response
-                final LwM2mClientResponseBuilder lwm2mResponseBuilder = new LwM2mClientResponseBuilder(coapRequest, coapResponse,
-                		CaliforniumLwM2mClientRequestSender.this);
+                final LwM2mClientResponseBuilder lwm2mResponseBuilder = new LwM2mClientResponseBuilder(coapRequest,
+                        coapResponse, CaliforniumLwM2mClientRequestSender.this);
                 request.accept(lwm2mResponseBuilder);
                 return lwm2mResponseBuilder.getResponse();
             }
@@ -145,10 +152,11 @@ public class CaliforniumLwM2mClientRequestSender implements LwM2mClientRequestSe
             try {
                 final OperationResponse lwM2mResponseT = buildResponse(coapResponse);
                 if (lwM2mResponseT != null) {
-                	responseCallback.onSuccess(lwM2mResponseT);
+                    responseCallback.onSuccess(lwM2mResponseT);
                 }
             } catch (final Exception e) {
-            	responseCallback.onFailure(OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR, e.getLocalizedMessage()));
+                responseCallback.onFailure(OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR,
+                        e.getLocalizedMessage()));
             } finally {
                 coapRequest.removeMessageObserver(this);
             }
@@ -156,7 +164,7 @@ public class CaliforniumLwM2mClientRequestSender implements LwM2mClientRequestSe
 
         @Override
         public void onTimeout() {
-        	//TODO just have the responseCallback work with just an exception
+            // TODO just have the responseCallback work with just an exception
             responseCallback.onFailure(OperationResponse.failure(ResponseCode.GATEWAY_TIMEOUT, "Request Timed Out."));
         }
 

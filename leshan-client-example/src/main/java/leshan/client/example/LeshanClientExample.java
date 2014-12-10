@@ -85,26 +85,26 @@ public class LeshanClientExample {
         final LwM2mClientObjectDefinition objectDevice = createObjectDefinition();
         final InetSocketAddress clientAddress = new InetSocketAddress(localHostName, localPort);
         final InetSocketAddress serverAddress = new InetSocketAddress(serverHostName, serverPort);
-        
-        final LeshanClient client = new LeshanClient(clientAddress, 
-									        		serverAddress,
-									        		objectDevice);
+
+        final LeshanClient client = new LeshanClient(clientAddress, serverAddress, objectDevice);
         // Start the client
         client.start();
-        
-		// Register to the server provided
+
+        // Register to the server provided
         final String endpointIdentifier = UUID.randomUUID().toString();
-		final RegisterRequest registerRequest = new RegisterRequest(endpointIdentifier, new HashMap<String, String>());
+        final RegisterRequest registerRequest = new RegisterRequest(endpointIdentifier, new HashMap<String, String>());
         final OperationResponse operationResponse = client.send(registerRequest);
 
         // Report registration response.
         System.out.println("Device Registration (Success? " + operationResponse.isSuccess() + ")");
         if (operationResponse.isSuccess()) {
-            System.out.println("\tDevice: Registered Client Location '" + operationResponse.getClientIdentifier() + "'");
+            System.out
+                    .println("\tDevice: Registered Client Location '" + operationResponse.getClientIdentifier() + "'");
             clientIdentifier = operationResponse.getClientIdentifier();
         } else {
             System.err.println("\tDevice Registration Error: " + operationResponse.getErrorMessage());
-            System.err.println("If you're having issues connecting to the LWM2M endpoint, try using the DTLS port instead");
+            System.err
+                    .println("If you're having issues connecting to the LWM2M endpoint, try using the DTLS port instead");
         }
 
         // Deregister on shutdown and stop client.
@@ -113,7 +113,8 @@ public class LeshanClientExample {
             public void run() {
                 if (clientIdentifier != null) {
                     System.out.println("\tDevice: Deregistering Client '" + clientIdentifier + "'");
-                    final AbstractRegisteredLwM2mClientRequest deregisterRequest = new DeregisterRequest(clientIdentifier);
+                    final AbstractRegisteredLwM2mClientRequest deregisterRequest = new DeregisterRequest(
+                            clientIdentifier);
                     final OperationResponse deregisterResponse = client.send(deregisterRequest);
                     client.stop();
                 }

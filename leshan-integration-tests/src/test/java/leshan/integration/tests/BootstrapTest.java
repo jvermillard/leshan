@@ -40,18 +40,18 @@ import org.junit.Test;
 
 public class BootstrapTest {
 
-	private final IntegrationTestHelper helper = new IntegrationTestHelper(true);
+    private final IntegrationTestHelper helper = new IntegrationTestHelper(true);
 
-	@After
-	public void stop() {
-		helper.stop();
-	}
+    @After
+    public void stop() {
+        helper.stop();
+    }
 
-	@Ignore
-	@Test
-	public void boostrap_device_exists() {
-		final OperationResponse bootstrap = helper.bootstrap();
+    @Ignore
+    @Test
+    public void boostrap_device_exists() {
+        final OperationResponse bootstrap = helper.bootstrap();
 
-		assertTrue(bootstrap.isSuccess());
-	}
+        assertTrue(bootstrap.isSuccess());
+    }
 }
