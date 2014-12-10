@@ -67,7 +67,7 @@ Leshan-client library or use the example LeshanDevice.  To build the LeshanDevic
 
 ```
 mvn install
-cd leshan-client-standalone
+cd leshan-client-example
 mvn assembly:assembly -DdescriptorId=jar-with-dependencies
 ```
 

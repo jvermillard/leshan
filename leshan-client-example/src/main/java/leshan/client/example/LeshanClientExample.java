@@ -89,6 +89,8 @@ public class LeshanClientExample {
         final LeshanClient client = new LeshanClient(clientAddress, 
 									        		serverAddress,
 									        		objectDevice);
+        // Start the client
+        client.start();
         
 		// Register to the server provided
         final String endpointIdentifier = UUID.randomUUID().toString();
@@ -101,7 +103,7 @@ public class LeshanClientExample {
             System.out.println("\tDevice: Registered Client Location '" + operationResponse.getClientIdentifier() + "'");
             clientIdentifier = operationResponse.getClientIdentifier();
         } else {
-            System.err.println("\tDevice: " + operationResponse.getErrorMessage());
+            System.err.println("\tDevice Registration Error: " + operationResponse.getErrorMessage());
             System.err.println("If you're having issues connecting to the LWM2M endpoint, try using the DTLS port instead");
         }
 
