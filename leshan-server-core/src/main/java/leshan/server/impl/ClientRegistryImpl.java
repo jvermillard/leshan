@@ -60,12 +60,12 @@ public class ClientRegistryImpl implements ClientRegistry {
     private final List<ClientRegistryListener> listeners = new CopyOnWriteArrayList<>();
 
     @Override
-    public void addListener(final ClientRegistryListener listener) {
+    public void addListener(ClientRegistryListener listener) {
         listeners.add(listener);
     }
 
     @Override
-    public void removeListener(final ClientRegistryListener listener) {
+    public void removeListener(ClientRegistryListener listener) {
         listeners.remove(listener);
     }
 
@@ -80,18 +80,18 @@ public class ClientRegistryImpl implements ClientRegistry {
     }
 
     @Override
-    public Client registerClient(final Client client) {
+    public Client registerClient(Client client) {
         Validate.notNull(client);
 
         LOG.debug("Registering new client: {}", client);
 
-        final Client previous = clientsByEp.put(client.getEndpoint(), client);
+        Client previous = clientsByEp.put(client.getEndpoint(), client);
         if (previous != null) {
-            for (final ClientRegistryListener l : listeners) {
+            for (ClientRegistryListener l : listeners) {
                 l.unregistered(previous);
             }
         }
-        for (final ClientRegistryListener l : listeners) {
+        for (ClientRegistryListener l : listeners) {
             l.registered(client);
         }
 
@@ -99,16 +99,16 @@ public class ClientRegistryImpl implements ClientRegistry {
     }
 
     @Override
-    public Client updateClient(final ClientUpdate clientUpdated) {
+    public Client updateClient(ClientUpdate clientUpdated) {
         Validate.notNull(clientUpdated);
 
         LOG.debug("Updating registration for client: {}", clientUpdated);
-        final Client client = findByRegistrationId(clientUpdated.getRegistrationId());
+        Client client = findByRegistrationId(clientUpdated.getRegistrationId());
         if (client == null) {
             return null;
         } else {
             clientUpdated.apply(client);
-            for (final ClientRegistryListener l : listeners) {
+            for (ClientRegistryListener l : listeners) {
                 l.updated(client);
             }
             return client;
@@ -116,17 +116,17 @@ public class ClientRegistryImpl implements ClientRegistry {
     }
 
     @Override
-    public Client deregisterClient(final String registrationId) {
+    public Client deregisterClient(String registrationId) {
         Validate.notNull(registrationId);
 
         LOG.debug("Deregistering client with registrationId: {}", registrationId);
 
-        final Client toBeUnregistered = findByRegistrationId(registrationId);
+        Client toBeUnregistered = findByRegistrationId(registrationId);
         if (toBeUnregistered == null) {
             return null;
         } else {
-            final Client unregistered = clientsByEp.remove(toBeUnregistered.getEndpoint());
-            for (final ClientRegistryListener l : listeners) {
+            Client unregistered = clientsByEp.remove(toBeUnregistered.getEndpoint());
+            for (ClientRegistryListener l : listeners) {
                 l.unregistered(unregistered);
             }
             LOG.debug("Deregistered client: {}", unregistered);
@@ -134,10 +134,10 @@ public class ClientRegistryImpl implements ClientRegistry {
         }
     }
 
-    private Client findByRegistrationId(final String id) {
+    private Client findByRegistrationId(String id) {
         Client result = null;
         if (id != null) {
-            for (final Client client : clientsByEp.values()) {
+            for (Client client : clientsByEp.values()) {
                 if (id.equals(client.getRegistrationId())) {
                     result = client;
                     break;
@@ -170,7 +170,7 @@ public class ClientRegistryImpl implements ClientRegistry {
 
         @Override
         public void run() {
-            for (final Client client : clientsByEp.values()) {
+            for (Client client : clientsByEp.values()) {
                 synchronized (client) {
                     if (!client.isAlive()) {
                         // force de-registration
