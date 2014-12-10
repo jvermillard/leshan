@@ -30,6 +30,8 @@
  */
 package leshan.client.californium.impl;
 
+import java.util.Objects;
+
 import leshan.client.request.identifier.ClientIdentifier;
 
 import org.eclipse.californium.core.coap.Request;
@@ -65,8 +67,33 @@ public class CaliforniumClientIdentifier implements ClientIdentifier {
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
-        builder.append("ClientIdentifier[" + getEndpointIdentifier() + "|" + getLocation() + "]");
+        builder.append("ClientIdentifier[").append(getEndpointIdentifier()).append("|").append(getLocation())
+                .append("]");
 
         return builder.toString();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(endpointIdentifier, location);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof CaliforniumClientIdentifier)) {
+            return false;
+        }
+
+        CaliforniumClientIdentifier other = (CaliforniumClientIdentifier) obj;
+
+        boolean isEqual = true;
+        isEqual = isEqual && Objects.equals(location, other.getLocation());
+        isEqual = isEqual && Objects.equals(endpointIdentifier, other.getEndpointIdentifier());
+
+        return isEqual;
     }
 }

@@ -66,7 +66,8 @@ public class CaliforniumClientIdentifierBuilder implements LwM2mClientRequestVis
 
     @Override
     public void visit(final BootstrapRequest request) {
-        buildClientIdentifier(request);
+        throw new UnsupportedOperationException(
+                "The Bootstrap Interface has not yet been fully implemented on the Leshan Client yet.");
     }
 
     private void buildClientIdentifier(final LwM2mIdentifierRequest request) {

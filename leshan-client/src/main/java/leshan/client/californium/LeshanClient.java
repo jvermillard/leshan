@@ -73,7 +73,7 @@ public class LeshanClient implements LwM2mClient {
         Validate.notNull(serverAddress);
         Validate.notNull(objectDevice);
         Validate.notEmpty(objectDevice);
-        
+
         serverLocal.setMessageDeliverer(new LwM2mServerMessageDeliverer(serverLocal.getRoot()));
         final Endpoint endpoint = new CoAPEndpoint(clientAddress);
         serverLocal.addEndpoint(endpoint);

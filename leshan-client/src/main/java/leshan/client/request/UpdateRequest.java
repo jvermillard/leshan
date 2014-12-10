@@ -58,9 +58,4 @@ public class UpdateRequest extends AbstractRegisteredLwM2mClientRequest implemen
     public void accept(final LwM2mClientRequestVisitor visitor) {
         visitor.visit(this);
     }
-
-    public String getClientEndpointIdentifier() {
-        return null;
-    }
-
 }

@@ -129,7 +129,7 @@ public class CaliforniumLwM2mClientRequestSender implements LwM2mClientRequestSe
     // ////// Request Observer Class definition/////////////
 
     private abstract class AbstractRequestObserver extends MessageObserverAdapter {
-        Request coapRequest;
+        protected Request coapRequest;
 
         public AbstractRequestObserver(final Request coapRequest) {
             this.coapRequest = coapRequest;
@@ -140,7 +140,7 @@ public class CaliforniumLwM2mClientRequestSender implements LwM2mClientRequestSe
 
     private abstract class AsyncRequestObserver extends AbstractRequestObserver {
 
-        ResponseCallback responseCallback;
+        protected ResponseCallback responseCallback;
 
         AsyncRequestObserver(final Request coapRequest, final ResponseCallback responseCallback) {
             super(coapRequest);
@@ -182,12 +182,12 @@ public class CaliforniumLwM2mClientRequestSender implements LwM2mClientRequestSe
 
     private abstract class SyncRequestObserver extends AbstractRequestObserver {
 
-        CountDownLatch latch = new CountDownLatch(1);
-        AtomicReference<OperationResponse> ref = new AtomicReference<OperationResponse>(null);
-        AtomicBoolean coapTimeout = new AtomicBoolean(false);
-        AtomicReference<RuntimeException> exception = new AtomicReference<>();
+        protected CountDownLatch latch = new CountDownLatch(1);
+        protected AtomicReference<OperationResponse> ref = new AtomicReference<OperationResponse>(null);
+        protected AtomicBoolean coapTimeout = new AtomicBoolean(false);
+        protected AtomicReference<RuntimeException> exception = new AtomicReference<>();
 
-        long timeout;
+        protected long timeout;
 
         public SyncRequestObserver(final Request coapRequest, final long timeout) {
             super(coapRequest);

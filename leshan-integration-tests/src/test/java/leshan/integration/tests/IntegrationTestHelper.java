@@ -218,14 +218,14 @@ public final class IntegrationTestHelper {
         }
     }
 
-    private AbstractLwM2mClientRequest createRegisterRequest() {
-        final AbstractLwM2mClientRequest registerRequest = new RegisterRequest(ENDPOINT_IDENTIFIER, clientParameters);
+    private LwM2mClientRequest createRegisterRequest() {
+        final RegisterRequest registerRequest = new RegisterRequest(ENDPOINT_IDENTIFIER, clientParameters);
 
         return registerRequest;
     }
 
-    private AbstractRegisteredLwM2mClientRequest createDeregisterRequest(final ClientIdentifier clientIdentifier) {
-        final AbstractRegisteredLwM2mClientRequest deregisterRequest = new DeregisterRequest(clientIdentifier);
+    private LwM2mClientRequest createDeregisterRequest(final ClientIdentifier clientIdentifier) {
+        final DeregisterRequest deregisterRequest = new DeregisterRequest(clientIdentifier);
 
         return deregisterRequest;
     }
@@ -244,14 +244,14 @@ public final class IntegrationTestHelper {
 
     public OperationResponse register() {
         client.start();
-        final AbstractLwM2mClientRequest registerRequest = createRegisterRequest();
+        final LwM2mClientRequest registerRequest = createRegisterRequest();
         final OperationResponse response = client.send(registerRequest);
         return response;
     }
 
     public void register(final ResponseCallback callback) {
         client.start();
-        final AbstractLwM2mClientRequest registerRequest = createRegisterRequest();
+        final LwM2mClientRequest registerRequest = createRegisterRequest();
         client.send(registerRequest, callback);
     }
 
@@ -262,7 +262,7 @@ public final class IntegrationTestHelper {
     }
 
     public void deregister(final ClientIdentifier clientIdentifier, final ResponseCallback callback) {
-        final AbstractRegisteredLwM2mClientRequest deregisterRequest = createDeregisterRequest(clientIdentifier);
+        final LwM2mClientRequest deregisterRequest = createDeregisterRequest(clientIdentifier);
         client.send(deregisterRequest, callback);
     }
 

@@ -177,10 +177,6 @@ public class CoapClientRequestBuilder implements LwM2mClientRequestVisitor {
     }
 
     private boolean isBindingValid(final String value) {
-        if (value.equals("U")) {
-            return true;
-        }
-
-        return false;
+        return value.equals("U");
     }
 }

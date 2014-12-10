@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2013, Sierra Wireless,
  * Copyright (c) 2014, Zebra Technologies,
  * 
  *
@@ -63,7 +64,6 @@ public class LwM2mClientResponseBuilder implements LwM2mClientRequestVisitor {
 
     @Override
     public void visit(final RegisterRequest request) {
-        // TODO run this through the eclipse stylesheet
         buildClientIdentifier(request);
         buildResponse();
     }
@@ -102,7 +102,6 @@ public class LwM2mClientResponseBuilder implements LwM2mClientRequestVisitor {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public OperationResponse getResponse() {
         return lwM2mresponse;
     }
