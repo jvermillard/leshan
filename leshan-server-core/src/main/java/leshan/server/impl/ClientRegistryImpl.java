@@ -75,7 +75,7 @@ public class ClientRegistryImpl implements ClientRegistry {
     }
 
     @Override
-    public Client get(final String endpoint) {
+    public Client get(String endpoint) {
         return clientsByEp.get(endpoint);
     }
 
