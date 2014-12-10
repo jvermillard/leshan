@@ -41,6 +41,7 @@ import java.util.Map;
 import leshan.client.californium.LeshanClient;
 import leshan.client.request.AbstractLwM2mClientRequest;
 import leshan.client.request.RegisterRequest;
+import leshan.client.request.identifier.ClientIdentifier;
 import leshan.client.resource.LwM2mClientObjectDefinition;
 import leshan.client.response.OperationResponse;
 import leshan.client.util.ResponseCallback;
@@ -115,13 +116,13 @@ public class RegistrationTest {
 	public void registered_device_updated() {
 		final OperationResponse register = helper.register();
 		
-		final String clientLocation = register.getLocation();
+		final ClientIdentifier clientIdentifier = register.getClientIdentifier();
 		
 		final Map<String, String> updatedParameters = new HashMap<>();
 		final int updatedLifetime = 1337;
 		updatedParameters.put("lt", Integer.toString(updatedLifetime));
 		
-		final OperationResponse update = helper.update(clientLocation, updatedParameters);
+		final OperationResponse update = helper.update(clientIdentifier, updatedParameters);
 		final Client client = helper.getClient();
 		
 		assertTrue(update.isSuccess());
@@ -133,11 +134,11 @@ public class RegistrationTest {
 	public void deregister_registered_device_then_reregister_async(){
 		ResponseCallback registerCallback = registerDeviceAsynch();
 		
-		final String clientLocation = registerCallback.getResponse().getLocation();
+		final ClientIdentifier clientIdentifier = registerCallback.getResponse().getClientIdentifier();
 		
 		final ResponseCallback deregisterCallback = new ResponseCallback();
 
-		helper.deregister(clientLocation, deregisterCallback);
+		helper.deregister(clientIdentifier, deregisterCallback);
 
 		await().untilTrue(deregisterCallback.isCalled());
 

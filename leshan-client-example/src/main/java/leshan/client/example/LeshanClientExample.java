@@ -48,6 +48,7 @@ import leshan.client.exchange.LwM2mExchange;
 import leshan.client.request.AbstractRegisteredLwM2mClientRequest;
 import leshan.client.request.DeregisterRequest;
 import leshan.client.request.RegisterRequest;
+import leshan.client.request.identifier.ClientIdentifier;
 import leshan.client.resource.LwM2mClientObjectDefinition;
 import leshan.client.resource.SingleResourceDefinition;
 import leshan.client.resource.integer.IntegerLwM2mExchange;
@@ -68,12 +69,12 @@ import leshan.client.response.OperationResponse;
  * java -jar target/leshan-client-*-SNAPSHOT-jar-with-dependencies.jar 127.0.0.1 5683 9000
  */
 public class LeshanClientExample {
-    private String deviceLocation;
+    private ClientIdentifier clientIdentifier;
 
     public static void main(final String[] args) {
         if (args.length < 4) {
             System.out
-                    .println("Usage:\njava -jar target/leshan-client-*-SNAPSHOT-jar-with-dependencies.jar [Client IP] [Client port] [Server IP] [Server Port]");
+                    .println("Usage:\njava -jar target/leshan-client-example-*-SNAPSHOT-jar-with-dependencies.jar [Client IP] [Client port] [Server IP] [Server Port]");
         } else {
             new LeshanClientExample(args[0], Integer.parseInt(args[1]), args[2], Integer.parseInt(args[3]));
         }
@@ -97,21 +98,20 @@ public class LeshanClientExample {
         // Report registration response.
         System.out.println("Device Registration (Success? " + operationResponse.isSuccess() + ")");
         if (operationResponse.isSuccess()) {
-            System.out.println("\tDevice: Registered Client Location '" + operationResponse.getLocation() + "'");
-            deviceLocation = operationResponse.getLocation();
+            System.out.println("\tDevice: Registered Client Location '" + operationResponse.getClientIdentifier() + "'");
+            clientIdentifier = operationResponse.getClientIdentifier();
         } else {
             System.err.println("\tDevice: " + operationResponse.getErrorMessage());
-            System.err
-                    .println("If you're having issues connecting to the LWM2M endpoint, try using the DTLS port instead");
+            System.err.println("If you're having issues connecting to the LWM2M endpoint, try using the DTLS port instead");
         }
 
         // Deregister on shutdown.
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
-                if (deviceLocation != null) {
-                    System.out.println("\tDevice: Deregistering Client '" + deviceLocation + "'");
-                    final AbstractRegisteredLwM2mClientRequest deregisterRequest = new DeregisterRequest(deviceLocation);
+                if (clientIdentifier != null) {
+                    System.out.println("\tDevice: Deregistering Client '" + clientIdentifier + "'");
+                    final AbstractRegisteredLwM2mClientRequest deregisterRequest = new DeregisterRequest(clientIdentifier);
                     client.send(deregisterRequest);
                 }
             }

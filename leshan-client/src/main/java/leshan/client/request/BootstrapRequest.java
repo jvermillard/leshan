@@ -1,6 +1,6 @@
 package leshan.client.request;
 
-public class BootstrapRequest extends AbstractLwM2mClientRequest{
+public class BootstrapRequest extends AbstractLwM2mClientRequest implements LwM2mIdentifierRequest{
 	private final String clientEndpointIdentifier;
 
 	public BootstrapRequest(final String clientEndpointIdentifier){
@@ -12,6 +12,7 @@ public class BootstrapRequest extends AbstractLwM2mClientRequest{
 		visitor.visit(this);
 	}
 	
+	@Override
 	public String getClientEndpointIdentifier() {
 		return clientEndpointIdentifier;
 	}

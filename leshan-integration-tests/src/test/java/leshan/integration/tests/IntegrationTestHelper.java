@@ -53,6 +53,7 @@ import leshan.client.request.DeregisterRequest;
 import leshan.client.request.LwM2mClientRequest;
 import leshan.client.request.RegisterRequest;
 import leshan.client.request.UpdateRequest;
+import leshan.client.request.identifier.ClientIdentifier;
 import leshan.client.resource.LwM2mClientObjectDefinition;
 import leshan.client.resource.SingleResourceDefinition;
 import leshan.client.resource.integer.IntegerLwM2mExchange;
@@ -225,8 +226,8 @@ public final class IntegrationTestHelper {
 		return registerRequest;
 	}
 
-	private AbstractRegisteredLwM2mClientRequest createDeregisterRequest(final String clientLocation) {
-		final AbstractRegisteredLwM2mClientRequest deregisterRequest = new DeregisterRequest(clientLocation);
+	private AbstractRegisteredLwM2mClientRequest createDeregisterRequest(final ClientIdentifier clientIdentifier) {
+		final AbstractRegisteredLwM2mClientRequest deregisterRequest = new DeregisterRequest(clientIdentifier);
 		
 		return deregisterRequest;
 	}
@@ -257,14 +258,14 @@ public final class IntegrationTestHelper {
 	}
 	
 
-	public OperationResponse update(final String clientLocation, final Map<String, String> updatedParameters) {
-		final AbstractLwM2mClientRequest updaterRequest = new UpdateRequest(clientLocation, updatedParameters);
+	public OperationResponse update(final ClientIdentifier clientIdentifier, final Map<String, String> updatedParameters) {
+		final AbstractLwM2mClientRequest updaterRequest = new UpdateRequest(clientIdentifier, updatedParameters);
 		
 		return client.send(updaterRequest);
 	}
 
-	public void deregister(final String clientLocation, final ResponseCallback callback) {
-		final AbstractRegisteredLwM2mClientRequest deregisterRequest = createDeregisterRequest(clientLocation);
+	public void deregister(final ClientIdentifier clientIdentifier, final ResponseCallback callback) {
+		final AbstractRegisteredLwM2mClientRequest deregisterRequest = createDeregisterRequest(clientIdentifier);
 		client.send(deregisterRequest, callback);
 	}
 

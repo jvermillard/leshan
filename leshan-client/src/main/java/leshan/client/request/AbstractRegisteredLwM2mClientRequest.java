@@ -1,22 +1,24 @@
 package leshan.client.request;
 
+import leshan.client.request.identifier.ClientIdentifier;
+
 
 public abstract class AbstractRegisteredLwM2mClientRequest extends
 		AbstractLwM2mClientRequest {
 
-	protected final String clientLocation;
+	protected final ClientIdentifier clientIdentifier;
 
-	public AbstractRegisteredLwM2mClientRequest(final String clientLocation, final long timeout) {
+	public AbstractRegisteredLwM2mClientRequest(final ClientIdentifier clientIdentifier, final long timeout) {
 		super(timeout);
-		this.clientLocation = clientLocation;
+		this.clientIdentifier = clientIdentifier;
 	}
 
-	public AbstractRegisteredLwM2mClientRequest(final String clientLocation) {
-		this(clientLocation, DEFAULT_TIMEOUT_MS);
+	public AbstractRegisteredLwM2mClientRequest(final ClientIdentifier clientIdentifier) {
+		this(clientIdentifier, DEFAULT_TIMEOUT_MS);
 	}
 
-	public String getClientLocation() {
-		return clientLocation;
+	public ClientIdentifier getClientIdentifier() {
+		return clientIdentifier;
 	}
 
 }

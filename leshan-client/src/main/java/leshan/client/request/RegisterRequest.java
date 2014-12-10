@@ -2,7 +2,7 @@ package leshan.client.request;
 
 import java.util.Map;
 
-public class RegisterRequest extends AbstractLwM2mClientRequest implements LwM2mContentRequest{
+public class RegisterRequest extends AbstractLwM2mClientRequest implements LwM2mContentRequest, LwM2mIdentifierRequest{
 	private final Map<String, String> clientParameters;
 	private final String clientEndpointIdentifier;
 
@@ -21,6 +21,7 @@ public class RegisterRequest extends AbstractLwM2mClientRequest implements LwM2m
 		return clientParameters;
 	}
 	
+	@Override
 	public String getClientEndpointIdentifier() {
 		return clientEndpointIdentifier;
 	}

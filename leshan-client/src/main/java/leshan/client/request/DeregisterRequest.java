@@ -1,15 +1,17 @@
 package leshan.client.request;
 
+import leshan.client.request.identifier.ClientIdentifier;
+
 
 public class DeregisterRequest extends AbstractRegisteredLwM2mClientRequest {
 
-	public DeregisterRequest(final String clientLocation) {
-		super(clientLocation);
+	public DeregisterRequest(final ClientIdentifier clientIdentifier) {
+		super(clientIdentifier);
 	}
 
-	public DeregisterRequest(final String clientLocation,
+	public DeregisterRequest(final ClientIdentifier clientIdentifier,
 			final long timeout) {
-		super(clientLocation, timeout);
+		super(clientIdentifier, timeout);
 	}
 
 	@Override
