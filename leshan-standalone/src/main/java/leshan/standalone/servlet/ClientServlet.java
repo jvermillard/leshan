@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2013, Sierra Wireless
+ * Copyright (c) 2014, Gemalto M2M GmbH
  *
  * All rights reserved.
  *
@@ -202,7 +203,7 @@ public class ClientServlet extends HttpServlet {
         // /clients/endPoint/LWRequest/observe : do LightWeight M2M observe request on a given client.
         if (path.length >= 4 && "observe".equals(path[path.length - 1])) {
             try {
-                String target = StringUtils.substringBetween(req.getPathInfo(), clientEndpoint, "observe");
+                String target = StringUtils.substringBetween(req.getPathInfo(), clientEndpoint, "/observe");
                 Client client = server.getClientRegistry().get(clientEndpoint);
                 if (client != null) {
                     ObserveRequest request = new ObserveRequest(client, target);
@@ -282,7 +283,7 @@ public class ClientServlet extends HttpServlet {
         // /clients/endPoint/LWRequest/observe : cancel observation for the given resource.
         if (path.length >= 4 && "observe".equals(path[path.length - 1])) {
             try {
-                String target = StringUtils.substringsBetween(req.getPathInfo(), clientEndpoint, "observe")[0];
+                String target = StringUtils.substringsBetween(req.getPathInfo(), clientEndpoint, "/observe")[0];
                 Client client = server.getClientRegistry().get(clientEndpoint);
                 if (client != null) {
                     server.getObservationRegistry().cancelObservation(client, target);
