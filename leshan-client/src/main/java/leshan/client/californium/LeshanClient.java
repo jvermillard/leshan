@@ -32,7 +32,6 @@
 package leshan.client.californium;
 
 import java.net.InetSocketAddress;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import leshan.LinkObject;
@@ -61,20 +60,18 @@ public class LeshanClient implements LwM2mClient {
     private final AtomicBoolean clientServerStarted = new AtomicBoolean(false);
 	private final CaliforniumLwM2mClientRequestSender requestSender;
 
-    public LeshanClient(final Set<InetSocketAddress> clientEndpoints, final InetSocketAddress serverAddress, final LwM2mClientObjectDefinition... objectDevice) {
-        this(clientEndpoints, serverAddress, new CoapServer(), objectDevice);
+    public LeshanClient(final InetSocketAddress clientAddress, final InetSocketAddress serverAddress, final LwM2mClientObjectDefinition... objectDevice) {
+        this(clientAddress, serverAddress, new CoapServer(), objectDevice);
     }
 
-    public LeshanClient(final Set<InetSocketAddress> clientEndpoints, final InetSocketAddress serverAddress, final CoapServer serverLocal, final LwM2mClientObjectDefinition... objectDevice) {
-        if (clientEndpoints == null || serverLocal == null || objectDevice == null || serverAddress == null || objectDevice.length == 0){
+    public LeshanClient(final InetSocketAddress clientAddress, final InetSocketAddress serverAddress, final CoapServer serverLocal, final LwM2mClientObjectDefinition... objectDevice) {
+        if (clientAddress == null || serverLocal == null || objectDevice == null || serverAddress == null || objectDevice.length == 0){
             throw new IllegalArgumentException(
                     "LWM2M Clients must support minimum required Objects defined in the LWM2M Specification.");
         }
         serverLocal.setMessageDeliverer(new LwM2mServerMessageDeliverer(serverLocal.getRoot()));
-        for(final InetSocketAddress clientAddress :clientEndpoints){
-	        final Endpoint endpoint = new CoAPEndpoint(clientAddress);
-	        serverLocal.addEndpoint(endpoint);
-        }
+        final Endpoint endpoint = new CoAPEndpoint(clientAddress);
+        serverLocal.addEndpoint(endpoint);
         
         clientSideServer = serverLocal;
 
@@ -89,7 +86,7 @@ public class LeshanClient implements LwM2mClient {
             clientSideServer.add(clientObject);
         }
         
-        requestSender = new CaliforniumLwM2mClientRequestSender(serverLocal.getEndpoints(), serverAddress, getObjectModel());
+        requestSender = new CaliforniumLwM2mClientRequestSender(serverLocal.getEndpoint(clientAddress), serverAddress, getObjectModel());
     }
 
     @Override

@@ -1,7 +1,5 @@
 package leshan.client.request;
 
-import java.net.InetSocketAddress;
-
 
 public class DeregisterRequest extends AbstractRegisteredLwM2mClientRequest {
 
@@ -10,16 +8,7 @@ public class DeregisterRequest extends AbstractRegisteredLwM2mClientRequest {
 	}
 
 	public DeregisterRequest(final String clientLocation,
-			final InetSocketAddress clientEndpointAddress, final long timeout) {
-		super(clientLocation, clientEndpointAddress, timeout);
-	}
-
-	public DeregisterRequest(final String clientLocation,
-			final InetSocketAddress clientEndpointAddress) {
-		super(clientLocation, clientEndpointAddress);
-	}
-
-	public DeregisterRequest(final String clientLocation, final long timeout) {
+			final long timeout) {
 		super(clientLocation, timeout);
 	}
 

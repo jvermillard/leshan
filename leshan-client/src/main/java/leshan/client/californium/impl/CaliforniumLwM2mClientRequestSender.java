@@ -31,9 +31,6 @@ package leshan.client.californium.impl;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 import java.net.InetSocketAddress;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -54,12 +51,12 @@ import org.eclipse.californium.core.network.Endpoint;
 
 public class CaliforniumLwM2mClientRequestSender implements LwM2mClientRequestSender{
     private static final Logger LOG = Logger.getLogger(CaliforniumLwM2mClientRequestSender.class.getCanonicalName());
-    private final Set<Endpoint> endpoints;
+    private final Endpoint clientEndpoint;
 	private final InetSocketAddress serverAddress;
 	private final LinkObject[] clientObjectModel;
     
-    public CaliforniumLwM2mClientRequestSender(final List<Endpoint> endpoints, final InetSocketAddress serverAddress, final LinkObject... linkObjects){
-    	this.endpoints = new HashSet<Endpoint>(endpoints);
+    public CaliforniumLwM2mClientRequestSender(final Endpoint endpoint, final InetSocketAddress serverAddress, final LinkObject... linkObjects){
+    	this.clientEndpoint = endpoint;
     	this.serverAddress = serverAddress;
     	this.clientObjectModel = linkObjects;
     }
@@ -88,8 +85,7 @@ public class CaliforniumLwM2mClientRequestSender implements LwM2mClientRequestSe
         coapRequest.addMessageObserver(syncMessageObserver);
 
         // Send CoAP request asynchronously
-        final Endpoint endpoint = getEndpointForServer(request.getClientEndpointAddress());
-        endpoint.sendRequest(coapRequest);
+        clientEndpoint.sendRequest(coapRequest);
 
         // Wait for response, then return it
         return syncMessageObserver.waitForResponse();
@@ -120,26 +116,7 @@ public class CaliforniumLwM2mClientRequestSender implements LwM2mClientRequestSe
         });
 
         // Send CoAP request asynchronously
-        final Endpoint endpoint = getEndpointForServer(request.getClientEndpointAddress());
-        endpoint.sendRequest(coapRequest);
-    }
-
-    /*
-     * TODO in the future this should allow for users to set combinations of clients to servers per request.
-     */
-    private Endpoint getEndpointForServer(final InetSocketAddress clientEndpointAddress) {
-    	if(clientEndpointAddress == null){
-    		return endpoints.iterator().next();
-    	}
-    	
-        for (final Endpoint ep : endpoints) {
-            final InetSocketAddress endpointAddress = ep.getAddress();
-            if (endpointAddress.equals(clientEndpointAddress)) {
-                return ep;
-            }
-        }
-        throw new IllegalStateException("can't find the client endpoint to use: "
-                + clientEndpointAddress);
+        clientEndpoint.sendRequest(coapRequest);
     }
 
     // ////// Request Observer Class definition/////////////

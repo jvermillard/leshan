@@ -36,7 +36,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -207,7 +206,7 @@ public final class IntegrationTestHelper {
 		final LwM2mClientObjectDefinition optionalSingleObject = new LwM2mClientObjectDefinition(
 				OPTIONAL_SINGLE_OBJECT_ID, !mandatory, single, new SingleResourceDefinition(
 						OPTIONAL_SINGLE_RESOURCE_ID, intResource, !mandatory));
-		return new LeshanClient(Collections.singleton(clientAddress), serverAddress, 
+		return new LeshanClient(clientAddress, serverAddress, 
 				objectOne, objectTwo, objectThree, objectFour, mandatoryMultipleObject,
 				mandatorySingleObject, optionalSingleObject);
 	}

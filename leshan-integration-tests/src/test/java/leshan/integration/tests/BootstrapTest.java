@@ -35,6 +35,7 @@ import static org.junit.Assert.assertTrue;
 import leshan.client.response.OperationResponse;
 
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class BootstrapTest {
@@ -46,6 +47,7 @@ public class BootstrapTest {
 		helper.stop();
 	}
 
+	@Ignore
 	@Test
 	public void boostrap_device_exists() {
 		final OperationResponse bootstrap = helper.bootstrap();

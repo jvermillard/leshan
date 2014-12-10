@@ -36,7 +36,6 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -69,7 +68,6 @@ import leshan.client.response.OperationResponse;
  * java -jar target/leshan-client-*-SNAPSHOT-jar-with-dependencies.jar 127.0.0.1 5683 9000
  */
 public class LeshanClientExample {
-    private static final int TIMEOUT_MS = 2000;
     private String deviceLocation;
 
     public static void main(final String[] args) {
@@ -87,11 +85,11 @@ public class LeshanClientExample {
         final InetSocketAddress clientAddress = new InetSocketAddress(localHostName, localPort);
         final InetSocketAddress serverAddress = new InetSocketAddress(serverHostName, serverPort);
         
-        final LeshanClient client = new LeshanClient(Collections.singleton(clientAddress), 
-        		serverAddress,
-        		objectDevice);
+        final LeshanClient client = new LeshanClient(clientAddress, 
+									        		serverAddress,
+									        		objectDevice);
         
-		// Connect to the server provided
+		// Register to the server provided
         final String endpointIdentifier = UUID.randomUUID().toString();
 		final RegisterRequest registerRequest = new RegisterRequest(endpointIdentifier, new HashMap<String, String>());
         final OperationResponse operationResponse = client.send(registerRequest);

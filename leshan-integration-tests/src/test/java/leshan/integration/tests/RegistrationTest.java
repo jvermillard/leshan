@@ -35,7 +35,6 @@ package leshan.integration.tests;
 import static com.jayway.awaitility.Awaitility.await;
 import static org.junit.Assert.*;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -69,7 +68,7 @@ public class RegistrationTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void fail_to_create_client_with_null() {
-		helper.client = new LeshanClient(Collections.singleton(helper.clientAddress),
+		helper.client = new LeshanClient(helper.clientAddress,
 				helper.serverAddress,
 				(LwM2mClientObjectDefinition[]) null);
 	}
@@ -77,7 +76,7 @@ public class RegistrationTest {
 	@Test(expected = IllegalArgumentException.class)
 	public void fail_to_create_client_with_same_object_twice() {
 		final LwM2mClientObjectDefinition objectOne = new LwM2mClientObjectDefinition(1, false, false);
-		helper.client = new LeshanClient(Collections.singleton(helper.clientAddress), 
+		helper.client = new LeshanClient(helper.clientAddress, 
 				helper.serverAddress,
 				objectOne, objectOne);
 	}
