@@ -41,6 +41,7 @@ import leshan.server.request.ObserveRequest;
 import leshan.server.request.ReadRequest;
 import leshan.server.request.WriteAttributesRequest;
 import leshan.server.request.WriteRequest;
+import leshan.util.StringUtils;
 
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.coap.Request;
@@ -115,6 +116,15 @@ public class CoapRequestBuilder implements LwM2mRequestVisitor {
     private final void setTarget(Request coapRequest, Client client, LwM2mPath path) {
         coapRequest.setDestination(client.getAddress());
         coapRequest.setDestinationPort(client.getPort());
+
+        // root path
+        if (client.getRootPath() != null) {
+            for (String rootPath : client.getRootPath().split("/")) {
+                if (!StringUtils.isEmpty(rootPath)) {
+                    coapRequest.getOptions().addURIPath(rootPath);
+                }
+            }
+        }
 
         // objectId
         coapRequest.getOptions().addURIPath(Integer.toString(path.getObjectId()));

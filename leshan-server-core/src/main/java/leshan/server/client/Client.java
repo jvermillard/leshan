@@ -75,6 +75,9 @@ public class Client {
 
     private LinkObject[] objectLinks;
 
+    /** The location where LWM2M objects are hosted on the device */
+    private String rootPath = "/";
+
     private Date lastUpdate;
 
     // true, if the client failed to answer the last server request
@@ -105,7 +108,8 @@ public class Client {
         this.endpoint = endpoint;
         this.address = address;
         this.port = port;
-        this.objectLinks = objectLinks;
+
+        setObjectLinks(objectLinks);
 
         this.registrationDate = registrationDate == null ? new Date() : registrationDate;
         lifeTimeInSec = lifetime == null ? DEFAULT_LIFETIME_IN_SEC : lifetime;
@@ -232,6 +236,16 @@ public class Client {
 
     void setObjectLinks(LinkObject[] objectLinks) {
         this.objectLinks = objectLinks;
+
+        // extract the root objects path from the object links
+        if (objectLinks != null) {
+            for (LinkObject link : objectLinks) {
+                if (link != null && "oma.lwm2m".equals(link.getAttributes().get("rt"))) {
+                    rootPath = link.getUrl();
+                    break;
+                }
+            }
+        }
     }
 
     public synchronized long getLifeTimeInSec() {
@@ -248,6 +262,13 @@ public class Client {
 
     public BindingMode getBindingMode() {
         return bindingMode;
+    }
+
+    /**
+     * @return the path where the objects are hosted on the device
+     */
+    public String getRootPath() {
+        return rootPath;
     }
 
     /**

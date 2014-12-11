@@ -101,7 +101,7 @@ lwClientControllers.controller('ClientDetailCtrl', [
             $scope.client = data;
 
             // update resource tree with client details
-            lwResources.buildResourceTree($scope.client.objectLinks,function (objects){
+            lwResources.buildResourceTree($scope.client.rootPath, $scope.client.objectLinks, function (objects){
                 $scope.objects = objects;
             });
 
@@ -112,7 +112,7 @@ lwClientControllers.controller('ClientDetailCtrl', [
                 $scope.$apply(function() {
                     $scope.deregistered = false;
                     $scope.client = JSON.parse(msg.data);
-                    lwResources.buildResourceTree($scope.client.objectLinks,function (objects){
+                    lwResources.buildResourceTree($scope.client.rootPath, $scope.client.objectLinks, function (objects){
                         $scope.objects = objects;
                     });
                 });

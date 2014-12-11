@@ -53,9 +53,9 @@ myModule.factory('lwResources',["$http", function($http) {
     }
     
     /**
-     * Build Resource Tree for the given objectLinks
+     * Build Resource Tree for the given rootPath and objectLinks
      */
-    var buildResourceTree = function(objectLinks,callback) {
+    var buildResourceTree = function(rootPath, objectLinks, callback) {
         if (objectLinks.length == 0)
             callback([]);
 
@@ -63,8 +63,15 @@ myModule.factory('lwResources',["$http", function($http) {
             var tree = [];
             
             for (var i = 0; i < objectLinks.length; i++) {
-                // get list of resource (e.g. : [3] or [1,123]
-                var resourcepath = url2array(objectLinks[i].url);
+            	
+                // remove root path from link
+                var link = objectLinks[i].url;
+                if(link.indexOf(rootPath) == 0) {
+                    link.slice(rootPath.length);
+                }
+            	
+                // get list of resources (e.g. : [3] or [1,123]
+                var resourcepath = url2array(link);
                 var attributes = objectLinks[i].attributes;
 
                 switch (resourcepath.length) {
