@@ -296,6 +296,11 @@
             </dependency>
             <dependency>
                 <groupId>org.github.leshan</groupId>
+                <artifactId>leshan-bs-server</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.github.leshan</groupId>
                 <artifactId>leshan-server-cf</artifactId>
                 <version>${project.version}</version>
             </dependency>
