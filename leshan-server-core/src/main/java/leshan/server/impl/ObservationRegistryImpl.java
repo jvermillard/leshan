@@ -38,6 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import leshan.core.node.LwM2mNode;
+import leshan.core.node.LwM2mPath;
 import leshan.server.client.Client;
 import leshan.server.observation.Observation;
 import leshan.server.observation.ObservationListener;
@@ -54,12 +55,12 @@ import org.slf4j.LoggerFactory;
 public class ObservationRegistryImpl implements ObservationRegistry, ObservationListener {
 
     private final Logger LOG = LoggerFactory.getLogger(ObservationRegistryImpl.class);
-    private final Map<String /* registration id */, Map<String /* resource path */, Observation>> observationsByClientAndResource;
+    private final Map<String /* registration id */, Map<LwM2mPath /* resource path */, Observation>> observationsByClientAndResource;
 
     private final List<ObservationRegistryListener> listeners = new CopyOnWriteArrayList<>();
 
     public ObservationRegistryImpl() {
-        observationsByClientAndResource = new ConcurrentHashMap<String, Map<String, Observation>>();
+        observationsByClientAndResource = new ConcurrentHashMap<String, Map<LwM2mPath, Observation>>();
     }
 
     @Override
@@ -68,17 +69,17 @@ public class ObservationRegistryImpl implements ObservationRegistry, Observation
         if (observation != null) {
             String registrationID = observation.getClient().getRegistrationId();
 
-            Map<String, Observation> clientObservations = observationsByClientAndResource.get(registrationID);
+            Map<LwM2mPath, Observation> clientObservations = observationsByClientAndResource.get(registrationID);
             if (clientObservations == null) {
-                clientObservations = new ConcurrentHashMap<String, Observation>();
+                clientObservations = new ConcurrentHashMap<LwM2mPath, Observation>();
                 observationsByClientAndResource.put(registrationID, clientObservations);
             }
 
-            Observation oldObservation = clientObservations.get(observation.getPath().toString());
+            Observation oldObservation = clientObservations.get(observation.getPath());
             if (oldObservation != null) {
                 oldObservation.cancel();
             }
-            clientObservations.put(observation.getPath().toString(), observation);
+            clientObservations.put(observation.getPath(), observation);
             for (ObservationRegistryListener listener : listeners) {
                 listener.newObservation(observation);
             }
@@ -90,7 +91,7 @@ public class ObservationRegistryImpl implements ObservationRegistry, Observation
     public synchronized int cancelObservations(Client client) {
         int count = 0;
         if (client != null) {
-            Map<String, Observation> clientObservations = observationsByClientAndResource.get(client
+            Map<LwM2mPath, Observation> clientObservations = observationsByClientAndResource.get(client
                     .getRegistrationId());
 
             if (clientObservations != null) {
@@ -111,17 +112,18 @@ public class ObservationRegistryImpl implements ObservationRegistry, Observation
     @Override
     public synchronized void cancelObservation(Client client, String resourcepath) {
         if (client != null && resourcepath != null) {
-            Map<String, Observation> clientObservations = observationsByClientAndResource.get(client
+            Map<LwM2mPath, Observation> clientObservations = observationsByClientAndResource.get(client
                     .getRegistrationId());
 
             if (clientObservations != null) {
-                Observation observation = clientObservations.get(resourcepath);
+                LwM2mPath lwM2mResourcePath = new LwM2mPath(resourcepath);
+                Observation observation = clientObservations.get(lwM2mResourcePath);
                 if (observation != null) {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace("Canceling {} observation of client {}", resourcepath, client.getEndpoint());
                     }
                     observation.cancel();
-                    clientObservations.remove(resourcepath);
+                    clientObservations.remove(lwM2mResourcePath);
                     if (clientObservations.isEmpty()) {
                         observationsByClientAndResource.remove(client.getEndpoint());
                     }
@@ -132,7 +134,7 @@ public class ObservationRegistryImpl implements ObservationRegistry, Observation
 
     @Override
     public Set<Observation> getObservations(Client client) {
-        Map<String, Observation> observations = observationsByClientAndResource.get(client.getRegistrationId());
+        Map<LwM2mPath, Observation> observations = observationsByClientAndResource.get(client.getRegistrationId());
         if (observations == null)
             return Collections.emptySet();
         else
