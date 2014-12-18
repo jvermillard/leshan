@@ -39,6 +39,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import leshan.server.Startable;
+import leshan.server.Stopable;
 import leshan.server.client.Client;
 import leshan.server.client.ClientRegistry;
 import leshan.server.client.ClientRegistryListener;
@@ -51,7 +53,7 @@ import org.slf4j.LoggerFactory;
 /**
  * In memory client registry
  */
-public class ClientRegistryImpl implements ClientRegistry {
+public class ClientRegistryImpl implements ClientRegistry, Startable, Stopable {
 
     private static final Logger LOG = LoggerFactory.getLogger(ClientRegistryImpl.class);
 
@@ -150,6 +152,7 @@ public class ClientRegistryImpl implements ClientRegistry {
     /**
      * start the registration manager, will start regular cleanup of dead registrations.
      */
+    @Override
     public void start() {
         // every 2 seconds clean the registration list
         // TODO re-consider clean-up interval: wouldn't 5 minutes do as well?
@@ -159,9 +162,14 @@ public class ClientRegistryImpl implements ClientRegistry {
     /**
      * Stop the underlying cleanup of the registrations.
      */
-    public void stop() throws InterruptedException {
+    @Override
+    public void stop() {
         schedExecutor.shutdownNow();
-        schedExecutor.awaitTermination(5, TimeUnit.SECONDS);
+        try {
+            schedExecutor.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            LOG.warn("Clean up registration thread was interrupted.", e);
+        }
     }
 
     private final ScheduledExecutorService schedExecutor = Executors.newScheduledThreadPool(1);

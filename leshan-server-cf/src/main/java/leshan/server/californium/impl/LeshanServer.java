@@ -37,11 +37,13 @@ import leshan.core.objectspec.Resources;
 import leshan.core.response.ClientResponse;
 import leshan.core.response.ExceptionConsumer;
 import leshan.core.response.ResponseConsumer;
+import leshan.server.Destroyable;
 import leshan.server.LwM2mServer;
+import leshan.server.Startable;
+import leshan.server.Stopable;
 import leshan.server.client.Client;
 import leshan.server.client.ClientRegistry;
 import leshan.server.client.ClientRegistryListener;
-import leshan.server.impl.ClientRegistryImpl;
 import leshan.server.observation.ObservationRegistry;
 import leshan.server.request.LwM2mRequest;
 import leshan.server.security.SecurityRegistry;
@@ -138,52 +140,63 @@ public class LeshanServer implements LwM2mServer {
         requestSender = new CaliforniumLwM2mRequestSender(endpoints, this.observationRegistry);
     }
 
-    /**
-     * Starts the server and binds it to the specified port.
-     */
     @Override
     public void start() {
-        // load resource definitions
+        // Load resource definitions
         Resources.load();
 
-        coapServer.start();
-        LOG.info("LW-M2M server started");
-
-        // start client registry
-        if (clientRegistry instanceof ClientRegistryImpl) {
-            ((ClientRegistryImpl) clientRegistry).start();
+        // Start registries
+        if (clientRegistry instanceof Startable) {
+            ((Startable) clientRegistry).start();
         }
+        if (securityRegistry instanceof Startable) {
+            ((Startable) securityRegistry).start();
+        }
+        if (observationRegistry instanceof Startable) {
+            ((Startable) observationRegistry).start();
+        }
+
+        // Start server
+        coapServer.start();
+
+        LOG.info("LW-M2M server started");
     }
 
-    /**
-     * Stops the server and unbinds it from assigned ports (can be restarted).
-     */
     @Override
     public void stop() {
+        // Stop server
         coapServer.stop();
 
-        if (clientRegistry instanceof ClientRegistryImpl) {
-            try {
-                ((ClientRegistryImpl) clientRegistry).stop();
-            } catch (final InterruptedException e) {
-                LOG.info("LW-M2M server started");
-            }
+        // Start registries
+        if (clientRegistry instanceof Stopable) {
+            ((Stopable) clientRegistry).stop();
         }
+        if (securityRegistry instanceof Stopable) {
+            ((Stopable) securityRegistry).stop();
+        }
+        if (observationRegistry instanceof Stopable) {
+            ((Stopable) observationRegistry).stop();
+        }
+
+        LOG.info("LW-M2M server stoped");
     }
 
-    /**
-     * Stops the server and unbinds it from assigned ports.
-     */
     public void destroy() {
+        // Destroy server
         coapServer.destroy();
 
-        if (clientRegistry instanceof ClientRegistryImpl) {
-            try {
-                ((ClientRegistryImpl) clientRegistry).stop();
-            } catch (final InterruptedException e) {
-                LOG.info("LW-M2M server started");
-            }
+        // Destroy registries
+        if (clientRegistry instanceof Destroyable) {
+            ((Destroyable) clientRegistry).destroy();
         }
+        if (securityRegistry instanceof Destroyable) {
+            ((Destroyable) securityRegistry).destroy();
+        }
+        if (observationRegistry instanceof Destroyable) {
+            ((Destroyable) observationRegistry).destroy();
+        }
+
+        LOG.info("LW-M2M server destroyed");
     }
 
     @Override
