@@ -40,8 +40,8 @@ import leshan.server.security.SecurityRegistry;
 /**
  * An OMA Lightweight M2M device management server.
  *
- * Will receive client registration through the "/rd" resource.
- * Is able to send requests (Read, Write, Create, Delete, Execute, Discover, Observer) to specified clients.
+ * Will receive client registration through the "/rd" resource. Is able to send requests (Read, Write, Create, Delete,
+ * Execute, Discover, Observer) to specified clients.
  *
  * It's your main entry point for using the Leshan-core API.
  */
@@ -53,9 +53,15 @@ public interface LwM2mServer {
     void start();
 
     /**
-     * Stop the server, release the resources (like UDP ports).
+     * Stops the server, i.e. unbinds it from all ports. Frees as much system resources as possible to still be able to
+     * be started.
      */
     void stop();
+
+    /**
+     * Destroys the server, i.e. unbinds from all ports and frees all system resources.
+     */
+    void destroy();
 
     /**
      * Send a Lightweight M2M request synchronously. Will block until a response is received from the remote client.
@@ -65,7 +71,8 @@ public interface LwM2mServer {
     /**
      * Send a Lightweight M2M request asynchronously.
      */
-    <T extends ClientResponse> void send(LwM2mRequest<T> request, ResponseConsumer<T> responseCallback, ExceptionConsumer errorCallback);
+    <T extends ClientResponse> void send(LwM2mRequest<T> request, ResponseConsumer<T> responseCallback,
+            ExceptionConsumer errorCallback);
 
     /**
      * Get the client registry containing the list of connected clients. You can use this object for listening client
