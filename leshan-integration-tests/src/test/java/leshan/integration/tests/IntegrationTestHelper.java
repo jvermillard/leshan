@@ -47,7 +47,6 @@ import leshan.client.LwM2mClient;
 import leshan.client.californium.LeshanClient;
 import leshan.client.exchange.LwM2mExchange;
 import leshan.client.request.AbstractLwM2mClientRequest;
-import leshan.client.request.AbstractRegisteredLwM2mClientRequest;
 import leshan.client.request.BootstrapRequest;
 import leshan.client.request.DeregisterRequest;
 import leshan.client.request.LwM2mClientRequest;
@@ -75,11 +74,10 @@ import leshan.core.response.CreateResponse;
 import leshan.core.response.DiscoverResponse;
 import leshan.core.response.ValueResponse;
 import leshan.server.LwM2mServer;
-import leshan.server.californium.LeshanServer;
+import leshan.server.californium.LeshanServerBuilder;
 import leshan.server.californium.impl.LwM2mBootstrapServerImpl;
 import leshan.server.client.Client;
-import leshan.server.impl.ClientRegistryImpl;
-import leshan.server.impl.ObservationRegistryImpl;
+import leshan.server.client.ClientRegistry;
 import leshan.server.impl.SecurityRegistryImpl;
 import leshan.server.observation.ObservationRegistry;
 import leshan.server.request.CreateRequest;
@@ -89,7 +87,6 @@ import leshan.server.request.ObserveRequest;
 import leshan.server.request.ReadRequest;
 import leshan.server.request.WriteAttributesRequest;
 import leshan.server.request.WriteRequest;
-import leshan.server.security.SecurityRegistry;
 
 import org.eclipse.californium.core.WebLink;
 import org.eclipse.californium.core.coap.LinkFormat;
@@ -132,7 +129,7 @@ public final class IntegrationTestHelper {
     private final String clientDataModel = "</lwm2m>;rt=\"oma.lwm2m\", </lwm2m/1/101>, </lwm2m/1/102>, </lwm2m/2/0>, </lwm2m/2/1>, </lwm2m/2/2>, </lwm2m/3/0>, </lwm2m/4/0>, </lwm2m/5>";
 
     LwM2mServer server;
-    private final ClientRegistryImpl clientRegistry;
+    private final ClientRegistry clientRegistry;
 
     Map<String, String> clientParameters = new HashMap<>();
     LwM2mClient client;
@@ -155,11 +152,10 @@ public final class IntegrationTestHelper {
 
     public IntegrationTestHelper(final boolean startBootstrap) {
         final InetSocketAddress serverAddressSecure = new InetSocketAddress(InetAddress.getLoopbackAddress(), 5684);
-        clientRegistry = new ClientRegistryImpl();
-        observationRegistry = new ObservationRegistryImpl();
-        final SecurityRegistry securityRegistry = new SecurityRegistryImpl();
-        server = new LeshanServer(serverAddress, serverAddressSecure, clientRegistry, securityRegistry,
-                observationRegistry);
+        server = new LeshanServerBuilder().setlocalAddress(serverAddress).setlocalAddressSecure(serverAddressSecure)
+                .build();
+        clientRegistry = server.getClientRegistry();
+        observationRegistry = server.getObservationRegistry();
 
         firstResource = new ValueResource();
         secondResource = new ValueResource();

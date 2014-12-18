@@ -27,9 +27,8 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.californium;
+package leshan.server.californium.impl;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.Set;
@@ -39,16 +38,10 @@ import leshan.core.response.ClientResponse;
 import leshan.core.response.ExceptionConsumer;
 import leshan.core.response.ResponseConsumer;
 import leshan.server.LwM2mServer;
-import leshan.server.californium.impl.CaliforniumLwM2mRequestSender;
-import leshan.server.californium.impl.LwM2mPskStore;
-import leshan.server.californium.impl.RegisterResource;
-import leshan.server.californium.impl.SecureEndpoint;
 import leshan.server.client.Client;
 import leshan.server.client.ClientRegistry;
 import leshan.server.client.ClientRegistryListener;
 import leshan.server.impl.ClientRegistryImpl;
-import leshan.server.impl.ObservationRegistryImpl;
-import leshan.server.impl.SecurityRegistryImpl;
 import leshan.server.observation.ObservationRegistry;
 import leshan.server.request.LwM2mRequest;
 import leshan.server.security.SecurityRegistry;
@@ -77,12 +70,6 @@ public class LeshanServer implements LwM2mServer {
 
     private static final Logger LOG = LoggerFactory.getLogger(LeshanServer.class);
 
-    /** IANA assigned UDP port for CoAP (so for LWM2M) */
-    public static final int PORT = 5683;
-
-    /** IANA assigned UDP port for CoAP with DTLS (so for LWM2M) */
-    public static final int PORT_DTLS = 5684;
-
     private final CaliforniumLwM2mRequestSender requestSender;
 
     private final ClientRegistry clientRegistry;
@@ -92,60 +79,24 @@ public class LeshanServer implements LwM2mServer {
     private final SecurityRegistry securityRegistry;
 
     /**
-     * Initialize a server which will bind to default UDP port for CoAP (5684).
-     */
-    public LeshanServer() {
-        this(null, null, null);
-    }
-
-    /**
-     * Initialize a server which will bind to the specified address and port.
-     *
-     * @param localAddress the address to bind the CoAP server.
-     * @param localAddressSecure the address to bind the CoAP server for DTLS connection.
-     */
-    public LeshanServer(final InetSocketAddress localAddress, final InetSocketAddress localAddressSecure) {
-        this(localAddress, localAddressSecure, null, null, null);
-    }
-
-    /**
-     * Initialize a server which will bind to default UDP port for CoAP (5684).
-     */
-    public LeshanServer(final ClientRegistry clientRegistry, final SecurityRegistry securityRegistry,
-            final ObservationRegistry observationRegistry) {
-        this(new InetSocketAddress((InetAddress) null, PORT), new InetSocketAddress((InetAddress) null, PORT_DTLS),
-                clientRegistry, securityRegistry, observationRegistry);
-    }
-
-    /**
      * Initialize a server which will bind to the specified address and port.
      *
      * @param localAddress the address to bind the CoAP server.
      * @param localAddressSecure the address to bind the CoAP server for DTLS connection.
      */
     public LeshanServer(final InetSocketAddress localAddress, final InetSocketAddress localAddressSecure,
-            final ClientRegistry clientRegistry, final SecurityRegistry securityRegistry, final ObservationRegistry observationRegistry) {
+            final ClientRegistry clientRegistry, final SecurityRegistry securityRegistry,
+            final ObservationRegistry observationRegistry) {
         Validate.notNull(localAddress, "IP address cannot be null");
         Validate.notNull(localAddressSecure, "Secure IP address cannot be null");
+        Validate.notNull(clientRegistry, "clientRegistry cannot be null");
+        Validate.notNull(securityRegistry, "securityRegistry cannot be null");
+        Validate.notNull(observationRegistry, "observationRegistry cannot be null");
 
-        // init registry
-        if (clientRegistry == null) {
-			this.clientRegistry = new ClientRegistryImpl();
-		} else {
-			this.clientRegistry = clientRegistry;
-		}
-
-        if (observationRegistry == null) {
-			this.observationRegistry = new ObservationRegistryImpl();
-		} else {
-			this.observationRegistry = observationRegistry;
-		}
-
-        if (securityRegistry == null) {
-			this.securityRegistry = new SecurityRegistryImpl();
-		} else {
-			this.securityRegistry = securityRegistry;
-		}
+        // Init registries
+        this.clientRegistry = clientRegistry;
+        this.securityRegistry = securityRegistry;
+        this.observationRegistry = observationRegistry;
 
         // Cancel observations on client unregistering
         this.clientRegistry.addListener(new ClientRegistryListener() {
@@ -191,7 +142,7 @@ public class LeshanServer implements LwM2mServer {
      * Starts the server and binds it to the specified port.
      */
     @Override
-	public void start() {
+    public void start() {
         // load resource definitions
         Resources.load();
 
@@ -200,15 +151,15 @@ public class LeshanServer implements LwM2mServer {
 
         // start client registry
         if (clientRegistry instanceof ClientRegistryImpl) {
-			((ClientRegistryImpl) clientRegistry).start();
-		}
+            ((ClientRegistryImpl) clientRegistry).start();
+        }
     }
 
     /**
      * Stops the server and unbinds it from assigned ports (can be restarted).
      */
     @Override
-	public void stop() {
+    public void stop() {
         coapServer.stop();
 
         if (clientRegistry instanceof ClientRegistryImpl) {
@@ -256,8 +207,8 @@ public class LeshanServer implements LwM2mServer {
     }
 
     @Override
-    public <T extends ClientResponse> void send(final LwM2mRequest<T> request, final ResponseConsumer<T> responseCallback,
-            final ExceptionConsumer errorCallback) {
+    public <T extends ClientResponse> void send(final LwM2mRequest<T> request,
+            final ResponseConsumer<T> responseCallback, final ExceptionConsumer errorCallback) {
         requestSender.send(request, responseCallback, errorCallback);
     }
 }

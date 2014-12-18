@@ -29,9 +29,8 @@
  */
 package leshan.standalone;
 
-import java.net.InetSocketAddress;
-
-import leshan.server.californium.LeshanServer;
+import leshan.server.LwM2mServer;
+import leshan.server.californium.LeshanServerBuilder;
 import leshan.standalone.servlet.ClientServlet;
 import leshan.standalone.servlet.EventServlet;
 import leshan.standalone.servlet.ObjectSpecServlet;
@@ -48,26 +47,29 @@ public class LeshanStandalone {
     private static final Logger LOG = LoggerFactory.getLogger(LeshanStandalone.class);
 
     private Server server;
-    private LeshanServer lwServer;
+    private LwM2mServer lwServer;
 
     public void start() {
-        // use those ENV variables for specifying the interface to be bound for coap and coaps
+        // Use those ENV variables for specifying the interface to be bound for coap and coaps
         String iface = System.getenv("COAPIFACE");
         String ifaces = System.getenv("COAPSIFACE");
 
-        // LWM2M server
-        if (iface == null || iface.isEmpty() || ifaces == null || ifaces.isEmpty()) {
-            lwServer = new LeshanServer();
-        } else {
+        // Build LWM2M server
+        LeshanServerBuilder leshanServerBuilder = new LeshanServerBuilder();
+        if (iface != null && !iface.isEmpty()) {
             String[] add = iface.split(":");
-            String[] adds = ifaces.split(":");
-            // user specified the iface to be bound
-            lwServer = new LeshanServer(new InetSocketAddress(add[0], Integer.parseInt(add[1])), new InetSocketAddress(
-                    adds[0], Integer.parseInt(adds[1])));
+            leshanServerBuilder.setlocalAddress(add[0], Integer.parseInt(add[1]));
         }
+        if (ifaces != null && !ifaces.isEmpty()) {
+            String[] adds = ifaces.split(":");
+            leshanServerBuilder.setlocalAddressSecure(adds[0], Integer.parseInt(adds[1]));
+        }
+        lwServer = leshanServerBuilder.build();
+
+        // Start it
         lwServer.start();
 
-        // now prepare and start jetty
+        // Now prepare and start jetty
         String webPort = System.getenv("PORT");
         if (webPort == null || webPort.isEmpty()) {
             webPort = System.getProperty("PORT");

@@ -31,7 +31,7 @@ package leshan.standalone.servlet.json;
 
 import java.lang.reflect.Type;
 
-import leshan.server.californium.LeshanServer;
+import leshan.server.californium.LeshanServerBuilder;
 import leshan.server.client.Client;
 
 import com.google.gson.JsonElement;
@@ -56,7 +56,7 @@ public class ClientSerializer implements JsonSerializer<Client> {
         element.add("rootPath", context.serialize(src.getRootPath()));
         element.add("objectLinks", context.serialize(src.getObjectLinks()));
         element.add("secure",
-                context.serialize(src.getRegistrationEndpointAddress().getPort() == LeshanServer.PORT_DTLS));
+                context.serialize(src.getRegistrationEndpointAddress().getPort() == LeshanServerBuilder.PORT_DTLS));
 
         return element;
     }
