@@ -30,20 +30,18 @@
 package leshan.server.californium.impl;
 
 import java.net.InetSocketAddress;
-import java.security.PublicKey;
 import java.util.List;
 
-import javax.xml.bind.DatatypeConverter;
-
 import leshan.LinkObject;
+import leshan.core.response.ClientResponse;
+import leshan.core.response.RegisterResponse;
 import leshan.server.client.BindingMode;
-import leshan.server.client.Client;
-import leshan.server.client.ClientRegistrationException;
 import leshan.server.client.ClientRegistry;
-import leshan.server.client.ClientUpdate;
-import leshan.server.security.SecurityInfo;
-import leshan.server.security.SecurityStore;
-import leshan.util.RandomStringUtils;
+import leshan.server.registration.RegistrationHandler;
+import leshan.server.request.DeregisterRequest;
+import leshan.server.request.RegisterRequest;
+import leshan.server.request.UpdateRequest;
+import leshan.util.Validate;
 
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
@@ -77,15 +75,12 @@ public class RegisterResource extends CoapResource {
 
     public static final String RESOURCE_NAME = "rd";
 
-    private final ClientRegistry clientRegistry;
+    private final RegistrationHandler registrationHandler;
 
-    private final SecurityStore securityStore;
-
-    public RegisterResource(ClientRegistry clientRegistry, SecurityStore securityStore) {
+    public RegisterResource(RegistrationHandler registrationHandler) {
         super(RESOURCE_NAME);
 
-        this.clientRegistry = clientRegistry;
-        this.securityStore = securityStore;
+        this.registrationHandler = registrationHandler;
         getAttributes().addResourceType("core.rd");
     }
 
@@ -102,118 +97,87 @@ public class RegisterResource extends CoapResource {
             return;
         }
 
+        // Create LwM2m request from CoAP request
+        // --------------------------------
         // TODO: assert content media type is APPLICATION LINK FORMAT?
-
         String endpoint = null;
         Long lifetime = null;
         String smsNumber = null;
         String lwVersion = null;
         BindingMode binding = null;
         LinkObject[] objectLinks = null;
-        try {
-
-            for (String param : request.getOptions().getUriQuery()) {
-                if (param.startsWith(QUERY_PARAM_ENDPOINT)) {
-                    endpoint = param.substring(3);
-                } else if (param.startsWith(QUERY_PARAM_LIFETIME)) {
-                    lifetime = Long.valueOf(param.substring(3));
-                } else if (param.startsWith(QUERY_PARAM_SMS)) {
-                    smsNumber = param.substring(4);
-                } else if (param.startsWith(QUERY_PARAM_LWM2M_VERSION)) {
-                    lwVersion = param.substring(6);
-                } else if (param.startsWith(QUERY_PARAM_BINDING_MODE)) {
-                    binding = BindingMode.valueOf(param.substring(2));
-                }
+        // Get Params
+        for (String param : request.getOptions().getUriQuery()) {
+            if (param.startsWith(QUERY_PARAM_ENDPOINT)) {
+                endpoint = param.substring(3);
+            } else if (param.startsWith(QUERY_PARAM_LIFETIME)) {
+                lifetime = Long.valueOf(param.substring(3));
+            } else if (param.startsWith(QUERY_PARAM_SMS)) {
+                smsNumber = param.substring(4);
+            } else if (param.startsWith(QUERY_PARAM_LWM2M_VERSION)) {
+                lwVersion = param.substring(6);
+            } else if (param.startsWith(QUERY_PARAM_BINDING_MODE)) {
+                binding = BindingMode.valueOf(param.substring(2));
             }
+        }
+        // Get object Links
+        if (request.getPayload() != null) {
+            objectLinks = LinkObject.parse(request.getPayload());
+        }
+        // Which end point did the client post this request to?
+        InetSocketAddress registrationEndpoint = exchange.advanced().getEndpoint().getAddress();
+        // Get Security info
+        String pskIdentity = null;
+        if (exchange.advanced().getEndpoint() instanceof SecureEndpoint)
+            pskIdentity = ((SecureEndpoint) exchange.advanced().getEndpoint()).getPskIdentity(request);
 
-            if (endpoint == null || endpoint.isEmpty()) {
-                exchange.respond(ResponseCode.BAD_REQUEST, "Client must specify an endpoint identifier");
-            } else {
-                // register
-                String registrationId = RegisterResource.createRegistrationId();
-                if (request.getPayload() != null) {
-                    objectLinks = LinkObject.parse(request.getPayload());
-                }
+        RegisterRequest registerRequest = new RegisterRequest(endpoint, lifetime, lwVersion, binding, smsNumber,
+                objectLinks, request.getSource(), request.getSourcePort(), registrationEndpoint, pskIdentity);
 
-                // do we have security information for this client?
-                SecurityInfo securityInfo = securityStore.getByEndpoint(endpoint);
+        // Handle request
+        // -------------------------------
+        RegisterResponse response = registrationHandler.register(registerRequest);
 
-                // which end point did the client post this request to?
-                InetSocketAddress registrationEndpoint = exchange.advanced().getEndpoint().getAddress();
+        // Create CoAP Response from LwM2m request
+        // -------------------------------
+        if (response.getCode() == leshan.ResponseCode.CREATED) {
+            exchange.setLocationPath(RESOURCE_NAME + "/" + response.getRegistrationID());
+            exchange.respond(ResponseCode.CREATED);
+        } else {
+            // TODO we lost specific message error with this refactoring
+            // exchange.respond(fromLwM2mCode(response.getCode()),"error message");
+            exchange.respond(fromLwM2mCode(response.getCode()));
+            if (exchange.advanced().getEndpoint() instanceof SecureEndpoint) {
 
-                // if this is a secure end-point, we must check that the registering client is using the right identity.
-                if (exchange.advanced().getEndpoint() instanceof SecureEndpoint) {
-                    String pskIdentity = ((SecureEndpoint) exchange.advanced().getEndpoint()).getPskIdentity(request);
-                    PublicKey rpk = ((SecureEndpoint) exchange.advanced().getEndpoint()).getRawPublicKey(request);
-
-                    if (pskIdentity != null) {
-                        // Manage PSK authentication
-                        // ----------------------------------------------------
-                        LOG.debug("Registration request received using the secure endpoint {} with identity {}",
-                                registrationEndpoint, pskIdentity);
-
-                        if (securityInfo == null || pskIdentity == null
-                                || !pskIdentity.equals(securityInfo.getIdentity())) {
-                            LOG.warn("Invalid identity for client {}: expected '{}' but was '{}'", endpoint,
-                                    securityInfo == null ? null : securityInfo.getIdentity(), pskIdentity);
-                            exchange.respond(ResponseCode.BAD_REQUEST, "Invalid identity");
-
-                            // kill the TLS Session
-                            ((SecureEndpoint) exchange.advanced().getEndpoint()).getDTLSConnector().close(
-                                    new InetSocketAddress(request.getSource(), request.getSourcePort()));
-                            return;
-
-                        } else {
-                            LOG.debug("authenticated client {} using DTLS PSK", endpoint);
-                        }
-                    } else if (rpk != null) {
-                        // Manage RPK authentication
-                        // ----------------------------------------------------
-                        LOG.debug("Registration request received using the secure endpoint {} with rpk {}",
-                                registrationEndpoint, DatatypeConverter.printHexBinary(rpk.getEncoded()));
-
-                        if (securityInfo == null || rpk == null || !rpk.equals(securityInfo.getRawPublicKey())) {
-                            LOG.warn("Invalid rpk for client {}: expected \n'{}'\n but was \n'{}'", endpoint,
-                                    DatatypeConverter.printHexBinary(securityInfo.getRawPublicKey().getEncoded()),
-                                    DatatypeConverter.printHexBinary(rpk.getEncoded()));
-                            exchange.respond(ResponseCode.BAD_REQUEST, "Invalid rpk");
-
-                            // kill the TLS Session
-                            ((SecureEndpoint) exchange.advanced().getEndpoint()).getDTLSConnector().close(
-                                    new InetSocketAddress(request.getSource(), request.getSourcePort()));
-                            return;
-
-                        } else {
-                            LOG.debug("authenticated client {} using DTLS RPK", endpoint);
-                        }
-                    } else {
-                        LOG.warn("Unable to authenticate client {}: unknown authentication mode.", endpoint);
-                        exchange.respond(ResponseCode.BAD_REQUEST,
-                                "Client must connect thru DTLS with PSK or RPK (port 5684)");
-                        return;
-                    }
-                } else {
-                    if (securityInfo != null) {
-                        LOG.warn("client {} must connect using DTLS", endpoint);
-                        exchange.respond(ResponseCode.BAD_REQUEST, "Client must connect thru DTLS (port 5684)");
-                        return;
-                    }
-                }
-
-                Client client = new Client(registrationId, endpoint, request.getSource(), request.getSourcePort(),
-                        lwVersion, lifetime, smsNumber, binding, objectLinks, registrationEndpoint);
-
-                clientRegistry.registerClient(client);
-                LOG.debug("New registered client: {}", client);
-
-                exchange.setLocationPath(RESOURCE_NAME + "/" + client.getRegistrationId());
-                exchange.respond(ResponseCode.CREATED);
             }
-        } catch (NumberFormatException e) {
-            exchange.respond(ResponseCode.BAD_REQUEST, "Lifetime parameter must be a valid number");
-        } catch (ClientRegistrationException e) {
-            LOG.debug("Registration failed for client " + endpoint, e);
-            exchange.respond(ResponseCode.BAD_REQUEST);
+        }
+    }
+
+    public static ResponseCode fromLwM2mCode(final leshan.ResponseCode code) {
+        Validate.notNull(code);
+
+        if (code == leshan.ResponseCode.CREATED) {
+            return ResponseCode.CREATED;
+        } else if (code == leshan.ResponseCode.DELETED) {
+            return ResponseCode.DELETED;
+        } else if (code == leshan.ResponseCode.CHANGED) {
+            return ResponseCode.CHANGED;
+        } else if (code == leshan.ResponseCode.CONTENT) {
+            return ResponseCode.CONTENT;
+        } else if (code == leshan.ResponseCode.BAD_REQUEST) {
+            return ResponseCode.BAD_REQUEST;
+        } else if (code == leshan.ResponseCode.UNAUTHORIZED) {
+            return ResponseCode.UNAUTHORIZED;
+        } else if (code == leshan.ResponseCode.NOT_FOUND) {
+            return ResponseCode.NOT_FOUND;
+        } else if (code == leshan.ResponseCode.METHOD_NOT_ALLOWED) {
+            return ResponseCode.METHOD_NOT_ALLOWED;
+        } else {
+            // TODO how can we manage CONFLICT code ...
+            // } else if (code == leshan.ResponseCode.CONFLICT) {
+            // //return 137;
+            // } else {
+            throw new IllegalArgumentException("Invalid CoAP code for LWM2M response: " + code);
         }
     }
 
@@ -238,13 +202,13 @@ public class RegisterResource extends CoapResource {
             return;
         }
 
+        // Create LwM2m request from CoAP request
+        // --------------------------------
         String registrationId = uri.get(1);
-
         Long lifetime = null;
         String smsNumber = null;
         BindingMode binding = null;
         LinkObject[] objectLinks = null;
-
         for (String param : request.getOptions().getUriQuery()) {
             if (param.startsWith(QUERY_PARAM_LIFETIME)) {
                 lifetime = Long.valueOf(param.substring(3));
@@ -254,52 +218,35 @@ public class RegisterResource extends CoapResource {
                 binding = BindingMode.valueOf(param.substring(2));
             }
         }
-
         if (request.getPayload() != null && request.getPayload().length > 0) {
             objectLinks = LinkObject.parse(request.getPayload());
         }
+        UpdateRequest updateRequest = new UpdateRequest(registrationId, request.getSource(), request.getSourcePort(),
+                lifetime, smsNumber, binding, objectLinks);
 
-        ClientUpdate client = new ClientUpdate(registrationId, request.getSource(), request.getSourcePort(), lifetime,
-                smsNumber, binding, objectLinks);
+        // Handle request
+        // -------------------------------
+        ClientResponse updateResponse = registrationHandler.update(updateRequest);
 
-        try {
-            Client c = clientRegistry.updateClient(client);
-            if (c == null) {
-                exchange.respond(ResponseCode.NOT_FOUND);
-            } else {
-                exchange.respond(ResponseCode.CHANGED);
-            }
-        } catch (ClientRegistrationException e) {
-            LOG.debug("Registration update failed: " + client, e);
-            exchange.respond(ResponseCode.BAD_REQUEST);
-        }
-
+        // Create CoAP Response from LwM2m request
+        // -------------------------------
+        exchange.respond(fromLwM2mCode(updateResponse.getCode()));
     }
 
     @Override
     public void handleDELETE(CoapExchange exchange) {
         LOG.debug("DELETE received : {}", exchange.advanced().getRequest());
 
-        Client unregistered = null;
         List<String> uri = exchange.getRequestOptions().getUriPath();
 
-        try {
-            if (uri != null && uri.size() == 2 && RESOURCE_NAME.equals(uri.get(0))) {
-                unregistered = clientRegistry.deregisterClient(uri.get(1));
-            }
-
-            if (unregistered != null) {
-                exchange.respond(ResponseCode.DELETED);
-            } else {
-                LOG.debug("Invalid deregistration");
-                exchange.respond(ResponseCode.NOT_FOUND);
-            }
-
-        } catch (ClientRegistrationException e) {
-            LOG.debug("Deregistration failed", e);
-            exchange.respond(ResponseCode.BAD_REQUEST);
+        if (uri != null && uri.size() == 2 && RESOURCE_NAME.equals(uri.get(0))) {
+            DeregisterRequest deregisterRequest = new DeregisterRequest(uri.get(1));
+            ClientResponse deregisterResponse = registrationHandler.deregister(deregisterRequest);
+            exchange.respond(fromLwM2mCode(deregisterResponse.getCode()));
+        } else {
+            LOG.debug("Invalid deregistration");
+            exchange.respond(ResponseCode.NOT_FOUND);
         }
-
     }
 
     /*
@@ -310,9 +257,4 @@ public class RegisterResource extends CoapResource {
     public Resource getChild(String name) {
         return this;
     }
-
-    private static String createRegistrationId() {
-        return RandomStringUtils.random(10, true, true);
-    }
-
 }

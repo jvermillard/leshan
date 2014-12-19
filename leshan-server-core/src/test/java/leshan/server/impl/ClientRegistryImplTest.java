@@ -36,6 +36,7 @@ import leshan.LinkObject;
 import leshan.server.client.BindingMode;
 import leshan.server.client.Client;
 import leshan.server.client.ClientUpdate;
+import leshan.server.request.UpdateRequest;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -65,7 +66,7 @@ public class ClientRegistryImplTest {
         givenASimpleClient(lifetime);
         registry.registerClient(client);
 
-        ClientUpdate clientUpdate = new ClientUpdate(registrationId, address, port);
+        ClientUpdate clientUpdate = new ClientUpdate(new UpdateRequest(registrationId, address, port));
         registry.updateClient(clientUpdate);
 
         Client registeredClient = registry.get(ep);
@@ -87,7 +88,8 @@ public class ClientRegistryImplTest {
         registry.registerClient(client);
         Assert.assertFalse(client.isAlive());
 
-        ClientUpdate clientUpdate = new ClientUpdate(registrationId, address, port, lifetime, null, null, null);
+        ClientUpdate clientUpdate = new ClientUpdate(new UpdateRequest(registrationId, address, port, lifetime, null,
+                null, null));
         registry.updateClient(clientUpdate);
         Assert.assertTrue(client.isAlive());
     }

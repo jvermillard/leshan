@@ -29,11 +29,10 @@
  */
 package leshan.server.client;
 
-import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Date;
 
-import leshan.LinkObject;
+import leshan.server.request.UpdateRequest;
 import leshan.util.Validate;
 
 /**
@@ -44,83 +43,10 @@ import leshan.util.Validate;
  */
 public class ClientUpdate {
 
-    private final InetAddress address;
+    private UpdateRequest updateRequest = null;
 
-    private final Integer port;
-
-    private final Long lifeTimeInSec;
-
-    private final String smsNumber;
-
-    private final BindingMode bindingMode;
-
-    private final String registrationId;
-
-    private final LinkObject[] objectLinks;
-
-    public ClientUpdate(String registrationId, InetAddress address, Integer port) {
-        this(registrationId, address, port, null, null, null, null);
-    }
-
-    public ClientUpdate(String registrationId, InetAddress address, Integer port, Long lifetime, String smsNumber,
-            BindingMode binding, LinkObject[] objectLinks) {
-        this(registrationId, address, port, lifetime, smsNumber, binding, objectLinks, null);
-    }
-
-    /**
-     * Sets all fields.
-     * 
-     * @param registrationId the ID under which the client is registered
-     * @param address the client's host name or IP address
-     * @param port the UDP port the client uses for communication
-     * @param lifetime the number of seconds the client would like its registration to be valid
-     * @param smsNumber the SMS number the client can receive messages under
-     * @param binding the binding mode(s) the client supports
-     * @param objectLinks the objects and object instances the client hosts/supports
-     * @param registrationDate the point in time the client registered with the server (?)
-     * @throws NullPointerException if the registration ID is <code>null</code>
-     */
-    public ClientUpdate(String registrationId, InetAddress address, Integer port, Long lifetime, String smsNumber,
-            BindingMode binding, LinkObject[] objectLinks, Date registrationDate) {
-
-        if (registrationId == null) {
-            throw new NullPointerException("Registration ID must not be null");
-        }
-        this.registrationId = registrationId;
-        this.address = address;
-        this.port = port;
-        this.objectLinks = objectLinks;
-        this.lifeTimeInSec = lifetime;
-        this.bindingMode = binding;
-        this.smsNumber = smsNumber;
-    }
-
-    public String getRegistrationId() {
-        return registrationId;
-    }
-
-    public InetAddress getAddress() {
-        return address;
-    }
-
-    public Integer getPort() {
-        return port;
-    }
-
-    public LinkObject[] getObjectLinks() {
-        return objectLinks;
-    }
-
-    public Long getLifeTimeInSec() {
-        return lifeTimeInSec;
-    }
-
-    public String getSmsNumber() {
-        return smsNumber;
-    }
-
-    public BindingMode getBindingMode() {
-        return bindingMode;
+    public ClientUpdate(UpdateRequest updateRequest) {
+        this.updateRequest = updateRequest;
     }
 
     /**
@@ -131,28 +57,28 @@ public class ClientUpdate {
     public void apply(Client client) {
         Validate.notNull(client);
 
-        if (getAddress() != null) {
-            client.setAddress(getAddress());
+        if (updateRequest.getAddress() != null) {
+            client.setAddress(updateRequest.getAddress());
         }
 
-        if (getPort() != null) {
-            client.setPort(getPort());
+        if (updateRequest.getPort() != null) {
+            client.setPort(updateRequest.getPort());
         }
 
-        if (getObjectLinks() != null) {
-            client.setObjectLinks(getObjectLinks());
+        if (updateRequest.getObjectLinks() != null) {
+            client.setObjectLinks(updateRequest.getObjectLinks());
         }
 
-        if (getLifeTimeInSec() != null) {
-            client.setLifeTimeInSec(getLifeTimeInSec());
+        if (updateRequest.getLifeTimeInSec() != null) {
+            client.setLifeTimeInSec(updateRequest.getLifeTimeInSec());
         }
 
-        if (getBindingMode() != null) {
-            client.setBindingMode(getBindingMode());
+        if (updateRequest.getBindingMode() != null) {
+            client.setBindingMode(updateRequest.getBindingMode());
         }
 
-        if (getSmsNumber() != null) {
-            client.setSmsNumber(getSmsNumber());
+        if (updateRequest.getSmsNumber() != null) {
+            client.setSmsNumber(updateRequest.getSmsNumber());
         }
 
         // this needs to be done in any case, even if no properties have changed, in order
@@ -164,8 +90,13 @@ public class ClientUpdate {
     public String toString() {
         return String
                 .format("ClientUpdate [address=%s, port=%s, lifeTimeInSec=%s, smsNumber=%s, bindingMode=%s, registrationId=%s, objectLinks=%s]",
-                        address, port, lifeTimeInSec, smsNumber, bindingMode, registrationId,
-                        Arrays.toString(objectLinks));
+                        updateRequest.getAddress(), updateRequest.getPort(), updateRequest.getLifeTimeInSec(),
+                        updateRequest.getSmsNumber(), updateRequest.getBindingMode(),
+                        updateRequest.getRegistrationId(), Arrays.toString(updateRequest.getObjectLinks()));
+    }
+
+    public String getRegistrationId() {
+        return updateRequest.getRegistrationId();
     }
 
 }
