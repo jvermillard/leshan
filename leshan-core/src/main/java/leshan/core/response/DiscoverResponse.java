@@ -62,4 +62,8 @@ public class DiscoverResponse extends ClientResponse {
         return links != null ? links.clone() : null;
     }
 
+    @Override
+    public String toString() {
+        return String.format("DiscoverResponse [links=%s, code=%s]", Arrays.toString(links), code);
+    }
 }

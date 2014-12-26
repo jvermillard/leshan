@@ -59,4 +59,8 @@ public class ValueResponse extends ClientResponse {
         return content;
     }
 
+    @Override
+    public String toString() {
+        return String.format("ValueResponse [content=%s, code=%s]", content, code);
+    }
 }

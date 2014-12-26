@@ -34,6 +34,8 @@ import leshan.util.Validate;
 
 /**
  * A response to a server request.
+ * 
+ * TODO We should probably rename Client Response as LwM2mResponse
  */
 public class ClientResponse {
 
@@ -55,9 +57,6 @@ public class ClientResponse {
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder();
-        builder.append("ClientResponse [code=").append(code).append("]");
-        return builder.toString();
+        return String.format("ClientResponse [code=%s]", code);
     }
-
 }

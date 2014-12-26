@@ -4,19 +4,24 @@ import leshan.ResponseCode;
 
 public class CreateResponse extends ClientResponse {
 
-	private String location;
+    private String location;
 
-	public CreateResponse(ResponseCode code) {
-		super(code);
-	}
+    public CreateResponse(ResponseCode code) {
+        super(code);
+    }
 
-	public CreateResponse(ResponseCode code, String location) {
-		super(code);
-		this.location = location;
-	}
+    public CreateResponse(ResponseCode code, String location) {
+        super(code);
+        this.location = location;
+    }
 
-	public String getLocation() {
-		return location;
-	}
+    public String getLocation() {
+        return location;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("CreateResponse [location=%s, code=%s]", location, code);
+    }
 
 }

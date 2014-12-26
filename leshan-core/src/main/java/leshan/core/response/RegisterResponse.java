@@ -31,7 +31,9 @@ package leshan.core.response;
 
 import leshan.ResponseCode;
 
-// TODO We should probably rename Client Response as LwM2mResponse
+/**
+ * Response to a client registration request
+ */
 public class RegisterResponse extends ClientResponse {
 
     private final String registrationID;
@@ -48,5 +50,10 @@ public class RegisterResponse extends ClientResponse {
 
     public String getRegistrationID() {
         return registrationID;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("RegisterResponse [registrationID=%s, code=%s]", registrationID, code);
     }
 }
