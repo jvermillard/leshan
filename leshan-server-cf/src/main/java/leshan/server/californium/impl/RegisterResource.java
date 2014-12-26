@@ -156,23 +156,24 @@ public class RegisterResource extends CoapResource {
     public static ResponseCode fromLwM2mCode(final leshan.ResponseCode code) {
         Validate.notNull(code);
 
-        if (code == leshan.ResponseCode.CREATED) {
+        switch (code) {
+        case CREATED:
             return ResponseCode.CREATED;
-        } else if (code == leshan.ResponseCode.DELETED) {
+        case DELETED:
             return ResponseCode.DELETED;
-        } else if (code == leshan.ResponseCode.CHANGED) {
+        case CHANGED:
             return ResponseCode.CHANGED;
-        } else if (code == leshan.ResponseCode.CONTENT) {
+        case CONTENT:
             return ResponseCode.CONTENT;
-        } else if (code == leshan.ResponseCode.BAD_REQUEST) {
+        case BAD_REQUEST:
             return ResponseCode.BAD_REQUEST;
-        } else if (code == leshan.ResponseCode.UNAUTHORIZED) {
+        case UNAUTHORIZED:
             return ResponseCode.UNAUTHORIZED;
-        } else if (code == leshan.ResponseCode.NOT_FOUND) {
+        case NOT_FOUND:
             return ResponseCode.NOT_FOUND;
-        } else if (code == leshan.ResponseCode.METHOD_NOT_ALLOWED) {
+        case METHOD_NOT_ALLOWED:
             return ResponseCode.METHOD_NOT_ALLOWED;
-        } else {
+        default:
             // TODO how can we manage CONFLICT code ...
             // } else if (code == leshan.ResponseCode.CONFLICT) {
             // //return 137;
@@ -184,7 +185,7 @@ public class RegisterResource extends CoapResource {
     /**
      * Updates an existing Client registration.
      *
-     * @param exchange the CoAP request containing the updated regsitration properties
+     * @param exchange the CoAP request containing the updated registration properties
      */
     @Override
     public void handlePUT(CoapExchange exchange) {
