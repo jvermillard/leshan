@@ -76,9 +76,8 @@ public interface ClientRegistry {
      *         its registration status with this server and simply starts over with a new registration request in order
      *         to remedy the situation. According to the LWM2M spec an implementation must remove the <em>stale</em>
      *         registration information in this case.
-     * @throws ClientRegistrationException if registration fails
      */
-    Client registerClient(Client client) throws ClientRegistrationException;
+    Client registerClient(Client client);
 
     /**
      * Updates registration properties for a given client.
@@ -86,16 +85,14 @@ public interface ClientRegistry {
      * @param client the registration properties to update
      * @return the updated registered client or <code>null</code> if no client is registered under the given end-point
      *         name
-     * @throws ClientRegistrationException when the registration update has failed
      */
-    Client updateClient(ClientUpdate update) throws ClientRegistrationException;
+    Client updateClient(ClientUpdate update);
 
     /**
      * De-registers a client.
      * 
      * @param registrationId the client registrationId
      * @return the previously registered client or <code>null</code> if no client is registered under the given ID
-     * @throws ClientRegistrationException when the client de-registation has failed
      */
-    Client deregisterClient(String registrationId) throws ClientRegistrationException;
+    Client deregisterClient(String registrationId);
 }

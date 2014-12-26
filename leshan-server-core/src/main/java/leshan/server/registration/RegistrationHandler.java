@@ -35,7 +35,6 @@ import leshan.ResponseCode;
 import leshan.core.response.ClientResponse;
 import leshan.core.response.RegisterResponse;
 import leshan.server.client.Client;
-import leshan.server.client.ClientRegistrationException;
 import leshan.server.client.ClientRegistry;
 import leshan.server.client.ClientUpdate;
 import leshan.server.request.DeregisterRequest;
@@ -48,6 +47,10 @@ import leshan.util.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Handle the client registration logic. Check if the client is allowed to register, with the wanted security scheme.
+ * Create the {@link Client} representing the registered client and add it to the {@link ClientRegistry}
+ */
 public class RegistrationHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(RegistrationHandler.class);
@@ -101,47 +104,30 @@ public class RegistrationHandler {
                     registerRequest.getLwVersion(), registerRequest.getLifetime(), registerRequest.getSmsNumber(),
                     registerRequest.getBindingMode(), registerRequest.getObjectLinks(), registrationEndpoint);
 
-            try {
-                clientRegistry.registerClient(client);
-            } catch (ClientRegistrationException e) {
-                // TODO It's not really a BAD_REQUEST ...
-                return new RegisterResponse(ResponseCode.BAD_REQUEST);
-            }
+            clientRegistry.registerClient(client);
             LOG.debug("New registered client: {}", client);
 
             return new RegisterResponse(ResponseCode.CREATED, client.getRegistrationId());
         }
     }
 
-    // TODO We should probably rename Client Response as LwM2mResponse
     public ClientResponse update(UpdateRequest updateRequest) {
         ClientUpdate client = new ClientUpdate(updateRequest);
-        try {
-            Client c = clientRegistry.updateClient(client);
-            if (c == null) {
-                return new ClientResponse(ResponseCode.NOT_FOUND);
-            } else {
-                return new ClientResponse(ResponseCode.CHANGED);
-            }
-        } catch (ClientRegistrationException e) {
-            LOG.debug("Registration update failed: " + client, e);
-            return new ClientResponse(ResponseCode.BAD_REQUEST);
+        Client c = clientRegistry.updateClient(client);
+        if (c == null) {
+            return new ClientResponse(ResponseCode.NOT_FOUND);
+        } else {
+            return new ClientResponse(ResponseCode.CHANGED);
         }
     }
 
-    // TODO We should probably rename Client Response as LwM2mResponse
     public ClientResponse deregister(DeregisterRequest deregisterRequest) {
-        try {
-            Client unregistered = clientRegistry.deregisterClient(deregisterRequest.getRegistrationID());
-            if (unregistered != null) {
-                return new ClientResponse(ResponseCode.DELETED);
-            } else {
-                LOG.debug("Invalid deregistration");
-                return new ClientResponse(ResponseCode.NOT_FOUND);
-            }
-        } catch (ClientRegistrationException e) {
-            LOG.debug("Deregistration failed", e);
-            return new ClientResponse(ResponseCode.BAD_REQUEST);
+        Client unregistered = clientRegistry.deregisterClient(deregisterRequest.getRegistrationID());
+        if (unregistered != null) {
+            return new ClientResponse(ResponseCode.DELETED);
+        } else {
+            LOG.debug("Invalid deregistration");
+            return new ClientResponse(ResponseCode.NOT_FOUND);
         }
     }
 
