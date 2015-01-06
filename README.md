@@ -14,14 +14,16 @@ http://member.openmobilealliance.org/ftp/Public_documents/DM/LightweightM2M/
 Introduction to LWM2M:
 http://fr.slideshare.net/zdshelby/oma-lightweightm2-mtutorial
 
+The project is currently under migration under the Eclipse Foundtation umbrella.
+
 Contact
 -------
 
-Join the project mailling list : 
+Join the project mailing list : [Subscribe](https://dev.eclipse.org/mailman/listinfo/leshan-dev)
 
-leshan-lwm2m@googlegroups.com
+[Archives](https://dev.eclipse.org/mhonarc/lists/leshan-dev/)
 
-https://groups.google.com/d/forum/leshan-lwm2m
+Mail address: leshan-dev@eclipse.org
 
 Test Sandbox
 ------------
