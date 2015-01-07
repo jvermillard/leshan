@@ -55,16 +55,16 @@ public class LeshanStandalone {
         String ifaces = System.getenv("COAPSIFACE");
 
         // Build LWM2M server
-        LeshanServerBuilder leshanServerBuilder = new LeshanServerBuilder();
+        LeshanServerBuilder builder = new LeshanServerBuilder();
         if (iface != null && !iface.isEmpty()) {
             String[] add = iface.split(":");
-            leshanServerBuilder.setlocalAddress(add[0], Integer.parseInt(add[1]));
+            builder.setLocalAddress(add[0], Integer.parseInt(add[1]));
         }
         if (ifaces != null && !ifaces.isEmpty()) {
             String[] adds = ifaces.split(":");
-            leshanServerBuilder.setlocalAddressSecure(adds[0], Integer.parseInt(adds[1]));
+            builder.setLocalAddressSecure(adds[0], Integer.parseInt(adds[1]));
         }
-        lwServer = leshanServerBuilder.build();
+        lwServer = builder.build();
 
         // Start it
         lwServer.start();

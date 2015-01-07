@@ -152,7 +152,7 @@ public final class IntegrationTestHelper {
 
     public IntegrationTestHelper(final boolean startBootstrap) {
         final InetSocketAddress serverAddressSecure = new InetSocketAddress(InetAddress.getLoopbackAddress(), 5684);
-        server = new LeshanServerBuilder().setlocalAddress(serverAddress).setlocalAddressSecure(serverAddressSecure)
+        server = new LeshanServerBuilder().setLocalAddress(serverAddress).setLocalAddressSecure(serverAddressSecure)
                 .build();
         clientRegistry = server.getClientRegistry();
         observationRegistry = server.getObservationRegistry();

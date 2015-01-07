@@ -33,6 +33,7 @@
 package leshan.integration.tests;
 
 import static com.jayway.awaitility.Awaitility.await;
+import static leshan.integration.tests.IntegrationTestHelper.ENDPOINT_IDENTIFIER;
 import static org.junit.Assert.*;
 
 import java.util.HashMap;
@@ -89,7 +90,7 @@ public class RegistrationTest {
 
     @Test
     public void wont_send_synchronous_if_not_started() {
-        final AbstractLwM2mClientRequest registerRequest = new RegisterRequest(helper.ENDPOINT_IDENTIFIER,
+        final AbstractLwM2mClientRequest registerRequest = new RegisterRequest(ENDPOINT_IDENTIFIER,
                 helper.clientParameters);
 
         final OperationResponse response = helper.client.send(registerRequest);
@@ -99,7 +100,7 @@ public class RegistrationTest {
 
     @Test
     public void wont_send_asynchronous_if_not_started() {
-        final AbstractLwM2mClientRequest registerRequest = new RegisterRequest(helper.ENDPOINT_IDENTIFIER,
+        final AbstractLwM2mClientRequest registerRequest = new RegisterRequest(ENDPOINT_IDENTIFIER,
                 helper.clientParameters);
 
         final ResponseCallback callback = new ResponseCallback();

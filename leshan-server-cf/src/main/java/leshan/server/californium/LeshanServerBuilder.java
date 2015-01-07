@@ -41,6 +41,11 @@ import leshan.server.impl.SecurityRegistryImpl;
 import leshan.server.observation.ObservationRegistry;
 import leshan.server.security.SecurityRegistry;
 
+/**
+ * Class helping you to build and configure a Californium based Leshan Lightweight M2M server. Usage: create it, call
+ * the different setters for changing the configuration and then call the {@link #build()} method for creating the
+ * {@link LwM2mServer} ready to operate.
+ */
 public class LeshanServerBuilder {
 
     /** IANA assigned UDP port for CoAP (so for LWM2M) */
@@ -55,22 +60,22 @@ public class LeshanServerBuilder {
     private InetSocketAddress localAddress;
     private InetSocketAddress localAddressSecure;
 
-    public LeshanServerBuilder setlocalAddress(String hostname, int port) {
+    public LeshanServerBuilder setLocalAddress(String hostname, int port) {
         this.localAddress = new InetSocketAddress(hostname, port);
         return this;
     }
 
-    public LeshanServerBuilder setlocalAddress(InetSocketAddress localAddress) {
+    public LeshanServerBuilder setLocalAddress(InetSocketAddress localAddress) {
         this.localAddress = localAddress;
         return this;
     }
 
-    public LeshanServerBuilder setlocalAddressSecure(String hostname, int port) {
+    public LeshanServerBuilder setLocalAddressSecure(String hostname, int port) {
         this.localAddressSecure = new InetSocketAddress(hostname, port);
         return this;
     }
 
-    public LeshanServerBuilder setlocalAddressSecure(InetSocketAddress localAddressSecure) {
+    public LeshanServerBuilder setLocalAddressSecure(InetSocketAddress localAddressSecure) {
         this.localAddressSecure = localAddressSecure;
         return this;
     }
