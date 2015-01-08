@@ -97,9 +97,9 @@ public class LeshanServerBuilder {
 
     public LwM2mServer build() {
         if (localAddress == null)
-            new InetSocketAddress((InetAddress) null, PORT);
+            localAddress = new InetSocketAddress((InetAddress) null, PORT);
         if (localAddressSecure == null)
-            new InetSocketAddress((InetAddress) null, PORT_DTLS);
+            localAddressSecure = new InetSocketAddress((InetAddress) null, PORT_DTLS);
         if (clientRegistry == null)
             clientRegistry = new ClientRegistryImpl();
         if (securityRegistry == null)
