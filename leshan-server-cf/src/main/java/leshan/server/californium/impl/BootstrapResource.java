@@ -29,10 +29,13 @@
  */
 package leshan.server.californium.impl;
 
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import leshan.server.bootstrap.BootstrapConfig;
 import leshan.server.bootstrap.BootstrapConfig.ServerConfig;
@@ -45,6 +48,7 @@ import leshan.tlv.TlvEncoder;
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 import org.eclipse.californium.core.coap.CoAP.Type;
+import org.eclipse.californium.core.coap.MessageObserver;
 import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.core.coap.Response;
 import org.eclipse.californium.core.network.Endpoint;
@@ -56,9 +60,10 @@ public class BootstrapResource extends CoapResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(BootstrapResource.class);
     private static final String QUERY_PARAM_ENDPOINT = "ep=";
-    private static final int TIMEOUT_MILLI = 20_000;
 
     private BootstrapStore store;
+
+    private Executor e = Executors.newFixedThreadPool(5);
 
     public BootstrapResource(BootstrapStore store) {
         super("bs");
@@ -66,7 +71,7 @@ public class BootstrapResource extends CoapResource {
     }
 
     @Override
-    public void handlePOST(CoapExchange exchange) {
+    public void handlePOST(final CoapExchange exchange) {
         Request request = exchange.advanced().getRequest();
         LOG.debug("POST received : {}", request);
         // The LW M2M spec (section 8.2) mandates the usage of Confirmable
@@ -77,21 +82,22 @@ public class BootstrapResource extends CoapResource {
         }
 
         // which endpoint?
-        String endpoint = null;
+        String endpointTmp = null;
         for (String param : request.getOptions().getURIQueries()) {
             if (param.startsWith(QUERY_PARAM_ENDPOINT)) {
-                endpoint = param.substring(QUERY_PARAM_ENDPOINT.length());
+                endpointTmp = param.substring(QUERY_PARAM_ENDPOINT.length());
                 break;
             }
         }
-        if (endpoint == null) {
+        if (endpointTmp == null) {
             exchange.respond(ResponseCode.BAD_REQUEST);
             return;
         }
+        final String endpoint = endpointTmp;
 
         // TODO check security of the endpoint
 
-        BootstrapConfig cfg = store.getBootstrap(endpoint);
+        final BootstrapConfig cfg = store.getBootstrap(endpoint);
         if (cfg == null) {
             LOG.error("No bootstrap config for {}", endpoint);
             exchange.respond(ResponseCode.BAD_REQUEST);
@@ -101,26 +107,58 @@ public class BootstrapResource extends CoapResource {
 
         // now push the config
 
-        // first delete everything
+        e.execute(new Runnable() {
 
-        Endpoint e = exchange.advanced().getEndpoint();
-        Request deleteAll = Request.newDelete();
-        deleteAll.getOptions().addURIPath("/");
-        deleteAll.setConfirmable(true);
-        deleteAll.setDestination(exchange.getSourceAddress());
-        deleteAll.setDestinationPort(exchange.getSourcePort());
+            @Override
+            public void run() {
+                // first delete everything
 
-        try {
-            Response response = deleteAll.send(e).waitForResponse(TIMEOUT_MILLI);
-            if (response == null) {
-                LOG.error("Bootstrap {} delete timeout", endpoint);
-                return;
+                final Endpoint e = exchange.advanced().getEndpoint();
+                Request deleteAll = Request.newDelete();
+                deleteAll.getOptions().addURIPath("/");
+                deleteAll.setConfirmable(true);
+                deleteAll.setDestination(exchange.getSourceAddress());
+                deleteAll.setDestinationPort(exchange.getSourcePort());
+
+                deleteAll.send(e).addMessageObserver(new MessageObserver() {
+
+                    @Override
+                    public void onTimeout() {
+                        LOG.debug("Bootstrap delete {} timeout!", e);
+                    }
+
+                    @Override
+                    public void onRetransmission() {
+                        LOG.debug("Bootstrap delete {} retransmission", e);
+                    }
+
+                    @Override
+                    public void onResponse(Response response) {
+                        LOG.debug("Bootstrap delete {} return code {}", e, response.getCode());
+                        sendBootstrap(e, endpoint, exchange.getSourceAddress(), exchange.getSourcePort(), cfg);
+                    }
+
+                    @Override
+                    public void onReject() {
+                        LOG.debug("Bootstrap delete {} reject", endpoint);
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        LOG.debug("Bootstrap delete {} cancel", endpoint);
+                    }
+
+                    @Override
+                    public void onAcknowledgement() {
+                        LOG.debug("Bootstrap delete {} acknowledgement", endpoint);
+                    }
+                });
             }
-            LOG.debug("Bootstrap delete {} return code {}", endpoint, response.getCode());
-        } catch (InterruptedException e1) {
-            // get out!the server is stopping
-            return;
-        }
+        });
+    }
+
+    private void sendBootstrap(final Endpoint e, final String endpoint, final InetAddress targetAddress,
+            final int targetPort, final BootstrapConfig cfg) {
         // send security elements
 
         // 1st encode them into a juicy TLV binary
@@ -130,54 +168,101 @@ public class BootstrapResource extends CoapResource {
             // create the security entry for this server
             secuInstances[idx++] = tlvEncode(entry.getKey(), entry.getValue());
         }
+
         ByteBuffer encoded = TlvEncoder.encode(secuInstances);
 
         Request postSecurity = Request.newPost();
         postSecurity.getOptions().addURIPath("/0");
         postSecurity.setConfirmable(true);
-        postSecurity.setDestination(exchange.getSourceAddress());
-        postSecurity.setDestinationPort(exchange.getSourcePort());
+        postSecurity.setDestination(targetAddress);
+        postSecurity.setDestinationPort(targetPort);
         postSecurity.setPayload(encoded.array());
 
-        try {
-            Response response = postSecurity.send(e).waitForResponse(TIMEOUT_MILLI);
-            if (response == null) {
-                LOG.error("security bootstrap of {} timeout", endpoint);
-                return;
-            }
-            LOG.debug("Security bootstrap of {} returned code {}", endpoint, response.getCode());
-        } catch (InterruptedException e1) {
-            // get out!the server is stopping
-            return;
-        }
+        postSecurity.send(e).addMessageObserver(new MessageObserver() {
 
+            @Override
+            public void onTimeout() {
+                LOG.debug("Bootstrap security {} timeout!", e);
+            }
+
+            @Override
+            public void onRetransmission() {
+                LOG.debug("Bootstrap security {} retransmission", e);
+            }
+
+            @Override
+            public void onResponse(Response response) {
+                LOG.debug("Bootstrap security {} return code {}", e, response.getCode());
+                sendServers(e, endpoint, targetAddress, targetPort, cfg);
+            }
+
+            @Override
+            public void onReject() {
+                LOG.debug("Bootstrap security {} reject", endpoint);
+            }
+
+            @Override
+            public void onCancel() {
+                LOG.debug("Bootstrap security {} cancel", endpoint);
+            }
+
+            @Override
+            public void onAcknowledgement() {
+                LOG.debug("Bootstrap security {} acknowledgement", endpoint);
+            }
+        });
+    }
+
+    private void sendServers(final Endpoint e, final String endpoint, final InetAddress targetAddress,
+            final int targetPort, final BootstrapConfig cfg) {
         // send the server settings
         Tlv[] serverInstances = new Tlv[cfg.servers.size()];
-        idx = 0;
+        int idx = 0;
         for (Map.Entry<Integer, BootstrapConfig.ServerConfig> entry : cfg.servers.entrySet()) {
             // create the security entry for this server
             serverInstances[idx++] = tlvEncode(entry.getKey(), entry.getValue());
         }
-        encoded = TlvEncoder.encode(serverInstances);
+        ByteBuffer encoded = TlvEncoder.encode(serverInstances);
 
         Request postServer = Request.newPost();
         postServer.getOptions().addURIPath("/1");
         postServer.setConfirmable(true);
-        postServer.setDestination(exchange.getSourceAddress());
-        postServer.setDestinationPort(exchange.getSourcePort());
+        postServer.setDestination(targetAddress);
+        postServer.setDestinationPort(targetPort);
         postServer.setPayload(encoded.array());
 
-        try {
-            Response response = postServer.send(e).waitForResponse(TIMEOUT_MILLI);
-            if (response == null) {
-                LOG.error("server list bootstrap of {} timeout", endpoint);
-                return;
+        postServer.send(e).addMessageObserver(new MessageObserver() {
+            @Override
+            public void onTimeout() {
+                LOG.debug("Bootstrap servers {} timeout!", e);
             }
-            LOG.debug("Server list bootstrap of {} returned code {}", endpoint, response.getCode());
-        } catch (InterruptedException e1) {
-            // get out!the server is stopping
-            return;
-        }
+
+            @Override
+            public void onRetransmission() {
+                LOG.debug("Bootstrap servers {} retransmission", e);
+            }
+
+            @Override
+            public void onResponse(Response response) {
+                LOG.debug("Bootstrap servers {} return code {}", e, response.getCode());
+            }
+
+            @Override
+            public void onReject() {
+                LOG.debug("Bootstrap servers {} reject", endpoint);
+            }
+
+            @Override
+            public void onCancel() {
+                LOG.debug("Bootstrap servers {} cancel", endpoint);
+            }
+
+            @Override
+            public void onAcknowledgement() {
+                LOG.debug("Bootstrap servers {} acknowledgement", endpoint);
+            }
+
+        });
     }
 
     private Tlv tlvEncode(int key, ServerSecurity value) {
