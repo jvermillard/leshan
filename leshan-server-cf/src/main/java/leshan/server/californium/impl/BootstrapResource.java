@@ -33,7 +33,6 @@ import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -124,18 +123,19 @@ public class BootstrapResource extends CoapResource {
 
                     @Override
                     public void onTimeout() {
-                        LOG.debug("Bootstrap delete {} timeout!", e);
+                        LOG.debug("Bootstrap delete {} timeout!", endpoint);
                     }
 
                     @Override
                     public void onRetransmission() {
-                        LOG.debug("Bootstrap delete {} retransmission", e);
+                        LOG.debug("Bootstrap delete {} retransmission", endpoint);
                     }
 
                     @Override
                     public void onResponse(Response response) {
-                        LOG.debug("Bootstrap delete {} return code {}", e, response.getCode());
-                        sendBootstrap(e, endpoint, exchange.getSourceAddress(), exchange.getSourcePort(), cfg);
+                        LOG.debug("Bootstrap delete {} return code {}", endpoint, response.getCode());
+                        List<Integer> toSend = new ArrayList<>(cfg.security.keySet());
+                        sendBootstrap(e, endpoint, exchange.getSourceAddress(), exchange.getSourcePort(), cfg, toSend);
                     }
 
                     @Override
@@ -158,114 +158,125 @@ public class BootstrapResource extends CoapResource {
     }
 
     private void sendBootstrap(final Endpoint e, final String endpoint, final InetAddress targetAddress,
-            final int targetPort, final BootstrapConfig cfg) {
-        // send security elements
+            final int targetPort, final BootstrapConfig cfg, final List<Integer> toSend) {
 
-        // 1st encode them into a juicy TLV binary
-        Tlv[] secuInstances = new Tlv[cfg.security.size()];
-        int idx = 0;
-        for (Map.Entry<Integer, BootstrapConfig.ServerSecurity> entry : cfg.security.entrySet()) {
-            // create the security entry for this server
-            secuInstances[idx++] = tlvEncode(entry.getKey(), entry.getValue());
+        if (!toSend.isEmpty()) {
+            // 1st encode them into a juicy TLV binary
+            Integer key = toSend.remove(0);
+
+            Tlv[] secuResources = tlvEncode(cfg.security.get(key));
+
+            ByteBuffer encoded = TlvEncoder.encode(secuResources);
+            // now send security
+            Request postSecurity = Request.newPost();
+            postSecurity.getOptions().addURIPath("0");
+            postSecurity.getOptions().addURIPath(key.toString());
+            postSecurity.setConfirmable(true);
+            postSecurity.setDestination(targetAddress);
+            postSecurity.setDestinationPort(targetPort);
+            postSecurity.setPayload(encoded.array());
+
+            postSecurity.send(e).addMessageObserver(new MessageObserver() {
+
+                @Override
+                public void onTimeout() {
+                    LOG.debug("Bootstrap security {} timeout!", endpoint);
+                }
+
+                @Override
+                public void onRetransmission() {
+                    LOG.debug("Bootstrap security {} retransmission", endpoint);
+                }
+
+                @Override
+                public void onResponse(Response response) {
+                    LOG.debug("Bootstrap security {} return code {}", endpoint, response.getCode());
+                    // recursive call until toSend is empty
+                    sendBootstrap(e, endpoint, targetAddress, targetPort, cfg, toSend);
+                }
+
+                @Override
+                public void onReject() {
+                    LOG.debug("Bootstrap security {} reject", endpoint);
+                }
+
+                @Override
+                public void onCancel() {
+                    LOG.debug("Bootstrap security {} cancel", endpoint);
+                }
+
+                @Override
+                public void onAcknowledgement() {
+                    LOG.debug("Bootstrap security {} acknowledgement", endpoint);
+                }
+            });
+
+        } else {
+            // we are done, send the servers
+            List<Integer> serversToSend = new ArrayList<>(cfg.servers.keySet());
+            sendServers(e, endpoint, targetAddress, targetPort, cfg, serversToSend);
         }
-
-        ByteBuffer encoded = TlvEncoder.encode(secuInstances);
-
-        Request postSecurity = Request.newPost();
-        postSecurity.getOptions().addURIPath("/0");
-        postSecurity.setConfirmable(true);
-        postSecurity.setDestination(targetAddress);
-        postSecurity.setDestinationPort(targetPort);
-        postSecurity.setPayload(encoded.array());
-
-        postSecurity.send(e).addMessageObserver(new MessageObserver() {
-
-            @Override
-            public void onTimeout() {
-                LOG.debug("Bootstrap security {} timeout!", e);
-            }
-
-            @Override
-            public void onRetransmission() {
-                LOG.debug("Bootstrap security {} retransmission", e);
-            }
-
-            @Override
-            public void onResponse(Response response) {
-                LOG.debug("Bootstrap security {} return code {}", e, response.getCode());
-                sendServers(e, endpoint, targetAddress, targetPort, cfg);
-            }
-
-            @Override
-            public void onReject() {
-                LOG.debug("Bootstrap security {} reject", endpoint);
-            }
-
-            @Override
-            public void onCancel() {
-                LOG.debug("Bootstrap security {} cancel", endpoint);
-            }
-
-            @Override
-            public void onAcknowledgement() {
-                LOG.debug("Bootstrap security {} acknowledgement", endpoint);
-            }
-        });
     }
 
     private void sendServers(final Endpoint e, final String endpoint, final InetAddress targetAddress,
-            final int targetPort, final BootstrapConfig cfg) {
-        // send the server settings
-        Tlv[] serverInstances = new Tlv[cfg.servers.size()];
-        int idx = 0;
-        for (Map.Entry<Integer, BootstrapConfig.ServerConfig> entry : cfg.servers.entrySet()) {
-            // create the security entry for this server
-            serverInstances[idx++] = tlvEncode(entry.getKey(), entry.getValue());
+            final int targetPort, final BootstrapConfig cfg, final List<Integer> toSend) {
+
+        if (!toSend.isEmpty()) {
+            // 1st encode them into a juicy TLV binary
+            Integer key = toSend.remove(0);
+
+            Tlv[] serverResources = tlvEncode(cfg.servers.get(key));
+            ByteBuffer encoded = TlvEncoder.encode(serverResources);
+
+            // now send server
+            Request postServer = Request.newPost();
+            postServer.getOptions().addURIPath("1");
+            postServer.getOptions().addURIPath(key.toString());
+            postServer.setConfirmable(true);
+            postServer.setDestination(targetAddress);
+            postServer.setDestinationPort(targetPort);
+            postServer.setPayload(encoded.array());
+            postServer.send(e).addMessageObserver(new MessageObserver() {
+                @Override
+                public void onTimeout() {
+                    LOG.debug("Bootstrap servers {} timeout!", e);
+                }
+
+                @Override
+                public void onRetransmission() {
+                    LOG.debug("Bootstrap servers {} retransmission", e);
+                }
+
+                @Override
+                public void onResponse(Response response) {
+                    LOG.debug("Bootstrap servers {} return code {}", e, response.getCode());
+                    // recursive call until toSend is empty
+                    sendServers(e, endpoint, targetAddress, targetPort, cfg, toSend);
+                }
+
+                @Override
+                public void onReject() {
+                    LOG.debug("Bootstrap servers {} reject", endpoint);
+                }
+
+                @Override
+                public void onCancel() {
+                    LOG.debug("Bootstrap servers {} cancel", endpoint);
+                }
+
+                @Override
+                public void onAcknowledgement() {
+                    LOG.debug("Bootstrap servers {} acknowledgement", endpoint);
+                }
+            });
+
+        } else {
+            // done
+            LOG.debug("Bootstrap session done for endpoint {}", endpoint);
         }
-        ByteBuffer encoded = TlvEncoder.encode(serverInstances);
-
-        Request postServer = Request.newPost();
-        postServer.getOptions().addURIPath("/1");
-        postServer.setConfirmable(true);
-        postServer.setDestination(targetAddress);
-        postServer.setDestinationPort(targetPort);
-        postServer.setPayload(encoded.array());
-
-        postServer.send(e).addMessageObserver(new MessageObserver() {
-            @Override
-            public void onTimeout() {
-                LOG.debug("Bootstrap servers {} timeout!", e);
-            }
-
-            @Override
-            public void onRetransmission() {
-                LOG.debug("Bootstrap servers {} retransmission", e);
-            }
-
-            @Override
-            public void onResponse(Response response) {
-                LOG.debug("Bootstrap servers {} return code {}", e, response.getCode());
-            }
-
-            @Override
-            public void onReject() {
-                LOG.debug("Bootstrap servers {} reject", endpoint);
-            }
-
-            @Override
-            public void onCancel() {
-                LOG.debug("Bootstrap servers {} cancel", endpoint);
-            }
-
-            @Override
-            public void onAcknowledgement() {
-                LOG.debug("Bootstrap servers {} acknowledgement", endpoint);
-            }
-
-        });
     }
 
-    private Tlv tlvEncode(int key, ServerSecurity value) {
+    private Tlv[] tlvEncode(ServerSecurity value) {
         Tlv[] resources = new Tlv[12];
         resources[0] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeString(value.uri), 0);
         resources[1] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeBoolean(value.bootstrapServer), 1);
@@ -279,10 +290,10 @@ public class BootstrapResource extends CoapResource {
         resources[9] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeString(value.serverSmsNumber), 9);
         resources[10] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.serverId), 10);
         resources[11] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.clientOldOffTime), 11);
-        return new Tlv(TlvType.OBJECT_INSTANCE, resources, null, key);
+        return resources;
     }
 
-    private Tlv tlvEncode(int key, ServerConfig value) {
+    private Tlv[] tlvEncode(ServerConfig value) {
         List<Tlv> resources = new ArrayList<Tlv>();
         resources.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.shortId), 0));
         resources.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.lifetime), 1));
@@ -297,6 +308,6 @@ public class BootstrapResource extends CoapResource {
         resources.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeBoolean(value.notifIfDisabled), 6));
         resources.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeString(value.binding.name()), 7));
 
-        return new Tlv(TlvType.OBJECT_INSTANCE, resources.toArray(new Tlv[] {}), null, key);
+        return resources.toArray(new Tlv[] {});
     }
 }
