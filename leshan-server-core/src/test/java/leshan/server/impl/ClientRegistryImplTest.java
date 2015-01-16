@@ -35,7 +35,6 @@ import java.net.InetSocketAddress;
 import leshan.LinkObject;
 import leshan.server.client.BindingMode;
 import leshan.server.client.Client;
-import leshan.server.client.ClientUpdate;
 import leshan.server.request.UpdateRequest;
 
 import org.junit.Assert;
@@ -66,8 +65,11 @@ public class ClientRegistryImplTest {
         givenASimpleClient(lifetime);
         registry.registerClient(client);
 
-        ClientUpdate clientUpdate = new ClientUpdate(new UpdateRequest(registrationId, address, port));
-        registry.updateClient(clientUpdate);
+        UpdateRequest updateRequest = new UpdateRequest(registrationId, address, port);
+        Client updatedClient = registry.updateClient(updateRequest);
+        Assert.assertEquals((long) lifetime, updatedClient.getLifeTimeInSec());
+        Assert.assertSame(binding, updatedClient.getBindingMode());
+        Assert.assertEquals(sms, updatedClient.getSmsNumber());
 
         Client registeredClient = registry.get(ep);
         Assert.assertEquals((long) lifetime, registeredClient.getLifeTimeInSec());
@@ -88,14 +90,16 @@ public class ClientRegistryImplTest {
         registry.registerClient(client);
         Assert.assertFalse(client.isAlive());
 
-        ClientUpdate clientUpdate = new ClientUpdate(new UpdateRequest(registrationId, address, port, lifetime, null,
-                null, null));
-        registry.updateClient(clientUpdate);
-        Assert.assertTrue(client.isAlive());
+        UpdateRequest updateRequest = new UpdateRequest(registrationId, address, port, lifetime, null, null, null);
+        Client updatedClient = registry.updateClient(updateRequest);
+        Assert.assertTrue(updatedClient.isAlive());
+
+        Client registeredClient = registry.get(ep);
+        Assert.assertTrue(registeredClient.isAlive());
     }
 
     private void givenASimpleClient(Long lifetime) {
-        client = new Client(registrationId, ep, address, port, null, lifetime, sms, binding, objectLinks, null,
+        client = new Client(registrationId, ep, address, port, null, lifetime, sms, binding, objectLinks,
                 InetSocketAddress.createUnresolved("localhost", 5683));
     }
 }

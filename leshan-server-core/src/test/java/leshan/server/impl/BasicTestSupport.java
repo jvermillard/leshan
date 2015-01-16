@@ -32,7 +32,6 @@ package leshan.server.impl;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.Date;
 
 import leshan.server.client.Client;
 
@@ -46,6 +45,6 @@ public class BasicTestSupport {
     public void givenASimpleClient() throws UnknownHostException {
         registrationAddress = InetSocketAddress.createUnresolved("localhost", 5683);
         client = new Client("ID", "urn:client", InetAddress.getLocalHost(), 10000, "1.0", 10000L, null, null, null,
-                new Date(), registrationAddress);
+                registrationAddress);
     }
 }

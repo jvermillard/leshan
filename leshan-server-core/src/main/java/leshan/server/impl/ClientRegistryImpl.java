@@ -29,8 +29,10 @@
  */
 package leshan.server.impl;
 
+import java.net.InetAddress;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,12 +41,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import leshan.LinkObject;
 import leshan.server.Startable;
 import leshan.server.Stopable;
+import leshan.server.client.BindingMode;
 import leshan.server.client.Client;
 import leshan.server.client.ClientRegistry;
 import leshan.server.client.ClientRegistryListener;
-import leshan.server.client.ClientUpdate;
+import leshan.server.request.UpdateRequest;
 import leshan.util.Validate;
 
 import org.slf4j.Logger;
@@ -101,19 +105,71 @@ public class ClientRegistryImpl implements ClientRegistry, Startable, Stopable {
     }
 
     @Override
-    public Client updateClient(ClientUpdate clientUpdated) {
-        Validate.notNull(clientUpdated);
+    public Client updateClient(UpdateRequest updateRequest) {
+        Validate.notNull(updateRequest);
 
-        LOG.debug("Updating registration for client: {}", clientUpdated);
-        Client client = findByRegistrationId(clientUpdated.getRegistrationId());
+        LOG.debug("Updating registration for client: {}", updateRequest);
+        Client client = findByRegistrationId(updateRequest.getRegistrationId());
         if (client == null) {
             return null;
         } else {
-            clientUpdated.apply(client);
-            for (ClientRegistryListener l : listeners) {
-                l.updated(client);
+            InetAddress address;
+            if (updateRequest.getAddress() != null) {
+                address = updateRequest.getAddress();
+            } else {
+                address = client.getAddress();
             }
-            return client;
+
+            int port;
+            if (updateRequest.getPort() != null) {
+                port = updateRequest.getPort();
+            } else {
+                port = client.getPort();
+            }
+
+            LinkObject[] linkObject;
+            if (updateRequest.getObjectLinks() != null) {
+                linkObject = updateRequest.getObjectLinks();
+            } else {
+                linkObject = client.getObjectLinks();
+            }
+
+            long lifeTimeInSec;
+            if (updateRequest.getLifeTimeInSec() != null) {
+                lifeTimeInSec = updateRequest.getLifeTimeInSec();
+            } else {
+                lifeTimeInSec = client.getLifeTimeInSec();
+            }
+
+            BindingMode bindingMode;
+            if (updateRequest.getBindingMode() != null) {
+                bindingMode = updateRequest.getBindingMode();
+            } else {
+                bindingMode = client.getBindingMode();
+            }
+
+            String smsNumber;
+            if (updateRequest.getSmsNumber() != null) {
+                smsNumber = updateRequest.getSmsNumber();
+            } else {
+                smsNumber = client.getSmsNumber();
+            }
+
+            // this needs to be done in any case, even if no properties have changed, in order
+            // to extend the client registration's time-to-live period ...
+            Date lastUpdate = new Date();
+
+            Client clientUpdated = new Client(client.getRegistrationId(), client.getEndpoint(), address, port,
+                    client.getLwM2mVersion(), lifeTimeInSec, smsNumber, bindingMode, linkObject,
+                    client.getRegistrationEndpointAddress(), client.getRegistrationDate(), lastUpdate);
+
+            clientsByEp.put(clientUpdated.getEndpoint(), clientUpdated);
+
+            // notify listener
+            for (ClientRegistryListener l : listeners) {
+                l.updated(clientUpdated);
+            }
+            return clientUpdated;
         }
     }
 

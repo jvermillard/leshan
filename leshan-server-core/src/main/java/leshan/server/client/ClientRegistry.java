@@ -31,6 +31,8 @@ package leshan.server.client;
 
 import java.util.Collection;
 
+import leshan.server.request.UpdateRequest;
+
 /**
  * A registry to access registered clients
  */
@@ -82,11 +84,11 @@ public interface ClientRegistry {
     /**
      * Updates registration properties for a given client.
      * 
-     * @param client the registration properties to update
+     * @param update the registration properties to update
      * @return the updated registered client or <code>null</code> if no client is registered under the given end-point
      *         name
      */
-    Client updateClient(ClientUpdate update);
+    Client updateClient(UpdateRequest update);
 
     /**
      * De-registers a client.

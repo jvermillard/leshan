@@ -54,7 +54,7 @@ public class ClientSerializer implements JsonSerializer<Client> {
         element.addProperty("lifetime", src.getLifeTimeInSec());
         element.addProperty("bindingMode", src.getBindingMode().toString());
         element.add("rootPath", context.serialize(src.getRootPath()));
-        element.add("objectLinks", context.serialize(src.getObjectLinks()));
+        element.add("objectLinks", context.serialize(src.getSortedObjectLinks()));
         element.add("secure",
                 context.serialize(src.getRegistrationEndpointAddress().getPort() == LeshanServerBuilder.PORT_DTLS));
 

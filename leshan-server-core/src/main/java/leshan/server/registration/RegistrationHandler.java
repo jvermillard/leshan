@@ -36,7 +36,6 @@ import leshan.core.response.ClientResponse;
 import leshan.core.response.RegisterResponse;
 import leshan.server.client.Client;
 import leshan.server.client.ClientRegistry;
-import leshan.server.client.ClientUpdate;
 import leshan.server.request.DeregisterRequest;
 import leshan.server.request.RegisterRequest;
 import leshan.server.request.UpdateRequest;
@@ -112,9 +111,8 @@ public class RegistrationHandler {
     }
 
     public ClientResponse update(UpdateRequest updateRequest) {
-        ClientUpdate client = new ClientUpdate(updateRequest);
-        Client c = clientRegistry.updateClient(client);
-        if (c == null) {
+        Client client = clientRegistry.updateClient(updateRequest);
+        if (client == null) {
             return new ClientResponse(ResponseCode.NOT_FOUND);
         } else {
             return new ClientResponse(ResponseCode.CHANGED);

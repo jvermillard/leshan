@@ -39,7 +39,7 @@ import leshan.LinkObject;
 import leshan.util.Validate;
 
 /**
- * A LW-M2M client registered on the server
+ * An immutable structure which represent a LW-M2M client registered on the server
  */
 public class Client {
 
@@ -49,22 +49,22 @@ public class Client {
 
     private final Date registrationDate;
 
-    private InetAddress address;
+    private final InetAddress address;
 
-    private int port;
+    private final int port;
 
     /*
      * The address of the LWM2M Server's CoAP end point the client used to register.
      */
     private final InetSocketAddress registrationEndpointAddress;
 
-    private long lifeTimeInSec;
+    private final long lifeTimeInSec;
 
-    private String smsNumber;
+    private final String smsNumber;
 
     private final String lwM2mVersion;
 
-    private BindingMode bindingMode;
+    private final BindingMode bindingMode;
 
     /**
      * The LWM2M Client's unique end point name.
@@ -73,51 +73,60 @@ public class Client {
 
     private final String registrationId;
 
-    private LinkObject[] objectLinks;
+    private final LinkObject[] objectLinks;
 
     /** The location where LWM2M objects are hosted on the device */
-    private String rootPath = "/";
+    private final String rootPath;
 
-    private Date lastUpdate;
-
-    // true, if the client failed to answer the last server request
-    private boolean LastRequesttimedout = false;
+    private final Date lastUpdate;
 
     public Client(String registrationId, String endpoint, InetAddress address, int port,
-            InetSocketAddress registrationEndpoint) {
-        this(registrationId, endpoint, address, port, null, null, null, null, null, registrationEndpoint);
+            InetSocketAddress registrationEndpointAddress) {
+        this(registrationId, endpoint, address, port, null, null, null, null, null, registrationEndpointAddress);
     }
 
     public Client(String registrationId, String endpoint, InetAddress address, int port, String lwM2mVersion,
-            Long lifetime, String smsNumber, BindingMode binding, LinkObject[] objectLinks,
-            InetSocketAddress registrationEndpoint) {
-        this(registrationId, endpoint, address, port, lwM2mVersion, lifetime, smsNumber, binding, objectLinks, null,
-                registrationEndpoint);
+            Long lifetimeInSec, String smsNumber, BindingMode bindingMode, LinkObject[] objectLinks,
+            InetSocketAddress registrationEndpointAddress) {
+        this(registrationId, endpoint, address, port, lwM2mVersion, lifetimeInSec, smsNumber, bindingMode, objectLinks,
+                registrationEndpointAddress, null, null);
     }
 
     public Client(String registrationId, String endpoint, InetAddress address, int port, String lwM2mVersion,
-            Long lifetime, String smsNumber, BindingMode binding, LinkObject[] objectLinks, Date registrationDate,
-            InetSocketAddress registrationEndpoint) {
+            Long lifetimeInSec, String smsNumber, BindingMode bindingMode, LinkObject[] objectLinks,
+            InetSocketAddress registrationEndpointAddress, Date registrationDate, Date lastUpdate) {
 
         Validate.notEmpty(endpoint);
         Validate.notNull(address);
         Validate.notNull(port);
-        Validate.notNull(registrationEndpoint);
+        Validate.notNull(registrationEndpointAddress);
 
         this.registrationId = registrationId;
         this.endpoint = endpoint;
         this.address = address;
         this.port = port;
 
-        setObjectLinks(objectLinks);
+        this.objectLinks = objectLinks;
+
+        // extract the root objects path from the object links
+        String rootPath = "/";
+        if (objectLinks != null) {
+            for (LinkObject link : objectLinks) {
+                if (link != null && "oma.lwm2m".equals(link.getAttributes().get("rt"))) {
+                    rootPath = link.getUrl();
+                    break;
+                }
+            }
+        }
+        this.rootPath = rootPath;
 
         this.registrationDate = registrationDate == null ? new Date() : registrationDate;
-        lifeTimeInSec = lifetime == null ? DEFAULT_LIFETIME_IN_SEC : lifetime;
+        this.lifeTimeInSec = lifetimeInSec == null ? DEFAULT_LIFETIME_IN_SEC : lifetimeInSec;
         this.lwM2mVersion = lwM2mVersion == null ? DEFAULT_LWM2M_VERSION : lwM2mVersion;
-        bindingMode = binding == null ? BindingMode.U : binding;
+        this.bindingMode = bindingMode == null ? BindingMode.U : bindingMode;
         this.smsNumber = smsNumber;
-        lastUpdate = new Date();
-        registrationEndpointAddress = registrationEndpoint;
+        this.registrationEndpointAddress = registrationEndpointAddress;
+        this.lastUpdate = lastUpdate == null ? new Date() : lastUpdate;
     }
 
     public String getRegistrationId() {
@@ -164,10 +173,15 @@ public class Client {
     }
 
     public LinkObject[] getObjectLinks() {
+        return objectLinks;
+    }
+
+    public LinkObject[] getSortedObjectLinks() {
         // sort the list of objects
         if (objectLinks == null) {
             return null;
         }
+
         LinkObject[] res = Arrays.copyOf(objectLinks, objectLinks.length);
 
         Arrays.sort(res, new Comparator<LinkObject>() {
@@ -234,20 +248,6 @@ public class Client {
         return res;
     }
 
-    void setObjectLinks(LinkObject[] objectLinks) {
-        this.objectLinks = objectLinks;
-
-        // extract the root objects path from the object links
-        if (objectLinks != null) {
-            for (LinkObject link : objectLinks) {
-                if (link != null && "oma.lwm2m".equals(link.getAttributes().get("rt"))) {
-                    rootPath = link.getUrl();
-                    break;
-                }
-            }
-        }
-    }
-
     public synchronized long getLifeTimeInSec() {
         return lifeTimeInSec;
     }
@@ -280,53 +280,20 @@ public class Client {
         return endpoint;
     }
 
-    void setAddress(InetAddress address) {
-        this.address = address;
-    }
-
-    void setPort(int port) {
-        this.port = port;
-    }
-
-    void setLifeTimeInSec(long lifeTimeInSec) {
-        this.lifeTimeInSec = lifeTimeInSec;
-    }
-
-    void setSmsNumber(String smsNumber) {
-        this.smsNumber = smsNumber;
-    }
-
-    void setBindingMode(BindingMode bindingMode) {
-        this.bindingMode = bindingMode;
-    }
-
-    public synchronized Date getLastUpdate() {
+    public Date getLastUpdate() {
         return lastUpdate;
     }
 
-    synchronized void setLastUpdate(Date lastUpdate) {
-        this.lastUpdate = lastUpdate;
-    }
-
-    public synchronized void markLastRequestTimedout() {
-        LastRequesttimedout = true;
-    }
-
-    public synchronized boolean isMarkLastRequestTimedout() {
-        return LastRequesttimedout;
-    }
-
-    public synchronized boolean isAlive() {
-        return LastRequesttimedout ? false : lastUpdate.getTime() + lifeTimeInSec * 1000 > System.currentTimeMillis();
+    public boolean isAlive() {
+        return lastUpdate.getTime() + lifeTimeInSec * 1000 > System.currentTimeMillis();
     }
 
     @Override
     public String toString() {
         return String
-                .format("Client [registrationDate=%s, address=%s, port=%s, registrationEndpoint=%s, lifeTimeInSec=%s, smsNumber=%s, lwM2mVersion=%s, bindingMode=%s, endpoint=%s, registrationId=%s, objectLinks=%s, lastUpdate=%s, failedLastRequest=%s]",
+                .format("Client [registrationDate=%s, address=%s, port=%s, registrationEndpoint=%s, lifeTimeInSec=%s, smsNumber=%s, lwM2mVersion=%s, bindingMode=%s, endpoint=%s, registrationId=%s, objectLinks=%s, lastUpdate=%s]",
                         registrationDate, address, port, registrationEndpointAddress, lifeTimeInSec, smsNumber,
-                        lwM2mVersion, bindingMode, endpoint, registrationId, Arrays.toString(objectLinks), lastUpdate,
-                        LastRequesttimedout);
+                        lwM2mVersion, bindingMode, endpoint, registrationId, Arrays.toString(objectLinks), lastUpdate);
     }
 
     /**
