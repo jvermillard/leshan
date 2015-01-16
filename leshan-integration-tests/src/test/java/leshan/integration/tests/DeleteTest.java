@@ -42,7 +42,7 @@ import static leshan.integration.tests.IntegrationTestHelper.assertResponse;
 import static leshan.integration.tests.IntegrationTestHelper.createGoodObjectInstance;
 import leshan.core.node.LwM2mObject;
 import leshan.core.node.LwM2mObjectInstance;
-import leshan.core.response.ClientResponse;
+import leshan.core.response.LwM2mResponse;
 
 import org.junit.After;
 import org.junit.Test;
@@ -86,14 +86,14 @@ public class DeleteTest {
     public void cannot_delete_unknown_object_instance() {
         helper.register();
 
-        final ClientResponse responseDelete = helper.sendDelete(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID);
+        final LwM2mResponse responseDelete = helper.sendDelete(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID);
         assertEmptyResponse(responseDelete, NOT_FOUND);
     }
 
     private void createAndThenAssertDeleted() {
         helper.sendCreate(createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
 
-        final ClientResponse responseDelete = helper.sendDelete(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID);
+        final LwM2mResponse responseDelete = helper.sendDelete(GOOD_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID);
         assertEmptyResponse(responseDelete, DELETED);
     }
 

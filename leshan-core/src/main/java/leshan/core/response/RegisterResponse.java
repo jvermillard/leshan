@@ -34,7 +34,7 @@ import leshan.ResponseCode;
 /**
  * Response to a client registration request
  */
-public class RegisterResponse extends ClientResponse {
+public class RegisterResponse extends LwM2mResponse {
 
     private final String registrationID;
 

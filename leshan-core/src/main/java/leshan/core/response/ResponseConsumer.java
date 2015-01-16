@@ -33,7 +33,7 @@ package leshan.core.response;
 /**
  * Functional interface consuming a response to a LWM2M request
  */
-public interface ResponseConsumer<T extends ClientResponse> {
+public interface ResponseConsumer<T extends LwM2mResponse> {
 
     void accept(T response);
 

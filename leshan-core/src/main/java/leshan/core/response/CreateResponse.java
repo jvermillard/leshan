@@ -2,7 +2,7 @@ package leshan.core.response;
 
 import leshan.ResponseCode;
 
-public class CreateResponse extends ClientResponse {
+public class CreateResponse extends LwM2mResponse {
 
     private String location;
 

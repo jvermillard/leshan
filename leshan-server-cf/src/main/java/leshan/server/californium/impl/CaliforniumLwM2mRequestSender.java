@@ -39,7 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import leshan.core.response.ExceptionConsumer;
-import leshan.core.response.ClientResponse;
+import leshan.core.response.LwM2mResponse;
 import leshan.core.response.ResponseConsumer;
 import leshan.server.client.Client;
 import leshan.server.client.ClientRegistry;
@@ -95,7 +95,7 @@ public class CaliforniumLwM2mRequestSender implements LwM2mRequestSender {
     }
 
     @Override
-    public <T extends ClientResponse> T send(final LwM2mRequest<T> request) {
+    public <T extends LwM2mResponse> T send(final LwM2mRequest<T> request) {
         // Create the CoAP request from LwM2m request
         final CoapRequestBuilder CoapRequestBuilder = new CoapRequestBuilder();
         request.accept(CoapRequestBuilder);
@@ -124,7 +124,7 @@ public class CaliforniumLwM2mRequestSender implements LwM2mRequestSender {
     }
 
     @Override
-    public <T extends ClientResponse> void send(final LwM2mRequest<T> request,
+    public <T extends LwM2mResponse> void send(final LwM2mRequest<T> request,
             final ResponseConsumer<T> responseCallback, final ExceptionConsumer errorCallback) {
         // Create the CoAP request from LwM2m request
         final CoapRequestBuilder CoapRequestBuilder = new CoapRequestBuilder();
@@ -170,7 +170,7 @@ public class CaliforniumLwM2mRequestSender implements LwM2mRequestSender {
 
     // ////// Request Observer Class definition/////////////
 
-    private abstract class AbstractRequestObserver<T extends ClientResponse> extends MessageObserverAdapter {
+    private abstract class AbstractRequestObserver<T extends LwM2mResponse> extends MessageObserverAdapter {
         Request coapRequest;
         Client client;
 
@@ -182,7 +182,7 @@ public class CaliforniumLwM2mRequestSender implements LwM2mRequestSender {
         public abstract T buildResponse(Response coapResponse);
     }
 
-    private abstract class AsyncRequestObserver<T extends ClientResponse> extends AbstractRequestObserver<T> {
+    private abstract class AsyncRequestObserver<T extends LwM2mResponse> extends AbstractRequestObserver<T> {
 
         ResponseConsumer<T> responseCallback;
         ExceptionConsumer errorCallback;
@@ -227,7 +227,7 @@ public class CaliforniumLwM2mRequestSender implements LwM2mRequestSender {
 
     }
 
-    private abstract class SyncRequestObserver<T extends ClientResponse> extends AbstractRequestObserver<T> {
+    private abstract class SyncRequestObserver<T extends LwM2mResponse> extends AbstractRequestObserver<T> {
 
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<T> ref = new AtomicReference<T>(null);

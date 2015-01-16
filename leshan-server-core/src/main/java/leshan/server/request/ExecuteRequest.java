@@ -31,13 +31,13 @@ package leshan.server.request;
 
 import leshan.core.node.LwM2mPath;
 import leshan.core.request.ContentFormat;
-import leshan.core.response.ClientResponse;
+import leshan.core.response.LwM2mResponse;
 import leshan.server.client.Client;
 
 /**
  * A request for executing resources on a client.
  */
-public class ExecuteRequest extends AbstractLwM2mRequest<ClientResponse> {
+public class ExecuteRequest extends AbstractLwM2mRequest<LwM2mResponse> {
 
     private final byte[] parameters;
     private final ContentFormat contentFormat;

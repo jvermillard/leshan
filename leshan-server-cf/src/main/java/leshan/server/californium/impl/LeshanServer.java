@@ -36,8 +36,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import leshan.core.objectspec.Resources;
-import leshan.core.response.ClientResponse;
 import leshan.core.response.ExceptionConsumer;
+import leshan.core.response.LwM2mResponse;
 import leshan.core.response.ResponseConsumer;
 import leshan.server.Destroyable;
 import leshan.server.LwM2mServer;
@@ -47,6 +47,7 @@ import leshan.server.client.Client;
 import leshan.server.client.ClientRegistry;
 import leshan.server.client.ClientRegistryListener;
 import leshan.server.observation.ObservationRegistry;
+import leshan.server.registration.RegistrationHandler;
 import leshan.server.request.LwM2mRequest;
 import leshan.server.security.SecurityRegistry;
 import leshan.util.Validate;
@@ -163,14 +164,15 @@ public class LeshanServer implements LwM2mServer {
         coapServer.addEndpoint(secureEndpoint);
 
         // define /rd resource
-        final RegisterResource rdResource = new RegisterResource(this.clientRegistry, this.securityRegistry);
+        final RegisterResource rdResource = new RegisterResource(new RegistrationHandler(this.clientRegistry,
+                this.securityRegistry));
         coapServer.add(rdResource);
 
         // create sender
         final Set<Endpoint> endpoints = new HashSet<>();
         endpoints.add(endpoint);
         endpoints.add(secureEndpoint);
-        requestSender = new CaliforniumLwM2mRequestSender(endpoints, this.observationRegistry);
+        requestSender = new CaliforniumLwM2mRequestSender(endpoints, this.clientRegistry, this.observationRegistry);
     }
 
     @Override
@@ -248,12 +250,12 @@ public class LeshanServer implements LwM2mServer {
     }
 
     @Override
-    public <T extends ClientResponse> T send(final LwM2mRequest<T> request) {
+    public <T extends LwM2mResponse> T send(final LwM2mRequest<T> request) {
         return requestSender.send(request);
     }
 
     @Override
-    public <T extends ClientResponse> void send(final LwM2mRequest<T> request,
+    public <T extends LwM2mResponse> void send(final LwM2mRequest<T> request,
             final ResponseConsumer<T> responseCallback, final ExceptionConsumer errorCallback) {
         requestSender.send(request, responseCallback, errorCallback);
     }

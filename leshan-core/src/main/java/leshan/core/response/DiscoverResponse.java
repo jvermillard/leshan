@@ -35,7 +35,7 @@ import leshan.LinkObject;
 import leshan.ResponseCode;
 import leshan.util.Validate;
 
-public class DiscoverResponse extends ClientResponse {
+public class DiscoverResponse extends LwM2mResponse {
 
     private final LinkObject[] links;
 

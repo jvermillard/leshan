@@ -31,11 +31,11 @@ package leshan.server.request;
 
 import leshan.ObserveSpec;
 import leshan.core.node.LwM2mPath;
-import leshan.core.response.ClientResponse;
+import leshan.core.response.LwM2mResponse;
 import leshan.server.client.Client;
 import leshan.util.Validate;
 
-public class WriteAttributesRequest extends AbstractLwM2mRequest<ClientResponse> {
+public class WriteAttributesRequest extends AbstractLwM2mRequest<LwM2mResponse> {
 
     private final ObserveSpec observeSpec;
 

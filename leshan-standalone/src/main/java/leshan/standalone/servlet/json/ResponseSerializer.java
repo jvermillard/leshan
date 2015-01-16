@@ -31,7 +31,7 @@ package leshan.standalone.servlet.json;
 
 import java.lang.reflect.Type;
 
-import leshan.core.response.ClientResponse;
+import leshan.core.response.LwM2mResponse;
 import leshan.core.response.ValueResponse;
 
 import com.google.gson.JsonElement;
@@ -39,10 +39,10 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
-public class ResponseSerializer implements JsonSerializer<ClientResponse> {
+public class ResponseSerializer implements JsonSerializer<LwM2mResponse> {
 
     @Override
-    public JsonElement serialize(final ClientResponse src, final Type typeOfSrc, final JsonSerializationContext context) {
+    public JsonElement serialize(final LwM2mResponse src, final Type typeOfSrc, final JsonSerializationContext context) {
         final JsonObject element = new JsonObject();
 
         element.addProperty("status", src.getCode().toString());

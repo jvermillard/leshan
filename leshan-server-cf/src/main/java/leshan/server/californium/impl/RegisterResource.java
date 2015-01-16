@@ -33,7 +33,7 @@ import java.net.InetSocketAddress;
 import java.util.List;
 
 import leshan.LinkObject;
-import leshan.core.response.ClientResponse;
+import leshan.core.response.LwM2mResponse;
 import leshan.core.response.RegisterResponse;
 import leshan.server.client.BindingMode;
 import leshan.server.client.ClientRegistry;
@@ -227,7 +227,7 @@ public class RegisterResource extends CoapResource {
 
         // Handle request
         // -------------------------------
-        ClientResponse updateResponse = registrationHandler.update(updateRequest);
+        LwM2mResponse updateResponse = registrationHandler.update(updateRequest);
 
         // Create CoAP Response from LwM2m request
         // -------------------------------
@@ -242,7 +242,7 @@ public class RegisterResource extends CoapResource {
 
         if (uri != null && uri.size() == 2 && RESOURCE_NAME.equals(uri.get(0))) {
             DeregisterRequest deregisterRequest = new DeregisterRequest(uri.get(1));
-            ClientResponse deregisterResponse = registrationHandler.deregister(deregisterRequest);
+            LwM2mResponse deregisterResponse = registrationHandler.deregister(deregisterRequest);
             exchange.respond(fromLwM2mCode(deregisterResponse.getCode()));
         } else {
             LOG.debug("Invalid deregistration");

@@ -69,7 +69,7 @@ import leshan.core.node.LwM2mObjectInstance;
 import leshan.core.node.LwM2mResource;
 import leshan.core.node.Value;
 import leshan.core.request.ContentFormat;
-import leshan.core.response.ClientResponse;
+import leshan.core.response.LwM2mResponse;
 import leshan.core.response.CreateResponse;
 import leshan.core.response.DiscoverResponse;
 import leshan.core.response.ValueResponse;
@@ -312,32 +312,32 @@ public final class IntegrationTestHelper {
         return server.send(new CreateRequest(getClient(), objectId, objectInstanceId, instance, ContentFormat.TLV));
     }
 
-    ClientResponse sendDelete(final int objectId, final int objectInstanceId) {
+    LwM2mResponse sendDelete(final int objectId, final int objectInstanceId) {
         return server.send(new DeleteRequest(getClient(), objectId, objectInstanceId));
     }
 
-    ClientResponse sendUpdate(final LwM2mResource resource, final int objectId, final int objectInstanceId,
+    LwM2mResponse sendUpdate(final LwM2mResource resource, final int objectId, final int objectInstanceId,
             final int resourceId) {
         final boolean isReplace = true;
         return server.send(new WriteRequest(getClient(), objectId, objectInstanceId, resourceId, resource,
                 ContentFormat.TEXT, !isReplace));
     }
 
-    ClientResponse sendUpdate(final String payload, final int objectId, final int objectInstanceId, final int resourceId) {
+    LwM2mResponse sendUpdate(final String payload, final int objectId, final int objectInstanceId, final int resourceId) {
         final boolean isReplace = true;
         final LwM2mNode resource = new LwM2mResource(resourceId, Value.newStringValue(payload));
         return server.send(new WriteRequest(getClient(), objectId, objectInstanceId, resourceId, resource,
                 ContentFormat.TEXT, !isReplace));
     }
 
-    ClientResponse sendReplace(final LwM2mResource resource, final int objectId, final int objectInstanceId,
+    LwM2mResponse sendReplace(final LwM2mResource resource, final int objectId, final int objectInstanceId,
             final int resourceId) {
         final boolean isReplace = true;
         return server.send(new WriteRequest(getClient(), objectId, objectInstanceId, resourceId, resource,
                 ContentFormat.TEXT, isReplace));
     }
 
-    ClientResponse sendReplace(final String payload, final int objectId, final int objectInstanceId,
+    LwM2mResponse sendReplace(final String payload, final int objectId, final int objectInstanceId,
             final int resourceId) {
         final boolean isReplace = true;
         final LwM2mNode resource = new LwM2mResource(resourceId, Value.newStringValue(payload));
@@ -345,15 +345,15 @@ public final class IntegrationTestHelper {
                 ContentFormat.TEXT, isReplace));
     }
 
-    ClientResponse sendWriteAttributes(final ObserveSpec observeSpec, final int objectId) {
+    LwM2mResponse sendWriteAttributes(final ObserveSpec observeSpec, final int objectId) {
         return server.send(new WriteAttributesRequest(getClient(), objectId, observeSpec));
     }
 
-    ClientResponse sendWriteAttributes(final ObserveSpec observeSpec, final int objectId, final int objectInstanceId) {
+    LwM2mResponse sendWriteAttributes(final ObserveSpec observeSpec, final int objectId, final int objectInstanceId) {
         return server.send(new WriteAttributesRequest(getClient(), objectId, objectInstanceId, observeSpec));
     }
 
-    ClientResponse sendWriteAttributes(final ObserveSpec observeSpec, final int objectId, final int objectInstanceId,
+    LwM2mResponse sendWriteAttributes(final ObserveSpec observeSpec, final int objectId, final int objectInstanceId,
             final int resourceId) {
         return server
                 .send(new WriteAttributesRequest(getClient(), objectId, objectInstanceId, resourceId, observeSpec));
@@ -369,7 +369,7 @@ public final class IntegrationTestHelper {
         assertEquals(expectedContent, response.getContent());
     }
 
-    static void assertEmptyResponse(final ClientResponse response, final ResponseCode responseCode) {
+    static void assertEmptyResponse(final LwM2mResponse response, final ResponseCode responseCode) {
         assertEquals(responseCode, response.getCode());
     }
 

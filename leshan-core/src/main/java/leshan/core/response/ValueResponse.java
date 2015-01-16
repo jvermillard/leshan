@@ -33,7 +33,7 @@ import leshan.ResponseCode;
 import leshan.core.node.LwM2mNode;
 import leshan.util.Validate;
 
-public class ValueResponse extends ClientResponse {
+public class ValueResponse extends LwM2mResponse {
 
     private final LwM2mNode content;
 

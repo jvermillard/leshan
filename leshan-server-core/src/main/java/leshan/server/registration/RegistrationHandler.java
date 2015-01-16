@@ -32,7 +32,7 @@ package leshan.server.registration;
 import java.net.InetSocketAddress;
 
 import leshan.ResponseCode;
-import leshan.core.response.ClientResponse;
+import leshan.core.response.LwM2mResponse;
 import leshan.core.response.RegisterResponse;
 import leshan.server.client.Client;
 import leshan.server.client.ClientRegistry;
@@ -110,22 +110,22 @@ public class RegistrationHandler {
         }
     }
 
-    public ClientResponse update(UpdateRequest updateRequest) {
+    public LwM2mResponse update(UpdateRequest updateRequest) {
         Client client = clientRegistry.updateClient(updateRequest);
         if (client == null) {
-            return new ClientResponse(ResponseCode.NOT_FOUND);
+            return new LwM2mResponse(ResponseCode.NOT_FOUND);
         } else {
-            return new ClientResponse(ResponseCode.CHANGED);
+            return new LwM2mResponse(ResponseCode.CHANGED);
         }
     }
 
-    public ClientResponse deregister(DeregisterRequest deregisterRequest) {
+    public LwM2mResponse deregister(DeregisterRequest deregisterRequest) {
         Client unregistered = clientRegistry.deregisterClient(deregisterRequest.getRegistrationID());
         if (unregistered != null) {
-            return new ClientResponse(ResponseCode.DELETED);
+            return new LwM2mResponse(ResponseCode.DELETED);
         } else {
             LOG.debug("Invalid deregistration");
-            return new ClientResponse(ResponseCode.NOT_FOUND);
+            return new LwM2mResponse(ResponseCode.NOT_FOUND);
         }
     }
 

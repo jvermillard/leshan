@@ -39,7 +39,7 @@ import leshan.core.objectspec.ResourceSpec;
 import leshan.core.objectspec.ResourceSpec.Type;
 import leshan.core.objectspec.Resources;
 import leshan.core.request.ContentFormat;
-import leshan.core.response.ClientResponse;
+import leshan.core.response.LwM2mResponse;
 import leshan.server.client.Client;
 import leshan.util.Validate;
 
@@ -47,7 +47,7 @@ import leshan.util.Validate;
  * The request to change the value of a Resource, an array of Resources Instances or multiple Resources from an Object
  * Instance.
  */
-public class WriteRequest extends AbstractLwM2mRequest<ClientResponse> {
+public class WriteRequest extends AbstractLwM2mRequest<LwM2mResponse> {
 
     private final LwM2mNode node;
     private final ContentFormat contentFormat;

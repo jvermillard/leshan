@@ -36,7 +36,7 @@ import leshan.core.node.LwM2mPath;
 import leshan.core.node.codec.InvalidValueException;
 import leshan.core.node.codec.LwM2mNodeDecoder;
 import leshan.core.request.ContentFormat;
-import leshan.core.response.ClientResponse;
+import leshan.core.response.LwM2mResponse;
 import leshan.core.response.CreateResponse;
 import leshan.core.response.DiscoverResponse;
 import leshan.core.response.ValueResponse;
@@ -61,11 +61,11 @@ import org.eclipse.californium.core.coap.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LwM2mResponseBuilder<T extends ClientResponse> implements LwM2mRequestVisitor {
+public class LwM2mResponseBuilder<T extends LwM2mResponse> implements LwM2mRequestVisitor {
 
     private static final Logger LOG = LoggerFactory.getLogger(LwM2mResponseBuilder.class);
 
-    private ClientResponse lwM2mresponse;
+    private LwM2mResponse lwM2mresponse;
     private final Request coapRequest;
     private final Response coapResponse;
     private final ObservationRegistry observationRegistry;
@@ -148,13 +148,13 @@ public class LwM2mResponseBuilder<T extends ClientResponse> implements LwM2mRequ
     public void visit(final WriteRequest request) {
         switch (coapResponse.getCode()) {
         case CHANGED:
-            lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new LwM2mResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         case BAD_REQUEST:
         case NOT_FOUND:
         case UNAUTHORIZED:
         case METHOD_NOT_ALLOWED:
-            lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new LwM2mResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         default:
             handleUnexpectedResponseCode(request.getClient(), coapRequest, coapResponse);
@@ -165,13 +165,13 @@ public class LwM2mResponseBuilder<T extends ClientResponse> implements LwM2mRequ
     public void visit(final WriteAttributesRequest request) {
         switch (coapResponse.getCode()) {
         case CHANGED:
-            lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new LwM2mResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         case BAD_REQUEST:
         case NOT_FOUND:
         case UNAUTHORIZED:
         case METHOD_NOT_ALLOWED:
-            lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new LwM2mResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         default:
             handleUnexpectedResponseCode(request.getClient(), coapRequest, coapResponse);
@@ -182,13 +182,13 @@ public class LwM2mResponseBuilder<T extends ClientResponse> implements LwM2mRequ
     public void visit(final ExecuteRequest request) {
         switch (coapResponse.getCode()) {
         case CHANGED:
-            lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new LwM2mResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         case BAD_REQUEST:
         case UNAUTHORIZED:
         case NOT_FOUND:
         case METHOD_NOT_ALLOWED:
-            lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new LwM2mResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         default:
             handleUnexpectedResponseCode(request.getClient(), coapRequest, coapResponse);
@@ -218,12 +218,12 @@ public class LwM2mResponseBuilder<T extends ClientResponse> implements LwM2mRequ
     public void visit(final DeleteRequest request) {
         switch (coapResponse.getCode()) {
         case DELETED:
-            lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new LwM2mResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         case UNAUTHORIZED:
         case NOT_FOUND:
         case METHOD_NOT_ALLOWED:
-            lwM2mresponse = new ClientResponse(fromCoapCode(coapResponse.getCode().value));
+            lwM2mresponse = new LwM2mResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         default:
             handleUnexpectedResponseCode(request.getClient(), coapRequest, coapResponse);

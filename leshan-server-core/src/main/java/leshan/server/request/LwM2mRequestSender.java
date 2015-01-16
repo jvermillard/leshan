@@ -29,7 +29,7 @@
  */
 package leshan.server.request;
 
-import leshan.core.response.ClientResponse;
+import leshan.core.response.LwM2mResponse;
 import leshan.core.response.ExceptionConsumer;
 import leshan.core.response.ResponseConsumer;
 
@@ -37,11 +37,11 @@ public interface LwM2mRequestSender {
     /**
      * Send a Lightweight M2M request synchronously. Will block until a response is received from the remote client.
      */
-    <T extends ClientResponse> T send(LwM2mRequest<T> request);
+    <T extends LwM2mResponse> T send(LwM2mRequest<T> request);
 
     /**
      * Send a Lightweight M2M request asynchronously.
      */
-    <T extends ClientResponse> void send(LwM2mRequest<T> request, ResponseConsumer<T> responseCallback,
+    <T extends LwM2mResponse> void send(LwM2mRequest<T> request, ResponseConsumer<T> responseCallback,
             ExceptionConsumer errorCallback);
 }

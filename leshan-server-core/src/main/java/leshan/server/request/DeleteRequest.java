@@ -30,10 +30,10 @@
 package leshan.server.request;
 
 import leshan.core.node.LwM2mPath;
-import leshan.core.response.ClientResponse;
+import leshan.core.response.LwM2mResponse;
 import leshan.server.client.Client;
 
-public class DeleteRequest extends AbstractLwM2mRequest<ClientResponse> {
+public class DeleteRequest extends AbstractLwM2mRequest<LwM2mResponse> {
 
     /**
      * Creates a request for deleting a particular object instance implemented by a client.

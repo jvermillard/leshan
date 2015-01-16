@@ -34,14 +34,12 @@ import leshan.util.Validate;
 
 /**
  * A response to a server request.
- * 
- * TODO We should probably rename Client Response as LwM2mResponse
  */
-public class ClientResponse {
+public class LwM2mResponse {
 
     protected final ResponseCode code;
 
-    public ClientResponse(final ResponseCode code) {
+    public LwM2mResponse(final ResponseCode code) {
         Validate.notNull(code);
         this.code = code;
     }
@@ -57,6 +55,6 @@ public class ClientResponse {
 
     @Override
     public String toString() {
-        return String.format("ClientResponse [code=%s]", code);
+        return String.format("LwM2mResponse [code=%s]", code);
     }
 }

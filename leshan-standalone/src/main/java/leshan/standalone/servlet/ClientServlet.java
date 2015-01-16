@@ -45,7 +45,7 @@ import leshan.core.node.LwM2mObjectInstance;
 import leshan.core.node.LwM2mResource;
 import leshan.core.node.Value;
 import leshan.core.request.ContentFormat;
-import leshan.core.response.ClientResponse;
+import leshan.core.response.LwM2mResponse;
 import leshan.core.response.ValueResponse;
 import leshan.server.LwM2mServer;
 import leshan.server.client.Client;
@@ -89,7 +89,7 @@ public class ClientServlet extends HttpServlet {
 
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeHierarchyAdapter(Client.class, new ClientSerializer());
-        gsonBuilder.registerTypeHierarchyAdapter(ClientResponse.class, new ResponseSerializer());
+        gsonBuilder.registerTypeHierarchyAdapter(LwM2mResponse.class, new ResponseSerializer());
         gsonBuilder.registerTypeHierarchyAdapter(LwM2mNode.class, new LwM2mNodeSerializer());
         gsonBuilder.registerTypeHierarchyAdapter(LwM2mNode.class, new LwM2mNodeDeserializer());
         gsonBuilder.setDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
@@ -175,7 +175,7 @@ public class ClientServlet extends HttpServlet {
             String target = StringUtils.removeStart(req.getPathInfo(), "/" + clientEndpoint);
             Client client = server.getClientRegistry().get(clientEndpoint);
             if (client != null) {
-                ClientResponse cResponse = this.writeRequest(client, target, req, resp);
+                LwM2mResponse cResponse = this.writeRequest(client, target, req, resp);
                 processDeviceResponse(resp, cResponse);
             } else {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -207,7 +207,7 @@ public class ClientServlet extends HttpServlet {
                 Client client = server.getClientRegistry().get(clientEndpoint);
                 if (client != null) {
                     ObserveRequest request = new ObserveRequest(client, target);
-                    ClientResponse cResponse = server.send(request);
+                    LwM2mResponse cResponse = server.send(request);
                     processDeviceResponse(resp, cResponse);
                 } else {
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -233,7 +233,7 @@ public class ClientServlet extends HttpServlet {
                 Client client = server.getClientRegistry().get(clientEndpoint);
                 if (client != null) {
                     ExecuteRequest request = new ExecuteRequest(client, target);
-                    ClientResponse cResponse = server.send(request);
+                    LwM2mResponse cResponse = server.send(request);
                     processDeviceResponse(resp, cResponse);
                 } else {
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -256,7 +256,7 @@ public class ClientServlet extends HttpServlet {
             try {
                 Client client = server.getClientRegistry().get(clientEndpoint);
                 if (client != null) {
-                    ClientResponse cResponse = this.createRequest(client, target, req, resp);
+                    LwM2mResponse cResponse = this.createRequest(client, target, req, resp);
                     processDeviceResponse(resp, cResponse);
                 } else {
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -310,7 +310,7 @@ public class ClientServlet extends HttpServlet {
             Client client = server.getClientRegistry().get(clientEndpoint);
             if (client != null) {
                 DeleteRequest request = new DeleteRequest(client, target);
-                ClientResponse cResponse = server.send(request);
+                LwM2mResponse cResponse = server.send(request);
                 processDeviceResponse(resp, cResponse);
             } else {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -327,7 +327,7 @@ public class ClientServlet extends HttpServlet {
         }
     }
 
-    private void processDeviceResponse(HttpServletResponse resp, ClientResponse cResponse) throws IOException {
+    private void processDeviceResponse(HttpServletResponse resp, LwM2mResponse cResponse) throws IOException {
         String response = null;
         if (cResponse == null) {
             response = "Request timeout";
@@ -340,7 +340,7 @@ public class ClientServlet extends HttpServlet {
     }
 
     // TODO refactor the code to remove this method.
-    private ClientResponse writeRequest(Client client, String target, HttpServletRequest req, HttpServletResponse resp)
+    private LwM2mResponse writeRequest(Client client, String target, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         Map<String, String> parameters = new HashMap<String, String>();
         String contentType = HttpFields.valueParameters(req.getContentType(), parameters);
@@ -368,7 +368,7 @@ public class ClientServlet extends HttpServlet {
     }
 
     // TODO refactor the code to remove this method.
-    private ClientResponse createRequest(Client client, String target, HttpServletRequest req, HttpServletResponse resp)
+    private LwM2mResponse createRequest(Client client, String target, HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         Map<String, String> parameters = new HashMap<String, String>();
         String contentType = HttpFields.valueParameters(req.getContentType(), parameters);

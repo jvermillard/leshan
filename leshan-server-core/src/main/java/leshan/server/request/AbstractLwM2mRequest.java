@@ -30,7 +30,7 @@
 package leshan.server.request;
 
 import leshan.core.node.LwM2mPath;
-import leshan.core.response.ClientResponse;
+import leshan.core.response.LwM2mResponse;
 import leshan.server.client.Client;
 import leshan.util.Validate;
 
@@ -39,7 +39,7 @@ import leshan.util.Validate;
  *
  * Provides generic support for specifying the target client and the resource path.
  */
-public abstract class AbstractLwM2mRequest<T extends ClientResponse> implements LwM2mRequest<T> {
+public abstract class AbstractLwM2mRequest<T extends LwM2mResponse> implements LwM2mRequest<T> {
 
     private final Client client;
     private final LwM2mPath path;
