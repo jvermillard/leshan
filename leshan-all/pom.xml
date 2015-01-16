@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.github.leshan</groupId>
         <artifactId>leshan</artifactId>
-        <version>0.1.9-SNAPSHOT</version>
+        <version>0.1.9</version>
     </parent>
     <artifactId>leshan-all</artifactId>
     <name>leshan - all</name>
