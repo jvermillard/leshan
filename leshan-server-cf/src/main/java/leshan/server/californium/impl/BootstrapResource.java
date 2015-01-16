@@ -278,35 +278,34 @@ public class BootstrapResource extends CoapResource {
 
     private Tlv[] tlvEncode(ServerSecurity value) {
         Tlv[] resources = new Tlv[12];
-        resources[0] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeString(value.uri), 0);
-        resources[1] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeBoolean(value.bootstrapServer), 1);
-        resources[2] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.securityMode.code), 2);
-        resources[3] = new Tlv(TlvType.RESOURCE_INSTANCE, null, value.publicKeyOrId, 3);
-        resources[4] = new Tlv(TlvType.RESOURCE_INSTANCE, null, value.serverPublicKeyOrId, 4);
-        resources[5] = new Tlv(TlvType.RESOURCE_INSTANCE, null, value.secretKey, 5);
-        resources[6] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.smsSecurityMode.code), 6);
-        resources[7] = new Tlv(TlvType.RESOURCE_INSTANCE, null, value.smsBindingKeyParam, 7);
-        resources[8] = new Tlv(TlvType.RESOURCE_INSTANCE, null, value.smsBindingKeySecret, 8);
-        resources[9] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeString(value.serverSmsNumber), 9);
-        resources[10] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.serverId), 10);
-        resources[11] = new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.clientOldOffTime), 11);
+        resources[0] = new Tlv(TlvType.RESOURCE_VALUE, null, TlvEncoder.encodeString(value.uri), 0);
+        resources[1] = new Tlv(TlvType.RESOURCE_VALUE, null, TlvEncoder.encodeBoolean(value.bootstrapServer), 1);
+        resources[2] = new Tlv(TlvType.RESOURCE_VALUE, null, TlvEncoder.encodeInteger(value.securityMode.code), 2);
+        resources[3] = new Tlv(TlvType.RESOURCE_VALUE, null, value.publicKeyOrId, 3);
+        resources[4] = new Tlv(TlvType.RESOURCE_VALUE, null, value.serverPublicKeyOrId, 4);
+        resources[5] = new Tlv(TlvType.RESOURCE_VALUE, null, value.secretKey, 5);
+        resources[6] = new Tlv(TlvType.RESOURCE_VALUE, null, TlvEncoder.encodeInteger(value.smsSecurityMode.code), 6);
+        resources[7] = new Tlv(TlvType.RESOURCE_VALUE, null, value.smsBindingKeyParam, 7);
+        resources[8] = new Tlv(TlvType.RESOURCE_VALUE, null, value.smsBindingKeySecret, 8);
+        resources[9] = new Tlv(TlvType.RESOURCE_VALUE, null, TlvEncoder.encodeString(value.serverSmsNumber), 9);
+        resources[10] = new Tlv(TlvType.RESOURCE_VALUE, null, TlvEncoder.encodeInteger(value.serverId), 10);
+        resources[11] = new Tlv(TlvType.RESOURCE_VALUE, null, TlvEncoder.encodeInteger(value.clientOldOffTime), 11);
         return resources;
     }
 
     private Tlv[] tlvEncode(ServerConfig value) {
         List<Tlv> resources = new ArrayList<Tlv>();
-        resources.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.shortId), 0));
-        resources.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.lifetime), 1));
-        resources.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.defaultMinPeriod), 2));
+        resources.add(new Tlv(TlvType.RESOURCE_VALUE, null, TlvEncoder.encodeInteger(value.shortId), 0));
+        resources.add(new Tlv(TlvType.RESOURCE_VALUE, null, TlvEncoder.encodeInteger(value.lifetime), 1));
+        resources.add(new Tlv(TlvType.RESOURCE_VALUE, null, TlvEncoder.encodeInteger(value.defaultMinPeriod), 2));
         if (value.defaultMaxPeriod != null) {
-            resources
-                    .add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.defaultMaxPeriod), 3));
+            resources.add(new Tlv(TlvType.RESOURCE_VALUE, null, TlvEncoder.encodeInteger(value.defaultMaxPeriod), 3));
         }
         if (value.disableTimeout != null) {
-            resources.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeInteger(value.disableTimeout), 5));
+            resources.add(new Tlv(TlvType.RESOURCE_VALUE, null, TlvEncoder.encodeInteger(value.disableTimeout), 5));
         }
-        resources.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeBoolean(value.notifIfDisabled), 6));
-        resources.add(new Tlv(TlvType.RESOURCE_INSTANCE, null, TlvEncoder.encodeString(value.binding.name()), 7));
+        resources.add(new Tlv(TlvType.RESOURCE_VALUE, null, TlvEncoder.encodeBoolean(value.notifIfDisabled), 6));
+        resources.add(new Tlv(TlvType.RESOURCE_VALUE, null, TlvEncoder.encodeString(value.binding.name()), 7));
 
         return resources.toArray(new Tlv[] {});
     }
