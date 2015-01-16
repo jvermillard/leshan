@@ -71,8 +71,8 @@ public class CoapClientRequestBuilder implements LwM2mClientRequestVisitor {
         coapRequest = Request.newPost();
         buildRequestSettings(request);
 
-        coapRequest.getOptions().addURIPath("bs");
-        coapRequest.getOptions().addURIQuery("ep=" + request.getClientEndpointIdentifier());
+        coapRequest.getOptions().addUriPath("bs");
+        coapRequest.getOptions().addUriQuery("ep=" + request.getClientEndpointIdentifier());
 
         parametersValid = true;
 
@@ -86,8 +86,8 @@ public class CoapClientRequestBuilder implements LwM2mClientRequestVisitor {
         coapRequest = Request.newPost();
         buildRequestSettings(request);
 
-        coapRequest.getOptions().addURIPath("rd");
-        coapRequest.getOptions().addURIQuery("ep=" + request.getClientEndpointIdentifier());
+        coapRequest.getOptions().addUriPath("rd");
+        coapRequest.getOptions().addUriQuery("ep=" + request.getClientEndpointIdentifier());
         buildRequestContent(request);
 
         parametersValid = true;
@@ -147,7 +147,7 @@ public class CoapClientRequestBuilder implements LwM2mClientRequestVisitor {
 
     private void buildRequestContent(final LwM2mContentRequest request) {
         for (final Entry<String, String> entry : request.getClientParameters().entrySet()) {
-            coapRequest.getOptions().addURIQuery(entry.getKey() + "=" + entry.getValue());
+            coapRequest.getOptions().addUriQuery(entry.getKey() + "=" + entry.getValue());
         }
 
         final String payload = LinkFormatUtils.payloadize(clientObjectModel);

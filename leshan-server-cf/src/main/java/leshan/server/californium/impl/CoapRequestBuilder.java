@@ -121,7 +121,7 @@ public class CoapRequestBuilder implements LwM2mRequestVisitor {
         if (client.getRootPath() != null) {
             for (String rootPath : client.getRootPath().split("/")) {
                 if (!StringUtils.isEmpty(rootPath)) {
-                    coapRequest.getOptions().addURIPath(rootPath);
+                    coapRequest.getOptions().addUriPath(rootPath);
                 }
             }
         }

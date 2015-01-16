@@ -29,7 +29,6 @@
  */
 package leshan.server.californium.impl;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -47,12 +46,10 @@ import leshan.server.Stopable;
 import leshan.server.client.Client;
 import leshan.server.client.ClientRegistry;
 import leshan.server.client.ClientRegistryListener;
-import leshan.server.impl.ClientRegistryImpl;
-import leshan.server.impl.ObservationRegistryImpl;
-import leshan.server.impl.SecurityRegistryImpl;
 import leshan.server.observation.ObservationRegistry;
 import leshan.server.request.LwM2mRequest;
 import leshan.server.security.SecurityRegistry;
+import leshan.util.Validate;
 
 import org.eclipse.californium.core.CoapServer;
 import org.eclipse.californium.core.network.CoAPEndpoint;
@@ -121,30 +118,16 @@ public class LeshanServer implements LwM2mServer {
     public LeshanServer(InetSocketAddress localAddress, InetSocketAddress localAddressSecure,
             final ClientRegistry clientRegistry, final SecurityRegistry securityRegistry,
             final ObservationRegistry observationRegistry) {
-        if (localAddress == null)
-            localAddress = new InetSocketAddress((InetAddress) null, PORT);
+        Validate.notNull(localAddress, "IP address cannot be null");
+        Validate.notNull(localAddressSecure, "Secure IP address cannot be null");
+        Validate.notNull(clientRegistry, "clientRegistry cannot be null");
+        Validate.notNull(securityRegistry, "securityRegistry cannot be null");
+        Validate.notNull(observationRegistry, "observationRegistry cannot be null");
 
-        if (localAddressSecure == null)
-            localAddressSecure = new InetSocketAddress((InetAddress) null, PORT_DTLS);
-
-        // init registry
-        if (clientRegistry == null) {
-            this.clientRegistry = new ClientRegistryImpl();
-        } else {
-            this.clientRegistry = clientRegistry;
-        }
-
-        if (observationRegistry == null) {
-            this.observationRegistry = new ObservationRegistryImpl();
-        } else {
-            this.observationRegistry = observationRegistry;
-        }
-
-        if (securityRegistry == null) {
-            this.securityRegistry = new SecurityRegistryImpl();
-        } else {
-            this.securityRegistry = securityRegistry;
-        }
+        // Init registries
+        this.clientRegistry = clientRegistry;
+        this.securityRegistry = securityRegistry;
+        this.observationRegistry = observationRegistry;
 
         // Cancel observations on client unregistering
         this.clientRegistry.addListener(new ClientRegistryListener() {

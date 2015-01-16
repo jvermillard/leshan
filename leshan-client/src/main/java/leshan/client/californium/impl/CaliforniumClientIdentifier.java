@@ -59,7 +59,7 @@ public class CaliforniumClientIdentifier implements ClientIdentifier {
         final String[] locationPaths = location.split("/");
         for (final String location : locationPaths) {
             if (location.length() != 0) {
-                coapRequest.getOptions().addURIPath(location);
+                coapRequest.getOptions().addUriPath(location);
             }
         }
     }
