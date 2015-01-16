@@ -168,7 +168,7 @@ public class BootstrapResource extends CoapResource {
 
             ByteBuffer encoded = TlvEncoder.encode(secuResources);
             // now send security
-            Request postSecurity = Request.newPost();
+            Request postSecurity = Request.newPut();
             postSecurity.getOptions().addURIPath("0");
             postSecurity.getOptions().addURIPath(key.toString());
             postSecurity.setConfirmable(true);
@@ -229,7 +229,7 @@ public class BootstrapResource extends CoapResource {
             ByteBuffer encoded = TlvEncoder.encode(serverResources);
 
             // now send server
-            Request postServer = Request.newPost();
+            Request postServer = Request.newPut();
             postServer.getOptions().addURIPath("1");
             postServer.getOptions().addURIPath(key.toString());
             postServer.setConfirmable(true);
