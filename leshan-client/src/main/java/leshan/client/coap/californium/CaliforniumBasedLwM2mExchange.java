@@ -105,7 +105,7 @@ public class CaliforniumBasedLwM2mExchange implements LwM2mExchange {
     }
 
     private List<String> getUriPaths() {
-        return exchange.getRequestOptions().getURIPaths();
+        return exchange.getRequestOptions().getUriPath();
     }
 
     @Override
@@ -118,7 +118,7 @@ public class CaliforniumBasedLwM2mExchange implements LwM2mExchange {
         if (exchange.advanced().getRequest().getOptions().getURIQueryCount() == 0) {
             return null;
         }
-        final List<String> uriQueries = exchange.advanced().getRequest().getOptions().getURIQueries();
+        final List<String> uriQueries = exchange.advanced().getRequest().getOptions().getUriQuery();
         return ObserveSpecParser.parse(uriQueries);
     }
 

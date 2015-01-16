@@ -96,19 +96,11 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <californium.version>1.0.0-M2</californium.version>
+        <californium.version>1.0.0-M3</californium.version>
         <log4j.version>[2.0.0, 3)</log4j.version>
         <jetty.version>9.1.4.v20140401</jetty.version>
     </properties>
     
-    <repositories>
-        <repository>
-            <id>californium-snapshots</id>
-            <name>Californium Repository - Snapshots</name>
-            <url>https://repo.eclipse.org/content/repositories/californium-snapshots/</url>
-        </repository>
-    </repositories>
-
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>

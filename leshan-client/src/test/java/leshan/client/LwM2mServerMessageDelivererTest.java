@@ -31,19 +31,14 @@
  */
 package leshan.client;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 import leshan.client.response.ResponseMatcher;
 
@@ -134,7 +129,7 @@ public class LwM2mServerMessageDelivererTest {
     private void deliver(final Code code, final String... uriPath) {
         final OptionSet options = new OptionSet();
         for (final String path : uriPath) {
-            options.addURIPath(path);
+            options.addUriPath(path);
         }
         final Request request = new Request(code);
         request.setOptions(options);
@@ -257,7 +252,7 @@ public class LwM2mServerMessageDelivererTest {
         }
 
         @Override
-        public Executor getExecutor() {
+        public ExecutorService getExecutor() {
             return null;
         }
 

@@ -82,7 +82,7 @@ public class BootstrapResource extends CoapResource {
 
         // which endpoint?
         String endpointTmp = null;
-        for (String param : request.getOptions().getURIQueries()) {
+        for (String param : request.getOptions().getUriQuery()) {
             if (param.startsWith(QUERY_PARAM_ENDPOINT)) {
                 endpointTmp = param.substring(QUERY_PARAM_ENDPOINT.length());
                 break;
@@ -114,7 +114,7 @@ public class BootstrapResource extends CoapResource {
 
                 final Endpoint e = exchange.advanced().getEndpoint();
                 Request deleteAll = Request.newDelete();
-                deleteAll.getOptions().addURIPath("/");
+                deleteAll.getOptions().addUriPath("/");
                 deleteAll.setConfirmable(true);
                 deleteAll.setDestination(exchange.getSourceAddress());
                 deleteAll.setDestinationPort(exchange.getSourcePort());
@@ -169,8 +169,8 @@ public class BootstrapResource extends CoapResource {
             ByteBuffer encoded = TlvEncoder.encode(secuResources);
             // now send security
             Request postSecurity = Request.newPut();
-            postSecurity.getOptions().addURIPath("0");
-            postSecurity.getOptions().addURIPath(key.toString());
+            postSecurity.getOptions().addUriPath("0");
+            postSecurity.getOptions().addUriPath(key.toString());
             postSecurity.setConfirmable(true);
             postSecurity.setDestination(targetAddress);
             postSecurity.setDestinationPort(targetPort);
@@ -230,8 +230,8 @@ public class BootstrapResource extends CoapResource {
 
             // now send server
             Request postServer = Request.newPut();
-            postServer.getOptions().addURIPath("1");
-            postServer.getOptions().addURIPath(key.toString());
+            postServer.getOptions().addUriPath("1");
+            postServer.getOptions().addUriPath(key.toString());
             postServer.setConfirmable(true);
             postServer.setDestination(targetAddress);
             postServer.setDestinationPort(targetPort);

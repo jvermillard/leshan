@@ -29,8 +29,7 @@
  */
 package leshan.server.californium.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 import leshan.core.node.LwM2mNode;
 import leshan.core.node.LwM2mPath;
 import leshan.core.node.LwM2mResource;
@@ -38,7 +37,6 @@ import leshan.server.observation.Observation;
 import leshan.server.observation.ObservationListener;
 
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
-import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.core.coap.Response;
 import org.junit.Assert;
@@ -80,7 +78,7 @@ public class CaliforniumObservationTest {
         CaliforniumObservation observation = new CaliforniumObservation(coapRequest, support.client, target);
         observation.addListener(listener);
         Response coapResponse = new Response(ResponseCode.CONTENT);
-        coapResponse.setPayload(reportedValue, MediaTypeRegistry.TEXT_PLAIN);
+        coapResponse.setPayload(reportedValue);
         observation.onResponse(coapResponse);
     }
 
@@ -96,9 +94,9 @@ public class CaliforniumObservationTest {
 
     private void givenAnObserveRequest(LwM2mPath target) {
         coapRequest = Request.newGet();
-        coapRequest.getOptions().addURIPath(String.valueOf(target.getObjectId()));
-        coapRequest.getOptions().addURIPath(String.valueOf(target.getObjectInstanceId()));
-        coapRequest.getOptions().addURIPath(String.valueOf(target.getResourceId()));
+        coapRequest.getOptions().addUriPath(String.valueOf(target.getObjectId()));
+        coapRequest.getOptions().addUriPath(String.valueOf(target.getObjectInstanceId()));
+        coapRequest.getOptions().addUriPath(String.valueOf(target.getResourceId()));
         coapRequest.setDestination(support.client.getAddress());
         coapRequest.setDestinationPort(support.client.getPort());
     }

@@ -112,7 +112,7 @@ public class RegisterResource extends CoapResource {
         LinkObject[] objectLinks = null;
         try {
 
-            for (String param : request.getOptions().getURIQueries()) {
+            for (String param : request.getOptions().getUriQuery()) {
                 if (param.startsWith(QUERY_PARAM_ENDPOINT)) {
                     endpoint = param.substring(3);
                 } else if (param.startsWith(QUERY_PARAM_LIFETIME)) {
@@ -232,7 +232,7 @@ public class RegisterResource extends CoapResource {
             return;
         }
 
-        List<String> uri = exchange.getRequestOptions().getURIPaths();
+        List<String> uri = exchange.getRequestOptions().getUriPath();
         if (uri == null || uri.size() != 2 || !RESOURCE_NAME.equals(uri.get(0))) {
             exchange.respond(ResponseCode.NOT_FOUND);
             return;
@@ -245,7 +245,7 @@ public class RegisterResource extends CoapResource {
         BindingMode binding = null;
         LinkObject[] objectLinks = null;
 
-        for (String param : request.getOptions().getURIQueries()) {
+        for (String param : request.getOptions().getUriQuery()) {
             if (param.startsWith(QUERY_PARAM_LIFETIME)) {
                 lifetime = Long.valueOf(param.substring(3));
             } else if (param.startsWith(QUERY_PARAM_SMS)) {
@@ -281,7 +281,7 @@ public class RegisterResource extends CoapResource {
         LOG.debug("DELETE received : {}", exchange.advanced().getRequest());
 
         Client unregistered = null;
-        List<String> uri = exchange.getRequestOptions().getURIPaths();
+        List<String> uri = exchange.getRequestOptions().getUriPath();
 
         try {
             if (uri != null && uri.size() == 2 && RESOURCE_NAME.equals(uri.get(0))) {

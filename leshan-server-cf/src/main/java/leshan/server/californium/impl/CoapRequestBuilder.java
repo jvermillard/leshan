@@ -77,7 +77,7 @@ public class CoapRequestBuilder implements LwM2mRequestVisitor {
         coapRequest = Request.newPut();
         setTarget(coapRequest, request.getClient(), request.getPath());
         for (String query : request.getObserveSpec().toQueryParams()) {
-            coapRequest.getOptions().addURIQuery(query);
+            coapRequest.getOptions().addUriQuery(query);
         }
     }
 
@@ -127,20 +127,20 @@ public class CoapRequestBuilder implements LwM2mRequestVisitor {
         }
 
         // objectId
-        coapRequest.getOptions().addURIPath(Integer.toString(path.getObjectId()));
+        coapRequest.getOptions().addUriPath(Integer.toString(path.getObjectId()));
 
         // objectInstanceId
         if (path.getObjectInstanceId() == null) {
             if (path.getResourceId() != null) {
-                coapRequest.getOptions().addURIPath("0"); // default instanceId
+                coapRequest.getOptions().addUriPath("0"); // default instanceId
             }
         } else {
-            coapRequest.getOptions().addURIPath(Integer.toString(path.getObjectInstanceId()));
+            coapRequest.getOptions().addUriPath(Integer.toString(path.getObjectInstanceId()));
         }
 
         // resourceId
         if (path.getResourceId() != null) {
-            coapRequest.getOptions().addURIPath(Integer.toString(path.getResourceId()));
+            coapRequest.getOptions().addUriPath(Integer.toString(path.getResourceId()));
         }
     }
 

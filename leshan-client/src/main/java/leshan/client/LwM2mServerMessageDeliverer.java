@@ -68,7 +68,7 @@ public class LwM2mServerMessageDeliverer implements MessageDeliverer {
     @Override
     public void deliverRequest(final Exchange exchange) {
         final Request request = exchange.getRequest();
-        final List<String> path = request.getOptions().getURIPaths();
+        final List<String> path = request.getOptions().getUriPath();
         final Code code = request.getCode();
         final Resource resource = findResource(path, code);
         if (resource != null) {
