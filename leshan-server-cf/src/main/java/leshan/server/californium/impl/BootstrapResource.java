@@ -239,17 +239,17 @@ public class BootstrapResource extends CoapResource {
             postServer.send(e).addMessageObserver(new MessageObserver() {
                 @Override
                 public void onTimeout() {
-                    LOG.debug("Bootstrap servers {} timeout!", e);
+                    LOG.debug("Bootstrap servers {} timeout!", endpoint);
                 }
 
                 @Override
                 public void onRetransmission() {
-                    LOG.debug("Bootstrap servers {} retransmission", e);
+                    LOG.debug("Bootstrap servers {} retransmission", endpoint);
                 }
 
                 @Override
                 public void onResponse(Response response) {
-                    LOG.debug("Bootstrap servers {} return code {}", e, response.getCode());
+                    LOG.debug("Bootstrap servers {} return code {}", endpoint, response.getCode());
                     // recursive call until toSend is empty
                     sendServers(e, endpoint, targetAddress, targetPort, cfg, toSend);
                 }

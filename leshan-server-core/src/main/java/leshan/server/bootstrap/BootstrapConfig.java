@@ -29,6 +29,7 @@
  */
 package leshan.server.bootstrap;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,6 +53,14 @@ public class BootstrapConfig {
         public Integer disableTimeout = null;
         public boolean notifIfDisabled = true;
         public BindingMode binding = BindingMode.U;
+
+        @Override
+        public String toString() {
+            return String
+                    .format("ServerConfig [shortId=%s, lifetime=%s, defaultMinPeriod=%s, defaultMaxPeriod=%s, disableTimeout=%s, notifIfDisabled=%s, binding=%s]",
+                            shortId, lifetime, defaultMinPeriod, defaultMaxPeriod, disableTimeout, notifIfDisabled,
+                            binding);
+        }
     }
 
     /** security configuration (object 0) */
@@ -68,5 +77,21 @@ public class BootstrapConfig {
         public String serverSmsNumber = ""; // spec says integer WTF?
         public Integer serverId;
         public int clientOldOffTime = 1;
+
+        @Override
+        public String toString() {
+            return String
+                    .format("ServerSecurity [uri=%s, bootstrapServer=%s, securityMode=%s, publicKeyOrId=%s, serverPublicKeyOrId=%s, secretKey=%s, smsSecurityMode=%s, smsBindingKeyParam=%s, smsBindingKeySecret=%s, serverSmsNumber=%s, serverId=%s, clientOldOffTime=%s]",
+                            uri, bootstrapServer, securityMode, Arrays.toString(publicKeyOrId),
+                            Arrays.toString(serverPublicKeyOrId), Arrays.toString(secretKey), smsSecurityMode,
+                            Arrays.toString(smsBindingKeyParam), Arrays.toString(smsBindingKeySecret), serverSmsNumber,
+                            serverId, clientOldOffTime);
+        }
     }
+
+    @Override
+    public String toString() {
+        return String.format("BootstrapConfig [servers=%s, security=%s]", servers, security);
+    }
+
 }
