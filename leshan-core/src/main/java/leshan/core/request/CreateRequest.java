@@ -27,19 +27,17 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.request;
+package leshan.core.request;
 
 import leshan.core.node.LwM2mNode;
 import leshan.core.node.LwM2mObjectInstance;
 import leshan.core.node.LwM2mPath;
-import leshan.core.request.ContentFormat;
 import leshan.core.response.CreateResponse;
-import leshan.server.client.Client;
 
 /**
  * A Lightweight M2M request for creating resources on a client.
  */
-public class CreateRequest extends AbstractLwM2mRequest<CreateResponse> {
+public class CreateRequest extends AbstractDownlinkRequest<CreateResponse> {
 
     private final LwM2mObjectInstance instance;
 
@@ -48,40 +46,36 @@ public class CreateRequest extends AbstractLwM2mRequest<CreateResponse> {
     /**
      * Creates a request for creating the (only) instance of a particular object.
      * 
-     * @param client the LWM2M Client to create the object instance on
      * @param objectId the object ID
      * @param values the TLV encoded resource values of the object instance
      */
-    public CreateRequest(Client client, int objectId, LwM2mObjectInstance instance, ContentFormat contentFormat) {
-        this(client, new LwM2mPath(objectId), instance, contentFormat);
+    public CreateRequest(int objectId, LwM2mObjectInstance instance, ContentFormat contentFormat) {
+        this(new LwM2mPath(objectId), instance, contentFormat);
     }
 
     /**
      * Creates a request for creating the (only) instance of a particular object.
      * 
-     * @param client the LWM2M Client to create the object instance on
      * @param objectId the object ID
      * @param objectInstanceId the ID of the new object instance
      * @param values the TLV encoded resource values of the object instance
      */
-    public CreateRequest(Client client, int objectId, int objectInstanceId, LwM2mObjectInstance instance,
-            ContentFormat contentFormat) {
-        this(client, new LwM2mPath(objectId, objectInstanceId), instance, contentFormat);
+    public CreateRequest(int objectId, int objectInstanceId, LwM2mObjectInstance instance, ContentFormat contentFormat) {
+        this(new LwM2mPath(objectId, objectInstanceId), instance, contentFormat);
     }
 
     /**
      * Creates a request for creating the (only) instance of a particular object.
      * 
-     * @param client the LWM2M Client to create the object instance on
      * @param path the target path
      * @param values the TLV encoded resource values of the object instance
      */
-    public CreateRequest(Client client, String path, LwM2mObjectInstance instance, ContentFormat contentFormat) {
-        this(client, new LwM2mPath(path), instance, contentFormat);
+    public CreateRequest(String path, LwM2mObjectInstance instance, ContentFormat contentFormat) {
+        this(new LwM2mPath(path), instance, contentFormat);
     }
 
-    private CreateRequest(Client client, LwM2mPath target, LwM2mObjectInstance instance, ContentFormat format) {
-        super(client, target);
+    private CreateRequest(LwM2mPath target, LwM2mObjectInstance instance, ContentFormat format) {
+        super(target);
 
         if (target.isResource()) {
             throw new IllegalArgumentException("Cannot create a resource node");
@@ -92,7 +86,7 @@ public class CreateRequest extends AbstractLwM2mRequest<CreateResponse> {
     }
 
     @Override
-    public void accept(LwM2mRequestVisitor visitor) {
+    public void accept(DownlinkRequestVisitor visitor) {
         visitor.visit(this);
     }
 

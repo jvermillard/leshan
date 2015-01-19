@@ -39,8 +39,8 @@ import static leshan.integration.tests.IntegrationTestHelper.GOOD_OBJECT_INSTANC
 import static leshan.integration.tests.IntegrationTestHelper.SECOND_RESOURCE_ID;
 import leshan.ResponseCode;
 import leshan.core.request.ContentFormat;
+import leshan.core.request.ExecuteRequest;
 import leshan.core.response.LwM2mResponse;
-import leshan.server.request.ExecuteRequest;
 
 import org.junit.After;
 import org.junit.Test;
@@ -60,7 +60,7 @@ public class ExecuteTest {
 
         helper.sendCreate(IntegrationTestHelper.createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
 
-        final LwM2mResponse response = helper.server.send(new ExecuteRequest(helper.getClient(), GOOD_OBJECT_ID,
+        final LwM2mResponse response = helper.server.send(helper.getClient(), new ExecuteRequest(GOOD_OBJECT_ID,
                 GOOD_OBJECT_INSTANCE_ID, SECOND_RESOURCE_ID, "world".getBytes(), ContentFormat.TEXT));
 
         IntegrationTestHelper.assertEmptyResponse(response, METHOD_NOT_ALLOWED);
@@ -72,7 +72,7 @@ public class ExecuteTest {
 
         helper.sendCreate(IntegrationTestHelper.createGoodObjectInstance("hello", "goodbye"), GOOD_OBJECT_ID);
 
-        final LwM2mResponse response = helper.server.send(new ExecuteRequest(helper.getClient(), GOOD_OBJECT_ID,
+        final LwM2mResponse response = helper.server.send(helper.getClient(), new ExecuteRequest(GOOD_OBJECT_ID,
                 GOOD_OBJECT_INSTANCE_ID, EXECUTABLE_RESOURCE_ID, "world".getBytes(), ContentFormat.TEXT));
 
         IntegrationTestHelper.assertEmptyResponse(response, ResponseCode.CHANGED);

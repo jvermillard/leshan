@@ -27,52 +27,38 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.request;
+package leshan.core.request;
 
-import leshan.ObserveSpec;
 import leshan.core.node.LwM2mPath;
 import leshan.core.response.LwM2mResponse;
-import leshan.server.client.Client;
-import leshan.util.Validate;
 
-public class WriteAttributesRequest extends AbstractLwM2mRequest<LwM2mResponse> {
+public class DeleteRequest extends AbstractDownlinkRequest<LwM2mResponse> {
 
-    private final ObserveSpec observeSpec;
-
-    public WriteAttributesRequest(final Client client, final int objectId, final ObserveSpec observeSpec) {
-        this(client, new LwM2mPath(objectId), observeSpec);
+    /**
+     * Creates a request for deleting a particular object instance implemented by a client.
+     *
+     * @param objectId the object type
+     * @param objectInstanceId the object instance
+     */
+    public DeleteRequest(final int objectId, final int objectInstanceId) {
+        this(new LwM2mPath(objectId, objectInstanceId));
     }
 
-    public WriteAttributesRequest(final Client client, final int objectId, final int objectInstanceId, final ObserveSpec observeSpec) {
-        this(client, new LwM2mPath(objectId, objectInstanceId), observeSpec);
+    public DeleteRequest(final String target) {
+        super(new LwM2mPath(target));
     }
 
-    public WriteAttributesRequest(final Client client, final int objectId, final int objectInstanceId, final int resourceId,
-            final ObserveSpec observeSpec) {
-        this(client, new LwM2mPath(objectId, objectInstanceId, resourceId), observeSpec);
-    }
-
-    public WriteAttributesRequest(final Client client, final String path, final ObserveSpec observeSpec) {
-        this(client, new LwM2mPath(path), observeSpec);
-    }
-
-    private WriteAttributesRequest(final Client client, final LwM2mPath path, final ObserveSpec observeSpec) {
-        super(client, path);
-        Validate.notNull(observeSpec);
-        this.observeSpec = observeSpec;
+    private DeleteRequest(final LwM2mPath target) {
+        super(target);
     }
 
     @Override
-    public void accept(final LwM2mRequestVisitor visitor) {
+    public void accept(final DownlinkRequestVisitor visitor) {
         visitor.visit(this);
     }
 
-    public ObserveSpec getObserveSpec() {
-        return this.observeSpec;
-    }
-
     @Override
-    public String toString() {
-        return String.format("WriteAttributesRequest [%s, attributes=%s]", getPath(), getObserveSpec());
+    public final String toString() {
+        return String.format("DeleteRequest [%s]", getPath());
     }
 }

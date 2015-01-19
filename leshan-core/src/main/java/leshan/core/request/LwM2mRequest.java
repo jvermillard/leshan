@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Sierra Wireless
+ * Copyright (c) 2013, Sierra Wireless
  *
  * All rights reserved.
  *
@@ -27,17 +27,12 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.request;
+package leshan.core.request;
 
-public class DeregisterRequest {
+import leshan.core.response.LwM2mResponse;
 
-    private String registrationID = null;
-
-    public DeregisterRequest(String registrationID) {
-        this.registrationID = registrationID;
-    }
-
-    public String getRegistrationID() {
-        return registrationID;
-    }
+/**
+ * A Lightweight M2M request.
+ */
+public interface LwM2mRequest<T extends LwM2mResponse> {
 }

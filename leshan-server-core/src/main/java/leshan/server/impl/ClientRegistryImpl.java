@@ -42,13 +42,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import leshan.LinkObject;
+import leshan.core.request.BindingMode;
+import leshan.core.request.UpdateRequest;
 import leshan.server.Startable;
 import leshan.server.Stopable;
-import leshan.server.client.BindingMode;
 import leshan.server.client.Client;
 import leshan.server.client.ClientRegistry;
 import leshan.server.client.ClientRegistryListener;
-import leshan.server.request.UpdateRequest;
 import leshan.util.Validate;
 
 import org.slf4j.Logger;

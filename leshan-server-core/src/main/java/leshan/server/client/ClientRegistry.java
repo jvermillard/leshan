@@ -31,7 +31,7 @@ package leshan.server.client;
 
 import java.util.Collection;
 
-import leshan.server.request.UpdateRequest;
+import leshan.core.request.UpdateRequest;
 
 /**
  * A registry to access registered clients

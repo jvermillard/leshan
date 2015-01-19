@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Sierra Wireless
+ * Copyright (c) 2015, Sierra Wireless
  *
  * All rights reserved.
  *
@@ -27,40 +27,27 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.request;
+package leshan.core.request;
 
 import leshan.core.node.LwM2mPath;
 import leshan.core.response.LwM2mResponse;
-import leshan.server.client.Client;
 
-public class DeleteRequest extends AbstractLwM2mRequest<LwM2mResponse> {
+/**
+ * A Downlink Lightweight M2M request.<br>
+ * This is a request sent from server to client to interact with the client resource tree.
+ */
+public interface DownlinkRequest<T extends LwM2mResponse> extends LwM2mRequest<T> {
 
     /**
-     * Creates a request for deleting a particular object instance implemented by a client.
+     * Gets the requested resource path.
      *
-     * @param client the LWM2M Client to delete the object instance on
-     * @param objectId the object type
-     * @param objectInstanceId the object instance
+     * @return the request path
      */
-    public DeleteRequest(final Client client, final int objectId, final int objectInstanceId) {
-        this(client, new LwM2mPath(objectId, objectInstanceId));
-    }
+    LwM2mPath getPath();
 
-    public DeleteRequest(final Client client, final String target) {
-        super(client, new LwM2mPath(target));
-    }
+    /**
+     * Accept a visitor for this request.
+     */
+    void accept(DownlinkRequestVisitor visitor);
 
-    private DeleteRequest(final Client client, final LwM2mPath target) {
-        super(client, target);
-    }
-
-    @Override
-    public void accept(final LwM2mRequestVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public final String toString() {
-        return String.format("DeleteRequest [%s]", getPath());
-    }
 }

@@ -45,17 +45,17 @@ import leshan.core.node.LwM2mObjectInstance;
 import leshan.core.node.LwM2mResource;
 import leshan.core.node.Value;
 import leshan.core.request.ContentFormat;
+import leshan.core.request.CreateRequest;
+import leshan.core.request.DeleteRequest;
+import leshan.core.request.ExecuteRequest;
+import leshan.core.request.ObserveRequest;
+import leshan.core.request.ReadRequest;
+import leshan.core.request.WriteRequest;
 import leshan.core.response.LwM2mResponse;
 import leshan.core.response.ValueResponse;
 import leshan.server.LwM2mServer;
 import leshan.server.client.Client;
-import leshan.server.request.CreateRequest;
-import leshan.server.request.DeleteRequest;
-import leshan.server.request.ExecuteRequest;
-import leshan.server.request.ObserveRequest;
-import leshan.server.request.ReadRequest;
 import leshan.server.request.ResourceAccessException;
-import leshan.server.request.WriteRequest;
 import leshan.standalone.servlet.json.ClientSerializer;
 import leshan.standalone.servlet.json.LwM2mNodeDeserializer;
 import leshan.standalone.servlet.json.LwM2mNodeSerializer;
@@ -139,8 +139,8 @@ public class ClientServlet extends HttpServlet {
             String target = StringUtils.removeStart(req.getPathInfo(), "/" + clientEndpoint);
             Client client = server.getClientRegistry().get(clientEndpoint);
             if (client != null) {
-                ReadRequest request = new ReadRequest(client, target);
-                ValueResponse cResponse = server.send(request);
+                ReadRequest request = new ReadRequest(target);
+                ValueResponse cResponse = server.send(client, request);
                 processDeviceResponse(resp, cResponse);
             } else {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -206,8 +206,8 @@ public class ClientServlet extends HttpServlet {
                 String target = StringUtils.substringBetween(req.getPathInfo(), clientEndpoint, "/observe");
                 Client client = server.getClientRegistry().get(clientEndpoint);
                 if (client != null) {
-                    ObserveRequest request = new ObserveRequest(client, target);
-                    LwM2mResponse cResponse = server.send(request);
+                    ObserveRequest request = new ObserveRequest(target);
+                    LwM2mResponse cResponse = server.send(client, request);
                     processDeviceResponse(resp, cResponse);
                 } else {
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -232,8 +232,8 @@ public class ClientServlet extends HttpServlet {
             try {
                 Client client = server.getClientRegistry().get(clientEndpoint);
                 if (client != null) {
-                    ExecuteRequest request = new ExecuteRequest(client, target);
-                    LwM2mResponse cResponse = server.send(request);
+                    ExecuteRequest request = new ExecuteRequest(target);
+                    LwM2mResponse cResponse = server.send(client, request);
                     processDeviceResponse(resp, cResponse);
                 } else {
                     resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -309,8 +309,8 @@ public class ClientServlet extends HttpServlet {
             String target = StringUtils.removeStart(req.getPathInfo(), "/" + clientEndpoint);
             Client client = server.getClientRegistry().get(clientEndpoint);
             if (client != null) {
-                DeleteRequest request = new DeleteRequest(client, target);
-                LwM2mResponse cResponse = server.send(request);
+                DeleteRequest request = new DeleteRequest(target);
+                LwM2mResponse cResponse = server.send(client, request);
                 processDeviceResponse(resp, cResponse);
             } else {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -348,7 +348,7 @@ public class ClientServlet extends HttpServlet {
         if ("text/plain".equals(contentType)) {
             String content = IOUtils.toString(req.getInputStream(), parameters.get("charset"));
             int rscId = Integer.valueOf(target.substring(target.lastIndexOf("/") + 1));
-            return server.send(new WriteRequest(client, target,
+            return server.send(client, new WriteRequest(target,
                     new LwM2mResource(rscId, Value.newStringValue(content)), ContentFormat.TEXT, true));
 
         } else if ("application/json".equals(contentType)) {
@@ -359,7 +359,7 @@ public class ClientServlet extends HttpServlet {
             } catch (JsonSyntaxException e) {
                 throw new IllegalArgumentException("unable to parse json to tlv:" + e.getMessage(), e);
             }
-            return server.send(new WriteRequest(client, target, node, null, true));
+            return server.send(client, new WriteRequest(target, node, null, true));
 
         } else {
             throw new IllegalArgumentException("content type " + req.getContentType()
@@ -384,7 +384,7 @@ public class ClientServlet extends HttpServlet {
                 throw new IllegalArgumentException("payload must contain an object instance");
             }
 
-            return server.send(new CreateRequest(client, target, (LwM2mObjectInstance) node, ContentFormat.TLV));
+            return server.send(client, new CreateRequest(target, (LwM2mObjectInstance) node, ContentFormat.TLV));
         } else {
             throw new IllegalArgumentException("content type " + req.getContentType()
                     + " not supported for write requests");

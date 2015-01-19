@@ -70,8 +70,16 @@ import leshan.core.node.LwM2mResource;
 import leshan.core.node.Value;
 import leshan.core.request.ContentFormat;
 import leshan.core.response.LwM2mResponse;
+import leshan.core.request.CreateRequest;
+import leshan.core.request.DeleteRequest;
+import leshan.core.request.DiscoverRequest;
+import leshan.core.request.ObserveRequest;
+import leshan.core.request.ReadRequest;
+import leshan.core.request.WriteAttributesRequest;
+import leshan.core.request.WriteRequest;
 import leshan.core.response.CreateResponse;
 import leshan.core.response.DiscoverResponse;
+import leshan.core.response.LwM2mResponse;
 import leshan.core.response.ValueResponse;
 import leshan.server.LwM2mServer;
 import leshan.server.californium.LeshanServerBuilder;
@@ -80,13 +88,6 @@ import leshan.server.client.Client;
 import leshan.server.client.ClientRegistry;
 import leshan.server.impl.SecurityRegistryImpl;
 import leshan.server.observation.ObservationRegistry;
-import leshan.server.request.CreateRequest;
-import leshan.server.request.DeleteRequest;
-import leshan.server.request.DiscoverRequest;
-import leshan.server.request.ObserveRequest;
-import leshan.server.request.ReadRequest;
-import leshan.server.request.WriteAttributesRequest;
-import leshan.server.request.WriteRequest;
 
 import org.eclipse.californium.core.WebLink;
 import org.eclipse.californium.core.coap.LinkFormat;
@@ -269,94 +270,93 @@ public final class IntegrationTestHelper {
     }
 
     ValueResponse sendRead(final int objectId) {
-        return server.send(new ReadRequest(getClient(), objectId));
+        return server.send(getClient(), new ReadRequest(objectId));
     }
 
     ValueResponse sendRead(final int objectId, final int objectInstanceId) {
-        return server.send(new ReadRequest(getClient(), objectId, objectInstanceId));
+        return server.send(getClient(), new ReadRequest(objectId, objectInstanceId));
     }
 
     ValueResponse sendRead(final int objectId, final int objectInstanceId, final int resourceId) {
-        return server.send(new ReadRequest(getClient(), objectId, objectInstanceId, resourceId));
+        return server.send(getClient(), new ReadRequest(objectId, objectInstanceId, resourceId));
     }
 
     ValueResponse sendObserve(final int objectId) {
-        return server.send(new ObserveRequest(getClient(), objectId));
+        return server.send(getClient(), new ObserveRequest(objectId));
     }
 
     ValueResponse sendObserve(final int objectId, final int objectInstanceId) {
-        return server.send(new ObserveRequest(getClient(), objectId, objectInstanceId));
+        return server.send(getClient(), new ObserveRequest(objectId, objectInstanceId));
     }
 
     ValueResponse sendObserve(final int objectId, final int objectInstanceId, final int resourceId) {
-        return server.send(new ObserveRequest(getClient(), objectId, objectInstanceId, resourceId));
+        return server.send(getClient(), new ObserveRequest(objectId, objectInstanceId, resourceId));
     }
 
     DiscoverResponse sendDiscover(final int objectId) {
-        return server.send(new DiscoverRequest(getClient(), objectId));
+        return server.send(getClient(), new DiscoverRequest(objectId));
     }
 
     DiscoverResponse sendDiscover(final int objectId, final int objectInstanceId) {
-        return server.send(new DiscoverRequest(getClient(), objectId, objectInstanceId));
+        return server.send(getClient(), new DiscoverRequest(objectId, objectInstanceId));
     }
 
     DiscoverResponse sendDiscover(final int objectId, final int objectInstanceId, final int resourceId) {
-        return server.send(new DiscoverRequest(getClient(), objectId, objectInstanceId, resourceId));
+        return server.send(getClient(), new DiscoverRequest(objectId, objectInstanceId, resourceId));
     }
 
     CreateResponse sendCreate(final LwM2mObjectInstance instance, final int objectId) {
-        return server.send(new CreateRequest(getClient(), objectId, instance, ContentFormat.TLV));
+        return server.send(getClient(), new CreateRequest(objectId, instance, ContentFormat.TLV));
     }
 
     CreateResponse sendCreate(final LwM2mObjectInstance instance, final int objectId, final int objectInstanceId) {
-        return server.send(new CreateRequest(getClient(), objectId, objectInstanceId, instance, ContentFormat.TLV));
+        return server.send(getClient(), new CreateRequest(objectId, objectInstanceId, instance, ContentFormat.TLV));
     }
 
     LwM2mResponse sendDelete(final int objectId, final int objectInstanceId) {
-        return server.send(new DeleteRequest(getClient(), objectId, objectInstanceId));
+        return server.send(getClient(), new DeleteRequest(objectId, objectInstanceId));
     }
 
     LwM2mResponse sendUpdate(final LwM2mResource resource, final int objectId, final int objectInstanceId,
             final int resourceId) {
         final boolean isReplace = true;
-        return server.send(new WriteRequest(getClient(), objectId, objectInstanceId, resourceId, resource,
+        return server.send(getClient(), new WriteRequest(objectId, objectInstanceId, resourceId, resource,
                 ContentFormat.TEXT, !isReplace));
     }
 
     LwM2mResponse sendUpdate(final String payload, final int objectId, final int objectInstanceId, final int resourceId) {
         final boolean isReplace = true;
         final LwM2mNode resource = new LwM2mResource(resourceId, Value.newStringValue(payload));
-        return server.send(new WriteRequest(getClient(), objectId, objectInstanceId, resourceId, resource,
+        return server.send(getClient(), new WriteRequest(objectId, objectInstanceId, resourceId, resource,
                 ContentFormat.TEXT, !isReplace));
     }
 
     LwM2mResponse sendReplace(final LwM2mResource resource, final int objectId, final int objectInstanceId,
             final int resourceId) {
         final boolean isReplace = true;
-        return server.send(new WriteRequest(getClient(), objectId, objectInstanceId, resourceId, resource,
+        return server.send(getClient(), new WriteRequest(objectId, objectInstanceId, resourceId, resource,
                 ContentFormat.TEXT, isReplace));
     }
 
-    LwM2mResponse sendReplace(final String payload, final int objectId, final int objectInstanceId,
-            final int resourceId) {
+    LwM2mResponse sendReplace(final String payload, final int objectId, final int objectInstanceId, final int resourceId) {
         final boolean isReplace = true;
         final LwM2mNode resource = new LwM2mResource(resourceId, Value.newStringValue(payload));
-        return server.send(new WriteRequest(getClient(), objectId, objectInstanceId, resourceId, resource,
+        return server.send(getClient(), new WriteRequest(objectId, objectInstanceId, resourceId, resource,
                 ContentFormat.TEXT, isReplace));
     }
 
     LwM2mResponse sendWriteAttributes(final ObserveSpec observeSpec, final int objectId) {
-        return server.send(new WriteAttributesRequest(getClient(), objectId, observeSpec));
+        return server.send(getClient(), new WriteAttributesRequest(objectId, observeSpec));
     }
 
     LwM2mResponse sendWriteAttributes(final ObserveSpec observeSpec, final int objectId, final int objectInstanceId) {
-        return server.send(new WriteAttributesRequest(getClient(), objectId, objectInstanceId, observeSpec));
+        return server.send(getClient(), new WriteAttributesRequest(objectId, objectInstanceId, observeSpec));
     }
 
     LwM2mResponse sendWriteAttributes(final ObserveSpec observeSpec, final int objectId, final int objectInstanceId,
             final int resourceId) {
         return server
-                .send(new WriteAttributesRequest(getClient(), objectId, objectInstanceId, resourceId, observeSpec));
+                .send(getClient(), new WriteAttributesRequest(objectId, objectInstanceId, resourceId, observeSpec));
     }
 
     Client getClient() {

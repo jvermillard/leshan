@@ -27,34 +27,51 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.request;
+package leshan.core.request;
 
+import leshan.ObserveSpec;
 import leshan.core.node.LwM2mPath;
 import leshan.core.response.LwM2mResponse;
-import leshan.server.client.Client;
+import leshan.util.Validate;
 
-/**
- * A Lightweight M2M request.
- */
-public interface LwM2mRequest<T extends LwM2mResponse> {
+public class WriteAttributesRequest extends AbstractDownlinkRequest<LwM2mResponse> {
 
-    /**
-     * Gets the LWM2M Client the request is targeted at.
-     *
-     * @return the client
-     */
-    Client getClient();
+    private final ObserveSpec observeSpec;
 
-    /**
-     * Gets the requested resource path.
-     *
-     * @return the request path
-     */
-    LwM2mPath getPath();
+    public WriteAttributesRequest(final int objectId, final ObserveSpec observeSpec) {
+        this(new LwM2mPath(objectId), observeSpec);
+    }
 
-    /**
-     * Accept a visitor for this request.
-     */
-    void accept(LwM2mRequestVisitor visitor);
+    public WriteAttributesRequest(final int objectId, final int objectInstanceId, final ObserveSpec observeSpec) {
+        this(new LwM2mPath(objectId, objectInstanceId), observeSpec);
+    }
 
+    public WriteAttributesRequest(final int objectId, final int objectInstanceId, final int resourceId,
+            final ObserveSpec observeSpec) {
+        this(new LwM2mPath(objectId, objectInstanceId, resourceId), observeSpec);
+    }
+
+    public WriteAttributesRequest(final String path, final ObserveSpec observeSpec) {
+        this(new LwM2mPath(path), observeSpec);
+    }
+
+    private WriteAttributesRequest(final LwM2mPath path, final ObserveSpec observeSpec) {
+        super(path);
+        Validate.notNull(observeSpec);
+        this.observeSpec = observeSpec;
+    }
+
+    @Override
+    public void accept(final DownlinkRequestVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    public ObserveSpec getObserveSpec() {
+        return this.observeSpec;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("WriteAttributesRequest [%s, attributes=%s]", getPath(), getObserveSpec());
+    }
 }

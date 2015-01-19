@@ -31,35 +31,40 @@ package leshan.server.californium.impl;
 
 import leshan.core.node.LwM2mPath;
 import leshan.core.node.codec.LwM2mNodeEncoder;
+import leshan.core.request.CreateRequest;
+import leshan.core.request.DeleteRequest;
+import leshan.core.request.DiscoverRequest;
+import leshan.core.request.ExecuteRequest;
+import leshan.core.request.DownlinkRequestVisitor;
+import leshan.core.request.ObserveRequest;
+import leshan.core.request.ReadRequest;
+import leshan.core.request.WriteAttributesRequest;
+import leshan.core.request.WriteRequest;
 import leshan.server.client.Client;
-import leshan.server.request.CreateRequest;
-import leshan.server.request.DeleteRequest;
-import leshan.server.request.DiscoverRequest;
-import leshan.server.request.ExecuteRequest;
-import leshan.server.request.LwM2mRequestVisitor;
-import leshan.server.request.ObserveRequest;
-import leshan.server.request.ReadRequest;
-import leshan.server.request.WriteAttributesRequest;
-import leshan.server.request.WriteRequest;
 import leshan.util.StringUtils;
 
 import org.eclipse.californium.core.coap.MediaTypeRegistry;
 import org.eclipse.californium.core.coap.Request;
 
-public class CoapRequestBuilder implements LwM2mRequestVisitor {
+public class CoapRequestBuilder implements DownlinkRequestVisitor {
 
     private Request coapRequest;
+    private final Client destination;
+
+    public CoapRequestBuilder(Client destination) {
+        this.destination = destination;
+    }
 
     @Override
     public void visit(ReadRequest request) {
         coapRequest = Request.newGet();
-        setTarget(coapRequest, request.getClient(), request.getPath());
+        setTarget(coapRequest, destination, request.getPath());
     }
 
     @Override
     public void visit(DiscoverRequest request) {
         coapRequest = Request.newGet();
-        setTarget(coapRequest, request.getClient(), request.getPath());
+        setTarget(coapRequest, destination, request.getPath());
         coapRequest.getOptions().setAccept(MediaTypeRegistry.APPLICATION_LINK_FORMAT);
     }
 
@@ -69,13 +74,13 @@ public class CoapRequestBuilder implements LwM2mRequestVisitor {
         coapRequest.getOptions().setContentFormat(request.getContentFormat().getCode());
         coapRequest
                 .setPayload(LwM2mNodeEncoder.encode(request.getNode(), request.getContentFormat(), request.getPath()));
-        setTarget(coapRequest, request.getClient(), request.getPath());
+        setTarget(coapRequest, destination, request.getPath());
     }
 
     @Override
     public void visit(WriteAttributesRequest request) {
         coapRequest = Request.newPut();
-        setTarget(coapRequest, request.getClient(), request.getPath());
+        setTarget(coapRequest, destination, request.getPath());
         for (String query : request.getObserveSpec().toQueryParams()) {
             coapRequest.getOptions().addUriQuery(query);
         }
@@ -84,7 +89,7 @@ public class CoapRequestBuilder implements LwM2mRequestVisitor {
     @Override
     public void visit(ExecuteRequest request) {
         coapRequest = Request.newPost();
-        setTarget(coapRequest, request.getClient(), request.getPath());
+        setTarget(coapRequest, destination, request.getPath());
         coapRequest.setPayload(request.getParameters());
         if (request.getContentFormat() != null) {
             coapRequest.getOptions().setContentFormat(request.getContentFormat().getCode());
@@ -97,20 +102,20 @@ public class CoapRequestBuilder implements LwM2mRequestVisitor {
         coapRequest.getOptions().setContentFormat(request.getContentFormat().getCode());
         coapRequest.setPayload(LwM2mNodeEncoder.encode(request.getObjectInstance(), request.getContentFormat(),
                 request.getPath()));
-        setTarget(coapRequest, request.getClient(), request.getPath());
+        setTarget(coapRequest, destination, request.getPath());
     }
 
     @Override
     public void visit(DeleteRequest request) {
         coapRequest = Request.newDelete();
-        setTarget(coapRequest, request.getClient(), request.getPath());
+        setTarget(coapRequest, destination, request.getPath());
     }
 
     @Override
     public void visit(ObserveRequest request) {
         coapRequest = Request.newGet();
         coapRequest.setObserve();
-        setTarget(coapRequest, request.getClient(), request.getPath());
+        setTarget(coapRequest, destination, request.getPath());
     }
 
     private final void setTarget(Request coapRequest, Client client, LwM2mPath path) {

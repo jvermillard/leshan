@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Sierra Wireless
+ * Copyright (c) 2014, Sierra Wireless
  *
  * All rights reserved.
  *
@@ -27,23 +27,24 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.request;
+package leshan.core.request;
 
-import leshan.core.request.DownlinkRequest;
-import leshan.core.response.ExceptionConsumer;
 import leshan.core.response.LwM2mResponse;
-import leshan.core.response.ResponseConsumer;
-import leshan.server.client.Client;
 
-public interface LwM2mRequestSender {
-    /**
-     * Send a Lightweight M2M request synchronously. Will block until a response is received from the remote client.
-     */
-    <T extends LwM2mResponse> T send(Client destination, DownlinkRequest<T> request);
+public class DeregisterRequest implements UplinkRequest<LwM2mResponse> {
 
-    /**
-     * Send a Lightweight M2M request asynchronously.
-     */
-    <T extends LwM2mResponse> void send(Client destination, DownlinkRequest<T> request,
-            ResponseConsumer<T> responseCallback, ExceptionConsumer errorCallback);
+    private String registrationID = null;
+
+    public DeregisterRequest(String registrationID) {
+        this.registrationID = registrationID;
+    }
+
+    public String getRegistrationID() {
+        return registrationID;
+    }
+
+    @Override
+    public void accept(UplinkRequestVisitor visitor) {
+        visitor.visit(this);
+    }
 }

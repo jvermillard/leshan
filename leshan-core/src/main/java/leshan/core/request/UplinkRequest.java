@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Sierra Wireless
+ * Copyright (c) 2015, Sierra Wireless
  *
  * All rights reserved.
  *
@@ -27,25 +27,18 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.request;
+package leshan.core.request;
+
+import leshan.core.response.LwM2mResponse;
 
 /**
- * A visitor to visit a Lightweight M2M request.
+ * A Uplink Lightweight M2M request.<br>
+ * This is a request sent from client to server.
  */
-public interface LwM2mRequestVisitor {
-    void visit(ReadRequest request);
+public interface UplinkRequest<T extends LwM2mResponse> extends LwM2mRequest<T> {
 
-    void visit(DiscoverRequest request);
-
-    void visit(WriteRequest request);
-
-    void visit(WriteAttributesRequest request);
-
-    void visit(ExecuteRequest request);
-
-    void visit(CreateRequest request);
-
-    void visit(DeleteRequest request);
-
-    void visit(ObserveRequest request);
+    /**
+     * Accept a visitor for this request.
+     */
+    void accept(UplinkRequestVisitor visitor);
 }

@@ -27,15 +27,15 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.request;
+package leshan.core.request;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 import leshan.LinkObject;
-import leshan.server.client.BindingMode;
+import leshan.core.response.RegisterResponse;
 
-public class RegisterRequest {
+public class RegisterRequest implements UplinkRequest<RegisterResponse> {
 
     private String endpointName = null;
     private Long lifetime = null;
@@ -105,5 +105,10 @@ public class RegisterRequest {
 
     public String getPskIdentity() {
         return pskIdentity;
+    }
+
+    @Override
+    public void accept(UplinkRequestVisitor visitor) {
+        visitor.visit(this);
     }
 }

@@ -29,12 +29,13 @@
  */
 package leshan.server;
 
-import leshan.core.response.LwM2mResponse;
+import leshan.core.request.DownlinkRequest;
 import leshan.core.response.ExceptionConsumer;
+import leshan.core.response.LwM2mResponse;
 import leshan.core.response.ResponseConsumer;
+import leshan.server.client.Client;
 import leshan.server.client.ClientRegistry;
 import leshan.server.observation.ObservationRegistry;
-import leshan.server.request.LwM2mRequest;
 import leshan.server.security.SecurityRegistry;
 
 /**
@@ -66,13 +67,13 @@ public interface LwM2mServer {
     /**
      * Send a Lightweight M2M request synchronously. Will block until a response is received from the remote client.
      */
-    <T extends LwM2mResponse> T send(LwM2mRequest<T> request);
+    <T extends LwM2mResponse> T send(Client destination, DownlinkRequest<T> request);
 
     /**
      * Send a Lightweight M2M request asynchronously.
      */
-    <T extends LwM2mResponse> void send(LwM2mRequest<T> request, ResponseConsumer<T> responseCallback,
-            ExceptionConsumer errorCallback);
+    <T extends LwM2mResponse> void send(Client destination, DownlinkRequest<T> request,
+            ResponseConsumer<T> responseCallback, ExceptionConsumer errorCallback);
 
     /**
      * Get the client registry containing the list of connected clients. You can use this object for listening client

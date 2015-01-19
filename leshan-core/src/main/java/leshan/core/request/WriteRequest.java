@@ -27,7 +27,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.request;
+package leshan.core.request;
 
 import leshan.core.node.LwM2mNode;
 import leshan.core.node.LwM2mObject;
@@ -38,35 +38,33 @@ import leshan.core.node.Value.DataType;
 import leshan.core.objectspec.ResourceSpec;
 import leshan.core.objectspec.ResourceSpec.Type;
 import leshan.core.objectspec.Resources;
-import leshan.core.request.ContentFormat;
 import leshan.core.response.LwM2mResponse;
-import leshan.server.client.Client;
 import leshan.util.Validate;
 
 /**
  * The request to change the value of a Resource, an array of Resources Instances or multiple Resources from an Object
  * Instance.
  */
-public class WriteRequest extends AbstractLwM2mRequest<LwM2mResponse> {
+public class WriteRequest extends AbstractDownlinkRequest<LwM2mResponse> {
 
     private final LwM2mNode node;
     private final ContentFormat contentFormat;
 
     private final boolean replaceRequest;
 
-    public WriteRequest(final Client client, final int objectId, final int objectInstanceId, final int resourceId,
-            final LwM2mNode node, final ContentFormat contentFormat, final boolean replaceResources) {
-        this(client, new LwM2mPath(objectId, objectInstanceId, resourceId), node, contentFormat, replaceResources);
-    }
-
-    public WriteRequest(final Client client, final String target, final LwM2mNode node,
+    public WriteRequest(final int objectId, final int objectInstanceId, final int resourceId, final LwM2mNode node,
             final ContentFormat contentFormat, final boolean replaceResources) {
-        this(client, new LwM2mPath(target), node, contentFormat, replaceResources);
+        this(new LwM2mPath(objectId, objectInstanceId, resourceId), node, contentFormat, replaceResources);
     }
 
-    private WriteRequest(final Client client, final LwM2mPath target, final LwM2mNode node, ContentFormat format,
+    public WriteRequest(final String target, final LwM2mNode node, final ContentFormat contentFormat,
             final boolean replaceResources) {
-        super(client, target);
+        this(new LwM2mPath(target), node, contentFormat, replaceResources);
+    }
+
+    private WriteRequest(final LwM2mPath target, final LwM2mNode node, ContentFormat format,
+            final boolean replaceResources) {
+        super(target);
         Validate.notNull(node);
 
         // Validate node and path coherence
@@ -163,7 +161,7 @@ public class WriteRequest extends AbstractLwM2mRequest<LwM2mResponse> {
     }
 
     @Override
-    public void accept(final LwM2mRequestVisitor visitor) {
+    public void accept(final DownlinkRequestVisitor visitor) {
         visitor.visit(this);
     }
 

@@ -27,11 +27,10 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.request;
+package leshan.core.request;
 
 import leshan.core.node.LwM2mPath;
 import leshan.core.response.ValueResponse;
-import leshan.server.client.Client;
 
 /**
  * A Lightweight M2M request for retrieving the values of resources from a LWM2M Client.
@@ -39,53 +38,49 @@ import leshan.server.client.Client;
  * The request can be used to retrieve the value(s) of one or all attributes of one particular or all instances of a
  * particular object type.
  */
-public class ReadRequest extends AbstractLwM2mRequest<ValueResponse> {
+public class ReadRequest extends AbstractDownlinkRequest<ValueResponse> {
 
     /**
      * Creates a request for reading all instances of a particular object from a client.
      * 
-     * @param client the LWM2M Client to read the resource from
      * @param objectId the object ID of the resource
      */
-    public ReadRequest(Client client, int objectId) {
-        this(client, new LwM2mPath(objectId));
+    public ReadRequest(int objectId) {
+        this(new LwM2mPath(objectId));
     }
 
     /**
      * Creates a request for reading a particular object instance from a client.
      * 
-     * @param client the LWM2M Client to read the resource from
      * @param objectId the object ID of the resource
      * @param objectInstanceId the object instance ID
      */
-    public ReadRequest(Client client, int objectId, int objectInstanceId) {
-        this(client, new LwM2mPath(objectId, objectInstanceId));
+    public ReadRequest(int objectId, int objectInstanceId) {
+        this(new LwM2mPath(objectId, objectInstanceId));
     }
 
     /**
      * Creates a request for reading a specific resource from a client.
      * 
-     * @param client the LWM2M Client to read the resource from
      * @param objectId the object ID of the resource
      * @param objectInstanceId the object instance ID
      * @param resourceId the (individual) resource's ID
      */
-    public ReadRequest(Client client, int objectId, int objectInstanceId, int resourceId) {
-        this(client, new LwM2mPath(objectId, objectInstanceId, resourceId));
+    public ReadRequest(int objectId, int objectInstanceId, int resourceId) {
+        this(new LwM2mPath(objectId, objectInstanceId, resourceId));
     }
 
     /**
      * Create a request for reading an object/instance/resource targeted by a specific path.
      * 
-     * @param client the LWM2M client to read the resource from
      * @param target the target path
      */
-    public ReadRequest(Client client, String target) {
-        super(client, new LwM2mPath(target));
+    public ReadRequest(String target) {
+        super(new LwM2mPath(target));
     }
 
-    private ReadRequest(Client client, LwM2mPath target) {
-        super(client, target);
+    private ReadRequest(LwM2mPath target) {
+        super(target);
     }
 
     @Override
@@ -94,7 +89,7 @@ public class ReadRequest extends AbstractLwM2mRequest<ValueResponse> {
     }
 
     @Override
-    public void accept(LwM2mRequestVisitor visitor) {
+    public void accept(DownlinkRequestVisitor visitor) {
         visitor.visit(this);
 
     }

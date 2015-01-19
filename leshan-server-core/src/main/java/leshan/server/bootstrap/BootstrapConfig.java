@@ -33,7 +33,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import leshan.server.client.BindingMode;
+import leshan.core.request.BindingMode;
 
 /**
  * A client configuration to be pushed by a bootstrap operation

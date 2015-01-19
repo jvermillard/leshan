@@ -27,23 +27,32 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.request;
+package leshan.core.request;
 
-import leshan.core.request.DownlinkRequest;
-import leshan.core.response.ExceptionConsumer;
+import leshan.core.node.LwM2mPath;
 import leshan.core.response.LwM2mResponse;
-import leshan.core.response.ResponseConsumer;
-import leshan.server.client.Client;
+import leshan.util.Validate;
 
-public interface LwM2mRequestSender {
-    /**
-     * Send a Lightweight M2M request synchronously. Will block until a response is received from the remote client.
-     */
-    <T extends LwM2mResponse> T send(Client destination, DownlinkRequest<T> request);
+/**
+ * A base class for concrete LWM2M Downlink request types.
+ *
+ * Provides generic support for specifying the target client and the resource path.
+ */
+public abstract class AbstractDownlinkRequest<T extends LwM2mResponse> implements DownlinkRequest<T> {
+
+    private final LwM2mPath path;
+
+    protected AbstractDownlinkRequest(final LwM2mPath path) {
+        Validate.notNull(path);
+        this.path = path;
+    }
 
     /**
-     * Send a Lightweight M2M request asynchronously.
+     * {@inheritDoc}
      */
-    <T extends LwM2mResponse> void send(Client destination, DownlinkRequest<T> request,
-            ResponseConsumer<T> responseCallback, ExceptionConsumer errorCallback);
+    @Override
+    public LwM2mPath getPath() {
+        return this.path;
+    }
+
 }

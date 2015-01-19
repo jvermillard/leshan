@@ -32,13 +32,13 @@ package leshan.server.registration;
 import java.net.InetSocketAddress;
 
 import leshan.ResponseCode;
+import leshan.core.request.DeregisterRequest;
+import leshan.core.request.RegisterRequest;
+import leshan.core.request.UpdateRequest;
 import leshan.core.response.LwM2mResponse;
 import leshan.core.response.RegisterResponse;
 import leshan.server.client.Client;
 import leshan.server.client.ClientRegistry;
-import leshan.server.request.DeregisterRequest;
-import leshan.server.request.RegisterRequest;
-import leshan.server.request.UpdateRequest;
 import leshan.server.security.SecurityInfo;
 import leshan.server.security.SecurityStore;
 import leshan.util.RandomStringUtils;

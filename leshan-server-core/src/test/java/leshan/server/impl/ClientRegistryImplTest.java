@@ -33,9 +33,9 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 import leshan.LinkObject;
-import leshan.server.client.BindingMode;
+import leshan.core.request.BindingMode;
+import leshan.core.request.UpdateRequest;
 import leshan.server.client.Client;
-import leshan.server.request.UpdateRequest;
 
 import org.junit.Assert;
 import org.junit.Before;

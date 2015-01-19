@@ -27,15 +27,15 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.request;
+package leshan.core.request;
 
 import java.net.InetAddress;
 import java.util.Date;
 
 import leshan.LinkObject;
-import leshan.server.client.BindingMode;
+import leshan.core.response.LwM2mResponse;
 
-public class UpdateRequest {
+public class UpdateRequest implements UplinkRequest<LwM2mResponse> {
 
     private final InetAddress address;
     private final Integer port;
@@ -108,5 +108,10 @@ public class UpdateRequest {
 
     public BindingMode getBindingMode() {
         return bindingMode;
+    }
+
+    @Override
+    public void accept(UplinkRequestVisitor visitor) {
+        visitor.visit(this);
     }
 }

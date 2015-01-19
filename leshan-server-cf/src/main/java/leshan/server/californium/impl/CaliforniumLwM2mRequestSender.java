@@ -38,13 +38,13 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import leshan.core.request.DownlinkRequest;
 import leshan.core.response.ExceptionConsumer;
 import leshan.core.response.LwM2mResponse;
 import leshan.core.response.ResponseConsumer;
 import leshan.server.client.Client;
 import leshan.server.client.ClientRegistry;
 import leshan.server.observation.ObservationRegistry;
-import leshan.server.request.LwM2mRequest;
 import leshan.server.request.LwM2mRequestSender;
 import leshan.server.request.RejectionException;
 import leshan.server.request.RequestTimeoutException;
@@ -95,20 +95,21 @@ public class CaliforniumLwM2mRequestSender implements LwM2mRequestSender {
     }
 
     @Override
-    public <T extends LwM2mResponse> T send(final LwM2mRequest<T> request) {
+    public <T extends LwM2mResponse> T send(final Client destination, final DownlinkRequest<T> request) {
+
         // Create the CoAP request from LwM2m request
-        final CoapRequestBuilder CoapRequestBuilder = new CoapRequestBuilder();
+        final CoapRequestBuilder CoapRequestBuilder = new CoapRequestBuilder(destination);
         request.accept(CoapRequestBuilder);
         final Request coapRequest = CoapRequestBuilder.getRequest();
 
         // Send CoAP request synchronously
-        final SyncRequestObserver<T> syncMessageObserver = new SyncRequestObserver<T>(coapRequest, request.getClient(),
+        final SyncRequestObserver<T> syncMessageObserver = new SyncRequestObserver<T>(coapRequest, destination,
                 timeoutMillis) {
             @Override
             public T buildResponse(final Response coapResponse) {
                 // Build LwM2m response
                 final LwM2mResponseBuilder<T> lwm2mResponseBuilder = new LwM2mResponseBuilder<T>(coapRequest,
-                        coapResponse, observationRegistry);
+                        coapResponse, client, observationRegistry);
                 request.accept(lwm2mResponseBuilder);
                 return lwm2mResponseBuilder.getResponse();
             }
@@ -116,7 +117,7 @@ public class CaliforniumLwM2mRequestSender implements LwM2mRequestSender {
         coapRequest.addMessageObserver(syncMessageObserver);
 
         // Send CoAP request asynchronously
-        final Endpoint endpoint = getEndpointForClient(request.getClient());
+        final Endpoint endpoint = getEndpointForClient(destination);
         endpoint.sendRequest(coapRequest);
 
         // Wait for response, then return it
@@ -124,28 +125,28 @@ public class CaliforniumLwM2mRequestSender implements LwM2mRequestSender {
     }
 
     @Override
-    public <T extends LwM2mResponse> void send(final LwM2mRequest<T> request,
+    public <T extends LwM2mResponse> void send(final Client destination, final DownlinkRequest<T> request,
             final ResponseConsumer<T> responseCallback, final ExceptionConsumer errorCallback) {
         // Create the CoAP request from LwM2m request
-        final CoapRequestBuilder CoapRequestBuilder = new CoapRequestBuilder();
+        final CoapRequestBuilder CoapRequestBuilder = new CoapRequestBuilder(destination);
         request.accept(CoapRequestBuilder);
         final Request coapRequest = CoapRequestBuilder.getRequest();
 
         // Add CoAP request callback
-        coapRequest.addMessageObserver(new AsyncRequestObserver<T>(coapRequest, request.getClient(), responseCallback,
+        coapRequest.addMessageObserver(new AsyncRequestObserver<T>(coapRequest, destination, responseCallback,
                 errorCallback) {
             @Override
             public T buildResponse(final Response coapResponse) {
                 // Build LwM2m response
                 final LwM2mResponseBuilder<T> lwm2mResponseBuilder = new LwM2mResponseBuilder<T>(coapRequest,
-                        coapResponse, observationRegistry);
+                        coapResponse, client, observationRegistry);
                 request.accept(lwm2mResponseBuilder);
                 return lwm2mResponseBuilder.getResponse();
             }
         });
 
         // Send CoAP request asynchronously
-        final Endpoint endpoint = getEndpointForClient(request.getClient());
+        final Endpoint endpoint = getEndpointForClient(destination);
         endpoint.sendRequest(coapRequest);
     }
 

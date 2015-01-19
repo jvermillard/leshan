@@ -36,6 +36,7 @@ import java.util.Comparator;
 import java.util.Date;
 
 import leshan.LinkObject;
+import leshan.core.request.BindingMode;
 import leshan.util.Validate;
 
 /**

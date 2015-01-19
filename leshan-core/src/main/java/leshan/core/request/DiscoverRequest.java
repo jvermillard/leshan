@@ -27,33 +27,30 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.request;
+package leshan.core.request;
 
 import leshan.core.node.LwM2mPath;
 import leshan.core.response.DiscoverResponse;
-import leshan.server.client.Client;
 
-public class DiscoverRequest extends AbstractLwM2mRequest<DiscoverResponse> {
+public class DiscoverRequest extends AbstractDownlinkRequest<DiscoverResponse> {
 
     /**
      * Creates a request for discovering the resources implemented by a client for a particular object type.
      *
-     * @param client the LWM2M Client to discover resources for
      * @param objectId the object type
      */
-    public DiscoverRequest(Client client, int objectId) {
-        this(client, new LwM2mPath(objectId));
+    public DiscoverRequest(int objectId) {
+        this(new LwM2mPath(objectId));
     }
 
     /**
      * Creates a request for discovering the resources implemented by a client for a particular object instance.
      *
-     * @param client the LWM2M Client to discover resources for
      * @param objectId the object type
      * @param objectInstanceId the object instance
      */
-    public DiscoverRequest(Client client, int objectId, int objectInstanceId) {
-        this(client, new LwM2mPath(objectId, objectInstanceId));
+    public DiscoverRequest(int objectId, int objectInstanceId) {
+        this(new LwM2mPath(objectId, objectInstanceId));
     }
 
     /**
@@ -64,8 +61,8 @@ public class DiscoverRequest extends AbstractLwM2mRequest<DiscoverResponse> {
      * @param objectInstanceId the object instance
      * @param resourceId the resource
      */
-    public DiscoverRequest(Client client, int objectId, int objectInstanceId, int resourceId) {
-        this(client, new LwM2mPath(objectId, objectInstanceId, resourceId));
+    public DiscoverRequest(int objectId, int objectInstanceId, int resourceId) {
+        this(new LwM2mPath(objectId, objectInstanceId, resourceId));
     }
 
     /**
@@ -75,16 +72,16 @@ public class DiscoverRequest extends AbstractLwM2mRequest<DiscoverResponse> {
      * @param client the LWM2M Client to discover resources for
      * @param target the target path
      */
-    public DiscoverRequest(Client client, String target) {
-        super(client, new LwM2mPath(target));
+    public DiscoverRequest(String target) {
+        super(new LwM2mPath(target));
     }
 
-    private DiscoverRequest(Client client, LwM2mPath target) {
-        super(client, target);
+    private DiscoverRequest(LwM2mPath target) {
+        super(target);
     }
 
     @Override
-    public void accept(LwM2mRequestVisitor visitor) {
+    public void accept(DownlinkRequestVisitor visitor) {
         visitor.visit(this);
     }
 

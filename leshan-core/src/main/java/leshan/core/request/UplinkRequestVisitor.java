@@ -27,44 +27,17 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.request;
-
-import leshan.core.node.LwM2mPath;
-import leshan.core.response.LwM2mResponse;
-import leshan.server.client.Client;
-import leshan.util.Validate;
+package leshan.core.request;
 
 /**
- * A base class for concrete LWM2M request types.
- *
- * Provides generic support for specifying the target client and the resource path.
+ * A visitor to visit an Uplink Lightweight M2M request.
  */
-public abstract class AbstractLwM2mRequest<T extends LwM2mResponse> implements LwM2mRequest<T> {
+public interface UplinkRequestVisitor {
+    void visit(RegisterRequest request);
 
-    private final Client client;
-    private final LwM2mPath path;
+    void visit(UpdateRequest request);
 
-    protected AbstractLwM2mRequest(final Client client, final LwM2mPath path) {
-        Validate.notNull(client);
-        Validate.notNull(path);
-        this.client = client;
-        this.path = path;
-    }
+    void visit(DeregisterRequest request);
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Client getClient() {
-        return this.client;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public LwM2mPath getPath() {
-        return this.path;
-    }
-
+    // void visit(BootstrapRequest request);
 }

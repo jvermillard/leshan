@@ -36,22 +36,22 @@ import leshan.core.node.LwM2mPath;
 import leshan.core.node.codec.InvalidValueException;
 import leshan.core.node.codec.LwM2mNodeDecoder;
 import leshan.core.request.ContentFormat;
-import leshan.core.response.LwM2mResponse;
+import leshan.core.request.CreateRequest;
+import leshan.core.request.DeleteRequest;
+import leshan.core.request.DiscoverRequest;
+import leshan.core.request.ExecuteRequest;
+import leshan.core.request.DownlinkRequestVisitor;
+import leshan.core.request.ObserveRequest;
+import leshan.core.request.ReadRequest;
+import leshan.core.request.WriteAttributesRequest;
+import leshan.core.request.WriteRequest;
 import leshan.core.response.CreateResponse;
 import leshan.core.response.DiscoverResponse;
+import leshan.core.response.LwM2mResponse;
 import leshan.core.response.ValueResponse;
 import leshan.server.client.Client;
 import leshan.server.observation.ObservationRegistry;
-import leshan.server.request.CreateRequest;
-import leshan.server.request.DeleteRequest;
-import leshan.server.request.DiscoverRequest;
-import leshan.server.request.ExecuteRequest;
-import leshan.server.request.LwM2mRequestVisitor;
-import leshan.server.request.ObserveRequest;
-import leshan.server.request.ReadRequest;
 import leshan.server.request.ResourceAccessException;
-import leshan.server.request.WriteAttributesRequest;
-import leshan.server.request.WriteRequest;
 import leshan.util.Validate;
 
 import org.eclipse.californium.core.coap.CoAP;
@@ -61,7 +61,7 @@ import org.eclipse.californium.core.coap.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LwM2mResponseBuilder<T extends LwM2mResponse> implements LwM2mRequestVisitor {
+public class LwM2mResponseBuilder<T extends LwM2mResponse> implements DownlinkRequestVisitor {
 
     private static final Logger LOG = LoggerFactory.getLogger(LwM2mResponseBuilder.class);
 
@@ -69,6 +69,7 @@ public class LwM2mResponseBuilder<T extends LwM2mResponse> implements LwM2mReque
     private final Request coapRequest;
     private final Response coapResponse;
     private final ObservationRegistry observationRegistry;
+    private final Client client;
 
     public static ResponseCode fromCoapCode(final int code) {
         Validate.notNull(code);
@@ -96,11 +97,13 @@ public class LwM2mResponseBuilder<T extends LwM2mResponse> implements LwM2mReque
         }
     }
 
-    public LwM2mResponseBuilder(final Request coapRequest, final Response coapResponse, final ObservationRegistry observationRegistry) {
+    public LwM2mResponseBuilder(final Request coapRequest, final Response coapResponse, final Client client,
+            final ObservationRegistry observationRegistry) {
         super();
         this.coapRequest = coapRequest;
         this.coapResponse = coapResponse;
         this.observationRegistry = observationRegistry;
+        this.client = client;
     }
 
     @Override
@@ -115,7 +118,7 @@ public class LwM2mResponseBuilder<T extends LwM2mResponse> implements LwM2mReque
             lwM2mresponse = new ValueResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         default:
-            handleUnexpectedResponseCode(request.getClient(), coapRequest, coapResponse);
+            handleUnexpectedResponseCode(client.getEndpoint(), coapRequest, coapResponse);
         }
     }
 
@@ -126,8 +129,8 @@ public class LwM2mResponseBuilder<T extends LwM2mResponse> implements LwM2mReque
             LinkObject[] links = null;
             if (MediaTypeRegistry.APPLICATION_LINK_FORMAT != coapResponse.getOptions().getContentFormat()) {
                 LOG.debug("Expected LWM2M Client [{}] to return application/link-format [{}] content but got [{}]",
-                        request.getClient().getEndpoint(), MediaTypeRegistry.APPLICATION_LINK_FORMAT, coapResponse
-                                .getOptions().getContentFormat());
+                        client.getEndpoint(), MediaTypeRegistry.APPLICATION_LINK_FORMAT, coapResponse.getOptions()
+                                .getContentFormat());
                 links = new LinkObject[] {}; // empty list
             } else {
                 links = LinkObject.parse(coapResponse.getPayload());
@@ -140,7 +143,7 @@ public class LwM2mResponseBuilder<T extends LwM2mResponse> implements LwM2mReque
             lwM2mresponse = new DiscoverResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         default:
-            handleUnexpectedResponseCode(request.getClient(), coapRequest, coapResponse);
+            handleUnexpectedResponseCode(client.getEndpoint(), coapRequest, coapResponse);
         }
     }
 
@@ -157,7 +160,7 @@ public class LwM2mResponseBuilder<T extends LwM2mResponse> implements LwM2mReque
             lwM2mresponse = new LwM2mResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         default:
-            handleUnexpectedResponseCode(request.getClient(), coapRequest, coapResponse);
+            handleUnexpectedResponseCode(client.getEndpoint(), coapRequest, coapResponse);
         }
     }
 
@@ -174,7 +177,7 @@ public class LwM2mResponseBuilder<T extends LwM2mResponse> implements LwM2mReque
             lwM2mresponse = new LwM2mResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         default:
-            handleUnexpectedResponseCode(request.getClient(), coapRequest, coapResponse);
+            handleUnexpectedResponseCode(client.getEndpoint(), coapRequest, coapResponse);
         }
     }
 
@@ -191,7 +194,7 @@ public class LwM2mResponseBuilder<T extends LwM2mResponse> implements LwM2mReque
             lwM2mresponse = new LwM2mResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         default:
-            handleUnexpectedResponseCode(request.getClient(), coapRequest, coapResponse);
+            handleUnexpectedResponseCode(client.getEndpoint(), coapRequest, coapResponse);
         }
 
     }
@@ -210,7 +213,7 @@ public class LwM2mResponseBuilder<T extends LwM2mResponse> implements LwM2mReque
             lwM2mresponse = new CreateResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         default:
-            handleUnexpectedResponseCode(request.getClient(), coapRequest, coapResponse);
+            handleUnexpectedResponseCode(client.getEndpoint(), coapRequest, coapResponse);
         }
     }
 
@@ -226,7 +229,7 @@ public class LwM2mResponseBuilder<T extends LwM2mResponse> implements LwM2mReque
             lwM2mresponse = new LwM2mResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         default:
-            handleUnexpectedResponseCode(request.getClient(), coapRequest, coapResponse);
+            handleUnexpectedResponseCode(client.getEndpoint(), coapRequest, coapResponse);
         }
     }
 
@@ -241,7 +244,7 @@ public class LwM2mResponseBuilder<T extends LwM2mResponse> implements LwM2mReque
             lwM2mresponse = buildContentResponse(request.getPath(), coapResponse);
             if (coapResponse.getOptions().hasObserve()) {
                 // observe request succeed so we can add and observation to registry
-                final CaliforniumObservation observation = new CaliforniumObservation(coapRequest, request.getClient(),
+                final CaliforniumObservation observation = new CaliforniumObservation(coapRequest, client,
                         request.getPath());
                 coapRequest.addMessageObserver(observation);
                 observationRegistry.addObservation(observation);
@@ -252,7 +255,7 @@ public class LwM2mResponseBuilder<T extends LwM2mResponse> implements LwM2mReque
             lwM2mresponse = new ValueResponse(fromCoapCode(coapResponse.getCode().value));
             break;
         default:
-            handleUnexpectedResponseCode(request.getClient(), coapRequest, coapResponse);
+            handleUnexpectedResponseCode(client.getEndpoint(), coapRequest, coapResponse);
         }
     }
 
@@ -281,8 +284,9 @@ public class LwM2mResponseBuilder<T extends LwM2mResponse> implements LwM2mReque
      * @param coapRequest
      * @param coapResponse
      */
-    private void handleUnexpectedResponseCode(final Client client, final Request coapRequest, final Response coapResponse) {
-        final String msg = String.format("Client [%s] returned unexpected response code [%s]", client.getEndpoint(),
+    private void handleUnexpectedResponseCode(final String clientEndpoint, final Request coapRequest,
+            final Response coapResponse) {
+        final String msg = String.format("Client [%s] returned unexpected response code [%s]", clientEndpoint,
                 coapResponse.getCode());
         throw new ResourceAccessException(fromCoapCode(coapResponse.getCode().value), coapRequest.getURI(), msg);
     }

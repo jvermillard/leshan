@@ -27,23 +27,28 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.request;
+package leshan.core.request;
 
-import leshan.core.request.DownlinkRequest;
-import leshan.core.response.ExceptionConsumer;
-import leshan.core.response.LwM2mResponse;
-import leshan.core.response.ResponseConsumer;
-import leshan.server.client.Client;
+/**
+ * Transport binding and Queue Mode
+ */
+public enum BindingMode {
 
-public interface LwM2mRequestSender {
-    /**
-     * Send a Lightweight M2M request synchronously. Will block until a response is received from the remote client.
-     */
-    <T extends LwM2mResponse> T send(Client destination, DownlinkRequest<T> request);
+    /** UDP */
+    U,
 
-    /**
-     * Send a Lightweight M2M request asynchronously.
-     */
-    <T extends LwM2mResponse> void send(Client destination, DownlinkRequest<T> request,
-            ResponseConsumer<T> responseCallback, ExceptionConsumer errorCallback);
+    /** UDP with Queue Mode */
+    UQ,
+
+    /** SMS */
+    S,
+
+    /** SMS with Queue Mode */
+    SQ,
+
+    /** UDP and SMS */
+    US,
+
+    /** UDP with Queue Mode and SMS */
+    UQS
 }

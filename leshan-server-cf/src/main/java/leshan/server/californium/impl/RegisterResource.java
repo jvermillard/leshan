@@ -33,14 +33,14 @@ import java.net.InetSocketAddress;
 import java.util.List;
 
 import leshan.LinkObject;
+import leshan.core.request.BindingMode;
+import leshan.core.request.DeregisterRequest;
+import leshan.core.request.RegisterRequest;
+import leshan.core.request.UpdateRequest;
 import leshan.core.response.LwM2mResponse;
 import leshan.core.response.RegisterResponse;
-import leshan.server.client.BindingMode;
 import leshan.server.client.ClientRegistry;
 import leshan.server.registration.RegistrationHandler;
-import leshan.server.request.DeregisterRequest;
-import leshan.server.request.RegisterRequest;
-import leshan.server.request.UpdateRequest;
 import leshan.util.Validate;
 
 import org.eclipse.californium.core.CoapResource;

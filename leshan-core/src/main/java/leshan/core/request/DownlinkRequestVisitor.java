@@ -27,28 +27,25 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.client;
+package leshan.core.request;
 
 /**
- * Transport binding and Queue Mode
+ * A visitor to visit a Downlink Lightweight M2M request.
  */
-public enum BindingMode {
+public interface DownlinkRequestVisitor {
+    void visit(ReadRequest request);
 
-    /** UDP */
-    U,
+    void visit(DiscoverRequest request);
 
-    /** UDP with Queue Mode */
-    UQ,
+    void visit(WriteRequest request);
 
-    /** SMS */
-    S,
+    void visit(WriteAttributesRequest request);
 
-    /** SMS with Queue Mode */
-    SQ,
+    void visit(ExecuteRequest request);
 
-    /** UDP and SMS */
-    US,
+    void visit(CreateRequest request);
 
-    /** UDP with Queue Mode and SMS */
-    UQS
+    void visit(DeleteRequest request);
+
+    void visit(ObserveRequest request);
 }

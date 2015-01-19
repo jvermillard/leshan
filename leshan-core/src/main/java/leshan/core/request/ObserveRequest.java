@@ -27,53 +27,49 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package leshan.server.request;
+package leshan.core.request;
 
 import leshan.core.node.LwM2mPath;
 import leshan.core.response.ValueResponse;
-import leshan.server.client.Client;
 
-public class ObserveRequest extends AbstractLwM2mRequest<ValueResponse> {
+public class ObserveRequest extends AbstractDownlinkRequest<ValueResponse> {
 
-    public ObserveRequest(Client client, String target) {
-        super(client, new LwM2mPath(target));
+    public ObserveRequest(String target) {
+        super(new LwM2mPath(target));
     }
 
     /**
      * Creates a request for observing future changes of all instances of a particular object of a client.
      * 
-     * @param client the LWM2M Client to observe the resource of
      * @param objectId the object ID of the resource
      */
-    public ObserveRequest(Client client, int objectId) {
-        super(client, new LwM2mPath(objectId));
+    public ObserveRequest(int objectId) {
+        super(new LwM2mPath(objectId));
     }
 
     /**
      * Creates a request for observing future changes of a particular object instance of a client.
      * 
-     * @param client the LWM2M Client to observe the resource of
      * @param objectId the object ID of the resource
      * @param objectInstanceId the object instance ID
      */
-    public ObserveRequest(Client client, int objectId, int objectInstanceId) {
-        super(client, new LwM2mPath(objectId, objectInstanceId));
+    public ObserveRequest(int objectId, int objectInstanceId) {
+        super(new LwM2mPath(objectId, objectInstanceId));
     }
 
     /**
      * Creates a request for observing future changes of a specific resource of a client.
      * 
-     * @param client the LWM2M Client to observe the resource of
      * @param objectId the object ID of the resource
      * @param objectInstanceId the object instance ID
      * @param resourceId the (individual) resource's ID
      */
-    public ObserveRequest(Client client, int objectId, int objectInstanceId, int resourceId) {
-        super(client, new LwM2mPath(objectId, objectInstanceId, resourceId));
+    public ObserveRequest(int objectId, int objectInstanceId, int resourceId) {
+        super(new LwM2mPath(objectId, objectInstanceId, resourceId));
     }
 
     @Override
-    public void accept(LwM2mRequestVisitor visitor) {
+    public void accept(DownlinkRequestVisitor visitor) {
         visitor.visit(this);
     }
 
