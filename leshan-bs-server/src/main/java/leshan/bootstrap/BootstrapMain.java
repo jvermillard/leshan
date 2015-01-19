@@ -49,7 +49,7 @@ public class BootstrapMain {
     public static void main(String[] args) {
 
         BootstrapStoreImpl bsStore = new BootstrapStoreImpl();
-        SecurityStore securityStore = new BoostrapSecurityStore(bsStore);
+        SecurityStore securityStore = new BootstrapSecurityStore(bsStore);
 
         // use those ENV variables for specifying the interface to be bound for coap and coaps
         String iface = System.getenv("COAPIFACE");

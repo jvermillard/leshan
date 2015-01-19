@@ -14,11 +14,11 @@ import org.apache.commons.io.Charsets;
 /**
  * A DTLS security store using the provisioned bootstrap information for finding the DTLS/PSK credentials.
  */
-public class BoostrapSecurityStore implements SecurityStore {
+public class BootstrapSecurityStore implements SecurityStore {
 
     private final BootstrapStoreImpl bsStore;
 
-    public BoostrapSecurityStore(BootstrapStoreImpl bsStore) {
+    public BootstrapSecurityStore(BootstrapStoreImpl bsStore) {
         this.bsStore = bsStore;
     }
 
