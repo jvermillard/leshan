@@ -64,7 +64,7 @@
                         <filter>
                             <artifact>*:*</artifact>
                             <includes>
-                                <include>leshan/**</include>
+                                <include>org/eclipse/leshan/**</include>
                             </includes>
                         </filter>
                     </filters>

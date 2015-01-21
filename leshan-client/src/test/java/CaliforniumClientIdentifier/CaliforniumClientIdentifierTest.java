@@ -1,8 +1,8 @@
 package CaliforniumClientIdentifier;
 
 import static org.junit.Assert.*;
-import leshan.client.californium.impl.CaliforniumClientIdentifier;
 
+import org.eclipse.leshan.client.californium.impl.CaliforniumClientIdentifier;
 import org.junit.Test;
 
 public class CaliforniumClientIdentifierTest {

@@ -87,8 +87,8 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            leshan.server.californium,
-                            leshan.server.californium.impl,
+                            org.eclipse.leshan.server.californium,
+                            org.eclipse.leshan.server.californium.impl,
                         </Export-Package>
                         <Import-Package>
                             org.eclipse.californium.*;version="[1.0.0, 1.1)",

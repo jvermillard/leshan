@@ -81,16 +81,16 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            leshan.server,
-                            leshan.server.bootstrap,
-                            leshan.server.client,
-                            leshan.server.impl,
-                            leshan.server.impl.node,
-                            leshan.server.impl.objectspec,
-                            leshan.server.node,
-                            leshan.server.observation,
-                            leshan.server.request,
-                            leshan.server.security,
+                            org.eclipse.leshan.server,
+                            org.eclipse.leshan.server.bootstrap,
+                            org.eclipse.leshan.server.client,
+                            org.eclipse.leshan.server.impl,
+                            org.eclipse.leshan.server.impl.node,
+                            org.eclipse.leshan.server.impl.objectspec,
+                            org.eclipse.leshan.server.node,
+                            org.eclipse.leshan.server.observation,
+                            org.eclipse.leshan.server.request,
+                            org.eclipse.leshan.server.security,
                         </Export-Package>
                         <Import-Package>
                             org.eclipse.californium.*;version="[1.0.0, 1.1)",
