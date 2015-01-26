@@ -14,6 +14,16 @@ import org.eclipse.leshan.core.response.LwM2mResponse;
 
 public class BootstrapRequest implements UplinkRequest<LwM2mResponse> {
 
+    private final String endpointName;
+
+    public BootstrapRequest(String endpointName) {
+        this.endpointName = endpointName;
+    }
+
+    public String getEndpointName() {
+        return endpointName;
+    }
+
     @Override
     public void accept(UplinkRequestVisitor visitor) {
         visitor.visit(this);

@@ -32,13 +32,6 @@ import org.eclipse.leshan.bootstrap.BootstrapStoreImpl;
 import org.eclipse.leshan.client.LwM2mClient;
 import org.eclipse.leshan.client.californium.LeshanClient;
 import org.eclipse.leshan.client.exchange.LwM2mExchange;
-import org.eclipse.leshan.client.request.AbstractLwM2mClientRequest;
-import org.eclipse.leshan.client.request.BootstrapRequest;
-import org.eclipse.leshan.client.request.DeregisterRequest;
-import org.eclipse.leshan.client.request.LwM2mClientRequest;
-import org.eclipse.leshan.client.request.RegisterRequest;
-import org.eclipse.leshan.client.request.UpdateRequest;
-import org.eclipse.leshan.client.request.identifier.ClientIdentifier;
 import org.eclipse.leshan.client.resource.LwM2mClientObjectDefinition;
 import org.eclipse.leshan.client.resource.SingleResourceDefinition;
 import org.eclipse.leshan.client.resource.integer.IntegerLwM2mExchange;
@@ -48,23 +41,27 @@ import org.eclipse.leshan.client.resource.multiple.MultipleLwM2mResource;
 import org.eclipse.leshan.client.resource.string.StringLwM2mExchange;
 import org.eclipse.leshan.client.resource.string.StringLwM2mResource;
 import org.eclipse.leshan.client.response.ExecuteResponse;
-import org.eclipse.leshan.client.response.OperationResponse;
 import org.eclipse.leshan.client.util.ResponseCallback;
 import org.eclipse.leshan.core.node.LwM2mNode;
 import org.eclipse.leshan.core.node.LwM2mObjectInstance;
 import org.eclipse.leshan.core.node.LwM2mResource;
 import org.eclipse.leshan.core.node.Value;
+import org.eclipse.leshan.core.request.BootstrapRequest;
 import org.eclipse.leshan.core.request.ContentFormat;
 import org.eclipse.leshan.core.request.CreateRequest;
 import org.eclipse.leshan.core.request.DeleteRequest;
+import org.eclipse.leshan.core.request.DeregisterRequest;
 import org.eclipse.leshan.core.request.DiscoverRequest;
 import org.eclipse.leshan.core.request.ObserveRequest;
 import org.eclipse.leshan.core.request.ReadRequest;
+import org.eclipse.leshan.core.request.RegisterRequest;
+import org.eclipse.leshan.core.request.UpdateRequest;
 import org.eclipse.leshan.core.request.WriteAttributesRequest;
 import org.eclipse.leshan.core.request.WriteRequest;
 import org.eclipse.leshan.core.response.CreateResponse;
 import org.eclipse.leshan.core.response.DiscoverResponse;
 import org.eclipse.leshan.core.response.LwM2mResponse;
+import org.eclipse.leshan.core.response.RegisterResponse;
 import org.eclipse.leshan.core.response.ValueResponse;
 import org.eclipse.leshan.server.LwM2mServer;
 import org.eclipse.leshan.server.californium.LeshanServerBuilder;
@@ -197,52 +194,51 @@ public final class IntegrationTestHelper {
         }
     }
 
-    private LwM2mClientRequest createRegisterRequest() {
-        final RegisterRequest registerRequest = new RegisterRequest(ENDPOINT_IDENTIFIER, clientParameters);
+    private RegisterRequest createRegisterRequest() {
+        final RegisterRequest registerRequest = new RegisterRequest(ENDPOINT_IDENTIFIER);
 
         return registerRequest;
     }
 
-    private LwM2mClientRequest createDeregisterRequest(final ClientIdentifier clientIdentifier) {
-        final DeregisterRequest deregisterRequest = new DeregisterRequest(clientIdentifier);
+    private DeregisterRequest createDeregisterRequest(final String registrationId) {
+        final DeregisterRequest deregisterRequest = new DeregisterRequest(registrationId);
 
         return deregisterRequest;
     }
 
-    private LwM2mClientRequest createBoostrapRequest() {
+    private BootstrapRequest createBoostrapRequest() {
         return new BootstrapRequest(ENDPOINT_IDENTIFIER);
     }
 
-    public OperationResponse bootstrap() {
+    public LwM2mResponse bootstrap() {
         client.start();
 
-        final LwM2mClientRequest boostrapRequest = createBoostrapRequest();
-        final OperationResponse response = client.send(boostrapRequest);
+        final BootstrapRequest boostrapRequest = createBoostrapRequest();
+        final LwM2mResponse response = client.send(boostrapRequest);
         return response;
     }
 
-    public OperationResponse register() {
+    public RegisterResponse register() {
         client.start();
-        final LwM2mClientRequest registerRequest = createRegisterRequest();
-        final OperationResponse response = client.send(registerRequest);
+        final RegisterRequest registerRequest = createRegisterRequest();
+        final RegisterResponse response = client.send(registerRequest);
         return response;
     }
 
-    public void register(final ResponseCallback callback) {
+    public void register(final ResponseCallback<RegisterResponse> callback) {
         client.start();
-        final LwM2mClientRequest registerRequest = createRegisterRequest();
-        client.send(registerRequest, callback);
+        final RegisterRequest registerRequest = createRegisterRequest();
+        client.send(registerRequest, callback, callback);
     }
 
-    public OperationResponse update(final ClientIdentifier clientIdentifier, final Map<String, String> updatedParameters) {
-        final AbstractLwM2mClientRequest updaterRequest = new UpdateRequest(clientIdentifier, updatedParameters);
-
+    public LwM2mResponse update(final String registrationId, final Long lifetime) {
+        final UpdateRequest updaterRequest = new UpdateRequest(registrationId, lifetime, null, null, null);
         return client.send(updaterRequest);
     }
 
-    public void deregister(final ClientIdentifier clientIdentifier, final ResponseCallback callback) {
-        final LwM2mClientRequest deregisterRequest = createDeregisterRequest(clientIdentifier);
-        client.send(deregisterRequest, callback);
+    public void deregister(final String registrationId, final ResponseCallback<LwM2mResponse> callback) {
+        final DeregisterRequest deregisterRequest = createDeregisterRequest(registrationId);
+        client.send(deregisterRequest, callback, callback);
     }
 
     static LwM2mObjectInstance createGoodObjectInstance(final String value0, final String value1) {

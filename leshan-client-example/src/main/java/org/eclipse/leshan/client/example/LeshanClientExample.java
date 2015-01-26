@@ -29,12 +29,9 @@ import java.util.Random;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import org.eclipse.leshan.ResponseCode;
 import org.eclipse.leshan.client.californium.LeshanClient;
 import org.eclipse.leshan.client.exchange.LwM2mExchange;
-import org.eclipse.leshan.client.request.AbstractRegisteredLwM2mClientRequest;
-import org.eclipse.leshan.client.request.DeregisterRequest;
-import org.eclipse.leshan.client.request.RegisterRequest;
-import org.eclipse.leshan.client.request.identifier.ClientIdentifier;
 import org.eclipse.leshan.client.resource.LwM2mClientObjectDefinition;
 import org.eclipse.leshan.client.resource.MultipleResourceDefinition;
 import org.eclipse.leshan.client.resource.SingleResourceDefinition;
@@ -47,7 +44,9 @@ import org.eclipse.leshan.client.resource.string.StringLwM2mResource;
 import org.eclipse.leshan.client.resource.time.TimeLwM2mExchange;
 import org.eclipse.leshan.client.resource.time.TimeLwM2mResource;
 import org.eclipse.leshan.client.response.ExecuteResponse;
-import org.eclipse.leshan.client.response.OperationResponse;
+import org.eclipse.leshan.core.request.DeregisterRequest;
+import org.eclipse.leshan.core.request.RegisterRequest;
+import org.eclipse.leshan.core.response.RegisterResponse;
 
 /*
  * To build: 
@@ -56,7 +55,7 @@ import org.eclipse.leshan.client.response.OperationResponse;
  * java -jar target/leshan-client-*-SNAPSHOT-jar-with-dependencies.jar 127.0.0.1 5683 9000
  */
 public class LeshanClientExample {
-    private ClientIdentifier clientIdentifier;
+    private String registrationID;
 
     public static void main(final String[] args) {
         if (args.length < 4) {
@@ -79,17 +78,18 @@ public class LeshanClientExample {
 
         // Register to the server provided
         final String endpointIdentifier = UUID.randomUUID().toString();
-        final RegisterRequest registerRequest = new RegisterRequest(endpointIdentifier, new HashMap<String, String>());
-        final OperationResponse operationResponse = client.send(registerRequest);
+        final RegisterRequest registerRequest = new RegisterRequest(endpointIdentifier);
+        RegisterResponse response = client.send(registerRequest);
 
         // Report registration response.
-        System.out.println("Device Registration (Success? " + operationResponse.isSuccess() + ")");
-        if (operationResponse.isSuccess()) {
-            System.out
-                    .println("\tDevice: Registered Client Location '" + operationResponse.getClientIdentifier() + "'");
-            clientIdentifier = operationResponse.getClientIdentifier();
+        System.out.println("Device Registration (Success? " + response.getCode() + ")");
+        if (response.getCode() == ResponseCode.CREATED) {
+            System.out.println("\tDevice: Registered Client Location '" + response.getRegistrationID() + "'");
+            registrationID = response.getRegistrationID();
         } else {
-            System.err.println("\tDevice Registration Error: " + operationResponse.getErrorMessage());
+            // TODO Should we have a error message on response ?
+            // System.err.println("\tDevice Registration Error: " + response.getErrorMessage());
+            System.err.println("\tDevice Registration Error: " + response.getCode());
             System.err
                     .println("If you're having issues connecting to the LWM2M endpoint, try using the DTLS port instead");
         }
@@ -98,11 +98,10 @@ public class LeshanClientExample {
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
-                if (clientIdentifier != null) {
-                    System.out.println("\tDevice: Deregistering Client '" + clientIdentifier + "'");
-                    final AbstractRegisteredLwM2mClientRequest deregisterRequest = new DeregisterRequest(
-                            clientIdentifier);
-                    final OperationResponse deregisterResponse = client.send(deregisterRequest);
+                if (registrationID != null) {
+                    System.out.println("\tDevice: Deregistering Client '" + registrationID + "'");
+                    final DeregisterRequest deregisterRequest = new DeregisterRequest(registrationID);
+                    client.send(deregisterRequest);
                     client.stop();
                 }
             }
@@ -120,7 +119,8 @@ public class LeshanClientExample {
         final MultipleLwM2mResource powerAvailablePowerResource = new IntegerMultipleResource(new Integer[] { 0, 4 });
         final MultipleLwM2mResource powerSourceVoltageResource = new IntegerMultipleResource(new Integer[] { 12000,
                                 5000 });
-        final IntegerMultipleResource powerSourceCurrentResource = new IntegerMultipleResource(new Integer[] { 150, 75 });
+        final IntegerMultipleResource powerSourceCurrentResource = new IntegerMultipleResource(
+                new Integer[] { 150, 75 });
         final IntegerValueResource batteryLevelResource = new IntegerValueResource(92, 9);
         final MemoryFreeResource memoryFreeResource = new MemoryFreeResource();
         final IntegerMultipleResource errorCodeResource = new IntegerMultipleResource(new Integer[] { 0 });
@@ -136,8 +136,8 @@ public class LeshanClientExample {
                 new SingleResourceDefinition(3, firmwareResource, true), new SingleResourceDefinition(4,
                         rebootResource, true), new SingleResourceDefinition(5, factoryResetResource, true),
                 new MultipleResourceDefinition(6, powerAvailablePowerResource, true), new MultipleResourceDefinition(7,
-                        powerSourceVoltageResource, true), new MultipleResourceDefinition(8, powerSourceCurrentResource,
-                        true), new SingleResourceDefinition(9, batteryLevelResource, true),
+                        powerSourceVoltageResource, true), new MultipleResourceDefinition(8,
+                        powerSourceCurrentResource, true), new SingleResourceDefinition(9, batteryLevelResource, true),
                 new SingleResourceDefinition(10, memoryFreeResource, true), new MultipleResourceDefinition(11,
                         errorCodeResource, true), new SingleResourceDefinition(12, new ExecutableResource(12), true),
                 new SingleResourceDefinition(13, currentTimeResource, true), new SingleResourceDefinition(14,

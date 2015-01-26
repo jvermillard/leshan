@@ -19,7 +19,6 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.californium.core.CoapServer;
-import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 import org.eclipse.californium.core.network.CoAPEndpoint;
 import org.eclipse.californium.core.network.Endpoint;
 import org.eclipse.californium.core.server.resources.Resource;
@@ -28,11 +27,12 @@ import org.eclipse.leshan.client.LwM2mClient;
 import org.eclipse.leshan.client.LwM2mServerMessageDeliverer;
 import org.eclipse.leshan.client.californium.impl.CaliforniumLwM2mClientRequestSender;
 import org.eclipse.leshan.client.coap.californium.CaliforniumBasedObject;
-import org.eclipse.leshan.client.request.LwM2mClientRequest;
 import org.eclipse.leshan.client.resource.LinkFormattable;
 import org.eclipse.leshan.client.resource.LwM2mClientObjectDefinition;
-import org.eclipse.leshan.client.response.OperationResponse;
-import org.eclipse.leshan.client.util.ResponseCallback;
+import org.eclipse.leshan.core.request.UplinkRequest;
+import org.eclipse.leshan.core.response.ExceptionConsumer;
+import org.eclipse.leshan.core.response.LwM2mResponse;
+import org.eclipse.leshan.core.response.ResponseConsumer;
 import org.eclipse.leshan.util.Validate;
 
 /**
@@ -91,22 +91,20 @@ public class LeshanClient implements LwM2mClient {
     }
 
     @Override
-    public OperationResponse send(final LwM2mClientRequest request) {
+    public <T extends LwM2mResponse> T send(final UplinkRequest<T> request) {
         if (!clientServerStarted.get()) {
-            return OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR,
-                    "Leshan Client not started so unable to send request.");
+            throw new RuntimeException("Internal CoapServer is not started.");
         }
         return requestSender.send(request);
     }
 
     @Override
-    public void send(final LwM2mClientRequest request, final ResponseCallback callback) {
+    public <T extends LwM2mResponse> void send(final UplinkRequest<T> request,
+            final ResponseConsumer<T> responseCallback, final ExceptionConsumer errorCallback) {
         if (!clientServerStarted.get()) {
-            callback.onFailure(OperationResponse.failure(ResponseCode.INTERNAL_SERVER_ERROR,
-                    "Leshan Client not started so unable to send request."));
-        } else {
-            requestSender.send(request, callback);
+            throw new RuntimeException("Internal CoapServer is not started.");
         }
+        requestSender.send(request, responseCallback, errorCallback);
     }
 
     @Override

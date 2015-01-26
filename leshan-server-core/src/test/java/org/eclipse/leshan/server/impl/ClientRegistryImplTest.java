@@ -22,7 +22,6 @@ import org.eclipse.leshan.LinkObject;
 import org.eclipse.leshan.core.request.BindingMode;
 import org.eclipse.leshan.core.request.UpdateRequest;
 import org.eclipse.leshan.server.client.Client;
-import org.eclipse.leshan.server.impl.ClientRegistryImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,12 +52,12 @@ public class ClientRegistryImplTest {
 
         UpdateRequest updateRequest = new UpdateRequest(registrationId, address, port);
         Client updatedClient = registry.updateClient(updateRequest);
-        Assert.assertEquals((long) lifetime, updatedClient.getLifeTimeInSec());
+        Assert.assertEquals(lifetime, updatedClient.getLifeTimeInSec());
         Assert.assertSame(binding, updatedClient.getBindingMode());
         Assert.assertEquals(sms, updatedClient.getSmsNumber());
 
         Client registeredClient = registry.get(ep);
-        Assert.assertEquals((long) lifetime, registeredClient.getLifeTimeInSec());
+        Assert.assertEquals(lifetime, registeredClient.getLifeTimeInSec());
         Assert.assertSame(binding, registeredClient.getBindingMode());
         Assert.assertEquals(sms, registeredClient.getSmsNumber());
     }

@@ -17,52 +17,44 @@ package org.eclipse.leshan.client.util;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.eclipse.californium.core.coap.CoAP.ResponseCode;
-import org.eclipse.leshan.client.response.Callback;
-import org.eclipse.leshan.client.response.OperationResponse;
+import org.eclipse.leshan.ResponseCode;
+import org.eclipse.leshan.core.response.ExceptionConsumer;
+import org.eclipse.leshan.core.response.LwM2mResponse;
+import org.eclipse.leshan.core.response.ResponseConsumer;
 
-public class ResponseCallback implements Callback {
+public class ResponseCallback<T extends LwM2mResponse> implements ResponseConsumer<T>, ExceptionConsumer {
 
     private final AtomicBoolean called;
-    private OperationResponse response;
+    private T response;
 
     public ResponseCallback() {
         called = new AtomicBoolean(false);
     }
 
     @Override
-    public void onSuccess(final OperationResponse t) {
+    public void accept(T response) {
+        this.response = response;
         called.set(true);
-        response = t;
     }
 
     @Override
-    public void onFailure(final OperationResponse t) {
+    public void accept(Exception e) {
         called.set(true);
-        response = t;
     }
 
     public AtomicBoolean isCalled() {
         return called;
     }
 
-    public byte[] getResponsePayload() {
-        return response.getPayload();
-    }
-
     public ResponseCode getResponseCode() {
-        return response.getResponseCode();
-    }
-
-    public boolean isSuccess() {
-        return response.isSuccess();
+        return response.getCode();
     }
 
     public void reset() {
         called.set(false);
     }
 
-    public OperationResponse getResponse() {
+    public T getResponse() {
         return response;
     }
 }

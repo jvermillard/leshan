@@ -18,18 +18,19 @@ package org.eclipse.leshan.integration.tests;
 
 import static com.jayway.awaitility.Awaitility.await;
 import static org.eclipse.leshan.integration.tests.IntegrationTestHelper.ENDPOINT_IDENTIFIER;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import org.eclipse.leshan.ResponseCode;
 import org.eclipse.leshan.client.californium.LeshanClient;
-import org.eclipse.leshan.client.request.AbstractLwM2mClientRequest;
-import org.eclipse.leshan.client.request.RegisterRequest;
-import org.eclipse.leshan.client.request.identifier.ClientIdentifier;
 import org.eclipse.leshan.client.resource.LwM2mClientObjectDefinition;
-import org.eclipse.leshan.client.response.OperationResponse;
 import org.eclipse.leshan.client.util.ResponseCallback;
+import org.eclipse.leshan.core.request.RegisterRequest;
+import org.eclipse.leshan.core.response.LwM2mResponse;
+import org.eclipse.leshan.core.response.RegisterResponse;
 import org.eclipse.leshan.server.client.Client;
 import org.junit.After;
 import org.junit.Test;
@@ -45,9 +46,9 @@ public class RegistrationTest {
 
     @Test
     public void registered_device_exists() {
-        final OperationResponse register = helper.register();
+        final RegisterResponse register = helper.register();
 
-        assertTrue(register.isSuccess());
+        assertTrue(register.getCode() == ResponseCode.CREATED);
         assertNotNull(helper.getClient());
     }
 
@@ -65,75 +66,68 @@ public class RegistrationTest {
 
     @Test
     public void registered_device_exists_async() {
-        final ResponseCallback callback = registerDeviceAsynch();
+        final ResponseCallback<RegisterResponse> callback = registerDeviceAsynch();
 
-        assertTrue(callback.isSuccess());
+        assertTrue(callback.getResponseCode() == ResponseCode.CREATED);
         assertNotNull(helper.getClient());
     }
 
-    @Test
+    @Test(expected = RuntimeException.class)
     public void wont_send_synchronous_if_not_started() {
-        final AbstractLwM2mClientRequest registerRequest = new RegisterRequest(ENDPOINT_IDENTIFIER,
-                helper.clientParameters);
+        final RegisterRequest registerRequest = new RegisterRequest(ENDPOINT_IDENTIFIER);
 
-        final OperationResponse response = helper.client.send(registerRequest);
+        final RegisterResponse response = helper.client.send(registerRequest);
 
-        assertFalse(response.isSuccess());
+        assertFalse(response.getCode() != ResponseCode.CREATED);
     }
 
-    @Test
+    @Test(expected = RuntimeException.class)
     public void wont_send_asynchronous_if_not_started() {
-        final AbstractLwM2mClientRequest registerRequest = new RegisterRequest(ENDPOINT_IDENTIFIER,
-                helper.clientParameters);
+        final RegisterRequest registerRequest = new RegisterRequest(ENDPOINT_IDENTIFIER);
 
-        final ResponseCallback callback = new ResponseCallback();
-        helper.client.send(registerRequest, callback);
+        final ResponseCallback<RegisterResponse> callback = new ResponseCallback<RegisterResponse>();
+        helper.client.send(registerRequest, callback, callback);
 
         assertTrue(callback.isCalled().get());
-        assertFalse(callback.isSuccess());
+        assertFalse(callback.getResponseCode() == ResponseCode.CREATED);
     }
 
     @Test
     public void registered_device_updated() {
-        final OperationResponse register = helper.register();
+        final RegisterResponse register = helper.register();
 
-        final ClientIdentifier clientIdentifier = register.getClientIdentifier();
-
-        final Map<String, String> updatedParameters = new HashMap<>();
-        final int updatedLifetime = 1337;
-        updatedParameters.put("lt", Integer.toString(updatedLifetime));
-
-        final OperationResponse update = helper.update(clientIdentifier, updatedParameters);
+        final Long updatedLifetime = 1337l;
+        final LwM2mResponse update = helper.update(register.getRegistrationID(), updatedLifetime);
         final Client client = helper.getClient();
 
-        assertTrue(update.isSuccess());
+        assertTrue(update.getCode() == ResponseCode.CHANGED);
         assertEquals(updatedLifetime, client.getLifeTimeInSec());
         assertNotNull(client);
     }
 
     @Test
     public void deregister_registered_device_then_reregister_async() {
-        ResponseCallback registerCallback = registerDeviceAsynch();
+        ResponseCallback<RegisterResponse> registerCallback = registerDeviceAsynch();
 
-        final ClientIdentifier clientIdentifier = registerCallback.getResponse().getClientIdentifier();
+        final String registrationId = registerCallback.getResponse().getRegistrationID();
 
-        final ResponseCallback deregisterCallback = new ResponseCallback();
+        final ResponseCallback<LwM2mResponse> deregisterCallback = new ResponseCallback<LwM2mResponse>();
 
-        helper.deregister(clientIdentifier, deregisterCallback);
+        helper.deregister(registrationId, deregisterCallback);
 
         await().untilTrue(deregisterCallback.isCalled());
 
-        assertTrue(deregisterCallback.isSuccess());
+        assertTrue(deregisterCallback.getResponseCode() == ResponseCode.DELETED);
         assertNull(helper.getClient());
 
         registerCallback = registerDeviceAsynch();
 
-        assertTrue(registerCallback.isSuccess());
+        assertTrue(registerCallback.getResponseCode() == ResponseCode.CREATED);
         assertNotNull(helper.getClient());
     }
 
-    private ResponseCallback registerDeviceAsynch() {
-        final ResponseCallback registerCallback = new ResponseCallback();
+    private ResponseCallback<RegisterResponse> registerDeviceAsynch() {
+        final ResponseCallback<RegisterResponse> registerCallback = new ResponseCallback<RegisterResponse>();
 
         helper.register(registerCallback);
 

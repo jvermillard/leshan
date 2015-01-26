@@ -18,7 +18,8 @@ package org.eclipse.leshan.integration.tests;
 
 import static org.junit.Assert.assertTrue;
 
-import org.eclipse.leshan.client.response.OperationResponse;
+import org.eclipse.leshan.ResponseCode;
+import org.eclipse.leshan.core.response.LwM2mResponse;
 import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -35,8 +36,8 @@ public class BootstrapTest {
     @Ignore
     @Test
     public void boostrap_device_exists() {
-        final OperationResponse bootstrap = helper.bootstrap();
+        final LwM2mResponse bootstrap = helper.bootstrap();
 
-        assertTrue(bootstrap.isSuccess());
+        assertTrue(bootstrap.getCode() == ResponseCode.CHANGED);
     }
 }
