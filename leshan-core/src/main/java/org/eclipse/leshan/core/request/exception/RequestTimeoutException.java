@@ -13,7 +13,7 @@
  * Contributors:
  *     Sierra Wireless - initial API and implementation
  *******************************************************************************/
-package org.eclipse.leshan.server.request;
+package org.eclipse.leshan.core.request.exception;
 
 public class RequestTimeoutException extends ResourceAccessException {
 
