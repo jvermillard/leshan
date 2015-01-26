@@ -25,5 +25,5 @@ public interface UplinkRequestVisitor {
 
     void visit(DeregisterRequest request);
 
-    // void visit(BootstrapRequest request);
+    void visit(BootstrapRequest request);
 }
