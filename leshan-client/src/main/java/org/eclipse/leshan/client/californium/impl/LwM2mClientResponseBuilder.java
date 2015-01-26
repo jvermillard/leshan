@@ -15,8 +15,6 @@
  *******************************************************************************/
 package org.eclipse.leshan.client.californium.impl;
 
-import java.util.logging.Logger;
-
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 import org.eclipse.californium.core.coap.Request;
 import org.eclipse.californium.core.coap.Response;
@@ -27,9 +25,11 @@ import org.eclipse.leshan.client.request.LwM2mClientRequestVisitor;
 import org.eclipse.leshan.client.request.RegisterRequest;
 import org.eclipse.leshan.client.request.UpdateRequest;
 import org.eclipse.leshan.client.response.OperationResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LwM2mClientResponseBuilder implements LwM2mClientRequestVisitor {
-    private static final Logger LOG = Logger.getLogger(LwM2mClientResponseBuilder.class.getCanonicalName());
+    private static final Logger LOG = LoggerFactory.getLogger(LwM2mClientResponseBuilder.class);
 
     private final Request coapRequest;
     private final Response coapResponse;

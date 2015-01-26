@@ -20,7 +20,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Logger;
 
 import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 import org.eclipse.californium.core.coap.MessageObserverAdapter;
@@ -32,9 +31,11 @@ import org.eclipse.leshan.client.request.LwM2mClientRequest;
 import org.eclipse.leshan.client.request.LwM2mClientRequestSender;
 import org.eclipse.leshan.client.response.OperationResponse;
 import org.eclipse.leshan.client.util.ResponseCallback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CaliforniumLwM2mClientRequestSender implements LwM2mClientRequestSender {
-    private static final Logger LOG = Logger.getLogger(CaliforniumLwM2mClientRequestSender.class.getCanonicalName());
+    private static final Logger LOG = LoggerFactory.getLogger(CaliforniumLwM2mClientRequestSender.class);
     private final Endpoint clientEndpoint;
     private final InetSocketAddress serverAddress;
     private final LinkObject[] clientObjectModel;
