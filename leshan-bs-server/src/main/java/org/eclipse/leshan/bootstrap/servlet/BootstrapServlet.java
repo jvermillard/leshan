@@ -33,11 +33,16 @@ import org.eclipse.leshan.server.bootstrap.BootstrapConfig;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Servlet for REST API in charge of adding bootstrap information to the bootstrap server.
  */
 @SuppressWarnings("serial")
 public class BootstrapServlet extends HttpServlet {
+
+    private static final Logger LOG = LoggerFactory.getLogger(BootstrapServlet.class);
 
     private final BootstrapStoreImpl bsStore;
 
@@ -55,7 +60,6 @@ public class BootstrapServlet extends HttpServlet {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
-
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType("application/json");
         resp.getOutputStream().write(gson.toJson(bsStore.getBootstrapConfigs()).getBytes(Charsets.UTF_8));
@@ -79,6 +83,7 @@ public class BootstrapServlet extends HttpServlet {
         }
 
         String endpoint = path[0];
+        LOG.debug("About to store configuration for endpoint: " + endpoint);
 
         try {
             BootstrapConfig cfg = gson.fromJson(new InputStreamReader(req.getInputStream()), BootstrapConfig.class);
@@ -87,6 +92,7 @@ public class BootstrapServlet extends HttpServlet {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "no content");
             } else {
                 bsStore.addConfig(endpoint, cfg);
+                LOG.debug("Boostrap config added to bsStore");
                 resp.setStatus(HttpServletResponse.SC_OK);
             }
         } catch (JsonSyntaxException jsonEx) {
@@ -114,6 +120,7 @@ public class BootstrapServlet extends HttpServlet {
         }
 
         String endpoint = path[0];
+        LOG.debug("About to delete configuration for endpoint:" + endpoint);
 
         if (bsStore.deleteConfig(endpoint)) {
             resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
