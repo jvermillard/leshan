@@ -31,16 +31,9 @@ import org.eclipse.leshan.ResponseCode;
 import org.eclipse.leshan.bootstrap.BootstrapStoreImpl;
 import org.eclipse.leshan.client.LwM2mClient;
 import org.eclipse.leshan.client.californium.LeshanClient;
-import org.eclipse.leshan.client.exchange.LwM2mExchange;
 import org.eclipse.leshan.client.resource.LwM2mClientObjectDefinition;
-import org.eclipse.leshan.client.resource.SingleResourceDefinition;
-import org.eclipse.leshan.client.resource.integer.IntegerLwM2mExchange;
-import org.eclipse.leshan.client.resource.integer.IntegerLwM2mResource;
-import org.eclipse.leshan.client.resource.multiple.MultipleLwM2mExchange;
-import org.eclipse.leshan.client.resource.multiple.MultipleLwM2mResource;
-import org.eclipse.leshan.client.resource.string.StringLwM2mExchange;
-import org.eclipse.leshan.client.resource.string.StringLwM2mResource;
-import org.eclipse.leshan.client.response.ExecuteResponse;
+import org.eclipse.leshan.client.resource.LwM2mClientResource;
+import org.eclipse.leshan.client.resource.ResourceDefinition;
 import org.eclipse.leshan.client.util.ResponseCallback;
 import org.eclipse.leshan.core.node.LwM2mNode;
 import org.eclipse.leshan.core.node.LwM2mObjectInstance;
@@ -164,24 +157,24 @@ public final class IntegrationTestHelper {
         final boolean mandatory = true;
 
         final LwM2mClientObjectDefinition objectOne = new LwM2mClientObjectDefinition(GOOD_OBJECT_ID, !mandatory,
-                !single, new SingleResourceDefinition(FIRST_RESOURCE_ID, firstResource, mandatory),
-                new SingleResourceDefinition(SECOND_RESOURCE_ID, secondResource, mandatory),
-                new SingleResourceDefinition(EXECUTABLE_RESOURCE_ID, executableResource, !mandatory));
+                !single, new ResourceDefinition(FIRST_RESOURCE_ID, firstResource, mandatory), new ResourceDefinition(
+                        SECOND_RESOURCE_ID, secondResource, mandatory), new ResourceDefinition(EXECUTABLE_RESOURCE_ID,
+                        executableResource, !mandatory));
         final LwM2mClientObjectDefinition objectTwo = new LwM2mClientObjectDefinition(BROKEN_OBJECT_ID, !mandatory,
-                !single, new SingleResourceDefinition(BROKEN_RESOURCE_ID, brokenResourceListener, mandatory));
+                !single, new ResourceDefinition(BROKEN_RESOURCE_ID, brokenResourceListener, mandatory));
         final LwM2mClientObjectDefinition objectThree = new LwM2mClientObjectDefinition(MULTIPLE_OBJECT_ID, !mandatory,
-                !single, new SingleResourceDefinition(MULTIPLE_RESOURCE_ID, multipleResource, !mandatory));
+                !single, new ResourceDefinition(MULTIPLE_RESOURCE_ID, multipleResource, !mandatory));
         final LwM2mClientObjectDefinition objectFour = new LwM2mClientObjectDefinition(INT_OBJECT_ID, !mandatory,
-                !single, new SingleResourceDefinition(INT_RESOURCE_ID, intResource, !mandatory));
+                !single, new ResourceDefinition(INT_RESOURCE_ID, intResource, !mandatory));
         final LwM2mClientObjectDefinition mandatoryMultipleObject = new LwM2mClientObjectDefinition(
-                MANDATORY_MULTIPLE_OBJECT_ID, mandatory, !single, new SingleResourceDefinition(
+                MANDATORY_MULTIPLE_OBJECT_ID, mandatory, !single, new ResourceDefinition(
                         MANDATORY_MULTIPLE_RESOURCE_ID, intResource, !mandatory));
         final LwM2mClientObjectDefinition mandatorySingleObject = new LwM2mClientObjectDefinition(
-                MANDATORY_SINGLE_OBJECT_ID, mandatory, single, new SingleResourceDefinition(
-                        MANDATORY_SINGLE_RESOURCE_ID, intResource, mandatory));
+                MANDATORY_SINGLE_OBJECT_ID, mandatory, single, new ResourceDefinition(MANDATORY_SINGLE_RESOURCE_ID,
+                        intResource, mandatory));
         final LwM2mClientObjectDefinition optionalSingleObject = new LwM2mClientObjectDefinition(
-                OPTIONAL_SINGLE_OBJECT_ID, !mandatory, single, new SingleResourceDefinition(
-                        OPTIONAL_SINGLE_RESOURCE_ID, intResource, !mandatory));
+                OPTIONAL_SINGLE_OBJECT_ID, !mandatory, single, new ResourceDefinition(OPTIONAL_SINGLE_RESOURCE_ID,
+                        intResource, !mandatory));
         return new LeshanClient(clientAddress, serverAddress, objectOne, objectTwo, objectThree, objectFour,
                 mandatoryMultipleObject, mandatorySingleObject, optionalSingleObject);
     }
@@ -243,8 +236,8 @@ public final class IntegrationTestHelper {
 
     static LwM2mObjectInstance createGoodObjectInstance(final String value0, final String value1) {
         return new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[] {
-                                new LwM2mResource(FIRST_RESOURCE_ID, Value.newStringValue(value0)),
-                                new LwM2mResource(SECOND_RESOURCE_ID, Value.newStringValue(value1)) });
+                                new LwM2mResource(FIRST_RESOURCE_ID, Value.newBinaryValue(value0.getBytes())),
+                                new LwM2mResource(SECOND_RESOURCE_ID, Value.newBinaryValue(value1.getBytes())) });
     }
 
     ValueResponse sendRead(final int objectId) {
@@ -351,13 +344,13 @@ public final class IntegrationTestHelper {
         assertEquals(responseCode, response.getCode());
     }
 
-    public class ValueResource extends StringLwM2mResource {
+    public class ValueResource extends LwM2mClientResource {
 
         private String value = "blergs";
 
         public void setValue(final String newValue) {
             value = newValue;
-            notifyResourceUpdated();
+            valueChanged(new LwM2mResource(getId(), Value.newStringValue(value)));
         }
 
         public String getValue() {
@@ -365,26 +358,26 @@ public final class IntegrationTestHelper {
         }
 
         @Override
-        public void handleWrite(final StringLwM2mExchange exchange) {
-            setValue(exchange.getRequestPayload());
-
-            exchange.respondSuccess();
+        public LwM2mResponse write(LwM2mNode node) {
+            setValue( (String) ((LwM2mResource) node).getValue().value);
+            return new LwM2mResponse(ResponseCode.CHANGED);
         }
 
         @Override
-        public void handleRead(final StringLwM2mExchange exchange) {
-            exchange.respondContent(value);
+        public ValueResponse read() {
+            return new ValueResponse(ResponseCode.CONTENT, new LwM2mResource(getId(), Value.newStringValue(value
+                   )));
         }
 
     }
 
-    public class IntValueResource extends IntegerLwM2mResource {
+    public class IntValueResource extends LwM2mClientResource {
 
         private int value = 0;
 
         public void setValue(final int newValue) {
             value = newValue;
-            notifyResourceUpdated();
+            valueChanged(new LwM2mResource(getId(), Value.newIntegerValue(value)));
         }
 
         public int getValue() {
@@ -392,68 +385,80 @@ public final class IntegrationTestHelper {
         }
 
         @Override
-        public void handleWrite(final IntegerLwM2mExchange exchange) {
-            setValue(exchange.getRequestPayload());
-
-            exchange.respondSuccess();
+        public LwM2mResponse write(LwM2mNode node) {
+            setValue((Integer) ((LwM2mResource) node).getValue().value);
+            return new LwM2mResponse(ResponseCode.CHANGED);
         }
 
         @Override
-        public void handleRead(final IntegerLwM2mExchange exchange) {
-            exchange.respondContent(value);
+        public ValueResponse read() {
+            return new ValueResponse(ResponseCode.CONTENT, new LwM2mResource(getId(), Value.newIntegerValue(value)));
         }
 
     }
 
-    public class ReadWriteListenerWithBrokenWrite extends StringLwM2mResource {
+    public class ReadWriteListenerWithBrokenWrite extends LwM2mClientResource {
 
         private String value;
 
         @Override
-        public void handleWrite(final StringLwM2mExchange exchange) {
+        public LwM2mResponse write(LwM2mNode node) {
             if (value == null) {
-                value = exchange.getRequestPayload();
-                exchange.respondSuccess();
+                value = (String) ((LwM2mResource) node).getValue().value;
+                return new LwM2mResponse(ResponseCode.CHANGED);
             } else {
-                exchange.respondFailure();
+                return new LwM2mResponse(ResponseCode.BAD_REQUEST);
             }
         }
 
         @Override
-        public void handleRead(final StringLwM2mExchange exchange) {
-            exchange.respondContent(value);
+        public ValueResponse read() {
+            return new ValueResponse(ResponseCode.CONTENT, new LwM2mResource(getId(), Value.newStringValue(value)));
         }
-
     }
 
-    public class ExecutableResource extends StringLwM2mResource {
+    public class ExecutableResource extends LwM2mClientResource {
 
-        @Override
-        public void handleExecute(final LwM2mExchange exchange) {
-            exchange.respond(ExecuteResponse.success());
+        public ExecutableResource() {
         }
 
+        @Override
+        public LwM2mResponse execute() {
+            System.out.println("Executing on Resource " + getId());
+            return new LwM2mResponse(ResponseCode.CHANGED);
+        }
     }
 
-    public class MultipleResource extends MultipleLwM2mResource {
+    public class MultipleResource extends LwM2mClientResource {
 
-        private Map<Integer, byte[]> value;
+        private String[] values;
 
-        public void setValue(final Map<Integer, byte[]> initialValue) {
-            this.value = initialValue;
+        public void setValue(final String[] values) {
+            this.values = values;
         }
 
         @Override
-        public void handleRead(final MultipleLwM2mExchange exchange) {
-            exchange.respondContent(value);
+        public ValueResponse read() {
+            Value<?>[] valuesRes = new Value<?>[values.length];
+
+            for (int i = 0; i < values.length; i++) {
+                valuesRes[i] = Value.newStringValue(values[i]);
+            }
+
+            return new ValueResponse(ResponseCode.CONTENT, new LwM2mResource(getId(), valuesRes));
         }
 
         @Override
-        public void handleWrite(final MultipleLwM2mExchange exchange) {
-            this.value = exchange.getRequestPayload();
-            exchange.respondSuccess();
-        }
+        public LwM2mResponse write(LwM2mNode node) {
+            Value<?>[] nodeValues = ((LwM2mResource) node).getValues();
+            String[] val = new String[nodeValues.length];
+            for (int i = 0; i < values.length; i++) {
+                val[i] = (String) nodeValues[i].value;
+            }
 
+            setValue(val);
+            return new LwM2mResponse(ResponseCode.CHANGED);
+        }
     }
 
 }

@@ -15,20 +15,17 @@
  *******************************************************************************/
 package org.eclipse.leshan.client.resource;
 
-import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
-import org.eclipse.leshan.client.exchange.LwM2mExchange;
-import org.eclipse.leshan.client.exchange.aggregate.AggregatedLwM2mExchange;
-import org.eclipse.leshan.client.exchange.aggregate.LwM2mObjectInstanceCreateResponseAggregator;
-import org.eclipse.leshan.client.exchange.aggregate.LwM2mObjectInstanceReadResponseAggregator;
-import org.eclipse.leshan.client.exchange.aggregate.LwM2mResponseAggregator;
-import org.eclipse.leshan.client.response.CreateResponse;
-import org.eclipse.leshan.tlv.Tlv;
-import org.eclipse.leshan.tlv.TlvDecoder;
-import org.eclipse.leshan.tlv.TlvException;
+import org.eclipse.leshan.ResponseCode;
+import org.eclipse.leshan.core.node.LwM2mNode;
+import org.eclipse.leshan.core.node.LwM2mObjectInstance;
+import org.eclipse.leshan.core.node.LwM2mResource;
+import org.eclipse.leshan.core.response.LwM2mResponse;
+import org.eclipse.leshan.core.response.ValueResponse;
 
 public class LwM2mClientObjectInstance extends LwM2mClientNode {
 
@@ -51,51 +48,44 @@ public class LwM2mClientObjectInstance extends LwM2mClientNode {
 
     public void createMandatory() {
         for (final LwM2mClientResourceDefinition def : definition.getResourceDefinitions()) {
+            LwM2mClientResource resource = def.createResource();
+            resource.setId(def.getId());
             resources.put(def.getId(), def.createResource());
-        }
-    }
-
-    public void createInstance(final LwM2mExchange exchange) {
-        final byte[] payload = exchange.getRequestPayload();
-        Tlv[] tlvs;
-        try {
-            tlvs = TlvDecoder.decode(ByteBuffer.wrap(payload));
-        } catch (TlvException e) {
-            throw new IllegalStateException(e);
-        }
-
-        if (!definition.hasAllRequiredResourceIds(tlvs)) {
-            exchange.respond(CreateResponse.invalidResource());
-            return;
-        }
-
-        for (final LwM2mClientResourceDefinition def : definition.getResourceDefinitions()) {
-            resources.put(def.getId(), def.createResource());
-        }
-
-        final LwM2mResponseAggregator aggr = new LwM2mObjectInstanceCreateResponseAggregator(exchange, tlvs.length, id);
-        for (final Tlv tlv : tlvs) {
-            final LwM2mClientResourceDefinition def = definition.getResourceDefinition(tlv.getIdentifier());
-            if (def == null) {
-                aggr.respond(tlv.getIdentifier(), CreateResponse.invalidResource());
-            } else {
-                final LwM2mClientResource res = def.createResource();
-                final AggregatedLwM2mExchange partialExchange = new AggregatedLwM2mExchange(aggr, tlv.getIdentifier());
-                partialExchange.setRequestPayload(tlv.getValue());
-                resources.put(tlv.getIdentifier(), res);
-                res.write(partialExchange);
-            }
         }
     }
 
     @Override
-    public void read(final LwM2mExchange exchange) {
-        final LwM2mResponseAggregator aggr = new LwM2mObjectInstanceReadResponseAggregator(exchange, resources.size());
-        for (final Entry<Integer, LwM2mClientResource> entry : resources.entrySet()) {
-            final LwM2mClientResource res = entry.getValue();
-            final int id = entry.getKey();
-            res.read(new AggregatedLwM2mExchange(aggr, id));
+    public ValueResponse read() {
+        List<LwM2mResource> resourcesRes = new ArrayList<LwM2mResource>();
+
+        for (LwM2mClientResource resource : resources.values()) {
+            ValueResponse response = resource.read();
+            if (response.getCode() == ResponseCode.CONTENT) {
+                LwM2mNode content = response.getContent();
+                if (content instanceof LwM2mResource) {
+                    resourcesRes.add((LwM2mResource) content);
+                } else {
+                    // TODO should rise an error
+                    // return new ValueResponse(ResponseCode.)
+                }
+            }
         }
+
+        return new ValueResponse(ResponseCode.CONTENT, new LwM2mObjectInstance(id,
+                resourcesRes.toArray(new LwM2mResource[0])));
+    }
+
+    @Override
+    public LwM2mResponse write(LwM2mNode node) {
+        if (node instanceof LwM2mObjectInstance) {
+            for (LwM2mResource resource : ((LwM2mObjectInstance) node).getResources().values()) {
+                LwM2mResponse response = resources.get(resource.getId()).write(resource);
+                if (response.getCode() != ResponseCode.CHANGED) {
+                    return response;
+                }
+            }
+        }
+        return new LwM2mResponse(ResponseCode.CHANGED);
     }
 
     public void addResource(final Integer resourceId, final LwM2mClientResource resource) {
@@ -106,8 +96,9 @@ public class LwM2mClientObjectInstance extends LwM2mClientNode {
         return new HashMap<>(resources);
     }
 
-    public void delete(LwM2mExchange exchange) {
-        parent.delete(exchange, id);
+    public LwM2mResponse delete() {
+        parent.delete(id);
+        return new LwM2mResponse(ResponseCode.DELETED);
     }
 
 }

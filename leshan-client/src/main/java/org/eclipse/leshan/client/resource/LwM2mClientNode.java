@@ -15,35 +15,87 @@
  *******************************************************************************/
 package org.eclipse.leshan.client.resource;
 
+import java.util.Date;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.eclipse.leshan.ObserveSpec;
-import org.eclipse.leshan.client.exchange.LwM2mExchange;
-import org.eclipse.leshan.client.exchange.ObserveNotifyExchange;
-import org.eclipse.leshan.client.response.WriteResponse;
+import org.eclipse.leshan.ResponseCode;
+import org.eclipse.leshan.core.node.LwM2mNode;
+import org.eclipse.leshan.core.response.LwM2mResponse;
+import org.eclipse.leshan.core.response.ValueResponse;
 
 public abstract class LwM2mClientNode {
 
+    private static final long SECONDS_TO_MILLIS = 1000;
+
+    private ScheduledExecutorService service;
     protected ObserveSpec observeSpec;
-    protected ObserveNotifyExchange observer;
+    private LwM2mNode previousValue;
+    private Date previousTime;
+    private NotifySender notifySender;
 
     public LwM2mClientNode() {
         this.observeSpec = new ObserveSpec.Builder().build();
     }
 
-    public abstract void read(LwM2mExchange exchange);
+    public abstract ValueResponse read();
 
-    public void observe(final LwM2mExchange exchange, final ScheduledExecutorService service) {
-        observer = new ObserveNotifyExchange(exchange, this, observeSpec, service);
+    public void observe(final NotifySender sender, final ScheduledExecutorService service) {
+        this.notifySender = sender;
+        this.service = service;
+        updatePrevious(null);
+        scheduleNext();
     }
 
-    public void write(LwM2mExchange exchange) {
-        exchange.respond(WriteResponse.notAllowed());
+    public LwM2mResponse write(LwM2mNode node) {
+        return new LwM2mResponse(ResponseCode.METHOD_NOT_ALLOWED);
     }
 
-    public void writeAttributes(LwM2mExchange exchange, ObserveSpec spec) {
+    public LwM2mResponse writeAttributes(ObserveSpec spec) {
         this.observeSpec = spec;
-        exchange.respond(WriteResponse.success());
+        return new LwM2mResponse(ResponseCode.CHANGED);
     }
 
+    public void valueChanged(LwM2mNode newValue) {
+        if (shouldNotify(newValue)) {
+            notifySender.sendNotify();
+            updatePrevious(newValue);
+        }
+        scheduleNext();
+    }
+
+    private void updatePrevious(LwM2mNode node) {
+        previousValue = node;
+        previousTime = new Date();
+    }
+
+    private boolean shouldNotify(LwM2mNode node) {
+        if (service == null || notifySender == null)
+            return false;
+
+        final long diff = getTimeDiff();
+        final Integer pmax = observeSpec.getMaxPeriod();
+        if (pmax != null && diff > pmax * SECONDS_TO_MILLIS) {
+            return true;
+        }
+        return node != null && !node.equals(previousValue);
+    }
+
+    private void scheduleNext() {
+        if (observeSpec.getMaxPeriod() != null) {
+            long diff = getTimeDiff();
+            service.schedule(new Runnable() {
+
+                @Override
+                public void run() {
+                    notifySender.sendNotify();
+                }
+            }, observeSpec.getMaxPeriod() * SECONDS_TO_MILLIS - diff, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private long getTimeDiff() {
+        return new Date().getTime() - previousTime.getTime();
+    }
 }

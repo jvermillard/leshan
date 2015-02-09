@@ -15,12 +15,19 @@
  *******************************************************************************/
 package org.eclipse.leshan.client.coap.californium;
 
+import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 import org.eclipse.californium.core.coap.LinkFormat;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 import org.eclipse.californium.core.server.resources.Resource;
 import org.eclipse.leshan.client.resource.LwM2mClientObject;
 import org.eclipse.leshan.client.resource.LwM2mClientObjectDefinition;
 import org.eclipse.leshan.client.resource.LwM2mClientObjectInstance;
+import org.eclipse.leshan.core.node.LwM2mNode;
+import org.eclipse.leshan.core.node.LwM2mPath;
+import org.eclipse.leshan.core.node.codec.InvalidValueException;
+import org.eclipse.leshan.core.node.codec.LwM2mNodeDecoder;
+import org.eclipse.leshan.core.request.ContentFormat;
+import org.eclipse.leshan.core.response.CreateResponse;
 
 public class CaliforniumBasedObject extends CaliforniumBasedLwM2mNode<LwM2mClientObject> {
 
@@ -31,36 +38,41 @@ public class CaliforniumBasedObject extends CaliforniumBasedLwM2mNode<LwM2mClien
             createMandatoryObjectInstance(def);
         }
     }
-    
+
     private void createMandatoryObjectInstance(final LwM2mClientObjectDefinition def) {
         LwM2mClientObjectInstance instance = node.createMandatoryInstance();
-        onSuccessfulCreate(instance);
+        add(new CaliforniumBasedObjectInstance(instance.getId(), instance));
     }
 
     @Override
-    public void handlePOST(final CoapExchange exchange) {
-        node.createInstance(new CaliforniumBasedLwM2mCallbackExchange<LwM2mClientObjectInstance>(exchange,
-                getCreateCallback()));
+    public void handlePOST(final CoapExchange coapExchange) {
+        ContentFormat contentFormat = ContentFormat.fromCode(coapExchange.getRequestOptions().getContentFormat());
+        LwM2mNode lwM2mNode;
+        try {
+            String instancePath = getFullPath() + "/" + getNewInstanceId();
+            LwM2mPath lwM2mPath = new LwM2mPath(instancePath);
+            lwM2mNode = LwM2mNodeDecoder.decode(coapExchange.getRequestPayload(), contentFormat, lwM2mPath);
+            CreateResponse response = node.createInstance(lwM2mNode);
+            if (response.getCode() == org.eclipse.leshan.ResponseCode.CREATED) {
+                LwM2mClientObjectInstance instance = node.getInstance(lwM2mPath.getObjectInstanceId());
+                add(new CaliforniumBasedObjectInstance(instance.getId(), instance));
+                coapExchange.respond(fromLwM2mCode(response.getCode()), lwM2mPath.toString());
+            } else {
+                coapExchange.respond(fromLwM2mCode(response.getCode()));
+            }
+        } catch (InvalidValueException e) {
+            coapExchange.respond(ResponseCode.INTERNAL_SERVER_ERROR);
+        }
+
     }
 
-    private Callback<LwM2mClientObjectInstance> getCreateCallback() {
-        return new Callback<LwM2mClientObjectInstance>() {
-
-            @Override
-            public void onSuccess(final LwM2mClientObjectInstance newInstance) {
-                onSuccessfulCreate(newInstance);
-            }
-
-            @Override
-            public void onFailure() {
-            }
-
-        };
-    }
-
-    public void onSuccessfulCreate(final LwM2mClientObjectInstance instance) {
-        add(new CaliforniumBasedObjectInstance(instance.getId(), instance));
-        node.onSuccessfulCreate(instance);
+    private int getNewInstanceId() {
+        // TODO should be thread safe ?
+        int i = 0;
+        while (this.getChild(Integer.toString(i)) != null) {
+            i++;
+        }
+        return i;
     }
 
     @Override

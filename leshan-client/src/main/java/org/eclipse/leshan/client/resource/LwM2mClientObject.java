@@ -15,91 +15,86 @@
  *******************************************************************************/
 package org.eclipse.leshan.client.resource;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import org.eclipse.leshan.client.exchange.LwM2mCallbackExchange;
-import org.eclipse.leshan.client.exchange.LwM2mExchange;
-import org.eclipse.leshan.client.exchange.aggregate.AggregatedLwM2mExchange;
-import org.eclipse.leshan.client.exchange.aggregate.LwM2mObjectReadResponseAggregator;
-import org.eclipse.leshan.client.exchange.aggregate.LwM2mResponseAggregator;
-import org.eclipse.leshan.client.response.CreateResponse;
-import org.eclipse.leshan.client.response.DeleteResponse;
-import org.eclipse.leshan.client.response.ReadResponse;
-import org.eclipse.leshan.client.response.WriteResponse;
+import org.eclipse.leshan.ResponseCode;
+import org.eclipse.leshan.core.node.LwM2mNode;
+import org.eclipse.leshan.core.node.LwM2mObject;
+import org.eclipse.leshan.core.node.LwM2mObjectInstance;
+import org.eclipse.leshan.core.response.CreateResponse;
+import org.eclipse.leshan.core.response.LwM2mResponse;
+import org.eclipse.leshan.core.response.ValueResponse;
 
 public class LwM2mClientObject extends LwM2mClientNode {
 
     private final LwM2mClientObjectDefinition definition;
-    private final AtomicInteger instanceCounter;
     private final Map<Integer, LwM2mClientObjectInstance> instances;
 
     public LwM2mClientObject(final LwM2mClientObjectDefinition definition) {
         this.definition = definition;
-        this.instanceCounter = new AtomicInteger(0);
         this.instances = new ConcurrentHashMap<>();
     }
 
     public LwM2mClientObjectInstance createMandatoryInstance() {
-        LwM2mClientObjectInstance instance = createNewInstance(false, 0);
+        LwM2mClientObjectInstance instance = new LwM2mClientObjectInstance(0, this, definition);
         instance.createMandatory();
         return instance;
     }
 
-    public void createInstance(final LwM2mCallbackExchange<LwM2mClientObjectInstance> exchange) {
-        if (instanceCounter.get() >= 1 && definition.isSingle()) {
-            exchange.respond(CreateResponse.invalidResource());
+    public CreateResponse createInstance(LwM2mNode node) {
+        if (instances.size() >= 1 && definition.isSingle()) {
+            return new CreateResponse(ResponseCode.BAD_REQUEST);
         }
+        if (!(node instanceof LwM2mObjectInstance))
+            return new CreateResponse(ResponseCode.BAD_REQUEST);
 
-        final LwM2mClientObjectInstance instance = createNewInstance(exchange.hasObjectInstanceId(),
-                exchange.getObjectInstanceId());
-        exchange.setNode(instance);
-        instance.createInstance(exchange);
+        LwM2mObjectInstance instanceNode = (LwM2mObjectInstance) node;
+
+        final LwM2mClientObjectInstance instance = new LwM2mClientObjectInstance(instanceNode.getId(), this, definition);
+        instance.createMandatory();
+        LwM2mResponse response = instance.write(node);
+        if (response.getCode() == ResponseCode.CHANGED) {
+            this.instances.put(instance.getId(), instance);
+            return new CreateResponse(ResponseCode.CREATED);
+        } else
+            return new CreateResponse(response.getCode());
     }
 
     @Override
-    public void read(LwM2mExchange exchange) {
-        final Collection<LwM2mClientObjectInstance> instances = this.instances.values();
+    public ValueResponse read() {
+        List<LwM2mObjectInstance> instancesRes = new ArrayList<LwM2mObjectInstance>();
 
-        if (instances.isEmpty()) {
-            exchange.respond(ReadResponse.success(new byte[0]));
-            return;
+        for (LwM2mClientObjectInstance resource : instances.values()) {
+            ValueResponse response = resource.read();
+            if (response.getCode() == ResponseCode.CONTENT) {
+                LwM2mNode content = response.getContent();
+                if (content instanceof LwM2mObjectInstance) {
+                    instancesRes.add((LwM2mObjectInstance) content);
+                } else {
+                    // TODO should rise an error
+                    // return new ValueResponse(ResponseCode.)
+                }
+            }
         }
 
-        final LwM2mResponseAggregator aggr = new LwM2mObjectReadResponseAggregator(exchange, instances.size());
-        for (final LwM2mClientObjectInstance inst : instances) {
-            inst.read(new AggregatedLwM2mExchange(aggr, inst.getId()));
-        }
+        return new ValueResponse(ResponseCode.CONTENT, new LwM2mObject(definition.getId(),
+                instancesRes.toArray(new LwM2mObjectInstance[0])));
     }
 
     @Override
-    public void write(LwM2mExchange exchange) {
-        exchange.respond(WriteResponse.notAllowed());
+    public LwM2mResponse write(LwM2mNode node) {
+        return new LwM2mResponse(ResponseCode.METHOD_NOT_ALLOWED);
     }
 
-    private LwM2mClientObjectInstance createNewInstance(boolean hasObjectInstanceId, int objectInstanceId) {
-        final int newInstanceId = getNewInstanceId(hasObjectInstanceId, objectInstanceId);
-        final LwM2mClientObjectInstance instance = new LwM2mClientObjectInstance(newInstanceId, this, definition);
-        return instance;
-    }
-
-    public void onSuccessfulCreate(final LwM2mClientObjectInstance instance) {
-        instances.put(instance.getId(), instance);
-    }
-
-    private int getNewInstanceId(boolean hasObjectInstanceId, int objectInstanceId) {
-        if (hasObjectInstanceId) {
-            return objectInstanceId;
-        } else {
-            return instanceCounter.getAndIncrement();
-        }
-    }
-
-    public void delete(LwM2mExchange exchange, int id) {
+    public LwM2mResponse delete(int id) {
         instances.remove(id);
-        exchange.respond(DeleteResponse.success());
+        return new LwM2mResponse(ResponseCode.DELETED);
     }
 
+    public LwM2mClientObjectInstance getInstance(int id) {
+        return instances.get(id);
+    }
 }

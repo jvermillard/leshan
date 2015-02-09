@@ -29,6 +29,7 @@ import org.eclipse.leshan.client.californium.impl.CaliforniumLwM2mClientRequestS
 import org.eclipse.leshan.client.coap.californium.CaliforniumBasedObject;
 import org.eclipse.leshan.client.resource.LinkFormattable;
 import org.eclipse.leshan.client.resource.LwM2mClientObjectDefinition;
+import org.eclipse.leshan.core.objectspec.Resources;
 import org.eclipse.leshan.core.request.UplinkRequest;
 import org.eclipse.leshan.core.response.ExceptionConsumer;
 import org.eclipse.leshan.core.response.LwM2mResponse;
@@ -80,6 +81,8 @@ public class LeshanClient implements LwM2mClient {
 
     @Override
     public void start() {
+        Resources.load();
+
         clientSideServer.start();
         clientServerStarted.set(true);
     }

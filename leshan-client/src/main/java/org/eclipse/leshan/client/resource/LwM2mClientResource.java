@@ -15,18 +15,27 @@
  *******************************************************************************/
 package org.eclipse.leshan.client.resource;
 
-import org.eclipse.leshan.client.exchange.LwM2mExchange;
+import org.eclipse.leshan.ResponseCode;
+import org.eclipse.leshan.core.response.LwM2mResponse;
+import org.eclipse.leshan.core.response.ValueResponse;
 
 public abstract class LwM2mClientResource extends LwM2mClientNode {
 
-    @Override
-    public abstract void read(LwM2mExchange exchange);
+    private int id;
 
-    public abstract void write(LwM2mExchange exchange);
+    public int getId() {
+        return id;
+    }
 
-    public abstract void execute(LwM2mExchange exchange);
+    public final void setId(int id) {
+        this.id = id;
+    }
 
-    public abstract boolean isReadable();
+    public ValueResponse read() {
+        return new ValueResponse(ResponseCode.METHOD_NOT_ALLOWED);
+    }
 
-    public abstract void notifyResourceUpdated();
+    public LwM2mResponse execute() {
+        return new LwM2mResponse(ResponseCode.METHOD_NOT_ALLOWED);
+    }
 }

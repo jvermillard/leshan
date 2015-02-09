@@ -19,6 +19,7 @@ import org.eclipse.californium.core.coap.LinkFormat;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 import org.eclipse.leshan.client.resource.LinkFormattable;
 import org.eclipse.leshan.client.resource.LwM2mClientResource;
+import org.eclipse.leshan.core.response.LwM2mResponse;
 
 class CaliforniumBasedResource extends CaliforniumBasedLwM2mNode<LwM2mClientResource> implements LinkFormattable {
 
@@ -28,7 +29,8 @@ class CaliforniumBasedResource extends CaliforniumBasedLwM2mNode<LwM2mClientReso
 
     @Override
     public void handlePOST(final CoapExchange exchange) {
-        node.execute(new CaliforniumBasedLwM2mExchange(exchange));
+        LwM2mResponse response = node.execute();
+        exchange.respond(fromLwM2mCode(response.getCode()));
     }
 
     @Override

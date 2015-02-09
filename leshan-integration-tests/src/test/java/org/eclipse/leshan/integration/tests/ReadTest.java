@@ -29,9 +29,6 @@ import static org.eclipse.leshan.integration.tests.IntegrationTestHelper.assertE
 import static org.eclipse.leshan.integration.tests.IntegrationTestHelper.assertResponse;
 import static org.eclipse.leshan.integration.tests.IntegrationTestHelper.createGoodObjectInstance;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.eclipse.leshan.ResponseCode;
 import org.eclipse.leshan.core.node.LwM2mNode;
 import org.eclipse.leshan.core.node.LwM2mObject;
@@ -39,8 +36,8 @@ import org.eclipse.leshan.core.node.LwM2mObjectInstance;
 import org.eclipse.leshan.core.node.LwM2mResource;
 import org.eclipse.leshan.core.node.Value;
 import org.eclipse.leshan.tlv.Tlv;
-import org.eclipse.leshan.tlv.TlvEncoder;
 import org.eclipse.leshan.tlv.Tlv.TlvType;
+import org.eclipse.leshan.tlv.TlvEncoder;
 import org.junit.After;
 import org.junit.Test;
 
@@ -124,10 +121,7 @@ public class ReadTest {
         helper.register();
         helper.sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), MULTIPLE_OBJECT_ID);
 
-        final Map<Integer, byte[]> map = new HashMap<Integer, byte[]>();
-        map.put(0, HELLO.getBytes());
-        map.put(1, GOODBYE.getBytes());
-        helper.multipleResource.setValue(map);
+        helper.multipleResource.setValue(new String[] { HELLO, GOODBYE });
 
         // This encoding is required because the LwM2mNodeParser doesn't have a way
         // of recognizing the multiple-versus-single resource-ness for the response
@@ -146,11 +140,7 @@ public class ReadTest {
         helper.register();
         helper.sendCreate(new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID, new LwM2mResource[0]), MULTIPLE_OBJECT_ID);
 
-        final Map<Integer, byte[]> map = new HashMap<Integer, byte[]>();
-        map.put(0, HELLO.getBytes());
-        map.put(1, GOODBYE.getBytes());
-
-        helper.multipleResource.setValue(map);
+        helper.multipleResource.setValue(new String[] { HELLO, GOODBYE });
 
         final LwM2mObjectInstance objectInstance = new LwM2mObjectInstance(GOOD_OBJECT_INSTANCE_ID,
                 new LwM2mResource[] { new LwM2mResource(MULTIPLE_RESOURCE_ID, new Value<?>[] {

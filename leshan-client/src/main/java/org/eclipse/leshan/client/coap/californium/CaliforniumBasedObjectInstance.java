@@ -17,14 +17,14 @@ package org.eclipse.leshan.client.coap.californium;
 
 import java.util.Map.Entry;
 
-import org.eclipse.californium.core.coap.CoAP.ResponseCode;
 import org.eclipse.californium.core.coap.LinkFormat;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 import org.eclipse.californium.core.server.resources.Resource;
+import org.eclipse.leshan.ResponseCode;
 import org.eclipse.leshan.client.resource.LinkFormattable;
-import org.eclipse.leshan.client.resource.LwM2mClientObject;
 import org.eclipse.leshan.client.resource.LwM2mClientObjectInstance;
 import org.eclipse.leshan.client.resource.LwM2mClientResource;
+import org.eclipse.leshan.core.response.LwM2mResponse;
 
 public class CaliforniumBasedObjectInstance extends CaliforniumBasedLwM2mNode<LwM2mClientObjectInstance> implements
         LinkFormattable {
@@ -39,22 +39,12 @@ public class CaliforniumBasedObjectInstance extends CaliforniumBasedLwM2mNode<Lw
     }
 
     @Override
-    public void handleDELETE(final CoapExchange exchange) {
-        node.delete(new CaliforniumBasedLwM2mCallbackExchange<LwM2mClientObject>(exchange,
-                new Callback<LwM2mClientObject>() {
-
-                    @Override
-                    public void onSuccess(LwM2mClientObject object) {
-                        getParent().remove(CaliforniumBasedObjectInstance.this);
-                    }
-
-                    @Override
-                    public void onFailure() {
-                    }
-
-                }));
-
-        exchange.respond(ResponseCode.DELETED);
+    public void handleDELETE(final CoapExchange coapExchange) {
+        LwM2mResponse response = node.delete();
+        if (response.getCode() == ResponseCode.DELETED) {
+            getParent().remove(CaliforniumBasedObjectInstance.this);
+        }
+        coapExchange.respond(fromLwM2mCode(response.getCode()));
     }
 
     @Override

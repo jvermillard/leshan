@@ -16,11 +16,18 @@
 
 package org.eclipse.leshan.integration.tests;
 
-import static org.eclipse.leshan.integration.tests.IntegrationTestHelper.*;
+import static org.eclipse.leshan.integration.tests.IntegrationTestHelper.BROKEN_OBJECT_ID;
+import static org.eclipse.leshan.integration.tests.IntegrationTestHelper.BROKEN_RESOURCE_ID;
+import static org.eclipse.leshan.integration.tests.IntegrationTestHelper.EXECUTABLE_RESOURCE_ID;
+import static org.eclipse.leshan.integration.tests.IntegrationTestHelper.GOOD_OBJECT_ID;
+import static org.eclipse.leshan.integration.tests.IntegrationTestHelper.GOOD_OBJECT_INSTANCE_ID;
+import static org.eclipse.leshan.integration.tests.IntegrationTestHelper.MULTIPLE_OBJECT_ID;
+import static org.eclipse.leshan.integration.tests.IntegrationTestHelper.MULTIPLE_RESOURCE_ID;
+import static org.eclipse.leshan.integration.tests.IntegrationTestHelper.SECOND_RESOURCE_ID;
+import static org.eclipse.leshan.integration.tests.IntegrationTestHelper.assertEmptyResponse;
+import static org.eclipse.leshan.integration.tests.IntegrationTestHelper.assertResponse;
+import static org.eclipse.leshan.integration.tests.IntegrationTestHelper.createGoodObjectInstance;
 import static org.junit.Assert.assertEquals;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import org.eclipse.leshan.ResponseCode;
 import org.eclipse.leshan.core.node.LwM2mObjectInstance;
@@ -88,11 +95,7 @@ public class WriteTest {
         final LwM2mResource newValues = new LwM2mResource(MULTIPLE_OBJECT_ID, new Value<?>[] {
                                 Value.newStringValue(HELLO), Value.newStringValue(GOODBYE) });
 
-        final Map<Integer, byte[]> map = new HashMap<>();
-        map.put(0, HELLO.getBytes());
-        map.put(1, GOODBYE.getBytes());
-
-        helper.multipleResource.setValue(map);
+        helper.multipleResource.setValue(new String[] { HELLO, GOODBYE });
 
         assertEmptyResponse(
                 helper.sendReplace(newValues, MULTIPLE_OBJECT_ID, GOOD_OBJECT_INSTANCE_ID, MULTIPLE_RESOURCE_ID),

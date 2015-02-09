@@ -13,16 +13,33 @@
  * Contributors:
  *     Zebra Technologies - initial API and implementation
  *******************************************************************************/
-package org.eclipse.leshan.client.resource.multiple;
+package org.eclipse.leshan.client.resource;
 
-import org.eclipse.leshan.client.exchange.LwM2mExchange;
-import org.eclipse.leshan.client.resource.BaseTypedLwM2mResource;
+public class ResourceDefinition implements LwM2mClientResourceDefinition {
 
-public class MultipleLwM2mResource extends BaseTypedLwM2mResource<MultipleLwM2mExchange> {
+    private final int id;
+    private final LwM2mClientResource resource;
+    private final boolean required;
+
+    public ResourceDefinition(final int id, final LwM2mClientResource resource, final boolean required) {
+        this.id = id;
+        this.resource = resource;
+        this.required = required;
+    }
 
     @Override
-    protected MultipleLwM2mExchange createSpecificExchange(final LwM2mExchange exchange) {
-        return new MultipleLwM2mExchange(exchange);
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public LwM2mClientResource createResource() {
+        return resource;
+    }
+
+    @Override
+    public boolean isRequired() {
+        return required;
     }
 
 }
