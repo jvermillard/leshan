@@ -70,7 +70,8 @@ public class BootstrapStoreImpl implements BootstrapStore {
         ConfigurationChecker.verify(config);
         // check the configuration
         bootstrapByEndpoint.put(endpoint, config);
-        saveToFile();
+        // FIXME test prieux 2015-02-04: saving to file raises a java.io.NotSerializableException
+        //saveToFile();
     }
 
     public Map<String, BootstrapConfig> getBootstrapConfigs() {
