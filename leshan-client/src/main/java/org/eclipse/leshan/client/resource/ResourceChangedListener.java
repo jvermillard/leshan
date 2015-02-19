@@ -10,6 +10,6 @@
  *******************************************************************************/
 package org.eclipse.leshan.client.resource;
 
-public interface NotifySender {
-    void sendNotify(String URI);
+public interface ResourceChangedListener {
+    void resourceChanged(int resourceId);
 }

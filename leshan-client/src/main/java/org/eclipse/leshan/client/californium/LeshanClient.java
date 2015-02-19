@@ -16,6 +16,7 @@
 package org.eclipse.leshan.client.californium;
 
 import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.californium.core.CoapServer;
@@ -26,9 +27,9 @@ import org.eclipse.leshan.LinkObject;
 import org.eclipse.leshan.client.LwM2mClient;
 import org.eclipse.leshan.client.LwM2mServerMessageDeliverer;
 import org.eclipse.leshan.client.californium.impl.CaliforniumLwM2mClientRequestSender;
-import org.eclipse.leshan.client.coap.californium.CaliforniumBasedObject;
+import org.eclipse.leshan.client.californium.impl.ObjectResource;
 import org.eclipse.leshan.client.resource.LinkFormattable;
-import org.eclipse.leshan.client.resource.LwM2mClientObjectDefinition;
+import org.eclipse.leshan.client.resource.LwM2mObjectEnabler;
 import org.eclipse.leshan.core.objectspec.Resources;
 import org.eclipse.leshan.core.request.UplinkRequest;
 import org.eclipse.leshan.core.response.ExceptionConsumer;
@@ -46,17 +47,18 @@ public class LeshanClient implements LwM2mClient {
     private final CaliforniumLwM2mClientRequestSender requestSender;
 
     public LeshanClient(final InetSocketAddress clientAddress, final InetSocketAddress serverAddress,
-            final LwM2mClientObjectDefinition... objectDevice) {
-        this(clientAddress, serverAddress, new CoapServer(), objectDevice);
+            final List<LwM2mObjectEnabler> objectEnablers) {
+        this(clientAddress, serverAddress, new CoapServer(), objectEnablers);
     }
 
     public LeshanClient(final InetSocketAddress clientAddress, final InetSocketAddress serverAddress,
-            final CoapServer serverLocal, final LwM2mClientObjectDefinition... objectDevice) {
+            final CoapServer serverLocal, final List<LwM2mObjectEnabler> objectEnablers) {
+
         Validate.notNull(clientAddress);
         Validate.notNull(serverLocal);
         Validate.notNull(serverAddress);
-        Validate.notNull(objectDevice);
-        Validate.notEmpty(objectDevice);
+        Validate.notNull(objectEnablers);
+        Validate.notEmpty(objectEnablers);
 
         serverLocal.setMessageDeliverer(new LwM2mServerMessageDeliverer(serverLocal.getRoot()));
         final Endpoint endpoint = new CoAPEndpoint(clientAddress);
@@ -64,14 +66,13 @@ public class LeshanClient implements LwM2mClient {
 
         clientSideServer = serverLocal;
 
-        for (final LwM2mClientObjectDefinition def : objectDevice) {
-            if (clientSideServer.getRoot().getChild(Integer.toString(def.getId())) != null) {
-                throw new IllegalArgumentException("Trying to load Client Object of name '" + def.getId()
+        for (LwM2mObjectEnabler enabler : objectEnablers) {
+            if (clientSideServer.getRoot().getChild(Integer.toString(enabler.getId())) != null) {
+                throw new IllegalArgumentException("Trying to load Client Object of name '" + enabler.getId()
                         + "' when one was already added.");
             }
 
-            final CaliforniumBasedObject clientObject = new CaliforniumBasedObject(def);
-
+            final ObjectResource clientObject = new ObjectResource(enabler);
             clientSideServer.add(clientObject);
         }
 

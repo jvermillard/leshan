@@ -10,6 +10,21 @@
  *******************************************************************************/
 package org.eclipse.leshan.client.resource;
 
-public interface NotifySender {
-    void sendNotify(String URI);
+import org.eclipse.leshan.core.node.LwM2mResource;
+import org.eclipse.leshan.core.objectspec.ObjectSpec;
+
+public interface LwM2mInstanceEnabler {
+
+    void setObjectSpec(ObjectSpec objectSpec);
+
+    void addResourceChangedListener(ResourceChangedListener listener);
+
+    void removeResourceChangedListener(ResourceChangedListener listener);
+
+    LwM2mResource read(int resourceid);
+
+    void write(int resourceid, LwM2mResource value);
+
+    void execute(int resourceid, byte[] params);
+
 }
