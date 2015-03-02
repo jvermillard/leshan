@@ -12,6 +12,8 @@ package org.eclipse.leshan.client.resource;
 
 import org.eclipse.leshan.core.node.LwM2mResource;
 import org.eclipse.leshan.core.objectspec.ObjectSpec;
+import org.eclipse.leshan.core.response.LwM2mResponse;
+import org.eclipse.leshan.core.response.ValueResponse;
 
 public interface LwM2mInstanceEnabler {
 
@@ -21,10 +23,10 @@ public interface LwM2mInstanceEnabler {
 
     void removeResourceChangedListener(ResourceChangedListener listener);
 
-    LwM2mResource read(int resourceid);
+    ValueResponse read(int resourceid);
 
-    void write(int resourceid, LwM2mResource value);
+    LwM2mResponse write(int resourceid, LwM2mResource value);
 
-    void execute(int resourceid, byte[] params);
+    LwM2mResponse execute(int resourceid, byte[] params);
 
 }

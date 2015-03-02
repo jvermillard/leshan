@@ -40,7 +40,9 @@ import org.eclipse.leshan.core.node.LwM2mResource;
 import org.eclipse.leshan.core.node.Value;
 import org.eclipse.leshan.core.request.DeregisterRequest;
 import org.eclipse.leshan.core.request.RegisterRequest;
+import org.eclipse.leshan.core.response.LwM2mResponse;
 import org.eclipse.leshan.core.response.RegisterResponse;
+import org.eclipse.leshan.core.response.ValueResponse;
 
 /*
  * To build: 
@@ -122,42 +124,56 @@ public class LeshanClientExample {
         }
 
         @Override
-        public LwM2mResource read(int resourceid) {
+        public ValueResponse read(int resourceid) {
             switch (resourceid) {
             case 0:
-                return new LwM2mResource(resourceid, Value.newStringValue(getManufacturer()));
+                return new ValueResponse(ResponseCode.CONTENT, new LwM2mResource(resourceid,
+                        Value.newStringValue(getManufacturer())));
             case 1:
-                return new LwM2mResource(resourceid, Value.newStringValue(getModelNumber()));
+                return new ValueResponse(ResponseCode.CONTENT, new LwM2mResource(resourceid,
+                        Value.newStringValue(getModelNumber())));
             case 2:
-                return new LwM2mResource(resourceid, Value.newStringValue(getSerialNumber()));
+                return new ValueResponse(ResponseCode.CONTENT, new LwM2mResource(resourceid,
+                        Value.newStringValue(getSerialNumber())));
             case 3:
-                return new LwM2mResource(resourceid, Value.newStringValue(getFirmwareVersion()));
+                return new ValueResponse(ResponseCode.CONTENT, new LwM2mResource(resourceid,
+                        Value.newStringValue(getFirmwareVersion())));
             case 9:
-                return new LwM2mResource(resourceid, Value.newIntegerValue(getBatteryLevel()));
+                return new ValueResponse(ResponseCode.CONTENT, new LwM2mResource(resourceid,
+                        Value.newIntegerValue(getBatteryLevel())));
             case 10:
-                return new LwM2mResource(resourceid, Value.newIntegerValue(getMemoryFree()));
+                return new ValueResponse(ResponseCode.CONTENT, new LwM2mResource(resourceid,
+                        Value.newIntegerValue(getMemoryFree())));
             case 13:
-                return new LwM2mResource(resourceid, Value.newDateValue(getCurrentTime()));
+                return new ValueResponse(ResponseCode.CONTENT, new LwM2mResource(resourceid,
+                        Value.newDateValue(getCurrentTime())));
             case 14:
-                return new LwM2mResource(resourceid, Value.newStringValue(getUtcOffset()));
+                return new ValueResponse(ResponseCode.CONTENT, new LwM2mResource(resourceid,
+                        Value.newStringValue(getUtcOffset())));
             case 15:
-                return new LwM2mResource(resourceid, Value.newStringValue(getTimezone()));
+                return new ValueResponse(ResponseCode.CONTENT, new LwM2mResource(resourceid,
+                        Value.newStringValue(getTimezone())));
             case 16:
-                return new LwM2mResource(resourceid, Value.newStringValue(getSupportedBinding()));
+                return new ValueResponse(ResponseCode.CONTENT, new LwM2mResource(resourceid,
+                        Value.newStringValue(getSupportedBinding())));
             default:
                 return super.read(resourceid);
             }
         }
 
         @Override
-        public void write(int resourceid, LwM2mResource value) {
+        public LwM2mResponse write(int resourceid, LwM2mResource value) {
             switch (resourceid) {
+            case 13:
+                return new LwM2mResponse(ResponseCode.NOT_FOUND);
             case 14:
                 setUtcOffset((String) value.getValue().value);
+                return new LwM2mResponse(ResponseCode.CHANGED);
             case 15:
                 setTimezone((String) value.getValue().value);
+                return new LwM2mResponse(ResponseCode.CHANGED);
             default:
-                super.write(resourceid, value);
+                return super.write(resourceid, value);
             }
         }
 

@@ -16,10 +16,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.leshan.ResponseCode;
 import org.eclipse.leshan.core.node.LwM2mResource;
 import org.eclipse.leshan.core.node.Value;
 import org.eclipse.leshan.core.objectspec.ObjectSpec;
 import org.eclipse.leshan.core.objectspec.ResourceSpec;
+import org.eclipse.leshan.core.response.LwM2mResponse;
+import org.eclipse.leshan.core.response.ValueResponse;
 
 public class SimpleInstanceEnabler implements LwM2mInstanceEnabler {
 
@@ -27,18 +30,23 @@ public class SimpleInstanceEnabler implements LwM2mInstanceEnabler {
     List<ResourceChangedListener> listeners = new ArrayList<ResourceChangedListener>();
 
     @Override
-    public LwM2mResource read(int resourceid) {
-        return resources.get(resourceid);
+    public ValueResponse read(int resourceid) {
+        if (resources.containsKey(resourceid)) {
+            return new ValueResponse(ResponseCode.CONTENT, resources.get(resourceid));
+        }
+        return new ValueResponse(ResponseCode.NOT_FOUND);
     }
 
     @Override
-    public void write(int resourceid, LwM2mResource value) {
+    public LwM2mResponse write(int resourceid, LwM2mResource value) {
         resources.put(resourceid, value);
+        return new LwM2mResponse(ResponseCode.CHANGED);
     }
 
     @Override
-    public void execute(int resourceid, byte[] params) {
+    public LwM2mResponse execute(int resourceid, byte[] params) {
         System.out.println("Execute on resource " + resourceid + " params " + params);
+        return new LwM2mResponse(ResponseCode.CHANGED);
     }
 
     @Override

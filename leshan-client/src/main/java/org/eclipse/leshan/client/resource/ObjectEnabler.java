@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.leshan.ResponseCode;
+import org.eclipse.leshan.core.node.LwM2mObject;
 import org.eclipse.leshan.core.node.LwM2mObjectInstance;
 import org.eclipse.leshan.core.node.LwM2mPath;
 import org.eclipse.leshan.core.node.LwM2mResource;
@@ -37,7 +38,8 @@ public class ObjectEnabler extends BaseObjectEnabler {
     private Map<Integer, LwM2mInstanceEnabler> instances;
     private Class<? extends LwM2mInstanceEnabler> instanceClass;
 
-    public ObjectEnabler(int id, Map<Integer, LwM2mInstanceEnabler> instances, Class<? extends LwM2mInstanceEnabler> instanceClass) {
+    public ObjectEnabler(int id, Map<Integer, LwM2mInstanceEnabler> instances,
+            Class<? extends LwM2mInstanceEnabler> instanceClass) {
         super(id);
         this.instances = new HashMap<Integer, LwM2mInstanceEnabler>(instances);
         this.instanceClass = instanceClass;
@@ -73,8 +75,12 @@ public class ObjectEnabler extends BaseObjectEnabler {
 
         // Manage Object case
         if (path.isObject()) {
-            // TODO
-            return new ValueResponse(ResponseCode.CONTENT);
+            List<LwM2mObjectInstance> lwM2mObjectInstances = new ArrayList<>();
+            for (Entry<Integer, LwM2mInstanceEnabler> entry : instances.entrySet()) {
+                lwM2mObjectInstances.add(getLwM2mObjectInstance(entry.getKey(), entry.getValue()));
+            }
+            return new ValueResponse(ResponseCode.CONTENT, new LwM2mObject(getId(),
+                    lwM2mObjectInstances.toArray(new LwM2mObjectInstance[0])));
         }
 
         // Manage Instance case
@@ -83,24 +89,23 @@ public class ObjectEnabler extends BaseObjectEnabler {
             return new ValueResponse(ResponseCode.NOT_FOUND);
 
         if (path.getResourceId() == null) {
-            List<LwM2mResource> resources = new ArrayList<>();
-            for (ResourceSpec resourceSpec : Resources.getObjectSpec(getId()).resources.values()) {
-                if (resourceSpec.operations.isReadable()) {
-                    LwM2mResource resource = instance.read(resourceSpec.id);
-                    if (resource != null)
-                        resources.add(resource);
-                }
-            }
-            return new ValueResponse(ResponseCode.CONTENT, new LwM2mObjectInstance(path.getObjectInstanceId(),
-                    resources.toArray(new LwM2mResource[0])));
+            return new ValueResponse(ResponseCode.CONTENT, getLwM2mObjectInstance(path.getObjectInstanceId(), instance));
         }
 
         // Manage Resource case
-        LwM2mResource resource = instance.read(path.getResourceId());
-        if (resource != null)
-            return new ValueResponse(ResponseCode.CONTENT, resource);
-        else
-            return new ValueResponse(ResponseCode.NOT_FOUND);
+        return instance.read(path.getResourceId());
+    }
+
+    LwM2mObjectInstance getLwM2mObjectInstance(int instanceid, LwM2mInstanceEnabler instance) {
+        List<LwM2mResource> resources = new ArrayList<>();
+        for (ResourceSpec resourceSpec : Resources.getObjectSpec(getId()).resources.values()) {
+            if (resourceSpec.operations.isReadable()) {
+                ValueResponse response = instance.read(resourceSpec.id);
+                if (response.getCode() == ResponseCode.CONTENT && response.getContent() instanceof LwM2mResource)
+                    resources.add((LwM2mResource) response.getContent());
+            }
+        }
+        return new LwM2mObjectInstance(instanceid, resources.toArray(new LwM2mResource[0]));
     }
 
     @Override
@@ -120,8 +125,7 @@ public class ObjectEnabler extends BaseObjectEnabler {
         }
 
         // Manage Resource case
-        instance.write(path.getResourceId(), (LwM2mResource) request.getNode());
-        return new LwM2mResponse(ResponseCode.CHANGED);
+        return instance.write(path.getResourceId(), (LwM2mResource) request.getNode());
     }
 
     @Override
@@ -131,8 +135,7 @@ public class ObjectEnabler extends BaseObjectEnabler {
         if (instance == null) {
             return new LwM2mResponse(ResponseCode.NOT_FOUND);
         }
-        instance.execute(path.getResourceId(), request.getParameters());
-        return new LwM2mResponse(ResponseCode.CHANGED);
+        return instance.execute(path.getResourceId(), request.getParameters());
     }
 
     @Override
