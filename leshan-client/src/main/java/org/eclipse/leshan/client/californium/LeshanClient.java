@@ -60,7 +60,9 @@ public class LeshanClient implements LwM2mClient {
         Validate.notNull(objectEnablers);
         Validate.notEmpty(objectEnablers);
 
+        // TODO I'm not sure this is still necessary
         serverLocal.setMessageDeliverer(new LwM2mServerMessageDeliverer(serverLocal.getRoot()));
+
         final Endpoint endpoint = new CoAPEndpoint(clientAddress);
         serverLocal.addEndpoint(endpoint);
 
@@ -111,6 +113,7 @@ public class LeshanClient implements LwM2mClient {
         requestSender.send(request, responseCallback, errorCallback);
     }
 
+    // TODO this function should be refactored when we will implements discover request
     @Override
     public LinkObject[] getObjectModel(final Integer... ids) {
         if (ids.length > 3) {
