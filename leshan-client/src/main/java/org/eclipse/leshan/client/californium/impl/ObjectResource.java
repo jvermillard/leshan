@@ -24,6 +24,7 @@ import org.eclipse.leshan.ObserveSpec;
 import org.eclipse.leshan.client.resource.LinkFormattable;
 import org.eclipse.leshan.client.resource.LwM2mObjectEnabler;
 import org.eclipse.leshan.client.resource.NotifySender;
+import org.eclipse.leshan.client.util.LinkFormatUtils;
 import org.eclipse.leshan.client.util.ObserveSpecParser;
 import org.eclipse.leshan.core.node.LwM2mNode;
 import org.eclipse.leshan.core.node.LwM2mObjectInstance;
@@ -39,12 +40,14 @@ import org.eclipse.leshan.core.objectspec.Resources;
 import org.eclipse.leshan.core.request.ContentFormat;
 import org.eclipse.leshan.core.request.CreateRequest;
 import org.eclipse.leshan.core.request.DeleteRequest;
+import org.eclipse.leshan.core.request.DiscoverRequest;
 import org.eclipse.leshan.core.request.ExecuteRequest;
 import org.eclipse.leshan.core.request.ObserveRequest;
 import org.eclipse.leshan.core.request.ReadRequest;
 import org.eclipse.leshan.core.request.WriteAttributesRequest;
 import org.eclipse.leshan.core.request.WriteRequest;
 import org.eclipse.leshan.core.response.CreateResponse;
+import org.eclipse.leshan.core.response.DiscoverResponse;
 import org.eclipse.leshan.core.response.LwM2mResponse;
 import org.eclipse.leshan.core.response.ValueResponse;
 import org.eclipse.leshan.util.Validate;
@@ -66,8 +69,9 @@ public class ObjectResource extends CoapResource implements LinkFormattable, Not
 
         // Manage Discover Request
         if (exchange.getRequestOptions().getAccept() == MediaTypeRegistry.APPLICATION_LINK_FORMAT) {
-            // TODO this should be implemented like this
-            exchange.respond(ResponseCode.CONTENT, asLinkFormat(), MediaTypeRegistry.APPLICATION_LINK_FORMAT);
+            DiscoverResponse response = nodeEnabler.discover(new DiscoverRequest(URI));
+            exchange.respond(fromLwM2mCode(response.getCode()), LinkFormatUtils.payloadize(response.getObjectLinks()),
+                    MediaTypeRegistry.APPLICATION_LINK_FORMAT);
         }
         // Manage Observe Request
         else if (exchange.getRequestOptions().hasObserve()) {
@@ -157,7 +161,8 @@ public class ObjectResource extends CoapResource implements LinkFormattable, Not
             CreateResponse response = nodeEnabler.create(new CreateRequest(URI, (LwM2mObjectInstance) lwM2mNode,
                     contentFormat));
             if (response.getCode() == org.eclipse.leshan.ResponseCode.CREATED) {
-                exchange.respond(fromLwM2mCode(response.getCode()), response.toString());
+                exchange.setLocationPath(response.getLocation());
+                exchange.respond(fromLwM2mCode(response.getCode()));
                 return;
             } else {
                 exchange.respond(fromLwM2mCode(response.getCode()));
