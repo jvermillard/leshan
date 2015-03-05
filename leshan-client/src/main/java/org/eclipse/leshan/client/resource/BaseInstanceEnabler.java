@@ -1,0 +1,62 @@
+/*******************************************************************************
+ * Copyright (c) 2015 Sierra Wireless and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     Sierra Wireless - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.leshan.client.resource;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.leshan.ResponseCode;
+import org.eclipse.leshan.core.node.LwM2mResource;
+import org.eclipse.leshan.core.objectspec.ObjectSpec;
+import org.eclipse.leshan.core.response.LwM2mResponse;
+import org.eclipse.leshan.core.response.ValueResponse;
+
+public class BaseInstanceEnabler implements LwM2mInstanceEnabler {
+
+    private List<ResourceChangedListener> listeners = new ArrayList<ResourceChangedListener>();
+    protected ObjectSpec spec = null;
+
+    @Override
+    public void setObjectSpec(ObjectSpec objectSpec) {
+        spec = objectSpec;
+    }
+
+    @Override
+    public void addResourceChangedListener(ResourceChangedListener listener) {
+        listeners.add(listener);
+    }
+
+    @Override
+    public void removeResourceChangedListener(ResourceChangedListener listener) {
+        listeners.remove(listener);
+    }
+
+    public void fireResourceChange(int resourceId) {
+        for (ResourceChangedListener listener : listeners) {
+            listener.resourceChanged(resourceId);
+        }
+    }
+
+    @Override
+    public ValueResponse read(int resourceid) {
+        return new ValueResponse(ResponseCode.NOT_FOUND);
+    }
+
+    @Override
+    public LwM2mResponse write(int resourceid, LwM2mResource value) {
+        return new LwM2mResponse(ResponseCode.NOT_FOUND);
+    }
+
+    @Override
+    public LwM2mResponse execute(int resourceid, byte[] params) {
+        return new LwM2mResponse(ResponseCode.NOT_FOUND);
+    }
+}

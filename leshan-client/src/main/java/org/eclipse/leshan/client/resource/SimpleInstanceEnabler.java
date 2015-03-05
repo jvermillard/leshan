@@ -10,10 +10,8 @@
  *******************************************************************************/
 package org.eclipse.leshan.client.resource;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.leshan.ResponseCode;
@@ -24,10 +22,9 @@ import org.eclipse.leshan.core.objectspec.ResourceSpec;
 import org.eclipse.leshan.core.response.LwM2mResponse;
 import org.eclipse.leshan.core.response.ValueResponse;
 
-public class SimpleInstanceEnabler implements LwM2mInstanceEnabler {
+public class SimpleInstanceEnabler extends BaseInstanceEnabler {
 
     Map<Integer, LwM2mResource> resources = new HashMap<Integer, LwM2mResource>();
-    List<ResourceChangedListener> listeners = new ArrayList<ResourceChangedListener>();
 
     @Override
     public ValueResponse read(int resourceid) {
@@ -39,7 +36,10 @@ public class SimpleInstanceEnabler implements LwM2mInstanceEnabler {
 
     @Override
     public LwM2mResponse write(int resourceid, LwM2mResource value) {
+        LwM2mResource previousValue = resources.get(resourceid);
         resources.put(resourceid, value);
+        if (!value.equals(previousValue))
+            fireResourceChange(resourceid);
         return new LwM2mResponse(ResponseCode.CHANGED);
     }
 
@@ -51,6 +51,8 @@ public class SimpleInstanceEnabler implements LwM2mInstanceEnabler {
 
     @Override
     public void setObjectSpec(ObjectSpec objectSpec) {
+        super.setObjectSpec(objectSpec);
+
         // initialize resources
         for (ResourceSpec resourceSpec : objectSpec.resources.values()) {
             if (resourceSpec.operations.isReadable()) {
@@ -124,7 +126,7 @@ public class SimpleInstanceEnabler implements LwM2mInstanceEnabler {
     }
 
     protected Value<String> createDefaultStringValue(ObjectSpec objectSpec, ResourceSpec resourceSpec) {
-        return Value.newStringValue("Default " + resourceSpec.name);
+        return Value.newStringValue(resourceSpec.name);
     }
 
     protected Value<Integer> createDefaultIntegerValue(ObjectSpec objectSpec, ResourceSpec resourceSpec) {
@@ -145,21 +147,5 @@ public class SimpleInstanceEnabler implements LwM2mInstanceEnabler {
 
     protected Value<?> createDefaultOpaqueValue(ObjectSpec objectSpec, ResourceSpec resourceSpec) {
         return Value.newBinaryValue(new String("Default " + resourceSpec.name).getBytes());
-    }
-
-    @Override
-    public void addResourceChangedListener(ResourceChangedListener listener) {
-        listeners.add(listener);
-    }
-
-    @Override
-    public void removeResourceChangedListener(ResourceChangedListener listener) {
-        listeners.remove(listener);
-    }
-
-    public void fireResourceChange(int resourceId) {
-        for (ResourceChangedListener listener : listeners) {
-            listener.resourceChanged(resourceId);
-        }
     }
 }
