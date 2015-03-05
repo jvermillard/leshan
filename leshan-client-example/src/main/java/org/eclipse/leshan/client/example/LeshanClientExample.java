@@ -168,9 +168,11 @@ public class LeshanClientExample {
                 return new LwM2mResponse(ResponseCode.NOT_FOUND);
             case 14:
                 setUtcOffset((String) value.getValue().value);
+                fireResourceChange(resourceid);
                 return new LwM2mResponse(ResponseCode.CHANGED);
             case 15:
                 setTimezone((String) value.getValue().value);
+                fireResourceChange(resourceid);
                 return new LwM2mResponse(ResponseCode.CHANGED);
             default:
                 return super.write(resourceid, value);
